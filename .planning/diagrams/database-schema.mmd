@@ -1,0 +1,131 @@
+%%{ init: { 'theme': 'dark' } }%%
+erDiagram
+    tenants {
+        uuid id PK
+        text name
+        text slug UK
+        text logo_url
+        text primary_color
+        text secondary_color
+        boolean is_active
+        timestamp created_at
+    }
+
+    users {
+        uuid id PK
+        uuid tenant_id FK
+        text email UK
+        text full_name
+        text role "super_admin | tenant_admin | agent | assistant"
+        boolean is_active
+        timestamp created_at
+    }
+
+    personas {
+        uuid id PK
+        uuid tenant_id FK
+        uuid created_by FK
+        text name
+        text description
+        jsonb filters "Apollo API params"
+        boolean is_starter
+        timestamp last_used_at
+        timestamp created_at
+    }
+
+    prospects {
+        uuid id PK
+        uuid tenant_id FK
+        text apollo_id
+        text full_name
+        text title
+        text company
+        text location
+        text work_email
+        text work_phone
+        text personal_email
+        text personal_phone
+        text linkedin_url
+        jsonb exa_data "Web presence, news, wealth signals"
+        text ai_summary
+        timestamp summary_generated_at
+        text enrichment_status "pending | in_progress | complete | failed"
+        timestamp enriched_at
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    sec_transactions {
+        uuid id PK
+        uuid prospect_id FK
+        uuid tenant_id FK
+        text filing_url
+        date transaction_date
+        text security_title
+        integer transaction_shares
+        numeric price_per_share
+        numeric transaction_value
+        text transaction_type "Purchase | Sale | Grant"
+        timestamp created_at
+    }
+
+    lists {
+        uuid id PK
+        uuid tenant_id FK
+        uuid created_by FK
+        text name
+        text description
+        integer member_count
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    list_members {
+        uuid id PK
+        uuid list_id FK
+        uuid prospect_id FK
+        uuid tenant_id FK
+        text status "New | Contacted | Responded | Not Interested"
+        text notes
+        timestamp added_at
+    }
+
+    activity_log {
+        uuid id PK
+        uuid tenant_id FK
+        uuid user_id FK
+        text action_type "11 types: login, search, view, enrich, etc."
+        text target_type "prospect | list | persona"
+        uuid target_id
+        jsonb metadata
+        timestamp created_at
+    }
+
+    usage_metrics_daily {
+        uuid id PK
+        uuid tenant_id FK
+        uuid user_id FK
+        date metric_date
+        integer logins
+        integer searches_executed
+        integer profiles_viewed
+        integer profiles_enriched
+        integer csv_exports
+        integer lists_created
+        integer lookalike_searches
+        timestamp created_at
+    }
+
+    tenants ||--o{ users : "has"
+    tenants ||--o{ personas : "has"
+    tenants ||--o{ prospects : "has"
+    tenants ||--o{ lists : "has"
+    tenants ||--o{ activity_log : "has"
+    tenants ||--o{ usage_metrics_daily : "has"
+    users ||--o{ usage_metrics_daily : "tracks"
+    users ||--o{ personas : "creates"
+    users ||--o{ lists : "creates"
+    users ||--o{ activity_log : "performs"
+    prospects ||--o{ sec_transactions : "has"
+    prospects ||--o{ list_members : "in"
+    lists ||--o{ list_members : "contains"

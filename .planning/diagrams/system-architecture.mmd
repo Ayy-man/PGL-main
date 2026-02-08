@@ -1,0 +1,86 @@
+%%{ init: { 'theme': 'dark' } }%%
+graph TB
+    subgraph Client["CLIENT LAYER"]
+        Browser["Browser"]
+        RSC["React Server Components<br/>(Data Fetching)"]
+        RCC["React Client Components<br/>(Interactivity)"]
+    end
+
+    subgraph Middleware["MIDDLEWARE LAYER"]
+        MW["Next.js Middleware"]
+        TenantID["Tenant Identification<br/>(Path: /[orgId]/...)"]
+        AuthCheck["Auth Check<br/>(Supabase Session)"]
+        RoleGate["Role Gate<br/>(super_admin / tenant_admin / agent / assistant)"]
+    end
+
+    subgraph API["API / BFF LAYER"]
+        SearchAPI["/api/search/apollo"]
+        LookalikeAPI["/api/search/lookalike"]
+        EnrichAPI["/api/enrich/*"]
+        ExportAPI["/api/export/csv"]
+        AnalyticsAPI["/api/analytics"]
+        ActivityAPI["/api/activity"]
+        AdminAPI["/api/admin/*"]
+    end
+
+    subgraph Background["BACKGROUND JOBS"]
+        Inngest["Inngest<br/>(Enrichment Orchestrator)"]
+        ContactOutJob["ContactOut Step"]
+        ExaJob["Exa.ai Step"]
+        SECJob["SEC EDGAR Step"]
+        ClaudeJob["Claude Summary Step"]
+    end
+
+    subgraph Data["DATA LAYER"]
+        Supabase["Supabase PostgreSQL<br/>+ RLS Policies"]
+        Redis["Upstash Redis<br/>(Cache + Rate Limits)"]
+    end
+
+    subgraph External["EXTERNAL APIs"]
+        Apollo["Apollo.io<br/>(People Search)"]
+        ContactOut["ContactOut<br/>(Personal Email/Phone)"]
+        Exa["Exa.ai<br/>(Web Presence/News)"]
+        SEC["SEC EDGAR<br/>(Insider Transactions)"]
+        Claude["Claude Haiku<br/>(AI Summaries)"]
+    end
+
+    Browser --> MW
+    MW --> TenantID --> AuthCheck --> RoleGate
+    RoleGate --> RSC
+    RSC --> RCC
+
+    RSC --> SearchAPI
+    RSC --> LookalikeAPI
+    RSC --> EnrichAPI
+    RSC --> ExportAPI
+    RSC --> AnalyticsAPI
+    RSC --> ActivityAPI
+    RSC --> AdminAPI
+
+    SearchAPI --> Redis
+    SearchAPI --> Apollo
+    EnrichAPI --> Inngest
+
+    Inngest --> ContactOutJob --> ContactOut
+    Inngest --> ExaJob --> Exa
+    Inngest --> SECJob --> SEC
+    Inngest --> ClaudeJob --> Claude
+
+    ContactOutJob --> Supabase
+    ExaJob --> Supabase
+    SECJob --> Supabase
+    ClaudeJob --> Supabase
+
+    LookalikeAPI --> Claude
+    LookalikeAPI --> Apollo
+
+    SearchAPI --> Supabase
+    AnalyticsAPI --> Supabase
+    ActivityAPI --> Supabase
+    AdminAPI --> Supabase
+    ExportAPI --> Supabase
+
+    Redis -.->|"Rate Limiting"| Apollo
+    Redis -.->|"Rate Limiting"| ContactOut
+    Redis -.->|"Rate Limiting"| Exa
+    Redis -.->|"Cache"| SearchAPI

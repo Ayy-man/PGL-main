@@ -1,0 +1,61 @@
+%%{ init: { 'theme': 'dark' } }%%
+sequenceDiagram
+    participant U as User
+    participant P as Profile Page
+    participant API as API Route
+    participant Cache as Redis Cache
+    participant DB as Supabase DB
+    participant Ing as Inngest
+    participant CO as ContactOut
+    participant Exa as Exa.ai
+    participant SEC as SEC EDGAR
+    participant AI as Claude Haiku
+
+    U->>P: Click prospect name
+    P->>API: GET /api/prospect/[id]
+    API->>Cache: Check cache (tenant:tid:prospect:pid)
+
+    alt Cache Hit & Fresh (<7 days)
+        Cache-->>API: Return cached data
+        API-->>P: Prospect data + enrichments
+        P-->>U: Render profile (instant)
+    else Cache Miss or Stale
+        API->>DB: Fetch prospect base data
+        DB-->>API: Apollo baseline data
+        API-->>P: Render with base data
+        P-->>U: Show profile + "Enriching..." indicators
+
+        API->>Ing: Trigger enrichment workflow
+
+        Note over Ing: Step 1: ContactOut (3-5s)
+        Ing->>CO: Enrich personal email/phone
+        CO-->>Ing: Personal contact data
+        Ing->>DB: Store ContactOut results
+
+        Note over Ing: Step 2: Exa.ai (2-4s)
+        Ing->>Exa: Search web presence + news
+        Exa-->>Ing: Articles, funding, wealth signals
+        Ing->>DB: Store Exa results
+
+        Note over Ing: Step 3: SEC EDGAR (2-3s)
+        alt Prospect at public company
+            Ing->>SEC: Fetch Form 4 filings
+            SEC-->>Ing: Insider transactions
+            Ing->>DB: Store SEC transactions
+        else Not public company
+            Note over Ing: Skip SEC step
+        end
+
+        Note over Ing: Step 4: Claude Summary (1-2s)
+        Ing->>AI: Generate "Why Recommended" from all data
+        AI-->>Ing: 2-3 sentence AI summary
+        Ing->>DB: Store summary
+        Ing->>Cache: Update cache (24h TTL)
+
+        Ing-->>P: Enrichment complete event
+        P->>API: Refetch enriched data
+        API->>Cache: Return fresh cache
+        Cache-->>API: Full enriched profile
+        API-->>P: Complete prospect data
+        P-->>U: Update profile (no page reload)
+    end

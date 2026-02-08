@@ -1,0 +1,46 @@
+%%{ init: { 'theme': 'dark' } }%%
+flowchart LR
+    subgraph Search["1. SEARCH"]
+        SelectPersona["Select Persona<br/>(Finance Elite, Tech Execs...)"]
+        RunSearch["Run Apollo Search"]
+        ViewResults["Browse Paginated Results<br/>(50 per page)"]
+    end
+
+    subgraph Evaluate["2. EVALUATE"]
+        ViewProfile["Open Prospect Profile"]
+        TriggerEnrich["Auto-Enrich<br/>(ContactOut + Exa + SEC)"]
+        ReadSummary["Read AI Summary<br/>(Why Recommended)"]
+        Lookalike["Find Similar People<br/>(AI Lookalike Discovery)"]
+    end
+
+    subgraph Organize["3. ORGANIZE"]
+        AddToList["Add to Named List"]
+        SetStatus["Set Status<br/>(New → Contacted → Responded)"]
+        AddNotes["Add Inline Notes"]
+    end
+
+    subgraph Export["4. EXPORT"]
+        ExportCSV["Export List to CSV"]
+        ImportCRM["Import into CRM<br/>(Monday.com / HubSpot)"]
+        StartOutreach["Begin Personal Outreach"]
+    end
+
+    subgraph Measure["5. MEASURE"]
+        ViewAnalytics["View Usage Analytics<br/>(Searches, Views, Exports)"]
+        RenewalProof["6-Month Renewal Proof"]
+    end
+
+    SelectPersona --> RunSearch --> ViewResults
+    ViewResults --> ViewProfile --> TriggerEnrich --> ReadSummary
+    ReadSummary --> AddToList --> SetStatus --> AddNotes
+    ReadSummary -.-> Lookalike -.->|"New results"| ViewResults
+    AddNotes --> ExportCSV --> ImportCRM --> StartOutreach
+    StartOutreach --> ViewAnalytics --> RenewalProof
+
+    ViewResults -.->|"Add directly"| AddToList
+
+    style Search fill:#1a1a2e,stroke:#d4af37
+    style Evaluate fill:#1a1a2e,stroke:#d4af37
+    style Organize fill:#1a1a2e,stroke:#d4af37
+    style Export fill:#1a1a2e,stroke:#d4af37
+    style Measure fill:#1a1a2e,stroke:#d4af37

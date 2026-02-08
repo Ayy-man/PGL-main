@@ -1,0 +1,40 @@
+%%{ init: { 'theme': 'dark' } }%%
+flowchart TD
+    Start([User visits URL]) --> MW{Middleware}
+
+    MW --> |"Extract orgId from path<br/>/[orgId]/..."| TenantCheck{Tenant exists?}
+
+    TenantCheck --> |No| NotFound[404: Tenant Not Found]
+    TenantCheck --> |Yes| SessionCheck{Has valid session?}
+
+    SessionCheck --> |No| Login[Redirect to /login]
+    SessionCheck --> |Yes| TenantMatch{User belongs<br/>to this tenant?}
+
+    Login --> AuthForm[Email + Password Form]
+    AuthForm --> SupaAuth[Supabase Auth]
+    SupaAuth --> |Success| SetSession[Set session cookie<br/>tenant_id in app_metadata]
+    SupaAuth --> |Failure| AuthError[Show error message]
+    AuthError --> AuthForm
+
+    SetSession --> TenantMatch
+
+    TenantMatch --> |No| Forbidden[403: Access Denied]
+    TenantMatch --> |Yes| RoleCheck{Check user role}
+
+    RoleCheck --> |super_admin| SuperAdmin["/admin panel<br/>Full platform access"]
+    RoleCheck --> |tenant_admin| TenantAdmin["Tenant dashboard<br/>Manage users + full features"]
+    RoleCheck --> |agent| Agent["Tenant dashboard<br/>Search, lists, profiles, export"]
+    RoleCheck --> |assistant| Assistant["Tenant dashboard<br/>Read-only: view search, lists, profiles"]
+
+    SuperAdmin --> RLS[["All queries filtered by RLS<br/>tenant_id from session JWT<br/>NEVER from client params"]]
+    TenantAdmin --> RLS
+    Agent --> RLS
+    Assistant --> RLS
+
+    RLS --> Data[(Supabase PostgreSQL<br/>Tenant-isolated data)]
+
+    style NotFound fill:#7f1d1d,stroke:#dc2626
+    style Forbidden fill:#7f1d1d,stroke:#dc2626
+    style AuthError fill:#7f1d1d,stroke:#dc2626
+    style RLS fill:#1e3a5f,stroke:#3b82f6
+    style Data fill:#14532d,stroke:#22c55e
