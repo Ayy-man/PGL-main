@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireSuperAdmin } from "@/lib/auth/rbac";
 
@@ -135,7 +134,7 @@ export async function createUserAction(formData: FormData) {
       tenant_id: role === "super_admin" ? null : tenantId,
       email: email.trim(),
       full_name: fullName.trim(),
-      role: role as any,
+      role: role as "super_admin" | "admin" | "agent",
       is_active: true,
     });
 

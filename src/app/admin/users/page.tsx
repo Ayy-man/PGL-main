@@ -74,7 +74,7 @@ export default async function UsersPage() {
                 </tr>
               ) : (
                 users?.map((user) => {
-                  const tenant = user.tenants as any;
+                  const tenant = user.tenants as { name: string } | null;
                   return (
                     <tr key={user.id} className="hover:bg-accent/50">
                       <td className="px-6 py-4 text-sm font-medium">
