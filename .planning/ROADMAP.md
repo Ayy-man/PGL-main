@@ -146,8 +146,8 @@ Plans:
 - [x] 02-03-PLAN.md — Apollo.io Search API route with caching, rate limiting, circuit breaking (TDD)
 - [x] 02-04-PLAN.md — List Management: CRUD, member status tracking, inline notes
 - [x] 02-05-PLAN.md — Search Results UI: TanStack Table, URL state with nuqs, pagination
-- [ ] 02-06-PLAN.md — Search-to-Lists integration: prospect upsert, Add to List dialog (plan file not created)
-- [ ] 02-07-PLAN.md — End-to-end verification checkpoint (plan file not created)
+- [x] 02-06-PLAN.md — Search-to-Lists integration: prospect upsert, Add to List dialog
+- [x] 02-07-PLAN.md — End-to-end verification checkpoint
 
 **Dependencies:** Phase 1 complete (requires multi-tenant infrastructure, authentication, UI shell)
 
@@ -481,7 +481,7 @@ Deferred to future releases after initial launch with The W Team.
 | Phase | Duration | Week | Requirements | Status |
 |-------|----------|------|--------------|--------|
 | **Phase 1: Foundation** | 2 weeks | Week 1-2 | 26 (MT, AUTH, SA, UI, INFRA) | Complete |
-| **Phase 2: Persona + Search + Lists** | 2 weeks | Week 3-4 | 21 (PB, SRCH, LIST, INFRA) | Pending |
+| **Phase 2: Persona + Search + Lists** | 2 weeks | Week 3-4 | 21 (PB, SRCH, LIST, INFRA) | Complete |
 | **Phase 3: Enrich + Ship** | 2 weeks | Week 5-6 | 32 (PROF, EXP, ACT, LIKE, ANLY, INFRA) | Pending |
 | **Total** | **6 weeks** | — | **79 requirements** | — |
 
@@ -498,11 +498,11 @@ Deferred to future releases after initial launch with The W Team.
 | Phase | Planned | In Progress | Complete | Blocked |
 |-------|---------|-------------|----------|---------|
 | Phase 1: Foundation | 0 | 0 | 26 | 0 |
-| Phase 2: Persona + Search + Lists | 21 | 0 | 0 | 0 |
+| Phase 2: Persona + Search + Lists | 0 | 0 | 21 | 0 |
 | Phase 3: Enrich + Ship | 32 | 0 | 0 | 0 |
-| **Total** | **53** | **0** | **26** | **0** |
+| **Total** | **32** | **0** | **47** | **0** |
 
-**Overall Progress:** 33% (26/79 requirements complete)
+**Overall Progress:** 59% (47/79 requirements complete)
 
 
 ---
@@ -568,4 +568,5 @@ Deferred to future releases after initial launch with The W Team.
 *Roadmap created: 2026-02-08*
 *Updated: 2026-02-08 after kickoff call scope changes (lookalike, analytics, expanded logging)*
 *Phase 1 completed: 2026-02-08*
-*Next action: Begin Phase 2 with `/gsd:plan-phase 2`*
+*Phase 2 completed: 2026-02-08*
+*Next action: Begin Phase 3 with `/gsd:plan-phase 3`*
