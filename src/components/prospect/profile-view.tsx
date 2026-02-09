@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { EnrichmentStatus } from "./enrichment-status";
 import { WealthSignals } from "./wealth-signals";
+import { LookalikeDiscovery } from "./lookalike-discovery";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -122,6 +123,7 @@ export function ProfileView({
 }: ProfileViewProps) {
   const router = useRouter();
   const [isAddingToList, setIsAddingToList] = useState(false);
+  const [showLookalikeDiscovery, setShowLookalikeDiscovery] = useState(false);
 
   // Mock lists for "Add to List" dropdown - in production, fetch from API
   const availableLists = [
@@ -144,11 +146,6 @@ export function ProfileView({
     } finally {
       setIsAddingToList(false);
     }
-  };
-
-  const handleFindSimilar = () => {
-    // Placeholder for lookalike search (Plan 08)
-    console.log("Find Similar People - to be implemented in Plan 08");
   };
 
   const handleExport = () => {
@@ -213,11 +210,11 @@ export function ProfileView({
 
               <Button
                 variant="outline"
-                onClick={handleFindSimilar}
+                onClick={() => setShowLookalikeDiscovery(!showLookalikeDiscovery)}
                 className="border-zinc-700 bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-zinc-100"
               >
                 <UserSearch className="mr-2 h-4 w-4" />
-                Find Similar People
+                {showLookalikeDiscovery ? "Hide" : "Show"} Similar People
               </Button>
 
               <Button
@@ -345,6 +342,19 @@ export function ProfileView({
             </p>
           )}
         </div>
+
+        {/* Lookalike Discovery Section - Plan 03-08 */}
+        {showLookalikeDiscovery && (
+          <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
+            <h3 className="mb-6 font-playfair text-xl font-semibold text-zinc-100">
+              Find Similar People
+            </h3>
+            <LookalikeDiscovery
+              prospectId={prospect.id}
+              prospectName={prospect.full_name}
+            />
+          </div>
+        )}
 
         {/* Wealth Signals Section */}
         <WealthSignals

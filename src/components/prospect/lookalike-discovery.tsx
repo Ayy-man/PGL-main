@@ -53,7 +53,6 @@ interface LookalikeResult {
 
 export function LookalikeDiscovery({
   prospectId,
-  prospectName,
 }: LookalikeDiscoveryProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<LookalikeResult | null>(null);
