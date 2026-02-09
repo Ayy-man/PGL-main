@@ -66,8 +66,49 @@ export interface Prospect {
   linkedin_url: string | null;
   enrichment_status: EnrichmentStatus;
   enriched_at: string | null;
+  // JSONB enrichment fields
+  contact_data: ContactData | null;
+  web_data: WebData | null;
+  insider_data: InsiderData | null;
+  ai_summary: string | null;
   created_at: string;
   updated_at: string;
+}
+
+// Contact enrichment data (JSONB)
+export interface ContactData {
+  personal_email?: string;
+  phone?: string;
+  work_phone?: string;
+  source?: string;
+  enriched_at?: string;
+}
+
+// Web presence and wealth signals (JSONB)
+export interface WebData {
+  wealth_signals?: string[];
+  linkedin_data?: Record<string, unknown>;
+  news_mentions?: Array<{
+    title: string;
+    url: string;
+    published_date: string;
+  }>;
+  source?: string;
+  enriched_at?: string;
+}
+
+// SEC insider trading data (JSONB)
+export interface InsiderData {
+  trades?: Array<{
+    date: string;
+    type: string;
+    shares: number;
+    value: number;
+    security: string;
+  }>;
+  total_value?: number;
+  source?: string;
+  enriched_at?: string;
 }
 
 export type EnrichmentStatus = 'none' | 'pending' | 'in_progress' | 'complete' | 'failed';
