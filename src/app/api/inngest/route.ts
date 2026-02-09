@@ -1,18 +1,22 @@
 import { serve } from "inngest/next";
 import { inngest } from "@/inngest/client";
+import { enrichProspect } from "@/inngest/functions/enrich-prospect";
 
 /**
  * Inngest serve endpoint for Next.js App Router.
  *
  * This endpoint allows Inngest to discover and invoke background functions.
- * Functions will be registered in later plans (04, 06).
+ *
+ * Registered functions:
+ * - enrichProspect (Plan 04): Multi-step enrichment workflow
+ * - (Plan 06): Daily metrics aggregation
  *
  * Exports GET, POST, PUT as required by Inngest.
  */
 export const { GET, POST, PUT } = serve({
   client: inngest,
   functions: [
-    // Functions will be added in Plan 04 (enrichment workflow)
-    // and Plan 06 (daily metrics aggregation)
+    enrichProspect,
+    // Daily metrics aggregation will be added in Plan 06
   ],
 });
