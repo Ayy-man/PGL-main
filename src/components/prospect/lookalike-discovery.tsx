@@ -18,7 +18,7 @@ import { Users, Loader2, Search } from "lucide-react";
 
 interface LookalikeDiscoveryProps {
   prospectId: string;
-  prospectName: string;
+  prospectName?: string; // Optional for future use
 }
 
 interface Persona {
