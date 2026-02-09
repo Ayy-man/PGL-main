@@ -75,7 +75,7 @@ function parseForm4Xml(xml: string): Array<{
   try {
     // Extract all nonDerivativeTransaction blocks
     const transactionRegex = /<nonDerivativeTransaction>([\s\S]*?)<\/nonDerivativeTransaction>/g;
-    const transactionMatches = xml.matchAll(transactionRegex);
+    const transactionMatches = Array.from(xml.matchAll(transactionRegex));
 
     for (const match of transactionMatches) {
       const txBlock = match[1];

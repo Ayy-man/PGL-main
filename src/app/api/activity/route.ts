@@ -54,7 +54,7 @@ export async function GET(request: Request) {
 
       // Validate all action types
       const invalidTypes = actionTypeFilter.filter(
-        (type) => !ACTION_TYPES.includes(type as any)
+        (type) => !ACTION_TYPES.includes(type as (typeof ACTION_TYPES)[number])
       );
 
       if (invalidTypes.length > 0) {

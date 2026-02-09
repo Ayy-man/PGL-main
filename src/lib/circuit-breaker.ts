@@ -21,10 +21,10 @@ const DEFAULT_BREAKER_OPTIONS = {
  * @param options - Optional overrides for breaker configuration
  * @returns CircuitBreaker instance with event listeners
  */
-export function createCircuitBreaker<T>(
-  fn: (...args: any[]) => Promise<T>,
+export function createCircuitBreaker<T, TArgs extends unknown[] = unknown[]>(
+  fn: (...args: TArgs) => Promise<T>,
   options?: Partial<typeof DEFAULT_BREAKER_OPTIONS>
-): CircuitBreaker<any[], T> {
+): CircuitBreaker<TArgs, T> {
   const breaker = new CircuitBreaker(fn, {
     ...DEFAULT_BREAKER_OPTIONS,
     ...options,
@@ -53,7 +53,7 @@ export function createCircuitBreaker<T>(
  * @param options - Optional name and breaker configuration
  * @returns Wrapped function with circuit breaker and fallback
  */
-export function withCircuitBreaker<TArgs extends any[], TResult>(
+export function withCircuitBreaker<TArgs extends unknown[], TResult>(
   fn: (...args: TArgs) => Promise<TResult>,
   options?: { name?: string } & Partial<typeof DEFAULT_BREAKER_OPTIONS>
 ): (...args: TArgs) => Promise<TResult> {
