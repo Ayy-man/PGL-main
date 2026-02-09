@@ -93,6 +93,9 @@ Recent decisions affecting current work:
 - Supabase Dashboard: Enable Connection Pooling in transaction mode (deferred — same reason)
 - Upstash Redis: Create database and add UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN to .env.local
 - Apollo.io: Add APOLLO_API_KEY to .env.local for search functionality
+- ContactOut: Add CONTACTOUT_API_KEY to .env.local for personal contact enrichment
+- Exa.ai: Add EXA_API_KEY to .env.local for web presence and wealth signal enrichment
+- SEC EDGAR: Add SEC_EDGAR_USER_AGENT to .env.local (format: "AppName admin@email.com")
 
 ### Blockers/Concerns
 
@@ -112,9 +115,9 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-09 (Phase 3 in progress)
-Stopped at: Completed 03-02-PLAN.md (Activity Logging Infrastructure)
+Stopped at: Completed 03-03-PLAN.md (Circuit Breaker Infrastructure + Enrichment Clients)
 Resume file: None
 
 ---
 
-*Next action: `/gsd:execute-plan 03-03` to continue Phase 3 (Enrich + Ship)*
+*Next action: `/gsd:execute-plan 03-04` to continue Phase 3 (Enrich + Ship)*
