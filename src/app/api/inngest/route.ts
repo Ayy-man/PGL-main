@@ -1,6 +1,7 @@
 import { serve } from "inngest/next";
 import { inngest } from "@/inngest/client";
 import { enrichProspect } from "@/inngest/functions/enrich-prospect";
+import { aggregateDailyMetrics } from "@/inngest/functions/daily-metrics";
 
 /**
  * Inngest serve endpoint for Next.js App Router.
@@ -9,7 +10,7 @@ import { enrichProspect } from "@/inngest/functions/enrich-prospect";
  *
  * Registered functions:
  * - enrichProspect (Plan 04): Multi-step enrichment workflow
- * - (Plan 06): Daily metrics aggregation
+ * - aggregateDailyMetrics (Plan 06): Daily usage metrics aggregation
  *
  * Exports GET, POST, PUT as required by Inngest.
  */
@@ -17,6 +18,6 @@ export const { GET, POST, PUT } = serve({
   client: inngest,
   functions: [
     enrichProspect,
-    // Daily metrics aggregation will be added in Plan 06
+    aggregateDailyMetrics,
   ],
 });
