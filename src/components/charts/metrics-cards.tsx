@@ -55,13 +55,13 @@ export function MetricsCards({ totals }: MetricsCardsProps) {
       {METRICS.map(({ key, label, icon }) => (
         <div
           key={key}
-          className="rounded-xl border border-zinc-800 bg-zinc-900 p-6"
+          className="rounded-xl border bg-card p-6"
         >
           <div className="flex items-center justify-between">
-            <p className="text-sm text-zinc-400">{label}</p>
-            <span className="text-zinc-500">{icon}</span>
+            <p className="text-sm text-muted-foreground">{label}</p>
+            <span className="text-muted-foreground">{icon}</span>
           </div>
-          <p className="mt-3 font-serif text-3xl font-bold text-[#f4d47f]">
+          <p className="mt-3 font-serif text-3xl font-bold text-gold">
             {totals[key].toLocaleString()}
           </p>
         </div>

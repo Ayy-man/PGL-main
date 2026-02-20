@@ -127,7 +127,7 @@ function PersonaCard({ persona, orgId }: { persona: Persona; orgId: string }) {
         </div>
 
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
-          <Calendar className="h-3 w-3" />
+          <Calendar className="h-3.5 w-3.5" />
           <span>{formatLastUsed()}</span>
         </div>
       </CardContent>

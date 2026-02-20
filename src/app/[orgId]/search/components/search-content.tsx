@@ -7,6 +7,7 @@ import { SearchToolbar } from "./search-toolbar";
 import { SearchResultsTable } from "./search-results-table";
 import { Search, AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 
 interface SearchContentProps {
   personas: Persona[];
@@ -39,39 +40,34 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
       />
 
       {error ? (
-        <div className="text-center py-12 border-2 border-dashed border-destructive/30 rounded-lg">
-          <AlertCircle className="h-10 w-10 text-destructive mx-auto mb-3" />
-          <p className="text-destructive font-medium mb-2">{error}</p>
+        <EmptyState
+          icon={AlertCircle}
+          title={error}
+          variant="error"
+        >
           <Button
             variant="outline"
             size="sm"
             onClick={executeSearch}
-            className="mt-2"
           >
             <RefreshCw className="h-4 w-4 mr-2" />
             Try Again
           </Button>
-        </div>
+        </EmptyState>
       ) : !searchState.persona ? (
-        <div className="text-center py-16 border-2 border-dashed rounded-lg">
-          <Search className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
-          <p className="text-lg text-muted-foreground">
-            Select a persona to search for prospects
-          </p>
-          <p className="text-sm text-muted-foreground/70 mt-1">
-            Choose from starter personas or create your own
-          </p>
-        </div>
+        <EmptyState
+          icon={Search}
+          title="Select a persona to search for prospects"
+          description="Choose from starter personas or create your own"
+          className="py-16"
+        />
       ) : !isLoading && results.length === 0 ? (
-        <div className="text-center py-16 border-2 border-dashed rounded-lg">
-          <Search className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
-          <p className="text-lg text-muted-foreground">
-            No prospects found for this persona
-          </p>
-          <p className="text-sm text-muted-foreground/70 mt-1">
-            Try adjusting the persona filters to broaden your search
-          </p>
-        </div>
+        <EmptyState
+          icon={Search}
+          title="No prospects found for this persona"
+          description="Try adjusting the persona filters to broaden your search"
+          className="py-16"
+        />
       ) : (
         <SearchResultsTable
           results={results}

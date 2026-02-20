@@ -50,11 +50,11 @@ export function WealthSignals({ webData, insiderData }: WealthSignalsProps) {
 
   if (!hasSignals) {
     return (
-      <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
-        <h3 className="mb-4 font-playfair text-xl font-semibold text-zinc-100">
+      <div className="rounded-lg border bg-card p-6">
+        <h3 className="mb-4 font-serif text-xl font-semibold text-foreground">
           Wealth Signals
         </h3>
-        <p className="text-sm text-zinc-500">
+        <p className="text-sm text-muted-foreground">
           No wealth signals found. Data will appear after enrichment.
         </p>
       </div>
@@ -75,8 +75,8 @@ export function WealthSignals({ webData, insiderData }: WealthSignalsProps) {
   };
 
   return (
-    <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
-      <h3 className="mb-6 font-playfair text-xl font-semibold text-zinc-100">
+    <div className="rounded-lg border bg-card p-6">
+      <h3 className="mb-6 font-serif text-xl font-semibold text-foreground">
         Wealth Signals
       </h3>
 
@@ -84,36 +84,36 @@ export function WealthSignals({ webData, insiderData }: WealthSignalsProps) {
         {/* Web Mentions */}
         {hasMentions && (
           <div>
-            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wide text-zinc-400">
+            <h4 className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Web Mentions
             </h4>
             <div className="space-y-4">
               {webData!.mentions.map((mention, index) => (
                 <div
                   key={index}
-                  className="rounded-md border border-zinc-800 bg-zinc-950 p-4"
+                  className="rounded-md border bg-background p-4"
                 >
                   <div className="mb-2 flex items-start justify-between gap-4">
-                    <h5 className="font-medium text-zinc-200">
+                    <h5 className="font-medium text-foreground">
                       {mention.title}
                     </h5>
                     {mention.publishedDate && (
-                      <span className="text-xs text-zinc-500">
+                      <span className="text-xs text-muted-foreground">
                         {new Date(mention.publishedDate).toLocaleDateString()}
                       </span>
                     )}
                   </div>
-                  <p className="mb-3 text-sm text-zinc-400">
+                  <p className="mb-3 text-sm text-muted-foreground">
                     {mention.snippet}
                   </p>
                   <a
                     href={mention.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs text-[#f4d47f] hover:text-[#d4af37]"
+                    className="inline-flex items-center gap-1 text-xs text-gold hover:text-gold-muted transition-colors"
                   >
                     View Source
-                    <ExternalLink className="h-3 w-3" />
+                    <ExternalLink className="h-3.5 w-3.5" />
                   </a>
                 </div>
               ))}
@@ -124,46 +124,46 @@ export function WealthSignals({ webData, insiderData }: WealthSignalsProps) {
         {/* Insider Transactions */}
         {hasTransactions && (
           <div>
-            <h4 className="mb-4 text-sm font-semibold uppercase tracking-wide text-zinc-400">
+            <h4 className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Insider Transactions
             </h4>
-            <div className="overflow-hidden rounded-md border border-zinc-800">
+            <div className="overflow-hidden rounded-md border">
               <table className="w-full">
-                <thead className="bg-zinc-950">
+                <thead className="bg-background">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       Date
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       Type
                     </th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       Shares
                     </th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       Price
                     </th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       Total Value
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-800 bg-zinc-900">
+                <tbody className="divide-y divide-border bg-card">
                   {insiderData!.transactions.map((tx, index) => (
-                    <tr key={index} className="hover:bg-zinc-850">
-                      <td className="px-4 py-3 text-sm text-zinc-300">
+                    <tr key={index} className="hover:bg-muted/50 transition-colors">
+                      <td className="px-4 py-3 text-sm text-foreground">
                         {new Date(tx.date).toLocaleDateString()}
                       </td>
-                      <td className="px-4 py-3 text-sm text-zinc-300">
+                      <td className="px-4 py-3 text-sm text-foreground">
                         {tx.transactionType}
                       </td>
-                      <td className="px-4 py-3 text-right text-sm text-zinc-300">
+                      <td className="px-4 py-3 text-right text-sm font-mono text-foreground">
                         {formatNumber(tx.shares)}
                       </td>
-                      <td className="px-4 py-3 text-right text-sm text-zinc-300">
+                      <td className="px-4 py-3 text-right text-sm font-mono text-foreground">
                         {formatCurrency(tx.pricePerShare)}
                       </td>
-                      <td className="px-4 py-3 text-right text-sm font-semibold text-[#f4d47f]">
+                      <td className="px-4 py-3 text-right text-sm font-mono font-semibold text-gold">
                         {formatCurrency(tx.totalValue)}
                       </td>
                     </tr>
@@ -174,8 +174,8 @@ export function WealthSignals({ webData, insiderData }: WealthSignalsProps) {
             {insiderData!.total_value && (
               <div className="mt-3 flex justify-end">
                 <div className="text-sm">
-                  <span className="text-zinc-400">Total: </span>
-                  <span className="font-semibold text-[#d4af37]">
+                  <span className="text-muted-foreground">Total: </span>
+                  <span className="font-mono font-semibold text-gold">
                     {formatCurrency(insiderData!.total_value)}
                   </span>
                 </div>

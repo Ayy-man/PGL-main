@@ -25,8 +25,8 @@ export function DateRangeFilter({
           onClick={() => onRangeChange(value)}
           className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
             selectedRange === value
-              ? "bg-[#d4af37] text-black"
-              : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700"
+              ? "bg-gold text-gold-foreground"
+              : "bg-muted text-muted-foreground hover:bg-accent"
           }`}
         >
           {label}

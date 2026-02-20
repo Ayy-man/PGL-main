@@ -40,6 +40,23 @@ const config: Config = {
   				DEFAULT: 'var(--destructive)',
   				foreground: 'var(--destructive-foreground)'
   			},
+  			gold: {
+  				DEFAULT: 'var(--gold)',
+  				foreground: 'var(--gold-foreground)',
+  				muted: 'var(--gold-muted)'
+  			},
+  			success: {
+  				DEFAULT: 'var(--success)',
+  				muted: 'var(--success-muted)'
+  			},
+  			warning: {
+  				DEFAULT: 'var(--warning)',
+  				muted: 'var(--warning-muted)'
+  			},
+  			info: {
+  				DEFAULT: 'var(--info)',
+  				muted: 'var(--info-muted)'
+  			},
   			border: 'var(--border)',
   			input: 'var(--input)',
   			ring: 'var(--ring)',

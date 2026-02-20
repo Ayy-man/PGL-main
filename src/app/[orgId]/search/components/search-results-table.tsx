@@ -32,13 +32,13 @@ function getEmailStatusBadge(status: string | undefined) {
   switch (status.toLowerCase()) {
     case "verified":
       return (
-        <Badge className="text-xs bg-emerald-500/15 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/25">
+        <Badge className="text-xs bg-success-muted text-success border border-success/30 hover:bg-success/20">
           Verified
         </Badge>
       );
     case "guessed":
       return (
-        <Badge className="text-xs bg-yellow-500/15 text-yellow-400 border-yellow-500/30 hover:bg-yellow-500/25">
+        <Badge className="text-xs bg-warning-muted text-warning border border-warning/30 hover:bg-warning/20">
           Guessed
         </Badge>
       );
@@ -131,7 +131,7 @@ function createColumns(lists: List[], orgId: string): ColumnDef<ApolloPerson>[] 
         const hasPhone =
           row.original.phone_numbers && row.original.phone_numbers.length > 0;
         return hasPhone ? (
-          <Check className="h-4 w-4 text-emerald-400" />
+          <Check className="h-4 w-4 text-success" />
         ) : (
           <X className="h-4 w-4 text-muted-foreground/50" />
         );
@@ -150,7 +150,7 @@ function createColumns(lists: List[], orgId: string): ColumnDef<ApolloPerson>[] 
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 px-2 text-xs text-muted-foreground hover:text-[oklch(0.84_0.15_84)]"
+              className="h-7 px-2 text-xs text-muted-foreground hover:text-gold cursor-pointer"
             >
               <ListPlus className="h-3.5 w-3.5 mr-1" />
               Add to List

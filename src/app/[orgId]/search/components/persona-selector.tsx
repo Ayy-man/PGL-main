@@ -108,7 +108,7 @@ export function PersonaSelector({
         <div className="px-2 py-1.5">
           <Link
             href={`/${orgId}/personas`}
-            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-[oklch(0.84_0.15_84)] transition-colors"
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-gold transition-colors"
           >
             <Settings className="h-3.5 w-3.5" />
             Manage Personas

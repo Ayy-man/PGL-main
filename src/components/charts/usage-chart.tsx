@@ -38,14 +38,14 @@ function formatDate(dateStr: string) {
 export function UsageChart({ data }: UsageChartProps) {
   if (data.length === 0) {
     return (
-      <div className="flex h-[400px] items-center justify-center rounded-xl border border-zinc-800 bg-zinc-900 p-6">
-        <p className="text-zinc-500">No data available for this period</p>
+      <div className="flex h-[400px] items-center justify-center rounded-xl border bg-card p-6">
+        <p className="text-muted-foreground">No data available for this period</p>
       </div>
     );
   }
 
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6">
+    <div className="rounded-xl border bg-card p-6">
       <ResponsiveContainer width="100%" height={400}>
         <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />

@@ -69,45 +69,45 @@ export function EnrichmentStatus({
   const renderStatusIcon = (status: SourceStatus) => {
     switch (status) {
       case "pending":
-        return <Circle className="h-4 w-4 text-zinc-500" />;
+        return <Circle className="h-4 w-4 text-muted-foreground" />;
       case "in_progress":
-        return <Loader2 className="h-4 w-4 text-blue-400 animate-spin" />;
+        return <Loader2 className="h-4 w-4 text-info animate-spin" />;
       case "complete":
-        return <CheckCircle2 className="h-4 w-4 text-green-500" />;
+        return <CheckCircle2 className="h-4 w-4 text-success" />;
       case "failed":
-        return <XCircle className="h-4 w-4 text-red-500" />;
+        return <XCircle className="h-4 w-4 text-destructive" />;
       case "skipped":
-        return <Minus className="h-4 w-4 text-zinc-500" />;
+        return <Minus className="h-4 w-4 text-muted-foreground" />;
       case "circuit_open":
-        return <Circle className="h-4 w-4 text-orange-500" />;
+        return <Circle className="h-4 w-4 text-warning" />;
       default:
-        return <Circle className="h-4 w-4 text-zinc-500" />;
+        return <Circle className="h-4 w-4 text-muted-foreground" />;
     }
   };
 
   const renderStatusText = (status: SourceStatus) => {
     switch (status) {
       case "pending":
-        return <span className="text-zinc-400">Pending</span>;
+        return <span className="text-muted-foreground">Pending</span>;
       case "in_progress":
-        return <span className="text-blue-400">Enriching...</span>;
+        return <span className="text-info">Enriching...</span>;
       case "complete":
-        return <span className="text-green-400">Complete</span>;
+        return <span className="text-success">Complete</span>;
       case "failed":
-        return <span className="text-red-400">Failed</span>;
+        return <span className="text-destructive">Failed</span>;
       case "skipped":
-        return <span className="text-zinc-500">Skipped</span>;
+        return <span className="text-muted-foreground">Skipped</span>;
       case "circuit_open":
-        return <span className="text-orange-400">Circuit Open</span>;
+        return <span className="text-warning">Circuit Open</span>;
       default:
-        return <span className="text-zinc-400">Unknown</span>;
+        return <span className="text-muted-foreground">Unknown</span>;
     }
   };
 
   return (
-    <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
+    <div className="rounded-lg border bg-card p-6">
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-zinc-100">
+        <h3 className="text-lg font-semibold text-foreground">
           Enrichment Status
         </h3>
         <Button
@@ -115,7 +115,7 @@ export function EnrichmentStatus({
           size="sm"
           onClick={handleRefresh}
           disabled={isRefreshing}
-          className="border-zinc-700 bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-zinc-100"
+          className="cursor-pointer"
         >
           {isRefreshing ? (
             <>
@@ -134,11 +134,11 @@ export function EnrichmentStatus({
           return (
             <div
               key={key}
-              className="flex items-center gap-3 rounded-md border border-zinc-800 bg-zinc-950 p-3"
+              className="flex items-center gap-3 rounded-md border bg-background p-3"
             >
               {renderStatusIcon(status)}
               <div className="flex flex-col">
-                <span className="text-sm font-medium text-zinc-300">
+                <span className="text-sm font-medium text-foreground">
                   {label}
                 </span>
                 <span className="text-xs">{renderStatusText(status)}</span>

@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { getLists } from "@/lib/lists/queries";
 import { ListGrid } from "./components/list-grid";
 import { CreateListDialog } from "./components/create-list-dialog";
+import { EmptyState } from "@/components/ui/empty-state";
+import { List } from "lucide-react";
 
 interface PageProps {
   params: Promise<{ orgId: string }>;
@@ -38,12 +40,13 @@ export default async function ListsPage({ params }: PageProps) {
       </div>
 
       {lists.length === 0 ? (
-        <div className="text-center py-12 border-2 border-dashed rounded-lg">
-          <p className="text-muted-foreground text-lg mb-4">
-            No lists yet. Create one to start organizing prospects.
-          </p>
+        <EmptyState
+          icon={List}
+          title="No lists yet"
+          description="Create one to start organizing prospects."
+        >
           <CreateListDialog />
-        </div>
+        </EmptyState>
       ) : (
         <ListGrid lists={lists} />
       )}

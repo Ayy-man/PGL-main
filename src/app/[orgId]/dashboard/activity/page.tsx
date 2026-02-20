@@ -37,7 +37,7 @@ export default function ActivityLogPage() {
         <h1 className="font-serif text-3xl font-bold tracking-tight">
           Activity Log
         </h1>
-        <p className="mt-1 text-zinc-400">
+        <p className="mt-1 text-muted-foreground">
           Browse all team activity
         </p>
       </div>

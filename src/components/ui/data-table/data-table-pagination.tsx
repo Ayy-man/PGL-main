@@ -66,7 +66,7 @@ export function DataTablePagination({
         <div className="flex items-center gap-1">
           <span className="text-sm font-medium">
             Page{" "}
-            <span className="text-[oklch(0.84_0.15_84)]">{currentPage}</span>{" "}
+            <span className="text-gold">{currentPage}</span>{" "}
             of {pageCount}
           </span>
         </div>

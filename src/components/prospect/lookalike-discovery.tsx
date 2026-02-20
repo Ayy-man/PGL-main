@@ -123,7 +123,7 @@ export function LookalikeDiscovery({
             <button
               onClick={handleFindSimilar}
               disabled={isLoading}
-              className="flex items-center gap-2 bg-[#d4af37] text-black px-6 py-3 rounded-lg font-semibold hover:bg-[#f4d47f] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center gap-2 bg-gold text-gold-foreground px-6 py-3 rounded-lg font-semibold hover:bg-gold-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {isLoading ? (
                 <>
@@ -139,12 +139,12 @@ export function LookalikeDiscovery({
             </button>
 
             {!isLoading && (
-              <label className="flex items-center gap-2 text-zinc-300">
+              <label className="flex items-center gap-2 text-foreground">
                 <input
                   type="checkbox"
                   checked={saveChecked}
                   onChange={(e) => setSaveChecked(e.target.checked)}
-                  className="w-4 h-4 rounded border-zinc-600 bg-zinc-800 text-[#d4af37] focus:ring-[#d4af37] focus:ring-offset-zinc-900"
+                  className="w-4 h-4 rounded border bg-muted text-gold focus:ring-gold focus:ring-offset-card"
                 />
                 Save generated persona for reuse
               </label>
@@ -163,19 +163,19 @@ export function LookalikeDiscovery({
       {showResults && result && (
         <div className="space-y-6">
           {/* Generated Persona Card */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-6 space-y-4">
+          <div className="bg-card border rounded-lg p-6 space-y-4">
             <div className="flex items-start justify-between">
               <div>
                 <h3 className="text-xl font-semibold text-white mb-2">
                   {result.persona.name}
                 </h3>
-                <p className="text-zinc-400 italic">{result.persona.reasoning}</p>
+                <p className="text-muted-foreground italic">{result.persona.reasoning}</p>
               </div>
               {!result.savedPersonaId && (
                 <button
                   onClick={handleSavePersona}
                   disabled={isLoading}
-                  className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                  className="bg-muted hover:bg-accent text-foreground px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                 >
                   Save Persona
                 </button>
@@ -190,12 +190,12 @@ export function LookalikeDiscovery({
             {/* Persona Attributes */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <h4 className="text-sm font-medium text-zinc-400 mb-2">Job Titles</h4>
+                <h4 className="text-sm font-medium text-muted-foreground mb-2">Job Titles</h4>
                 <div className="flex flex-wrap gap-2">
                   {result.persona.jobTitles.map((title, i) => (
                     <span
                       key={i}
-                      className="bg-zinc-800 text-zinc-300 rounded-full px-3 py-1 text-sm"
+                      className="bg-muted text-foreground rounded-full px-3 py-1 text-sm"
                     >
                       {title}
                     </span>
@@ -204,19 +204,19 @@ export function LookalikeDiscovery({
               </div>
 
               <div>
-                <h4 className="text-sm font-medium text-zinc-400 mb-2">Seniority</h4>
-                <span className="bg-zinc-800 text-zinc-300 rounded-full px-3 py-1 text-sm">
+                <h4 className="text-sm font-medium text-muted-foreground mb-2">Seniority</h4>
+                <span className="bg-muted text-foreground rounded-full px-3 py-1 text-sm">
                   {result.persona.seniority}
                 </span>
               </div>
 
               <div>
-                <h4 className="text-sm font-medium text-zinc-400 mb-2">Industries</h4>
+                <h4 className="text-sm font-medium text-muted-foreground mb-2">Industries</h4>
                 <div className="flex flex-wrap gap-2">
                   {result.persona.industries.map((industry, i) => (
                     <span
                       key={i}
-                      className="bg-zinc-800 text-zinc-300 rounded-full px-3 py-1 text-sm"
+                      className="bg-muted text-foreground rounded-full px-3 py-1 text-sm"
                     >
                       {industry}
                     </span>
@@ -225,20 +225,20 @@ export function LookalikeDiscovery({
               </div>
 
               <div>
-                <h4 className="text-sm font-medium text-zinc-400 mb-2">Company Size</h4>
-                <span className="bg-zinc-800 text-zinc-300 rounded-full px-3 py-1 text-sm">
+                <h4 className="text-sm font-medium text-muted-foreground mb-2">Company Size</h4>
+                <span className="bg-muted text-foreground rounded-full px-3 py-1 text-sm">
                   {result.persona.companySize}
                 </span>
               </div>
 
               {result.persona.locations && result.persona.locations.length > 0 && (
                 <div>
-                  <h4 className="text-sm font-medium text-zinc-400 mb-2">Locations</h4>
+                  <h4 className="text-sm font-medium text-muted-foreground mb-2">Locations</h4>
                   <div className="flex flex-wrap gap-2">
                     {result.persona.locations.map((location, i) => (
                       <span
                         key={i}
-                        className="bg-zinc-800 text-zinc-300 rounded-full px-3 py-1 text-sm"
+                        className="bg-muted text-foreground rounded-full px-3 py-1 text-sm"
                       >
                         {location}
                       </span>
@@ -248,12 +248,12 @@ export function LookalikeDiscovery({
               )}
 
               <div>
-                <h4 className="text-sm font-medium text-zinc-400 mb-2">Keywords</h4>
+                <h4 className="text-sm font-medium text-muted-foreground mb-2">Keywords</h4>
                 <div className="flex flex-wrap gap-2">
                   {result.persona.keywords.map((keyword, i) => (
                     <span
                       key={i}
-                      className="bg-zinc-800 text-zinc-300 rounded-full px-3 py-1 text-sm"
+                      className="bg-muted text-foreground rounded-full px-3 py-1 text-sm"
                     >
                       {keyword}
                     </span>
@@ -264,8 +264,8 @@ export function LookalikeDiscovery({
           </div>
 
           {/* Similar Prospects Table */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden">
-            <div className="px-6 py-4 border-b border-zinc-800">
+          <div className="bg-card border rounded-lg overflow-hidden">
+            <div className="px-6 py-4 border-b">
               <h3 className="text-lg font-semibold text-white flex items-center gap-2">
                 <Search className="w-5 h-5" />
                 Similar Prospects ({result.totalResults} found)
@@ -273,36 +273,36 @@ export function LookalikeDiscovery({
             </div>
 
             {result.searchResults.length === 0 ? (
-              <div className="px-6 py-12 text-center text-zinc-400">
+              <div className="px-6 py-12 text-center text-muted-foreground">
                 No similar prospects found. Try adjusting the search criteria.
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-zinc-800/50">
+                  <thead className="bg-muted/50">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         Name
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         Title
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         Company
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         Location
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-zinc-400 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                         Actions
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-zinc-800">
+                  <tbody className="divide-y divide-border">
                     {result.searchResults.slice(0, 20).map((prospect) => (
                       <tr
                         key={prospect.id}
-                        className="hover:bg-zinc-800/50 transition-colors"
+                        className="hover:bg-muted/50 transition-colors"
                       >
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-white">
@@ -310,15 +310,15 @@ export function LookalikeDiscovery({
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="text-sm text-zinc-300">{prospect.title}</div>
+                          <div className="text-sm text-foreground">{prospect.title}</div>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="text-sm text-zinc-300">
+                          <div className="text-sm text-foreground">
                             {prospect.organization_name}
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="text-sm text-zinc-300">
+                          <div className="text-sm text-foreground">
                             {[prospect.city, prospect.state, prospect.country]
                               .filter(Boolean)
                               .join(", ")}
@@ -331,7 +331,7 @@ export function LookalikeDiscovery({
                                 href={prospect.linkedin_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="text-[#d4af37] hover:text-[#f4d47f] text-sm font-medium"
+                                className="text-gold hover:text-gold text-sm font-medium"
                               >
                                 LinkedIn
                               </a>
@@ -339,7 +339,7 @@ export function LookalikeDiscovery({
                             {prospect.email && (
                               <a
                                 href={`mailto:${prospect.email}`}
-                                className="text-zinc-400 hover:text-zinc-300 text-sm"
+                                className="text-muted-foreground hover:text-foreground text-sm"
                               >
                                 Email
                               </a>
@@ -361,7 +361,7 @@ export function LookalikeDiscovery({
                 setShowResults(false);
                 setResult(null);
               }}
-              className="bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-6 py-3 rounded-lg font-medium transition-colors"
+              className="bg-muted hover:bg-accent text-foreground px-6 py-3 rounded-lg font-medium transition-colors"
             >
               Search Again
             </button>

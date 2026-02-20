@@ -112,8 +112,8 @@ interface ProfileViewProps {
  * 5. Wealth Signals Section: Web mentions and SEC transactions
  * 6. Lists Section: List memberships table
  *
- * Dark theme with gold accents (#f4d47f, #d4af37).
- * Playfair Display for headings, Inter for body.
+ * Uses design system tokens (gold, foreground, card, muted-foreground).
+ * font-serif (Playfair Display) for headings, font-sans (Inter) for body.
  */
 export function ProfileView({
   prospect,
@@ -154,28 +154,28 @@ export function ProfileView({
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 p-6">
-      <div className="mx-auto max-w-6xl space-y-6">
+    <div className="min-h-screen bg-background p-6">
+      <div className="mx-auto max-w-6xl space-y-8">
         {/* Header Section */}
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-8">
+        <div className="rounded-lg border bg-card p-8">
           <div className="flex items-start justify-between gap-6">
             <div className="flex-1">
-              <h1 className="mb-2 font-playfair text-4xl font-bold text-zinc-100">
+              <h1 className="mb-2 font-serif text-4xl font-bold text-foreground">
                 {prospect.full_name}
               </h1>
               {prospect.title && prospect.company && (
-                <p className="mb-3 text-xl text-zinc-300">
+                <p className="mb-3 text-xl text-foreground">
                   {prospect.title} @ {prospect.company}
                 </p>
               )}
               {prospect.location && (
-                <div className="flex items-center gap-2 text-zinc-400">
+                <div className="flex items-center gap-2 text-muted-foreground">
                   <MapPin className="h-4 w-4" />
                   <span className="text-sm">{prospect.location}</span>
                 </div>
               )}
               {isStale && (
-                <div className="mt-4 inline-flex items-center gap-2 rounded-md border border-orange-800 bg-orange-950/50 px-3 py-1.5 text-sm text-orange-400">
+                <div className="mt-4 inline-flex items-center gap-2 rounded-md border border-warning/30 bg-warning-muted px-3 py-1.5 text-sm text-warning">
                   <AlertCircle className="h-4 w-4" />
                   Data may be outdated - refreshing...
                 </div>
@@ -189,18 +189,18 @@ export function ProfileView({
                   <Button
                     variant="outline"
                     disabled={isAddingToList}
-                    className="border-zinc-700 bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-zinc-100"
+                    className="cursor-pointer"
                   >
                     <Plus className="mr-2 h-4 w-4" />
                     Add to List
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="border-zinc-800 bg-zinc-900 text-zinc-100">
+                <DropdownMenuContent>
                   {availableLists.map((list) => (
                     <DropdownMenuItem
                       key={list.id}
                       onClick={() => handleAddToList(list.id)}
-                      className="hover:bg-zinc-800"
+                      className="cursor-pointer"
                     >
                       {list.name}
                     </DropdownMenuItem>
@@ -211,7 +211,7 @@ export function ProfileView({
               <Button
                 variant="outline"
                 onClick={() => setShowLookalikeDiscovery(!showLookalikeDiscovery)}
-                className="border-zinc-700 bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-zinc-100"
+                className="cursor-pointer"
               >
                 <UserSearch className="mr-2 h-4 w-4" />
                 {showLookalikeDiscovery ? "Hide" : "Show"} Similar People
@@ -220,7 +220,7 @@ export function ProfileView({
               <Button
                 variant="outline"
                 onClick={handleExport}
-                className="border-zinc-700 bg-zinc-800 text-zinc-300 hover:bg-zinc-700 hover:text-zinc-100"
+                className="cursor-pointer"
               >
                 <Download className="mr-2 h-4 w-4" />
                 Export Profile
@@ -236,24 +236,24 @@ export function ProfileView({
         />
 
         {/* Contact Section */}
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
-          <h3 className="mb-6 font-playfair text-xl font-semibold text-zinc-100">
+        <div className="rounded-lg border bg-card p-6">
+          <h3 className="mb-6 font-serif text-xl font-semibold text-foreground">
             Contact Information
           </h3>
 
           <div className="grid gap-6 md:grid-cols-2">
             {/* Work Contact */}
             <div>
-              <h4 className="mb-3 text-sm font-semibold uppercase tracking-wide text-zinc-400">
+              <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Work
               </h4>
               <div className="space-y-3">
                 {prospect.work_email && (
                   <div className="flex items-center gap-3">
-                    <Mail className="h-4 w-4 text-zinc-500" />
+                    <Mail className="h-4 w-4 text-muted-foreground" />
                     <a
                       href={`mailto:${prospect.work_email}`}
-                      className="text-sm text-zinc-300 hover:text-[#f4d47f]"
+                      className="text-sm text-foreground hover:text-gold transition-colors"
                     >
                       {prospect.work_email}
                     </a>
@@ -261,10 +261,10 @@ export function ProfileView({
                 )}
                 {prospect.work_phone && (
                   <div className="flex items-center gap-3">
-                    <Phone className="h-4 w-4 text-zinc-500" />
+                    <Phone className="h-4 w-4 text-muted-foreground" />
                     <a
                       href={`tel:${prospect.work_phone}`}
-                      className="text-sm text-zinc-300 hover:text-[#f4d47f]"
+                      className="text-sm text-foreground hover:text-gold transition-colors"
                     >
                       {prospect.work_phone}
                     </a>
@@ -272,12 +272,12 @@ export function ProfileView({
                 )}
                 {prospect.linkedin_url && (
                   <div className="flex items-center gap-3">
-                    <Linkedin className="h-4 w-4 text-zinc-500" />
+                    <Linkedin className="h-4 w-4 text-muted-foreground" />
                     <a
                       href={prospect.linkedin_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-zinc-300 hover:text-[#f4d47f]"
+                      className="text-sm text-foreground hover:text-gold transition-colors"
                     >
                       LinkedIn Profile
                     </a>
@@ -286,23 +286,23 @@ export function ProfileView({
                 {!prospect.work_email &&
                   !prospect.work_phone &&
                   !prospect.linkedin_url && (
-                    <p className="text-sm text-zinc-500">No work contact info</p>
+                    <p className="text-sm text-muted-foreground">No work contact info</p>
                   )}
               </div>
             </div>
 
             {/* Personal Contact */}
             <div>
-              <h4 className="mb-3 text-sm font-semibold uppercase tracking-wide text-zinc-400">
+              <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Personal (ContactOut)
               </h4>
               <div className="space-y-3">
                 {prospect.contact_data?.personal_email && (
                   <div className="flex items-center gap-3">
-                    <Mail className="h-4 w-4 text-zinc-500" />
+                    <Mail className="h-4 w-4 text-muted-foreground" />
                     <a
                       href={`mailto:${prospect.contact_data.personal_email}`}
-                      className="text-sm text-zinc-300 hover:text-[#f4d47f]"
+                      className="text-sm text-foreground hover:text-gold transition-colors"
                     >
                       {prospect.contact_data.personal_email}
                     </a>
@@ -310,17 +310,17 @@ export function ProfileView({
                 )}
                 {prospect.contact_data?.phone && (
                   <div className="flex items-center gap-3">
-                    <Phone className="h-4 w-4 text-zinc-500" />
+                    <Phone className="h-4 w-4 text-muted-foreground" />
                     <a
                       href={`tel:${prospect.contact_data.phone}`}
-                      className="text-sm text-zinc-300 hover:text-[#f4d47f]"
+                      className="text-sm text-foreground hover:text-gold transition-colors"
                     >
                       {prospect.contact_data.phone}
                     </a>
                   </div>
                 )}
                 {!prospect.contact_data && (
-                  <p className="text-sm text-zinc-500">
+                  <p className="text-sm text-muted-foreground">
                     Not enriched - personal contact will be added after enrichment
                   </p>
                 )}
@@ -330,14 +330,14 @@ export function ProfileView({
         </div>
 
         {/* AI Summary Section */}
-        <div className="rounded-lg border border-[#d4af37] bg-zinc-900 p-6">
-          <h3 className="mb-4 font-playfair text-xl font-semibold text-zinc-100">
+        <div className="rounded-lg border border-gold bg-card p-6">
+          <h3 className="mb-4 font-serif text-xl font-semibold text-foreground">
             Why Recommended
           </h3>
           {prospect.ai_summary ? (
-            <p className="text-zinc-300 leading-relaxed">{prospect.ai_summary}</p>
+            <p className="text-foreground leading-relaxed">{prospect.ai_summary}</p>
           ) : (
-            <p className="text-sm text-zinc-500">
+            <p className="text-sm text-muted-foreground">
               AI summary will be generated after enrichment completes
             </p>
           )}
@@ -345,8 +345,8 @@ export function ProfileView({
 
         {/* Lookalike Discovery Section - Plan 03-08 */}
         {showLookalikeDiscovery && (
-          <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
-            <h3 className="mb-6 font-playfair text-xl font-semibold text-zinc-100">
+          <div className="rounded-lg border bg-card p-6">
+            <h3 className="mb-6 font-serif text-xl font-semibold text-foreground">
               Find Similar People
             </h3>
             <LookalikeDiscovery
@@ -363,47 +363,47 @@ export function ProfileView({
         />
 
         {/* Lists Section */}
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
-          <h3 className="mb-6 font-playfair text-xl font-semibold text-zinc-100">
+        <div className="rounded-lg border bg-card p-6">
+          <h3 className="mb-6 font-serif text-xl font-semibold text-foreground">
             List Memberships
           </h3>
 
           {listMemberships.length > 0 ? (
-            <div className="overflow-hidden rounded-md border border-zinc-800">
+            <div className="overflow-hidden rounded-md border">
               <table className="w-full">
-                <thead className="bg-zinc-950">
+                <thead className="bg-background">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       List Name
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       Status
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-zinc-400">
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       Added Date
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-800 bg-zinc-900">
+                <tbody className="divide-y divide-border bg-card">
                   {listMemberships.map((membership) => (
                     <tr
                       key={membership.listId}
-                      className="hover:bg-zinc-850"
+                      className="hover:bg-muted/50 transition-colors"
                     >
                       <td className="px-4 py-3">
                         <Link
                           href={`/lists/${membership.listId}`}
-                          className="text-sm font-medium text-[#f4d47f] hover:text-[#d4af37]"
+                          className="text-sm font-medium text-gold hover:text-gold-muted transition-colors"
                         >
                           {membership.listName}
                         </Link>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="inline-flex rounded-full px-2 py-1 text-xs font-medium capitalize bg-zinc-800 text-zinc-300">
+                        <span className="inline-flex rounded-full px-2 py-1 text-xs font-medium capitalize bg-muted text-muted-foreground">
                           {membership.status}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-sm text-zinc-400">
+                      <td className="px-4 py-3 text-sm text-muted-foreground">
                         {new Date(membership.addedAt).toLocaleDateString()}
                       </td>
                     </tr>
@@ -412,7 +412,7 @@ export function ProfileView({
               </table>
             </div>
           ) : (
-            <p className="text-sm text-zinc-500">
+            <p className="text-sm text-muted-foreground">
               Not yet added to any lists. Use &quot;Add to List&quot; above to organize this prospect.
             </p>
           )}

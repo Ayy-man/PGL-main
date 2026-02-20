@@ -95,7 +95,7 @@ export default function SuperAdminAnalyticsPage() {
           <h1 className="font-serif text-3xl font-bold tracking-tight">
             Platform Analytics
           </h1>
-          <p className="mt-1 text-zinc-400">
+          <p className="mt-1 text-muted-foreground">
             Cross-tenant usage metrics
           </p>
         </div>
@@ -103,7 +103,7 @@ export default function SuperAdminAnalyticsPage() {
           <select
             value={selectedTenant}
             onChange={(e) => setSelectedTenant(e.target.value)}
-            className="rounded-md border border-zinc-700 bg-zinc-800 px-3 py-1.5 text-sm text-zinc-300 focus:border-[#d4af37] focus:outline-none"
+            className="rounded-md border bg-muted px-3 py-1.5 text-sm text-foreground focus:border-gold focus:outline-none"
           >
             <option value="">All Tenants</option>
             {tenants.map((t) => (
@@ -131,11 +131,11 @@ export default function SuperAdminAnalyticsPage() {
             {Array.from({ length: 6 }).map((_, i) => (
               <div
                 key={i}
-                className="h-28 animate-pulse rounded-xl border border-zinc-800 bg-zinc-900"
+                className="h-28 animate-pulse rounded-xl border bg-card"
               />
             ))}
           </div>
-          <div className="h-[400px] animate-pulse rounded-xl border border-zinc-800 bg-zinc-900" />
+          <div className="h-[400px] animate-pulse rounded-xl border bg-card" />
         </div>
       ) : data ? (
         <>

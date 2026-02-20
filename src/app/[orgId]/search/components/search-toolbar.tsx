@@ -57,7 +57,7 @@ export function SearchToolbar({
               disabled={isLoading}
               className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
             >
-              <RefreshCw className="h-3 w-3 mr-1" />
+              <RefreshCw className="h-3.5 w-3.5 mr-1" />
               Refresh
             </Button>
           </div>

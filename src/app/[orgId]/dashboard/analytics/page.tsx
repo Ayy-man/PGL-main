@@ -87,7 +87,7 @@ export default function TenantAnalyticsPage() {
           <h1 className="font-serif text-3xl font-bold tracking-tight">
             Team Analytics
           </h1>
-          <p className="mt-1 text-zinc-400">
+          <p className="mt-1 text-muted-foreground">
             Usage metrics for your team
           </p>
         </div>
@@ -109,11 +109,11 @@ export default function TenantAnalyticsPage() {
             {Array.from({ length: 6 }).map((_, i) => (
               <div
                 key={i}
-                className="h-28 animate-pulse rounded-xl border border-zinc-800 bg-zinc-900"
+                className="h-28 animate-pulse rounded-xl border bg-card"
               />
             ))}
           </div>
-          <div className="h-[400px] animate-pulse rounded-xl border border-zinc-800 bg-zinc-900" />
+          <div className="h-[400px] animate-pulse rounded-xl border bg-card" />
         </div>
       ) : data ? (
         <>
@@ -121,14 +121,14 @@ export default function TenantAnalyticsPage() {
           <UsageChart data={data.daily} />
 
           {data.userBreakdown && data.userBreakdown.length > 0 && (
-            <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6">
+            <div className="rounded-xl border bg-card p-6">
               <h2 className="mb-4 font-serif text-xl font-semibold">
                 Team Breakdown
               </h2>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-zinc-800 text-left text-zinc-400">
+                    <tr className="border-b border text-left text-muted-foreground">
                       <th className="pb-3 pr-4">User</th>
                       <th className="pb-3 pr-4">Searches</th>
                       <th className="pb-3 pr-4">Profile Views</th>
@@ -140,21 +140,21 @@ export default function TenantAnalyticsPage() {
                     {data.userBreakdown.map((user, i) => (
                       <tr
                         key={user.userId}
-                        className={i % 2 === 0 ? "bg-zinc-900" : "bg-zinc-950"}
+                        className={i % 2 === 0 ? "bg-card" : "bg-background"}
                       >
-                        <td className="py-2 pr-4 font-mono text-xs text-zinc-300">
+                        <td className="py-2 pr-4 font-mono text-xs text-foreground">
                           {user.userId.slice(0, 8)}...
                         </td>
-                        <td className="py-2 pr-4 text-zinc-300">
+                        <td className="py-2 pr-4 text-foreground">
                           {user.searchesExecuted}
                         </td>
-                        <td className="py-2 pr-4 text-zinc-300">
+                        <td className="py-2 pr-4 text-foreground">
                           {user.profilesViewed}
                         </td>
-                        <td className="py-2 pr-4 text-zinc-300">
+                        <td className="py-2 pr-4 text-foreground">
                           {user.profilesEnriched}
                         </td>
-                        <td className="py-2 text-zinc-300">
+                        <td className="py-2 text-foreground">
                           {user.csvExports}
                         </td>
                       </tr>
