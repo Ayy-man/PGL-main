@@ -17,10 +17,12 @@ export default async function TenantLayout({
     redirect("/login");
   }
 
+  // Look up tenant by slug or UUID
+  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orgId);
   const { data: tenant, error } = await supabase
     .from("tenants")
     .select("id, name, slug, logo_url, primary_color, secondary_color, is_active")
-    .eq("slug", orgId)
+    .eq(isUuid ? "id" : "slug", orgId)
     .single();
 
   if (error || !tenant || !tenant.is_active) {
@@ -41,12 +43,6 @@ export default async function TenantLayout({
         </div>
       </main>
 
-      <style>{`
-        :root {
-          --tenant-primary: ${tenant.primary_color};
-          --tenant-secondary: ${tenant.secondary_color};
-        }
-      `}</style>
     </div>
   );
 }

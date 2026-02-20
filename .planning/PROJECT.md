@@ -69,6 +69,13 @@ Real estate teams can quickly find and qualify wealthy prospects by searching st
 - **New routes from kickoff:** `/dashboard/analytics` (tenant metrics), `/admin/analytics` (cross-tenant metrics), `/api/search/lookalike`, `/api/analytics`, `/api/activity`
 - **Enrichment strategy:** Lazy enrichment — ContactOut, Exa, SEC, and AI summaries trigger on profile view, not upfront
 
+## Deployment
+
+- **Vercel Domain:** https://pgl-main.vercel.app
+- **Vercel Project:** pgl-luxury-buyer-finder (aymans-projects-eef8e702)
+- **GitHub Repo:** git@github.com:Ayy-man/PGL-main.git
+- **Supabase Project:** gsociuxkotdiarrblwnf.supabase.co
+
 ## Constraints
 
 - **Tech Stack**: Next.js 14 (App Router), TypeScript, Tailwind CSS, Supabase (PostgreSQL + Auth + RLS), Vercel hosting — chosen by client

@@ -103,6 +103,21 @@ export default function NewUserPage() {
           </div>
 
           <div className="space-y-2">
+            <label htmlFor="password" className="text-sm font-medium">
+              Password <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              required
+              minLength={6}
+              placeholder="Minimum 6 characters"
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+
+          <div className="space-y-2">
             <label htmlFor="role" className="text-sm font-medium">
               Role <span className="text-red-500">*</span>
             </label>

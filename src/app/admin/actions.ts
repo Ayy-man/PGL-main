@@ -91,6 +91,7 @@ export async function createUserAction(formData: FormData) {
     await guardSuperAdmin();
 
     const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
     const fullName = formData.get("full_name") as string;
     const role = formData.get("role") as string;
     const tenantId = formData.get("tenant_id") as string | null;
@@ -114,9 +115,14 @@ export async function createUserAction(formData: FormData) {
 
     const supabase = createAdminClient();
 
+    if (!password || password.length < 6) {
+      throw new Error("Password must be at least 6 characters");
+    }
+
     // Create auth user
     const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
       email: email.trim(),
+      password: password,
       email_confirm: true,
       app_metadata: {
         role: role,

@@ -5,11 +5,14 @@
 -- 1. ACTIVITY_LOG TABLE (Partitioned by created_at)
 -- ============================================================================
 
+-- Drop non-partitioned activity_log from initial migration (replaced with partitioned version)
+DROP TABLE IF EXISTS activity_log CASCADE;
+
 -- Create partitioned activity_log table
-CREATE TABLE IF NOT EXISTS activity_log (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  tenant_id UUID NOT NULL REFERENCES tenants(id),
-  user_id UUID NOT NULL REFERENCES users(id),
+CREATE TABLE activity_log (
+  id UUID DEFAULT gen_random_uuid(),
+  tenant_id UUID NOT NULL,
+  user_id UUID NOT NULL,
   action_type TEXT NOT NULL CHECK (action_type IN (
     'login',
     'search_executed',
@@ -28,7 +31,8 @@ CREATE TABLE IF NOT EXISTS activity_log (
   metadata JSONB DEFAULT '{}',
   ip_address INET,
   user_agent TEXT,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (id, created_at)
 ) PARTITION BY RANGE (created_at);
 
 -- Create monthly partitions (2026-02 through 2026-06)

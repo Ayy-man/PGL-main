@@ -32,6 +32,13 @@ Progress: [████████░░] 75% (63/79 requirements)
 | Phase 2 | 7 | 51 min | 7 min |
 | Phase 3 | 4 | 39 min | 10 min |
 
+## Infrastructure
+
+- **Vercel:** Linked — https://pgl-main.vercel.app (env vars: NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY)
+- **Supabase:** Connected — gsociuxkotdiarrblwnf.supabase.co
+- **GitHub:** git@github.com:Ayy-man/PGL-main.git
+- **Still needed:** SUPABASE_SERVICE_ROLE_KEY, UPSTASH_REDIS_REST_URL/TOKEN, APOLLO_API_KEY, CONTACTOUT_API_KEY, EXA_API_KEY, ANTHROPIC_API_KEY
+
 ## Accumulated Context
 
 ### Decisions

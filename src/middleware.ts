@@ -50,7 +50,14 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/admin", request.url));
     }
     if (userTenantId) {
-      return NextResponse.redirect(new URL(`/${userTenantId}`, request.url));
+      // Look up tenant slug for clean URLs
+      const { data: tenant } = await supabase
+        .from("tenants")
+        .select("slug")
+        .eq("id", userTenantId)
+        .single();
+      const target = tenant?.slug || userTenantId;
+      return NextResponse.redirect(new URL(`/${target}`, request.url));
     }
     return NextResponse.redirect(new URL("/login", request.url));
   }

@@ -34,12 +34,24 @@ export default function LoginPage() {
 
         if (role === 'super_admin') {
           router.push("/admin");
+          router.refresh();
         } else if (tenantId) {
-          router.push(`/${tenantId}`);
+          // Look up tenant slug for URL routing
+          const { data: tenant } = await supabase
+            .from("tenants")
+            .select("slug")
+            .eq("id", tenantId)
+            .single();
+
+          if (tenant?.slug) {
+            router.push(`/${tenant.slug}`);
+          } else {
+            router.push(`/${tenantId}`);
+          }
+          router.refresh();
         } else {
           setError("No tenant assigned. Contact your administrator.");
         }
-        router.refresh();
       }
     } catch {
       setError("An unexpected error occurred");
