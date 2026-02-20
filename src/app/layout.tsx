@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
 
@@ -30,7 +31,9 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${playfair.variable} font-sans antialiased bg-background text-foreground`}
       >
-        {children}
+        <NuqsAdapter>
+          {children}
+        </NuqsAdapter>
         <Toaster />
       </body>
     </html>
