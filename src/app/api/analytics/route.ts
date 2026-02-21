@@ -104,7 +104,7 @@ export async function GET(request: NextRequest) {
 
     if (role === "tenant_admin") {
       // Tenant admins can only see their own tenant data
-      targetTenantId = userTenantId;
+      targetTenantId = userTenantId ?? null;
     } else if (role === "super_admin") {
       // Super admins can optionally filter by tenant_id
       targetTenantId = requestedTenantId || null;
