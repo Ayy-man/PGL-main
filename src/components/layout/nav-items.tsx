@@ -18,8 +18,8 @@ const NAV_ITEMS = [
   { label: "Search", href: "/search", icon: Search },
   { label: "Lists", href: "/lists", icon: List },
   { label: "Personas", href: "/personas", icon: Users },
-  { label: "Activity", href: "/activity", icon: Activity },
-  { label: "Analytics", href: "/analytics", icon: BarChart3 },
+  { label: "Activity", href: "/dashboard/activity", icon: Activity },
+  { label: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
 ];
 
 export function NavItems({ orgId }: NavItemsProps) {
