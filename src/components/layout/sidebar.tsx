@@ -15,7 +15,7 @@ export function SidebarContent({
 }: SidebarProps) {
   return (
     <>
-      <div className="flex items-center gap-3 border-b border-border px-4 py-4">
+      <div className="flex items-center gap-3 border-b border-border px-5 py-5">
         <TenantLogo logoUrl={logoUrl} tenantName={tenantName} />
         <div className="flex flex-col">
           <span className="font-serif text-sm font-semibold">
@@ -24,14 +24,8 @@ export function SidebarContent({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto py-4">
+      <div className="flex-1 overflow-y-auto py-6">
         <NavItems orgId={orgId} />
-      </div>
-
-      <div className="border-t border-border p-4">
-        <div className="text-xs text-muted-foreground">
-          PGL Luxury Buyer Finder
-        </div>
       </div>
     </>
   );

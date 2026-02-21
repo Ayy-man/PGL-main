@@ -28,12 +28,14 @@ export default async function ListsPage({ params }: PageProps) {
   const lists = await getLists(tenantId);
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-serif font-bold">Lists</h1>
-          <p className="text-muted-foreground mt-1">
-            Organize prospects for targeted outreach campaigns
+          <h1 className="font-serif text-3xl font-bold tracking-tight">Lists</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {lists.length > 0
+              ? `${lists.length} list${lists.length === 1 ? "" : "s"}`
+              : "Organize prospects into targeted groups"}
           </p>
         </div>
         <CreateListDialog />
@@ -43,7 +45,7 @@ export default async function ListsPage({ params }: PageProps) {
         <EmptyState
           icon={List}
           title="No lists yet"
-          description="Create one to start organizing prospects."
+          description="Create your first list to start organizing prospects for outreach."
         >
           <CreateListDialog />
         </EmptyState>

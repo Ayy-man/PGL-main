@@ -101,7 +101,7 @@ function PersonaCard({ persona, orgId }: { persona: Persona; orgId: string }) {
   };
 
   return (
-    <Card className="flex flex-col">
+    <Card className="flex flex-col transition-colors hover:border-gold/20">
       <CardHeader>
         <div className="flex items-start justify-between gap-2">
           <CardTitle className="text-xl">

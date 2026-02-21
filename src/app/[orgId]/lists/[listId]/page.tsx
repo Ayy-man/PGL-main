@@ -4,7 +4,8 @@ import Link from "next/link";
 import { getListById, getListMembers } from "@/lib/lists/queries";
 import { ListMemberTable } from "../components/list-member-table";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
+import { ArrowLeft, Users } from "lucide-react";
 
 interface PageProps {
   params: Promise<{ orgId: string; listId: string }>;
@@ -35,7 +36,7 @@ export default async function ListDetailPage({ params }: PageProps) {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" asChild>
           <Link href={`/${orgId}/lists`}>
@@ -43,9 +44,9 @@ export default async function ListDetailPage({ params }: PageProps) {
           </Link>
         </Button>
         <div className="flex-1">
-          <h1 className="text-3xl font-serif font-bold">{list.name}</h1>
+          <h1 className="font-serif text-3xl font-bold tracking-tight">{list.name}</h1>
           {list.description && (
-            <p className="text-muted-foreground mt-1">{list.description}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{list.description}</p>
           )}
         </div>
         <div className="text-sm text-muted-foreground">
@@ -54,11 +55,11 @@ export default async function ListDetailPage({ params }: PageProps) {
       </div>
 
       {members.length === 0 ? (
-        <div className="text-center py-12 border-2 border-dashed rounded-lg">
-          <p className="text-muted-foreground text-lg">
-            No prospects in this list yet. Add prospects from the search page.
-          </p>
-        </div>
+        <EmptyState
+          icon={Users}
+          title="No prospects in this list yet"
+          description="Add prospects from the search page to start building your pipeline."
+        />
       ) : (
         <ListMemberTable members={members} />
       )}

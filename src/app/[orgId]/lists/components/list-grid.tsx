@@ -44,7 +44,7 @@ export function ListGrid({ lists }: ListGridProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {lists.map((list) => (
-        <Card key={list.id} className="flex flex-col">
+        <Card key={list.id} className="flex flex-col transition-colors hover:border-gold/20">
           <CardHeader>
             <CardTitle className="font-serif">{list.name}</CardTitle>
             {list.description && (

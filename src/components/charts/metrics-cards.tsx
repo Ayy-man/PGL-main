@@ -55,7 +55,7 @@ export function MetricsCards({ totals }: MetricsCardsProps) {
       {METRICS.map(({ key, label, icon }) => (
         <div
           key={key}
-          className="rounded-xl border bg-card p-6"
+          className="rounded-xl border bg-card p-6 shadow-sm"
         >
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">{label}</p>

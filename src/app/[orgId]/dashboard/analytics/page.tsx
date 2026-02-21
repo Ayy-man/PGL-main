@@ -98,7 +98,7 @@ export default function TenantAnalyticsPage() {
       </div>
 
       {error && (
-        <div className="rounded-lg border border-red-900 bg-red-950 p-4 text-red-300">
+        <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
           {error}
         </div>
       )}
@@ -128,33 +128,33 @@ export default function TenantAnalyticsPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border text-left text-muted-foreground">
-                      <th className="pb-3 pr-4">User</th>
-                      <th className="pb-3 pr-4">Searches</th>
-                      <th className="pb-3 pr-4">Profile Views</th>
-                      <th className="pb-3 pr-4">Enrichments</th>
-                      <th className="pb-3">Exports</th>
+                    <tr className="border-b text-left">
+                      <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">User</th>
+                      <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Searches</th>
+                      <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Profile Views</th>
+                      <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Enrichments</th>
+                      <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Exports</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {data.userBreakdown.map((user, i) => (
+                    {data.userBreakdown.map((user) => (
                       <tr
                         key={user.userId}
-                        className={i % 2 === 0 ? "bg-card" : "bg-background"}
+                        className="border-b last:border-0 transition-colors hover:bg-muted/50"
                       >
-                        <td className="py-2 pr-4 font-mono text-xs text-foreground">
+                        <td className="px-4 py-3 font-mono text-xs text-foreground">
                           {user.userId.slice(0, 8)}...
                         </td>
-                        <td className="py-2 pr-4 text-foreground">
+                        <td className="px-4 py-3 text-sm text-foreground">
                           {user.searchesExecuted}
                         </td>
-                        <td className="py-2 pr-4 text-foreground">
+                        <td className="px-4 py-3 text-sm text-foreground">
                           {user.profilesViewed}
                         </td>
-                        <td className="py-2 pr-4 text-foreground">
+                        <td className="px-4 py-3 text-sm text-foreground">
                           {user.profilesEnriched}
                         </td>
-                        <td className="py-2 text-foreground">
+                        <td className="px-4 py-3 text-sm text-foreground">
                           {user.csvExports}
                         </td>
                       </tr>

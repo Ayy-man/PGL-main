@@ -12,7 +12,7 @@ interface PageProps {
 
 function SearchFallback() {
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="space-y-8">
       <div>
         <Skeleton className="h-9 w-48 mb-2" />
         <Skeleton className="h-5 w-72" />
@@ -46,11 +46,11 @@ export default async function SearchPage({ params }: PageProps) {
   ]);
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-serif font-bold">Search Prospects</h1>
-        <p className="text-muted-foreground mt-1">
-          Select a persona to discover matching prospects from Apollo.io
+        <h1 className="font-serif text-3xl font-bold tracking-tight">Search Prospects</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Select a persona to find matching prospects
         </p>
       </div>
       <Suspense fallback={<SearchFallback />}>

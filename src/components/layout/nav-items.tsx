@@ -26,7 +26,7 @@ export function NavItems({ orgId }: NavItemsProps) {
   const pathname = usePathname();
 
   return (
-    <nav className="flex flex-col gap-1 px-3">
+    <nav className="flex flex-col gap-1.5 px-4">
       {NAV_ITEMS.map((item) => {
         const fullHref = `/${orgId}${item.href}`;
         const isActive = pathname === fullHref || pathname.startsWith(`${fullHref}/`);

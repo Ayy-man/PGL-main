@@ -154,8 +154,7 @@ export function ProfileView({
   };
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="mx-auto max-w-6xl space-y-8">
+    <div className="space-y-8">
         {/* Header Section */}
         <div className="rounded-lg border bg-card p-8">
           <div className="flex items-start justify-between gap-6">
@@ -417,7 +416,6 @@ export function ProfileView({
             </p>
           )}
         </div>
-      </div>
     </div>
   );
 }

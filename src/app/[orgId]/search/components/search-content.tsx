@@ -59,14 +59,12 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
           icon={Search}
           title="Select a persona to search for prospects"
           description="Choose from starter personas or create your own"
-          className="py-16"
         />
       ) : !isLoading && results.length === 0 ? (
         <EmptyState
           icon={Search}
           title="No prospects found for this persona"
           description="Try adjusting the persona filters to broaden your search"
-          className="py-16"
         />
       ) : (
         <SearchResultsTable

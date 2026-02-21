@@ -21,35 +21,44 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center text-center py-12 border-2 border-dashed rounded-lg",
-        variant === "error" && "border-destructive/30",
+        "flex flex-col items-center justify-center text-center py-16 px-6 border border-dashed rounded-xl",
+        variant === "error" && "border-destructive/30 bg-destructive/5",
         className
       )}
     >
       {Icon && (
-        <Icon
+        <div
           className={cn(
-            "h-8 w-8 mb-3",
+            "mb-4 flex h-14 w-14 items-center justify-center rounded-full",
             variant === "error"
-              ? "text-destructive"
-              : "text-muted-foreground/50"
+              ? "bg-destructive/10"
+              : "bg-muted"
           )}
-        />
+        >
+          <Icon
+            className={cn(
+              "h-6 w-6",
+              variant === "error"
+                ? "text-destructive"
+                : "text-muted-foreground"
+            )}
+          />
+        </div>
       )}
-      <p
+      <h3
         className={cn(
-          "text-lg font-semibold",
-          variant === "error" ? "text-destructive" : "text-muted-foreground"
+          "text-base font-semibold",
+          variant === "error" ? "text-destructive" : "text-foreground"
         )}
       >
         {title}
-      </p>
+      </h3>
       {description && (
-        <p className="text-sm text-muted-foreground/70 mt-1 max-w-sm">
+        <p className="mt-1.5 text-sm text-muted-foreground max-w-xs">
           {description}
         </p>
       )}
-      {children && <div className="mt-4">{children}</div>}
+      {children && <div className="mt-6">{children}</div>}
     </div>
   );
 }
