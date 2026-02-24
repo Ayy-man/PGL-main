@@ -8,6 +8,8 @@ import {
 } from "@/lib/apollo/client";
 import { getPersonaById, updatePersonaLastUsed } from "@/lib/personas/queries";
 
+export const dynamic = "force-dynamic";
+
 /**
  * POST /api/search/apollo
  *

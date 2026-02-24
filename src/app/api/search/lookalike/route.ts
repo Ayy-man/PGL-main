@@ -7,6 +7,8 @@ import { searchApollo } from "@/lib/apollo/client";
 import { logActivity } from "@/lib/activity-logger";
 import type { PersonaFilters } from "@/lib/personas/types";
 
+export const dynamic = "force-dynamic";
+
 /**
  * Maps ApolloFilters from lookalike persona generation to PersonaFilters
  * expected by the rate-limited Apollo client.
