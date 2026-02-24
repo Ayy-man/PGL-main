@@ -54,22 +54,22 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Prospect Profile
 
-- [ ] **PROF-01**: Clicking a prospect opens a profile view with consolidated data
-- [ ] **PROF-02**: Profile view triggers lazy enrichment if data is missing or stale (>7 days)
-- [ ] **PROF-03**: ContactOut integration enriches personal email and phone on profile view
-- [ ] **PROF-04**: Exa.ai integration enriches web presence, news mentions, company data, wealth signals
-- [ ] **PROF-05**: SEC EDGAR integration pulls insider transaction data (Form 4) for public company execs
-- [ ] **PROF-06**: Claude AI generates a 2-3 sentence "Why Recommended" summary from enriched data
-- [ ] **PROF-07**: Enrichment status indicators show loading/complete/failed state for each data source
-- [ ] **PROF-08**: Enriched data is cached in database with timestamp for staleness checks
-- [ ] **PROF-09**: User can add prospect to a list directly from profile view
-- [ ] **PROF-10**: "Find Similar People" button triggers lookalike discovery flow (see LIKE-XX)
+- [x] **PROF-01**: Clicking a prospect opens a profile view with consolidated data
+- [x] **PROF-02**: Profile view triggers lazy enrichment if data is missing or stale (>7 days)
+- [x] **PROF-03**: ContactOut integration enriches personal email and phone on profile view
+- [x] **PROF-04**: Exa.ai integration enriches web presence, news mentions, company data, wealth signals
+- [x] **PROF-05**: SEC EDGAR integration pulls insider transaction data (Form 4) for public company execs
+- [x] **PROF-06**: Claude AI generates a 2-3 sentence "Why Recommended" summary from enriched data
+- [x] **PROF-07**: Enrichment status indicators show loading/complete/failed state for each data source
+- [x] **PROF-08**: Enriched data is cached in database with timestamp for staleness checks
+- [x] **PROF-09**: User can add prospect to a list directly from profile view
+- [x] **PROF-10**: "Find Similar People" button triggers lookalike discovery flow (see LIKE-XX)
 
 ### List Management
 
 - [x] **LIST-01**: User can create named lists with optional description
 - [x] **LIST-02**: User can view all lists with member count and last updated date
-- [ ] **LIST-03**: User can add/remove prospects to/from lists
+- [x] **LIST-03**: User can add/remove prospects to/from lists
 - [x] **LIST-04**: List members have status tracking: New, Contacted, Responded, Not Interested
 - [x] **LIST-05**: User can add inline notes on individual list members
 - [x] **LIST-06**: User can view list members in a table with prospect data columns
@@ -77,36 +77,36 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Export
 
-- [ ] **EXP-01**: User can export list to CSV with all enriched data columns
-- [ ] **EXP-02**: CSV export uses streaming (papaparse) to handle 1000+ prospects without OOM
-- [ ] **EXP-03**: Export includes UTF-8 encoding for international names
-- [ ] **EXP-04**: Export triggers activity log entry
+- [x] **EXP-01**: User can export list to CSV with all enriched data columns
+- [x] **EXP-02**: CSV export uses streaming (papaparse) to handle 1000+ prospects without OOM
+- [x] **EXP-03**: Export includes UTF-8 encoding for international names
+- [x] **EXP-04**: Export triggers activity log entry
 
 ### Activity Logging
 
-- [ ] **ACT-01**: System logs 11 action types: login, search_executed, profile_viewed, profile_enriched, add_to_list, remove_from_list, status_updated, note_added, csv_exported, persona_created, lookalike_search
-- [ ] **ACT-02**: Activity log entries include user, action type, target (prospect/list), timestamp, metadata (JSON)
-- [ ] **ACT-03**: Activity log is viewable by tenant admin (tenant-scoped)
-- [ ] **ACT-04**: Activity log supports filtering by action type, date range, and user
-- [ ] **ACT-05**: Activity log API at `/api/activity` supports querying with filters
+- [x] **ACT-01**: System logs 11 action types: login, search_executed, profile_viewed, profile_enriched, add_to_list, remove_from_list, status_updated, note_added, csv_exported, persona_created, lookalike_search
+- [x] **ACT-02**: Activity log entries include user, action type, target (prospect/list), timestamp, metadata (JSON)
+- [x] **ACT-03**: Activity log is viewable by tenant admin (tenant-scoped)
+- [x] **ACT-04**: Activity log supports filtering by action type, date range, and user
+- [x] **ACT-05**: Activity log API at `/api/activity` supports querying with filters
 
 ### Lookalike Discovery
 
-- [ ] **LIKE-01**: "Find Similar People" button on prospect profile view
-- [ ] **LIKE-02**: AI extracts key attributes from prospect (title, industry, seniority, company size, wealth signals)
-- [ ] **LIKE-03**: Extracted attributes auto-generate a persona with Apollo.io-compatible filters
-- [ ] **LIKE-04**: Generated persona triggers Apollo search and displays results
-- [ ] **LIKE-05**: User can save generated lookalike persona for future reuse
-- [ ] **LIKE-06**: Lookalike search triggers activity log entry (action_type: lookalike_search)
+- [x] **LIKE-01**: "Find Similar People" button on prospect profile view
+- [x] **LIKE-02**: AI extracts key attributes from prospect (title, industry, seniority, company size, wealth signals)
+- [x] **LIKE-03**: Extracted attributes auto-generate a persona with Apollo.io-compatible filters
+- [x] **LIKE-04**: Generated persona triggers Apollo search and displays results
+- [x] **LIKE-05**: User can save generated lookalike persona for future reuse
+- [x] **LIKE-06**: Lookalike search triggers activity log entry (action_type: lookalike_search)
 
 ### Usage Metrics Dashboard
 
-- [ ] **ANLY-01**: `usage_metrics_daily` table aggregates daily stats per user (logins, searches, profiles viewed, enrichments, exports)
-- [ ] **ANLY-02**: Tenant admin dashboard at `/dashboard/analytics` shows team usage metrics
-- [ ] **ANLY-03**: PGL super admin dashboard at `/admin/analytics` shows cross-tenant metrics
-- [ ] **ANLY-04**: Metrics include: total logins, searches executed, profiles viewed, profiles enriched, CSV exports, lists created
-- [ ] **ANLY-05**: Dashboard shows date range filter (7d, 30d, 90d) with basic charts
-- [ ] **ANLY-06**: Analytics API at `/api/analytics` returns aggregated metrics by date range
+- [x] **ANLY-01**: `usage_metrics_daily` table aggregates daily stats per user (logins, searches, profiles viewed, enrichments, exports)
+- [x] **ANLY-02**: Tenant admin dashboard at `/dashboard/analytics` shows team usage metrics
+- [x] **ANLY-03**: PGL super admin dashboard at `/admin/analytics` shows cross-tenant metrics
+- [x] **ANLY-04**: Metrics include: total logins, searches executed, profiles viewed, profiles enriched, CSV exports, lists created
+- [x] **ANLY-05**: Dashboard shows date range filter (7d, 30d, 90d) with basic charts
+- [x] **ANLY-06**: Analytics API at `/api/analytics` returns aggregated metrics by date range
 
 ### UI/UX
 
@@ -120,7 +120,7 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Infrastructure
 
 - [x] **INFRA-01**: API keys stored server-side only (never exposed to client)
-- [ ] **INFRA-02**: Inngest handles long-running enrichment workflows (bypasses Vercel 60s timeout)
+- [x] **INFRA-02**: Inngest handles long-running enrichment workflows (bypasses Vercel 60s timeout)
 - [x] **INFRA-03**: Rate limiting on all external API calls (Apollo, ContactOut, Exa, SEC EDGAR, Claude)
 - [x] **INFRA-04**: Supabase connection pooling configured for serverless (transaction mode)
 - [x] **INFRA-05**: Environment variables for all API keys and configuration
@@ -197,15 +197,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SRCH-05 | Phase 2 | Complete |
 | SRCH-06 | Phase 2 | Complete |
 | SRCH-07 | Phase 2 | Complete |
-| PROF-01 | Phase 3 | Pending |
-| PROF-02 | Phase 3 | Pending |
-| PROF-03 | Phase 3 | Pending |
-| PROF-04 | Phase 3 | Pending |
-| PROF-05 | Phase 3 | Pending |
-| PROF-06 | Phase 3 | Pending |
-| PROF-07 | Phase 3 | Pending |
-| PROF-08 | Phase 3 | Pending |
-| PROF-09 | Phase 3 | Pending |
+| PROF-01 | Phase 3 | Complete |
+| PROF-02 | Phase 3 | Complete |
+| PROF-03 | Phase 3 | Complete |
+| PROF-04 | Phase 3 | Complete |
+| PROF-05 | Phase 3 | Complete |
+| PROF-06 | Phase 3 | Complete |
+| PROF-07 | Phase 3 | Complete |
+| PROF-08 | Phase 3 | Complete |
+| PROF-09 | Phase 3 | Complete |
 | LIST-01 | Phase 2 | Complete |
 | LIST-02 | Phase 2 | Complete |
 | LIST-03 | Phase 2 | Complete |
@@ -213,28 +213,28 @@ Which phases cover which requirements. Updated during roadmap creation.
 | LIST-05 | Phase 2 | Complete |
 | LIST-06 | Phase 2 | Complete |
 | LIST-07 | Phase 2 | Complete |
-| EXP-01 | Phase 3 | Pending |
-| EXP-02 | Phase 3 | Pending |
-| EXP-03 | Phase 3 | Pending |
-| EXP-04 | Phase 3 | Pending |
-| ACT-01 | Phase 3 | Pending |
-| ACT-02 | Phase 3 | Pending |
-| ACT-03 | Phase 3 | Pending |
-| ACT-04 | Phase 3 | Pending |
-| ACT-05 | Phase 3 | Pending |
-| LIKE-01 | Phase 3 | Pending |
-| LIKE-02 | Phase 3 | Pending |
-| LIKE-03 | Phase 3 | Pending |
-| LIKE-04 | Phase 3 | Pending |
-| LIKE-05 | Phase 3 | Pending |
-| LIKE-06 | Phase 3 | Pending |
-| ANLY-01 | Phase 3 | Pending |
-| ANLY-02 | Phase 3 | Pending |
-| ANLY-03 | Phase 3 | Pending |
-| ANLY-04 | Phase 3 | Pending |
-| ANLY-05 | Phase 3 | Pending |
-| ANLY-06 | Phase 3 | Pending |
-| PROF-10 | Phase 3 | Pending |
+| EXP-01 | Phase 3 | Complete |
+| EXP-02 | Phase 3 | Complete |
+| EXP-03 | Phase 3 | Complete |
+| EXP-04 | Phase 3 | Complete |
+| ACT-01 | Phase 3 | Complete |
+| ACT-02 | Phase 3 | Complete |
+| ACT-03 | Phase 3 | Complete |
+| ACT-04 | Phase 3 | Complete |
+| ACT-05 | Phase 3 | Complete |
+| LIKE-01 | Phase 3 | Complete |
+| LIKE-02 | Phase 3 | Complete |
+| LIKE-03 | Phase 3 | Complete |
+| LIKE-04 | Phase 3 | Complete |
+| LIKE-05 | Phase 3 | Complete |
+| LIKE-06 | Phase 3 | Complete |
+| ANLY-01 | Phase 3 | Complete |
+| ANLY-02 | Phase 3 | Complete |
+| ANLY-03 | Phase 3 | Complete |
+| ANLY-04 | Phase 3 | Complete |
+| ANLY-05 | Phase 3 | Complete |
+| ANLY-06 | Phase 3 | Complete |
+| PROF-10 | Phase 3 | Complete |
 | UI-01 | Phase 1 | Complete |
 | UI-02 | Phase 1 | Complete |
 | UI-03 | Phase 1 | Complete |
@@ -242,7 +242,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UI-05 | Phase 1 | Complete |
 | UI-06 | Phase 1 | Complete |
 | INFRA-01 | Phase 1 | Complete |
-| INFRA-02 | Phase 3 | Pending |
+| INFRA-02 | Phase 3 | Complete |
 | INFRA-03 | Phase 2 | Complete |
 | INFRA-04 | Phase 1 | Complete |
 | INFRA-05 | Phase 1 | Complete |
@@ -254,4 +254,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-02-08*
-*Last updated: 2026-02-08 after kickoff call scope changes*
+*Last updated: 2026-02-25 — Phase 3 requirements marked complete*

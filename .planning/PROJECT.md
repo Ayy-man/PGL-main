@@ -64,7 +64,7 @@ Real estate teams can quickly find and qualify wealthy prospects by searching st
   - Exa.ai — enrichment layer for web presence, news, company data, wealth signals (Adrian newly interested; potential future expansion)
   - ContactOut — personal email enrichment (lazy, on profile view)
   - SEC EDGAR — insider transaction data for public company executives
-  - Anthropic Claude (haiku) — AI-generated prospect summaries
+  - Anthropic Claude (Haiku 4.5) — AI-generated prospect summaries
 - **Database:** Full schema designed with 9 core tables (tenants, users, personas, prospects, sec_transactions, prospect_summaries, lists, list_members, activity_log, usage_metrics_daily) plus RLS policies
 - **New routes from kickoff:** `/dashboard/analytics` (tenant metrics), `/admin/analytics` (cross-tenant metrics), `/api/search/lookalike`, `/api/analytics`, `/api/activity`
 - **Enrichment strategy:** Lazy enrichment — ContactOut, Exa, SEC, and AI summaries trigger on profile view, not upfront
@@ -79,7 +79,7 @@ Real estate teams can quickly find and qualify wealthy prospects by searching st
 ## Constraints
 
 - **Tech Stack**: Next.js 14 (App Router), TypeScript, Tailwind CSS, Supabase (PostgreSQL + Auth + RLS), Vercel hosting — chosen by client
-- **AI Model**: Claude 3 Haiku for cost efficiency on prospect summaries
+- **AI Model**: Claude Haiku 4.5 for cost efficiency on prospect summaries
 - **Timeline**: 6 weeks total — Foundation (weeks 1-2), Persona + Search (weeks 3-4), Enrich + Ship (weeks 5-6)
 - **Budget**: $3,100 — constrains scope to what's specced, no gold-plating
 - **Performance**: Search <3s cached / <8s fresh, profile <2s, tables handle 500+ rows, CSV export 1000+ prospects
@@ -92,7 +92,7 @@ Real estate teams can quickly find and qualify wealthy prospects by searching st
 | Apollo.io as primary lead source | Structured filters map directly to persona fields, reliable API | — Pending |
 | Exa.ai for enrichment (not lead source) | Complements Apollo with web presence, news, company data, wealth signals | — Pending |
 | Supabase RLS for tenant isolation | Database-level enforcement is more secure than application-level checks | — Pending |
-| Claude Haiku for AI summaries | Cost-efficient for high-volume 2-3 sentence generations | — Pending |
+| Claude Haiku 4.5 for AI summaries | Cost-efficient for high-volume 2-3 sentence generations | — Pending |
 | Lazy enrichment strategy | Reduces API costs by only enriching prospects users actually view | — Pending |
 | Dark theme with gold accents | Luxury brand positioning — signals premium product to real estate clients | — Pending |
 | Lookalike Discovery in v1 | Adrian loved it; AI-driven persona generation from prospect profile is key differentiator | — Pending |
@@ -100,4 +100,4 @@ Real estate teams can quickly find and qualify wealthy prospects by searching st
 | CRM integration OUT of v1 | CSV export only; teams import to Monday.com/HubSpot themselves | — Pending |
 
 ---
-*Last updated: 2026-02-08 after kickoff call changes*
+*Last updated: 2026-02-25 after comprehensive code review*
