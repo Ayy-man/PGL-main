@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { trackApiUsage } from "@/lib/enrichment/track-api-usage";
 
 /**
  * Input for generating prospect summary
@@ -93,6 +94,7 @@ export async function generateProspectSummary(
     // Extract text from response
     const textContent = response.content[0];
     if (textContent.type === "text") {
+      trackApiUsage("claude").catch(() => {});
       return textContent.text;
     }
 

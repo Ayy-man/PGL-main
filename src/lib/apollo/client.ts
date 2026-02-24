@@ -6,6 +6,7 @@ import type {
 import { apolloRateLimiter } from "@/lib/rate-limit/limiters";
 import { apolloBreaker } from "@/lib/circuit-breaker/apollo-breaker";
 import { getCachedData, setCachedData } from "@/lib/cache/keys";
+import { trackApiUsage } from "@/lib/enrichment/track-api-usage";
 
 /**
  * Custom error for rate limit exceeded.
@@ -194,6 +195,8 @@ export async function searchApollo(
 
     // 6. Cache results (24h TTL)
     await setCachedData(cacheKey, result, 86400);
+
+    trackApiUsage("apollo").catch(() => {});
 
     // 7. Return results
     return {

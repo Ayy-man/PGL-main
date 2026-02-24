@@ -1,4 +1,5 @@
 import { withCircuitBreaker } from '../circuit-breaker';
+import { trackApiUsage } from '@/lib/enrichment/track-api-usage';
 
 /**
  * Exa.ai API enrichment result
@@ -172,6 +173,8 @@ async function enrichExaInternal(params: {
       .map((r) => ({ text: r.text!, url: r.url }));
 
     const wealthSignals = extractWealthSignals(snippetsForSignals);
+
+    trackApiUsage("exa").catch(() => {});
 
     return {
       found: true,

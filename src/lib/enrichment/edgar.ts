@@ -1,5 +1,6 @@
 import { withCircuitBreaker } from '../circuit-breaker';
 import { edgarRateLimiter } from '../rate-limit/limiters';
+import { trackApiUsage } from '@/lib/enrichment/track-api-usage';
 
 /**
  * SEC EDGAR API enrichment result
@@ -237,6 +238,8 @@ async function enrichEdgarInternal(params: {
     // Sort by filing date DESC and limit to 30 transactions
     allTransactions.sort((a, b) => b.filingDate.localeCompare(a.filingDate));
     const limitedTransactions = allTransactions.slice(0, 30);
+
+    trackApiUsage("edgar").catch(() => {});
 
     return {
       found: true,

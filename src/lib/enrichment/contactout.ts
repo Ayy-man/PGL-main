@@ -1,4 +1,5 @@
 import { withCircuitBreaker } from '../circuit-breaker';
+import { trackApiUsage } from '@/lib/enrichment/track-api-usage';
 
 /**
  * ContactOut API enrichment result
@@ -94,6 +95,8 @@ async function enrichContactOutInternal(params: {
 
     const personalEmail = data.person.personal_emails?.[0];
     const phone = data.person.phone_numbers?.[0];
+
+    trackApiUsage("contactout").catch(() => {});
 
     return {
       found: !!(personalEmail || phone),
