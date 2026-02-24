@@ -83,9 +83,15 @@ CREATE INDEX IF NOT EXISTS activity_log_2026_06_metadata_idx ON activity_log_202
 -- Enable RLS on activity_log
 ALTER TABLE activity_log ENABLE ROW LEVEL SECURITY;
 
--- RLS policy: tenant isolation
+-- RLS policy: tenant isolation (matches JWT pattern from initial migration)
 CREATE POLICY activity_log_tenant_isolation ON activity_log
-  FOR ALL USING (tenant_id = (current_setting('app.current_tenant_id', true))::UUID);
+  FOR ALL USING (tenant_id = (auth.jwt() -> 'app_metadata' ->> 'tenant_id')::uuid);
+
+-- RLS policy: super_admin bypass
+CREATE POLICY activity_log_super_admin_all ON activity_log
+  FOR ALL USING (
+    (auth.jwt() -> 'app_metadata' ->> 'role')::text = 'super_admin'
+  );
 
 -- ============================================================================
 -- 2. USAGE_METRICS_DAILY TABLE (Daily aggregation)
@@ -114,9 +120,15 @@ CREATE INDEX IF NOT EXISTS usage_metrics_daily_date_idx ON usage_metrics_daily (
 -- Enable RLS on usage_metrics_daily
 ALTER TABLE usage_metrics_daily ENABLE ROW LEVEL SECURITY;
 
--- RLS policy: tenant isolation
+-- RLS policy: tenant isolation (matches JWT pattern from initial migration)
 CREATE POLICY usage_metrics_daily_tenant_isolation ON usage_metrics_daily
-  FOR ALL USING (tenant_id = (current_setting('app.current_tenant_id', true))::UUID);
+  FOR ALL USING (tenant_id = (auth.jwt() -> 'app_metadata' ->> 'tenant_id')::uuid);
+
+-- RLS policy: super_admin bypass
+CREATE POLICY usage_metrics_daily_super_admin_all ON usage_metrics_daily
+  FOR ALL USING (
+    (auth.jwt() -> 'app_metadata' ->> 'role')::text = 'super_admin'
+  );
 
 -- ============================================================================
 -- 3. PROSPECTS TABLE ENRICHMENT COLUMNS
@@ -221,6 +233,6 @@ BEGIN
     WHERE tablename = 'prospects' AND policyname = 'prospects_tenant_isolation'
   ) THEN
     EXECUTE 'CREATE POLICY prospects_tenant_isolation ON prospects
-      FOR ALL USING (tenant_id = (current_setting(''app.current_tenant_id'', true))::UUID)';
+      FOR ALL USING (tenant_id = (auth.jwt() -> ''app_metadata'' ->> ''tenant_id'')::uuid)';
   END IF;
 END $$;

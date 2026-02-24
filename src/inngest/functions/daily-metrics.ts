@@ -126,9 +126,10 @@ export const aggregateDailyMetrics = inngest.createFunction(
           case "csv_exported":
             agg.csv_exports++;
             break;
-          case "add_to_list":
-            agg.lists_created++;
-            break;
+          // Note: "add_to_list" adds a prospect to an existing list,
+          // it does NOT create a new list. No matching metric column exists
+          // for list additions, so this action is intentionally not counted.
+          // "lists_created" should only be incremented for actual list creation events.
         }
       }
 

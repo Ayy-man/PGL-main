@@ -203,8 +203,8 @@ export async function GET(request: NextRequest) {
       }
 
       const daily = dailyMap.get(dateKey)!;
-      daily.totalLogins += metric.logins || 0;
-      daily.searchesExecuted += metric.searches || 0;
+      daily.totalLogins += metric.total_logins || 0;
+      daily.searchesExecuted += metric.searches_executed || 0;
       daily.profilesViewed += metric.profiles_viewed || 0;
       daily.profilesEnriched += metric.profiles_enriched || 0;
       daily.csvExports += metric.csv_exports || 0;
@@ -224,8 +224,8 @@ export async function GET(request: NextRequest) {
       }
 
       const userStats = userMap.get(metric.user_id)!;
-      userStats.totalLogins += metric.logins || 0;
-      userStats.searchesExecuted += metric.searches || 0;
+      userStats.totalLogins += metric.total_logins || 0;
+      userStats.searchesExecuted += metric.searches_executed || 0;
       userStats.profilesViewed += metric.profiles_viewed || 0;
       userStats.profilesEnriched += metric.profiles_enriched || 0;
       userStats.csvExports += metric.csv_exports || 0;
