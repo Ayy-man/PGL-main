@@ -6,11 +6,11 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** Real estate teams can quickly find and qualify wealthy prospects by searching structured lead databases, enriching profiles with personal contact info and wealth signals, and organizing prospects into actionable lists.
 
-**Current focus:** Phase 3 - Enrich + Ship (all plans complete)
+**Current focus:** Phase 4 - Super Admin Health Dashboard (not planned yet)
 
 ## Current Position
 
-Phase: 3 of 3 (Enrich + Ship)
+Phase: 4 of 4 (Super Admin Health Dashboard)
 Plan: 9 of 9 (completed)
 Status: Complete — comprehensive code review done
 Last activity: 2026-02-25 — Comprehensive code review completed, 18 issues fixed
@@ -115,6 +115,10 @@ Recent decisions affecting current work:
 - is_generated flag distinguishes AI-generated personas from manual ones
 - [Phase 03]: In-memory aggregation in Inngest function instead of SQL RPC due to Supabase JS client limitations
 - [Phase 03]: Admin client for super_admin analytics queries (cross-tenant access), session client for tenant_admin (RLS-scoped)
+
+### Roadmap Evolution
+
+- Phase 4 added: Super admin health dashboard — platform pulse, tenant heatmap, enrichment pipeline health, API quota tracking, funnel analytics, error feed
 
 ### Pending Todos
 

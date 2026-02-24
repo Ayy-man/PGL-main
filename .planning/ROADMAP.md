@@ -563,6 +563,15 @@ Deferred to future releases after initial launch with The W Team.
 - [ ] Usage metrics dashboard shows tenant team stats (tenant admin) and cross-tenant stats (super admin)
 - [ ] Analytics date range filter works (7d, 30d, 90d)
 
+### Phase 4: Super admin health dashboard — platform pulse, tenant heatmap, enrichment pipeline, API quota tracking, funnel analytics, error feed
+
+**Goal:** [To be planned]
+**Depends on:** Phase 3
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 4 to break down)
+
 ---
 
 *Roadmap created: 2026-02-08*
