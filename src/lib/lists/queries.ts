@@ -1,5 +1,32 @@
 import { createClient } from "@/lib/supabase/server";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type { List, ListMember, CreateListInput, ListMemberStatus } from "./types";
+
+/**
+ * Syncs the cached member_count on a list by counting actual members.
+ */
+async function syncListMemberCount(
+  supabase: SupabaseClient,
+  listId: string,
+  tenantId: string
+): Promise<void> {
+  const { count, error: countError } = await supabase
+    .from("list_members")
+    .select("*", { count: "exact", head: true })
+    .eq("list_id", listId)
+    .eq("tenant_id", tenantId);
+
+  if (countError) {
+    console.error("Failed to count list members:", countError.message);
+    return;
+  }
+
+  await supabase
+    .from("lists")
+    .update({ member_count: count ?? 0 })
+    .eq("id", listId)
+    .eq("tenant_id", tenantId);
+}
 
 export async function getLists(tenantId: string): Promise<List[]> {
   const supabase = await createClient();
@@ -262,6 +289,10 @@ export async function addProspectToList(
 
   const typedData = data as unknown as RawInsertData;
   const prospects = Array.isArray(typedData.prospects) ? typedData.prospects[0] : typedData.prospects;
+
+  // Sync member_count on the parent list
+  await syncListMemberCount(supabase, listId, tenantId);
+
   return {
     id: typedData.id,
     list_id: typedData.list_id,
@@ -274,22 +305,37 @@ export async function addProspectToList(
   } as ListMember;
 }
 
-export async function removeFromList(memberId: string): Promise<void> {
+export async function removeFromList(memberId: string, tenantId: string): Promise<void> {
   const supabase = await createClient();
+
+  // Fetch list_id before deleting so we can update member_count
+  const { data: member } = await supabase
+    .from("list_members")
+    .select("list_id")
+    .eq("id", memberId)
+    .eq("tenant_id", tenantId)
+    .single();
 
   const { error } = await supabase
     .from("list_members")
     .delete()
-    .eq("id", memberId);
+    .eq("id", memberId)
+    .eq("tenant_id", tenantId);
 
   if (error) {
     throw new Error(`Failed to remove from list: ${error.message}`);
+  }
+
+  // Sync member_count on the parent list
+  if (member?.list_id) {
+    await syncListMemberCount(supabase, member.list_id, tenantId);
   }
 }
 
 export async function updateMemberStatus(
   memberId: string,
-  status: ListMemberStatus
+  status: ListMemberStatus,
+  tenantId: string
 ): Promise<void> {
   const supabase = await createClient();
 
@@ -299,14 +345,15 @@ export async function updateMemberStatus(
       status,
       updated_at: new Date().toISOString()
     })
-    .eq("id", memberId);
+    .eq("id", memberId)
+    .eq("tenant_id", tenantId);
 
   if (error) {
     throw new Error(`Failed to update member status: ${error.message}`);
   }
 }
 
-export async function updateMemberNotes(memberId: string, notes: string): Promise<void> {
+export async function updateMemberNotes(memberId: string, notes: string, tenantId: string): Promise<void> {
   const supabase = await createClient();
 
   const { error } = await supabase
@@ -315,7 +362,8 @@ export async function updateMemberNotes(memberId: string, notes: string): Promis
       notes,
       updated_at: new Date().toISOString()
     })
-    .eq("id", memberId);
+    .eq("id", memberId)
+    .eq("tenant_id", tenantId);
 
   if (error) {
     throw new Error(`Failed to update member notes: ${error.message}`);

@@ -89,7 +89,7 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL("/login", request.url));
       }
     }
-    response.headers.set("x-tenant-id", orgId);
+    response.headers.set("x-tenant-id", resolvedTenantId);
   }
 
   return response;

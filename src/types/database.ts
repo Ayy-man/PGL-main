@@ -1,4 +1,7 @@
 import type { UserRole } from './auth';
+import type { PersonaFilters } from '@/lib/personas/types';
+
+export type { PersonaFilters } from '@/lib/personas/types';
 
 // Tenant table
 export interface Tenant {
@@ -39,14 +42,7 @@ export interface Persona {
   updated_at: string;
 }
 
-export interface PersonaFilters {
-  job_titles?: string[];
-  seniority_levels?: string[];
-  industries?: string[];
-  locations?: string[];
-  company_size_ranges?: string[];
-  keywords?: string[];
-}
+// PersonaFilters is re-exported from @/lib/personas/types above
 
 // Prospect table
 export interface Prospect {
@@ -198,8 +194,8 @@ export interface UsageMetricsDaily {
   tenant_id: string;
   user_id: string;
   date: string; // YYYY-MM-DD
-  logins: number;
-  searches: number;
+  total_logins: number;
+  searches_executed: number;
   profiles_viewed: number;
   profiles_enriched: number;
   csv_exports: number;

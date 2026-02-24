@@ -72,7 +72,7 @@ export async function createPersonaAction(formData: FormData) {
   }
 
   // Create persona
-  await createPersona(tenantId, {
+  await createPersona(tenantId, user.id, {
     name: name.trim(),
     description: description?.trim() || undefined,
     filters

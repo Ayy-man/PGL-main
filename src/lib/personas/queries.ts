@@ -39,13 +39,14 @@ export async function getPersonaById(id: string, tenantId: string): Promise<Pers
   return data as Persona;
 }
 
-export async function createPersona(tenantId: string, input: CreatePersonaInput): Promise<Persona> {
+export async function createPersona(tenantId: string, userId: string, input: CreatePersonaInput): Promise<Persona> {
   const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("personas")
     .insert({
       tenant_id: tenantId,
+      created_by: userId,
       name: input.name,
       description: input.description || null,
       filters: input.filters,
@@ -114,23 +115,40 @@ export async function updatePersonaLastUsed(id: string, tenantId: string): Promi
   }
 }
 
-export async function seedStarterPersonas(tenantId: string): Promise<void> {
+export async function seedStarterPersonas(tenantId: string, userId: string): Promise<void> {
   const supabase = await createClient();
 
-  const personasToInsert = STARTER_PERSONAS.map(persona => ({
-    tenant_id: tenantId,
-    name: persona.name,
-    description: persona.description || null,
-    filters: persona.filters,
-    is_starter: true
-  }));
+  // Check which starter personas already exist for this tenant
+  const { data: existing, error: fetchError } = await supabase
+    .from("personas")
+    .select("name")
+    .eq("tenant_id", tenantId)
+    .eq("is_starter", true);
+
+  if (fetchError) {
+    throw new Error(`Failed to check existing starter personas: ${fetchError.message}`);
+  }
+
+  const existingNames = new Set((existing ?? []).map(p => p.name));
+
+  const personasToInsert = STARTER_PERSONAS
+    .filter(persona => !existingNames.has(persona.name))
+    .map(persona => ({
+      tenant_id: tenantId,
+      created_by: userId,
+      name: persona.name,
+      description: persona.description || null,
+      filters: persona.filters,
+      is_starter: true
+    }));
+
+  if (personasToInsert.length === 0) {
+    return; // All starter personas already exist
+  }
 
   const { error } = await supabase
     .from("personas")
-    .upsert(personasToInsert, {
-      onConflict: "tenant_id,name",
-      ignoreDuplicates: true
-    });
+    .insert(personasToInsert);
 
   if (error) {
     throw new Error(`Failed to seed starter personas: ${error.message}`);

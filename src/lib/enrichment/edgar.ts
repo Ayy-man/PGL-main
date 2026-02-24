@@ -1,4 +1,5 @@
 import { withCircuitBreaker } from '../circuit-breaker';
+import { edgarRateLimiter } from '../rate-limit/limiters';
 
 /**
  * SEC EDGAR API enrichment result
@@ -33,23 +34,15 @@ type EdgarSubmissionsResponse = {
 };
 
 /**
- * Rate limiter for SEC EDGAR API (max 10 requests per second)
- * SEC requires respectful rate limiting - we use 150ms between requests
+ * Check SEC EDGAR rate limit via Upstash Redis.
+ * Throws if rate limit is exceeded (10 requests per second).
  */
-let lastRequestTime = 0;
-const MIN_REQUEST_INTERVAL = 150; // 150ms = ~6.67 requests per second (well under 10/sec limit)
-
 async function waitForRateLimit(): Promise<void> {
-  const now = Date.now();
-  const timeSinceLastRequest = now - lastRequestTime;
-
-  if (timeSinceLastRequest < MIN_REQUEST_INTERVAL) {
-    await new Promise((resolve) =>
-      setTimeout(resolve, MIN_REQUEST_INTERVAL - timeSinceLastRequest)
-    );
+  const result = await edgarRateLimiter.limit('sec-edgar:global');
+  if (!result.success) {
+    const waitMs = Math.max(result.reset - Date.now(), 100);
+    await new Promise((resolve) => setTimeout(resolve, waitMs));
   }
-
-  lastRequestTime = Date.now();
 }
 
 /**

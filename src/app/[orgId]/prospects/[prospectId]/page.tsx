@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { logActivity } from "@/lib/activity-logger";
 import { ProfileView } from "@/components/prospect/profile-view";
@@ -106,12 +107,14 @@ export default async function ProspectProfilePage({
     prospect.enrichment_status !== "in_progress"
   ) {
     // Fire-and-forget: trigger enrichment without waiting for response
+    const cookieStore = await cookies();
     fetch(
       `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/prospects/${prospectId}/enrich`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Cookie: cookieStore.toString(),
         },
       }
     ).catch((error) => {

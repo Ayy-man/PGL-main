@@ -120,6 +120,13 @@ CREATE INDEX IF NOT EXISTS usage_metrics_daily_date_idx ON usage_metrics_daily (
 -- Enable RLS on usage_metrics_daily
 ALTER TABLE usage_metrics_daily ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if they exist (from initial migration) to avoid name collision
+DROP POLICY IF EXISTS usage_metrics_daily_select ON usage_metrics_daily;
+DROP POLICY IF EXISTS usage_metrics_daily_insert ON usage_metrics_daily;
+DROP POLICY IF EXISTS usage_metrics_daily_update ON usage_metrics_daily;
+DROP POLICY IF EXISTS usage_metrics_daily_super_admin_all ON usage_metrics_daily;
+DROP POLICY IF EXISTS usage_metrics_daily_tenant_isolation ON usage_metrics_daily;
+
 -- RLS policy: tenant isolation (matches JWT pattern from initial migration)
 CREATE POLICY usage_metrics_daily_tenant_isolation ON usage_metrics_daily
   FOR ALL USING (tenant_id = (auth.jwt() -> 'app_metadata' ->> 'tenant_id')::uuid);

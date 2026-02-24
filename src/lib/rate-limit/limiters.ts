@@ -18,3 +18,22 @@ export const apolloRateLimiter = new Ratelimit({
   analytics: true,
   prefix: "ratelimit:apollo",
 });
+
+/**
+ * SEC EDGAR rate limiter - 10 requests per second (SEC policy)
+ *
+ * Uses Redis-backed sliding window so the limit persists across
+ * Vercel cold starts, unlike the previous in-memory approach.
+ *
+ * Usage:
+ * ```ts
+ * const result = await edgarRateLimiter.limit('sec-edgar:global');
+ * if (!result.success) { /* wait or bail *\/ }
+ * ```
+ */
+export const edgarRateLimiter = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(10, "1 s"),
+  analytics: true,
+  prefix: "ratelimit:edgar",
+});

@@ -14,6 +14,7 @@ export interface Persona {
   description: string | null;
   filters: PersonaFilters;
   is_starter: boolean;
+  created_by: string;
   last_used_at: string | null;
   created_at: string;
   updated_at: string;

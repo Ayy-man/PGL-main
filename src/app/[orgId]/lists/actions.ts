@@ -76,9 +76,9 @@ export async function deleteListAction(listId: string) {
 
 export async function updateMemberStatusAction(memberId: string, status: ListMemberStatus) {
   try {
-    await getAuthenticatedUser();
+    const { tenantId } = await getAuthenticatedUser();
 
-    await updateMemberStatus(memberId, status);
+    await updateMemberStatus(memberId, status, tenantId);
 
     revalidatePath(`/[orgId]/lists/[listId]`, "page");
 
@@ -94,9 +94,9 @@ export async function updateMemberStatusAction(memberId: string, status: ListMem
 
 export async function updateMemberNotesAction(memberId: string, notes: string) {
   try {
-    await getAuthenticatedUser();
+    const { tenantId } = await getAuthenticatedUser();
 
-    await updateMemberNotes(memberId, notes);
+    await updateMemberNotes(memberId, notes, tenantId);
 
     revalidatePath(`/[orgId]/lists/[listId]`, "page");
 
@@ -112,9 +112,9 @@ export async function updateMemberNotesAction(memberId: string, notes: string) {
 
 export async function removeFromListAction(memberId: string) {
   try {
-    await getAuthenticatedUser();
+    const { tenantId } = await getAuthenticatedUser();
 
-    await removeFromList(memberId);
+    await removeFromList(memberId, tenantId);
 
     revalidatePath(`/[orgId]/lists/[listId]`, "page");
     revalidatePath(`/[orgId]/lists`, "page");
