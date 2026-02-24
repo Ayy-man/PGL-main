@@ -67,10 +67,11 @@ export async function middleware(request: NextRequest) {
   const orgId = pathSegments[0];
 
   if (orgId) {
+    let resolvedTenantId = orgId;
+
     if (role !== "super_admin") {
       // orgId may be a UUID or a tenant slug — resolve to UUID for comparison
       const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orgId);
-      let resolvedTenantId = orgId;
 
       if (!isUuid) {
         // Look up tenant UUID by slug
