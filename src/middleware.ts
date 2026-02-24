@@ -67,11 +67,27 @@ export async function middleware(request: NextRequest) {
   const orgId = pathSegments[0];
 
   if (orgId) {
-    if (role !== "super_admin" && userTenantId !== orgId) {
-      if (userTenantId) {
-        return NextResponse.redirect(new URL(`/${userTenantId}`, request.url));
+    if (role !== "super_admin") {
+      // orgId may be a UUID or a tenant slug — resolve to UUID for comparison
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orgId);
+      let resolvedTenantId = orgId;
+
+      if (!isUuid) {
+        // Look up tenant UUID by slug
+        const { data: tenant } = await supabase
+          .from("tenants")
+          .select("id")
+          .eq("slug", orgId)
+          .single();
+        resolvedTenantId = tenant?.id ?? orgId;
       }
-      return NextResponse.redirect(new URL("/login", request.url));
+
+      if (userTenantId !== resolvedTenantId) {
+        if (userTenantId) {
+          return NextResponse.redirect(new URL(`/${userTenantId}`, request.url));
+        }
+        return NextResponse.redirect(new URL("/login", request.url));
+      }
     }
     response.headers.set("x-tenant-id", orgId);
   }

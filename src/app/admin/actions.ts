@@ -140,7 +140,7 @@ export async function createUserAction(formData: FormData) {
       tenant_id: role === "super_admin" ? null : tenantId,
       email: email.trim(),
       full_name: fullName.trim(),
-      role: role as "super_admin" | "admin" | "agent",
+      role: role as "super_admin" | "tenant_admin" | "agent" | "assistant",
       is_active: true,
     });
 
