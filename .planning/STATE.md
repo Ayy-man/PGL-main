@@ -6,14 +6,14 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** Real estate teams can quickly find and qualify wealthy prospects by searching structured lead databases, enriching profiles with personal contact info and wealth signals, and organizing prospects into actionable lists.
 
-**Current focus:** Phase 4 - Super Admin Health Dashboard (not planned yet)
+**Current focus:** Phase 4 - Super Admin Health Dashboard
 
 ## Current Position
 
 Phase: 4 of 4 (Super Admin Health Dashboard)
-Plan: 9 of 9 (completed)
-Status: Complete — comprehensive code review done
-Last activity: 2026-02-25 — Comprehensive code review completed, 18 issues fixed
+Plan: 1 of 4 (completed — enrichment data capture)
+Status: In Progress — Plan 01 complete
+Last activity: 2026-02-25 — Plan 04-01 complete: structured error objects + API quota tracking
 
 Progress: [██████████] 95% (75/79 requirements)
 
@@ -31,6 +31,8 @@ Progress: [██████████] 95% (75/79 requirements)
 | Phase 1 | 7 | 40 min | 6 min |
 | Phase 2 | 7 | 51 min | 7 min |
 | Phase 3 | 9 | ~85 min | ~9 min |
+| Phase 04 P01 | 3 | 2 tasks | 7 files |
+| Phase 04 P02 | 3 | 2 tasks | 6 files |
 
 ### Phase 3 Plan Completion
 
@@ -115,6 +117,12 @@ Recent decisions affecting current work:
 - is_generated flag distinguishes AI-generated personas from manual ones
 - [Phase 03]: In-memory aggregation in Inngest function instead of SQL RPC due to Supabase JS client limitations
 - [Phase 03]: Admin client for super_admin analytics queries (cross-tenant access), session client for tenant_admin (RLS-scoped)
+- [Phase 04]: Fire-and-forget quota tracking (.catch(() => {})) ensures enrichment pipeline never blocked by Redis failures
+- [Phase 04]: 90-day TTL on api_usage Redis keys; key pattern api_usage:{provider}:{YYYY-MM-DD} for per-day aggregation
+- [Phase 04]: Backward-compatible JSONB: enrichment_source_status stores { status, error?, at } objects; old string values remain valid
+- [Phase 04]: Inline super_admin auth check in Route Handlers (not requireSuperAdmin) to avoid redirect() 500 in Route Handler context
+- [Phase 04]: In-memory aggregation for admin analytics queries due to Supabase JS GROUP BY limitation
+- [Phase 04]: Backward-compat enrichment_source_status: handle both string and object entries in all admin API routes
 
 ### Roadmap Evolution
 
@@ -173,10 +181,9 @@ All 3 phases and 23 plans are complete. The following items remain before produc
 
 ## Session Continuity
 
-Last session: 2026-02-25 (Phase 4 context gathering)
-Stopped at: Phase 4 context gathered. Ready to plan. Run /gsd:plan-phase 4 in fresh context.
-Resume file: .planning/phases/04-super-admin-health-dashboard-platform-pulse-tenant-heatmap-enrichment-pipeline-api-quota-tracking-funnel-analytics-error-feed/04-CONTEXT.md
+Last session: 2026-02-25 (Phase 4, Plan 01 execution)
+Stopped at: Completed 04-01-PLAN.md — enrichment data capture complete
 
 ---
 
-*All plans complete. Next action: Configure external services (Supabase, Upstash, Apollo, etc.) and run E2E testing.*
+*Phase 4 in progress. Next: Execute 04-02-PLAN.md (API quota endpoint + real-time quota data).*
