@@ -1,8 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { generateLookalikePersona, searchApollo } from "@/lib/enrichment/lookalike";
+import { generateLookalikePersona } from "@/lib/enrichment/lookalike";
+import type { ApolloFilters } from "@/lib/enrichment/lookalike";
+import { searchApollo } from "@/lib/apollo/client";
 import { logActivity } from "@/lib/activity-logger";
+import type { PersonaFilters } from "@/lib/personas/types";
+
+/**
+ * Maps ApolloFilters from lookalike persona generation to PersonaFilters
+ * expected by the rate-limited Apollo client.
+ */
+function mapApolloFiltersToPersonaFilters(
+  filters: ApolloFilters
+): PersonaFilters {
+  return {
+    titles: filters.person_titles,
+    seniorities: filters.person_seniorities,
+    industries: filters.organization_industry_tag_ids,
+    locations: filters.person_locations,
+    companySize: filters.organization_num_employees_ranges,
+    keywords: filters.q_keywords,
+  };
+}
 
 /**
  * POST /api/search/lookalike
@@ -95,8 +115,15 @@ export async function POST(request: NextRequest) {
 
     const { persona, apolloFilters } = await generateLookalikePersona(prospectData);
 
-    // 5. Search Apollo for similar people
-    const apolloResults = await searchApollo(apolloFilters);
+    // 5. Search Apollo for similar people (via rate-limited, cached client)
+    const personaFilters = mapApolloFiltersToPersonaFilters(apolloFilters);
+    const apolloResults = await searchApollo(
+      tenantId,
+      prospectId, // Use prospectId as persona identifier for caching
+      personaFilters,
+      1,  // page
+      25  // pageSize
+    );
 
     // 6. Save persona if requested
     let savedPersonaId: string | undefined;
@@ -146,7 +173,7 @@ export async function POST(request: NextRequest) {
       targetId: prospectId,
       metadata: {
         generatedPersonaName: persona.name,
-        resultCount: apolloResults.people.length,
+        resultCount: apolloResults.people?.length ?? 0,
         saved: !!savedPersonaId,
       },
     });
@@ -166,7 +193,7 @@ export async function POST(request: NextRequest) {
         },
         apolloFilters,
         searchResults: apolloResults.people,
-        totalResults: apolloResults.pagination.total_entries,
+        totalResults: apolloResults.pagination.totalResults,
         savedPersonaId,
       },
       { status: 200 }
