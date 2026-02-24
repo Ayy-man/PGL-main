@@ -565,12 +565,15 @@ Deferred to future releases after initial launch with The W Team.
 
 ### Phase 4: Super admin health dashboard — platform pulse, tenant heatmap, enrichment pipeline, API quota tracking, funnel analytics, error feed
 
-**Goal:** [To be planned]
+**Goal:** Transform the bare admin dashboard (4 count cards) into a live platform health command center with platform pulse stats, tenant activity heatmap, enrichment pipeline health chart, search-to-export funnel, API quota tracking, and error feed — all auto-refreshing every 60 seconds.
 **Depends on:** Phase 3
-**Plans:** 0 plans
+**Plans:** 4 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 4 to break down)
+- [ ] 04-01-PLAN.md — Enrichment data capture: structured error objects in Inngest + Redis INCR API quota tracking
+- [ ] 04-02-PLAN.md — 6 new admin API endpoints (dashboard, tenants/activity, enrichment/health, funnel, errors, quota shell)
+- [ ] 04-03-PLAN.md — Dashboard UI components (stat cards, heatmap, charts, error feed)
+- [ ] 04-04-PLAN.md — Dashboard assembly: refactor admin page to client component with 60s polling
 
 ---
 
