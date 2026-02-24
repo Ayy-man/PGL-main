@@ -6,13 +6,15 @@ import { generateProspectSummary } from "@/lib/enrichment/claude";
 import { logActivity } from "@/lib/activity-logger";
 import { createAdminClient } from "@/lib/supabase/admin";
 
+type SourceStatusPayload = { status: string; error?: string; at: string };
+
 /**
  * Helper to update enrichment source status for a specific source
  */
 async function updateSourceStatus(
   prospectId: string,
   source: string,
-  status: string
+  payload: SourceStatusPayload
 ): Promise<void> {
   const supabase = createAdminClient();
 
@@ -26,7 +28,7 @@ async function updateSourceStatus(
   // Update the specific source status
   const updatedStatus = {
     ...(currentProspect?.enrichment_source_status || {}),
-    [source]: status,
+    [source]: payload,
   };
 
   await supabase
@@ -95,10 +97,10 @@ export const enrichProspect = inngest.createFunction(
         .update({
           enrichment_status: "in_progress",
           enrichment_source_status: {
-            contactout: "pending",
-            exa: "pending",
-            sec: "pending",
-            claude: "pending",
+            contactout: { status: "pending", at: new Date().toISOString() },
+            exa: { status: "pending", at: new Date().toISOString() },
+            sec: { status: "pending", at: new Date().toISOString() },
+            claude: { status: "pending", at: new Date().toISOString() },
           },
         })
         .eq("id", prospectId);
@@ -124,8 +126,24 @@ export const enrichProspect = inngest.createFunction(
           sourceStatus = "failed";
         }
 
-        // Update source status
-        await updateSourceStatus(prospectId, "contactout", sourceStatus);
+        // Update source status with structured payload
+        if (sourceStatus === "failed" && result.error) {
+          await updateSourceStatus(prospectId, "contactout", {
+            status: "failed",
+            error: result.error,
+            at: new Date().toISOString(),
+          });
+        } else if (sourceStatus === "circuit_open") {
+          await updateSourceStatus(prospectId, "contactout", {
+            status: "circuit_open",
+            at: new Date().toISOString(),
+          });
+        } else {
+          await updateSourceStatus(prospectId, "contactout", {
+            status: sourceStatus,
+            at: new Date().toISOString(),
+          });
+        }
 
         // Save contact data if found
         if (result.found && (result.personalEmail || result.phone)) {
@@ -152,7 +170,11 @@ export const enrichProspect = inngest.createFunction(
         console.error("[Inngest] ContactOut enrichment failed:", error);
 
         // Mark as failed but don't stop workflow
-        await updateSourceStatus(prospectId, "contactout", "failed");
+        await updateSourceStatus(prospectId, "contactout", {
+          status: "failed",
+          error: error instanceof Error ? error.message : String(error),
+          at: new Date().toISOString(),
+        });
 
         return { found: false, status: "failed" };
       }
@@ -171,8 +193,24 @@ export const enrichProspect = inngest.createFunction(
           sourceStatus = "failed";
         }
 
-        // Update source status
-        await updateSourceStatus(prospectId, "exa", sourceStatus);
+        // Update source status with structured payload
+        if (sourceStatus === "failed" && result.error) {
+          await updateSourceStatus(prospectId, "exa", {
+            status: "failed",
+            error: result.error,
+            at: new Date().toISOString(),
+          });
+        } else if (sourceStatus === "circuit_open") {
+          await updateSourceStatus(prospectId, "exa", {
+            status: "circuit_open",
+            at: new Date().toISOString(),
+          });
+        } else {
+          await updateSourceStatus(prospectId, "exa", {
+            status: sourceStatus,
+            at: new Date().toISOString(),
+          });
+        }
 
         // Save web data if found
         if (result.found && (result.mentions.length > 0 || result.wealthSignals.length > 0)) {
@@ -199,7 +237,11 @@ export const enrichProspect = inngest.createFunction(
         console.error("[Inngest] Exa enrichment failed:", error);
 
         // Mark as failed but don't stop workflow
-        await updateSourceStatus(prospectId, "exa", "failed");
+        await updateSourceStatus(prospectId, "exa", {
+          status: "failed",
+          error: error instanceof Error ? error.message : String(error),
+          at: new Date().toISOString(),
+        });
 
         return { found: false, mentions: [], wealthSignals: [], status: "failed" };
       }
@@ -209,7 +251,10 @@ export const enrichProspect = inngest.createFunction(
     const edgarData = await step.run("fetch-edgar", async () => {
       // Skip if not public company
       if (!isPublicCompany || !companyCik) {
-        await updateSourceStatus(prospectId, "sec", "skipped");
+        await updateSourceStatus(prospectId, "sec", {
+          status: "skipped",
+          at: new Date().toISOString(),
+        });
         return { found: false, transactions: [], status: "skipped" };
       }
 
@@ -224,8 +269,24 @@ export const enrichProspect = inngest.createFunction(
           sourceStatus = "failed";
         }
 
-        // Update source status
-        await updateSourceStatus(prospectId, "sec", sourceStatus);
+        // Update source status with structured payload
+        if (sourceStatus === "failed" && result.error) {
+          await updateSourceStatus(prospectId, "sec", {
+            status: "failed",
+            error: result.error,
+            at: new Date().toISOString(),
+          });
+        } else if (sourceStatus === "circuit_open") {
+          await updateSourceStatus(prospectId, "sec", {
+            status: "circuit_open",
+            at: new Date().toISOString(),
+          });
+        } else {
+          await updateSourceStatus(prospectId, "sec", {
+            status: sourceStatus,
+            at: new Date().toISOString(),
+          });
+        }
 
         // Save insider data if found
         if (result.found && result.transactions.length > 0) {
@@ -251,7 +312,11 @@ export const enrichProspect = inngest.createFunction(
         console.error("[Inngest] SEC EDGAR enrichment failed:", error);
 
         // Mark as failed but don't stop workflow
-        await updateSourceStatus(prospectId, "sec", "failed");
+        await updateSourceStatus(prospectId, "sec", {
+          status: "failed",
+          error: error instanceof Error ? error.message : String(error),
+          at: new Date().toISOString(),
+        });
 
         return { found: false, transactions: [], status: "failed" };
       }
@@ -276,7 +341,10 @@ export const enrichProspect = inngest.createFunction(
         });
 
         // Update source status
-        await updateSourceStatus(prospectId, "claude", "complete");
+        await updateSourceStatus(prospectId, "claude", {
+          status: "complete",
+          at: new Date().toISOString(),
+        });
 
         // Save AI summary
         await supabase
@@ -291,7 +359,11 @@ export const enrichProspect = inngest.createFunction(
         console.error("[Inngest] Claude AI summary generation failed:", error);
 
         // Mark as failed but don't stop workflow
-        await updateSourceStatus(prospectId, "claude", "failed");
+        await updateSourceStatus(prospectId, "claude", {
+          status: "failed",
+          error: error instanceof Error ? error.message : String(error),
+          at: new Date().toISOString(),
+        });
 
         return { summary: null, status: "failed" };
       }
