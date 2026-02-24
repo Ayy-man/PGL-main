@@ -174,23 +174,28 @@ export async function GET(request: Request) {
     });
 
     // 6. Return streaming response
-    const filename = `prospects-${list.name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")}-${Date.now()}.csv`;
+    const safeName = list.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    const filename = `prospects-${safeName}-${Date.now()}.csv`;
 
-    return new NextResponse(stream, {
-      headers: {
-        "Content-Type": "text/csv; charset=utf-8",
-        "Content-Disposition": `attachment; filename="${filename}"`,
-        "Cache-Control": "no-cache",
-      },
+    const headers = new Headers({
+      "Content-Type": "text/csv; charset=utf-8",
+      "Cache-Control": "no-cache",
     });
+    // Use both filename and filename* for broad compatibility (RFC 6266)
+    headers.set(
+      "Content-Disposition",
+      `attachment; filename="${filename}"; filename*=UTF-8''${encodeURIComponent(filename)}`
+    );
+
+    return new NextResponse(stream, { headers });
   } catch (error) {
     console.error("CSV export error:", error);
     return NextResponse.json(
       {
-        error: "Failed to export CSV",
-        message: error instanceof Error ? error.message : "Unknown error",
+        error: "Internal server error",
+        ...(process.env.NODE_ENV === "development" && {
+          message: error instanceof Error ? error.message : "Unknown error",
+        }),
       },
       { status: 500 }
     );
