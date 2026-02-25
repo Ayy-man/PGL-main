@@ -13,7 +13,7 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 Phase: 4 of 4 (Super Admin Health Dashboard)
 Plan: 4 of 4 (COMPLETE)
 Status: Complete — All 4 phases and all plans done
-Last activity: 2026-02-25 — Plan 04-04 complete: visual verification checkpoint approved (deferred to Vercel deployment), Phase 4 and entire project fully complete
+Last activity: 2026-02-25 — Phase 4 complete, deployed to Vercel, 3 post-deploy fixes applied (empty chart states, error feed fallback, heatmap link)
 
 Progress: [██████████] 100% (79/79 requirements)
 
@@ -131,6 +131,9 @@ Recent decisions affecting current work:
 - [Phase 04]: OKLCH gold-adjacent palette for enrichment chart: graduated lightness 0.84→0.63 for success, warm red 0.52→0.35 for failures
 - [Phase 04]: useRef(errorPage) pattern captures pagination state in fetchAll closure without stale closure bugs
 - [Phase 04]: Visual verification deferred to Vercel deployment — user has no local dev environment; checkpoint approved
+- [Phase 04]: Post-deploy fix: charts show "No data yet" empty state instead of blank Recharts containers when DB has no enrichment/activity data
+- [Phase 04]: Post-deploy fix: error feed falls back to empty result `{ data: [], total: 0 }` when API returns error — prevents infinite skeleton
+- [Phase 04]: Post-deploy fix: heatmap tenant link goes to /admin/tenants (list page) since no tenant detail page exists
 
 ### Roadmap Evolution
 
@@ -189,9 +192,9 @@ All 4 phases and 27 plans are complete. The following items remain before produc
 
 ## Session Continuity
 
-Last session: 2026-02-25 (Phase 4, Plan 04 completion)
-Stopped at: Completed 04-04-PLAN.md — Phase 4 fully complete, all 4 phases done
+Last session: 2026-02-25 (Phase 4 deployed + post-deploy fixes)
+Stopped at: Phase 4 deployed to Vercel with 3 post-deploy bug fixes. All 4 phases complete.
 
 ---
 
-*Project complete. All 4 phases and 27 plans executed. Ready for Vercel deployment and E2E testing with real API keys.*
+*Project complete. All 4 phases and 27 plans executed. Deployed to Vercel. Run Supabase migrations and configure API keys for E2E testing.*
