@@ -62,6 +62,19 @@ export function FunnelChart({ data }: FunnelChartProps) {
     );
   }
 
+  const allZero = funnelData.length === 0 || funnelData.every((d) => d.value === 0);
+
+  if (allZero) {
+    return (
+      <div className="rounded-lg border border-border bg-card p-6">
+        <p className="text-sm text-muted-foreground mb-4">Search-to-Export Funnel (30d)</p>
+        <div className="h-[280px] flex items-center justify-center">
+          <p className="text-sm text-muted-foreground">No activity yet. Search and export prospects to see funnel data.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-lg border border-border bg-card p-6">
       <p className="text-sm text-muted-foreground mb-4">Search-to-Export Funnel (30d)</p>

@@ -71,6 +71,17 @@ export function EnrichmentHealthChart({ data }: EnrichmentHealthChartProps) {
     );
   }
 
+  if (data.length === 0) {
+    return (
+      <div className="rounded-lg border border-border bg-card p-6">
+        <p className="text-sm text-muted-foreground mb-4">Enrichment Pipeline Health (per source, daily)</p>
+        <div className="h-[300px] flex items-center justify-center">
+          <p className="text-sm text-muted-foreground">No enrichment data yet. Enrich prospects to see pipeline health.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-lg border border-border bg-card p-6">
       <p className="text-sm text-muted-foreground mb-4">Enrichment Pipeline Health (per source, daily)</p>

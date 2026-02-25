@@ -119,9 +119,9 @@ export default function AdminDashboard() {
 
       if (pulse) setPulseData(pulse);
       if (heatmap) setHeatmapData(heatmap);
-      if (enrichment?.data) setEnrichmentData(enrichment.data);
-      if (funnel?.data) setFunnelData(funnel.data);
-      if (errors) setErrorData(errors);
+      setEnrichmentData(enrichment?.data ?? []);
+      setFunnelData(funnel?.data ?? []);
+      setErrorData(errors ?? { data: [], total: 0, page: 1, limit: 50 });
 
       setLastFetched(new Date());
     } finally {
