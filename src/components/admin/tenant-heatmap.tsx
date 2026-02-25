@@ -202,7 +202,7 @@ export function TenantHeatmap({ data }: TenantHeatmapProps) {
                           Per-User Breakdown
                         </p>
                         <Link
-                          href={`/admin/tenants/${tenant.id}`}
+                          href="/admin/tenants"
                           className="text-xs text-primary hover:underline"
                           onClick={(e) => e.stopPropagation()}
                         >
