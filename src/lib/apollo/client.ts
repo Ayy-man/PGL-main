@@ -159,12 +159,10 @@ export async function searchApollo(
         enrichedPeople = searchPeople.map((p) => ({
           id: p.id,
           first_name: p.first_name,
-          last_name: (p as Record<string, unknown>).last_name_obfuscated as string || "",
-          name: `${p.first_name} ${(p as Record<string, unknown>).last_name_obfuscated || ""}`.trim(),
+          last_name: p.last_name_obfuscated || "",
+          name: `${p.first_name} ${p.last_name_obfuscated || ""}`.trim(),
           title: p.title || "",
-          organization_name: (p as Record<string, unknown>).organization
-            ? ((p as Record<string, unknown>).organization as Record<string, unknown>)?.name as string
-            : undefined,
+          organization_name: p.organization?.name,
         }));
       }
     }
