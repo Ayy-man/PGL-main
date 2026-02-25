@@ -6,7 +6,7 @@ import { z } from "zod";
 export const searchRequestSchema = z.object({
   personaId: z.string().uuid(),
   page: z.number().int().min(1).max(500).default(1),
-  pageSize: z.number().int().min(10).max(100).default(50),
+  pageSize: z.number().int().min(1).max(10).default(10),
 });
 
 /**

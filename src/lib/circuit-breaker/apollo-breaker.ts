@@ -2,20 +2,17 @@ import CircuitBreaker from "opossum";
 import type {
   ApolloSearchParams,
   ApolloSearchResponse,
+  ApolloPerson,
+  ApolloBulkMatchResponse,
 } from "@/lib/apollo/types";
 
 /**
- * Internal function to make Apollo API search requests.
- * Throws on rate limits or API errors for circuit breaker to handle.
- *
- * @param params - Apollo search parameters
- * @returns Apollo search response
- * @throws Error on rate limit (429) or other API errors
+ * Search Apollo for people (free, returns obfuscated previews).
  */
 async function apolloSearchRequest(
   params: ApolloSearchParams
 ): Promise<ApolloSearchResponse> {
-  const response = await fetch("https://api.apollo.io/api/v1/mixed_people/search", {
+  const response = await fetch("https://api.apollo.io/api/v1/mixed_people/api_search", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -25,57 +22,77 @@ async function apolloSearchRequest(
     body: JSON.stringify(params),
   });
 
-  // Apollo rate limit hit - throw for circuit breaker tracking
   if (response.status === 429) {
     throw new Error("APOLLO_RATE_LIMIT_HIT");
   }
 
-  // Other API errors
   if (!response.ok) {
-    throw new Error(`Apollo API error: ${response.status}`);
+    const text = await response.text();
+    throw new Error(`Apollo API error: ${response.status} — ${text.slice(0, 200)}`);
   }
 
   return (await response.json()) as ApolloSearchResponse;
 }
 
 /**
- * Circuit breaker options for Apollo API.
- * - Opens at 50% failure rate
- * - Resets after 30 seconds
- * - Requires 5 requests minimum before opening
+ * Bulk enrich people by Apollo IDs (costs ~1 credit each).
+ * Returns fully revealed contact data.
  */
-const options = {
-  timeout: 10000, // 10 second timeout
-  errorThresholdPercentage: 50, // Open at 50% failure rate
-  resetTimeout: 30000, // Try again after 30 seconds
-  volumeThreshold: 5, // Minimum requests before opening
-};
+export async function bulkEnrichPeople(
+  apolloIds: string[]
+): Promise<ApolloPerson[]> {
+  if (apolloIds.length === 0) return [];
+
+  const url = new URL("https://api.apollo.io/api/v1/people/bulk_match");
+  url.searchParams.set("reveal_personal_emails", "true");
+
+  const response = await fetch(url.toString(), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Api-Key": process.env.APOLLO_API_KEY!,
+    },
+    body: JSON.stringify({
+      details: apolloIds.map((id) => ({ id })),
+    }),
+  });
+
+  if (response.status === 429) {
+    throw new Error("APOLLO_RATE_LIMIT_HIT");
+  }
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Apollo bulk enrich error: ${response.status} — ${text.slice(0, 200)}`);
+  }
+
+  const data = (await response.json()) as ApolloBulkMatchResponse;
+  console.info(`[Apollo] Bulk enriched ${data.unique_enriched_records ?? '?'} people, credits: ${data.credits_consumed ?? '?'}`);
+  return data.matches || [];
+}
 
 /**
- * Circuit breaker for Apollo API requests.
- * Prevents cascading failures by opening circuit on repeated errors.
- *
- * Fallback returns empty results when circuit is open.
- *
- * Usage:
- * ```ts
- * const result = await apolloBreaker.fire(params);
- * ```
+ * Circuit breaker options for Apollo search.
  */
+const options = {
+  timeout: 10000,
+  errorThresholdPercentage: 50,
+  resetTimeout: 30000,
+  volumeThreshold: 5,
+};
+
 export const apolloBreaker = new CircuitBreaker(apolloSearchRequest, options);
 
-// Fallback: return empty results when circuit is open
 apolloBreaker.fallback(async () => ({
   people: [],
   pagination: {
     page: 1,
-    per_page: 50,
+    per_page: 10,
     total_entries: 0,
     total_pages: 0,
   },
 }));
 
-// Event logging for circuit breaker state changes
 apolloBreaker.on("open", () => {
   console.error("[Circuit Breaker] OPEN - Apollo API circuit breaker opened due to repeated failures");
 });

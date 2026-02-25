@@ -46,7 +46,7 @@ export function useSearch(): SearchResult {
   const [results, setResults] = useState<ApolloPerson[]>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     page: 1,
-    pageSize: 50,
+    pageSize: 10,
     totalPages: 0,
     totalEntries: 0,
     hasMore: false,
@@ -62,7 +62,7 @@ export function useSearch(): SearchResult {
       setResults([]);
       setPagination({
         page: 1,
-        pageSize: 50,
+        pageSize: 10,
         totalPages: 0,
         totalEntries: 0,
         hasMore: false,
@@ -90,7 +90,7 @@ export function useSearch(): SearchResult {
         body: JSON.stringify({
           personaId: searchState.persona,
           page: searchState.page,
-          pageSize: 50,
+          pageSize: 10,
         }),
         signal: controller.signal,
       });
@@ -117,7 +117,7 @@ export function useSearch(): SearchResult {
         page: data.pagination?.page ?? searchState.page,
         pageSize: data.pagination?.pageSize ?? 50,
         totalPages: data.pagination?.totalPages ?? 0,
-        totalEntries: data.pagination?.totalEntries ?? 0,
+        totalEntries: data.pagination?.totalResults ?? 0,
         hasMore: data.pagination?.hasMore ?? false,
       });
       setCached(data.cached ?? false);

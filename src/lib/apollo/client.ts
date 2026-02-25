@@ -4,13 +4,13 @@ import type {
   ApolloPerson,
 } from "@/lib/apollo/types";
 import { apolloRateLimiter } from "@/lib/rate-limit/limiters";
-import { apolloBreaker } from "@/lib/circuit-breaker/apollo-breaker";
+import { apolloBreaker, bulkEnrichPeople } from "@/lib/circuit-breaker/apollo-breaker";
 import { getCachedData, setCachedData } from "@/lib/cache/keys";
 import { trackApiUsage } from "@/lib/enrichment/track-api-usage";
 
-/**
- * Custom error for rate limit exceeded.
- */
+/** Hard limit on results per search during testing. */
+const MAX_RESULTS_PER_SEARCH = 10;
+
 export class RateLimitError extends Error {
   constructor(public resetAt: number) {
     super("Rate limit exceeded");
@@ -18,9 +18,6 @@ export class RateLimitError extends Error {
   }
 }
 
-/**
- * Custom error for Apollo API errors.
- */
 export class ApolloApiError extends Error {
   constructor(
     message: string,
@@ -33,42 +30,27 @@ export class ApolloApiError extends Error {
 
 /**
  * Translates PersonaFilters to Apollo API parameter names.
- * Only includes fields that are defined and non-empty.
- *
- * @param filters - Persona filter criteria
- * @returns Apollo API search parameters (partial)
  */
 export function translateFiltersToApolloParams(
   filters: PersonaFilters
 ): Partial<ApolloSearchParams> {
   const params: Partial<ApolloSearchParams> = {};
 
-  // Map titles -> person_titles
   if (filters.titles && filters.titles.length > 0) {
     params.person_titles = filters.titles;
   }
-
-  // Map seniorities -> person_seniorities
   if (filters.seniorities && filters.seniorities.length > 0) {
     params.person_seniorities = filters.seniorities;
   }
-
-  // Map industries -> organization_industries
   if (filters.industries && filters.industries.length > 0) {
     params.organization_industries = filters.industries;
   }
-
-  // Map locations -> person_locations
   if (filters.locations && filters.locations.length > 0) {
     params.person_locations = filters.locations;
   }
-
-  // Map companySize -> organization_num_employees_ranges
   if (filters.companySize && filters.companySize.length > 0) {
     params.organization_num_employees_ranges = filters.companySize;
   }
-
-  // Map keywords -> q_keywords
   if (filters.keywords && filters.keywords.trim().length > 0) {
     params.q_keywords = filters.keywords;
   }
@@ -76,15 +58,6 @@ export function translateFiltersToApolloParams(
   return params;
 }
 
-/**
- * Calculates pagination metadata.
- * Caps totalPages at 500 (Apollo's limit).
- *
- * @param totalEntries - Total number of results
- * @param page - Current page number
- * @param perPage - Results per page
- * @returns Pagination metadata
- */
 export function calculatePagination(
   totalEntries: number,
   page: number,
@@ -97,7 +70,7 @@ export function calculatePagination(
   hasMore: boolean;
 } {
   const totalPages = totalEntries === 0 ? 0 : Math.ceil(totalEntries / perPage);
-  const cappedTotalPages = Math.min(totalPages, 500); // Apollo's limit
+  const cappedTotalPages = Math.min(totalPages, 500);
   const hasMore = page < cappedTotalPages;
 
   return {
@@ -110,17 +83,9 @@ export function calculatePagination(
 }
 
 /**
- * Searches Apollo.io for people matching persona filters.
- * Applies rate limiting, caching, and circuit breaking.
- *
- * @param tenantId - Tenant identifier for rate limiting and caching
- * @param personaId - Persona identifier for cache key
- * @param filters - Persona filter criteria
- * @param page - Page number (1-indexed)
- * @param pageSize - Results per page
- * @returns Search results with pagination metadata and cache status
- * @throws {RateLimitError} When rate limit is exceeded
- * @throws {ApolloApiError} When Apollo API returns an error
+ * Searches Apollo for people matching persona filters.
+ * Two-step flow: search (free) → bulk enrich (credits) → return full data.
+ * Hard-capped at MAX_RESULTS_PER_SEARCH during testing.
  */
 export async function searchApollo(
   tenantId: string,
@@ -139,6 +104,9 @@ export async function searchApollo(
   };
   cached: boolean;
 }> {
+  // Cap page size
+  const cappedPageSize = Math.min(pageSize, MAX_RESULTS_PER_SEARCH);
+
   // 1. Check rate limit
   const rateLimitResult = await apolloRateLimiter.limit(`tenant:${tenantId}`);
   if (!rateLimitResult.success) {
@@ -149,7 +117,7 @@ export async function searchApollo(
   const cacheKey = {
     tenantId,
     resource: "apollo:search",
-    identifier: { personaId, page, pageSize },
+    identifier: { personaId, page, pageSize: cappedPageSize },
   };
 
   const cachedResult = await getCachedData<{
@@ -164,45 +132,54 @@ export async function searchApollo(
   }>(cacheKey);
 
   if (cachedResult) {
-    return {
-      ...cachedResult,
-      cached: true,
-    };
+    return { ...cachedResult, cached: true };
   }
 
-  // 3. Build Apollo params
+  // 3. Build Apollo search params
   const apolloParams: ApolloSearchParams = {
     ...translateFiltersToApolloParams(filters),
     page,
-    per_page: pageSize,
+    per_page: cappedPageSize,
   };
 
-  // 4. Call Apollo API through circuit breaker
+  // 4. Search (free — returns obfuscated previews with Apollo IDs)
   try {
-    const response = await apolloBreaker.fire(apolloParams);
+    const searchResponse = await apolloBreaker.fire(apolloParams);
+    const searchPeople = searchResponse.people || [];
 
-    // 5. Calculate pagination from response
-    const pagination = calculatePagination(
-      response.pagination.total_entries,
-      page,
-      pageSize
-    );
+    // 5. Bulk enrich all results to get full contact data (costs ~1 credit each)
+    let enrichedPeople: ApolloPerson[] = [];
+    if (searchPeople.length > 0) {
+      const apolloIds = searchPeople.map((p) => p.id);
+      try {
+        enrichedPeople = await bulkEnrichPeople(apolloIds);
+      } catch (enrichErr) {
+        console.error("[Apollo] Bulk enrich failed, falling back to search previews:", enrichErr);
+        // Fall back to search data with what we have
+        enrichedPeople = searchPeople.map((p) => ({
+          id: p.id,
+          first_name: p.first_name,
+          last_name: (p as Record<string, unknown>).last_name_obfuscated as string || "",
+          name: `${p.first_name} ${(p as Record<string, unknown>).last_name_obfuscated || ""}`.trim(),
+          title: p.title || "",
+          organization_name: (p as Record<string, unknown>).organization
+            ? ((p as Record<string, unknown>).organization as Record<string, unknown>)?.name as string
+            : undefined,
+        }));
+      }
+    }
 
-    const result = {
-      people: response.people,
-      pagination,
-    };
+    // 6. Calculate pagination (total_entries can be top-level or nested)
+    const totalEntries = searchResponse.total_entries ?? searchResponse.pagination?.total_entries ?? searchPeople.length;
+    const pagination = calculatePagination(totalEntries, page, cappedPageSize);
 
-    // 6. Cache results (24h TTL)
+    const result = { people: enrichedPeople, pagination };
+
+    // 7. Cache results (24h TTL)
     await setCachedData(cacheKey, result, 86400);
-
     trackApiUsage("apollo").catch(() => {});
 
-    // 7. Return results
-    return {
-      ...result,
-      cached: false,
-    };
+    return { ...result, cached: false };
   } catch (error) {
     if (error instanceof Error) {
       if (error.message === "APOLLO_RATE_LIMIT_HIT") {
