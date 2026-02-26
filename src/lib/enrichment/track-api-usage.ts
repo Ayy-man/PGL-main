@@ -1,4 +1,5 @@
 /** API usage tracking stub. */
-export async function trackApiUsage(_params: { source: string; credits: number; tenantId: string }) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function trackApiUsage(...args: unknown[]) {
   // TODO: Implement API usage tracking
 }

@@ -1,4 +1,5 @@
 /** Lookalike search stub. */
-export async function generateLookalikePersona(_params: Record<string, unknown>) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function generateLookalikePersona(params: Record<string, unknown>) {
   return { results: [] };
 }
