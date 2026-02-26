@@ -1,3 +1,4 @@
+import * as React from "react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -21,40 +22,38 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center text-center py-20 px-6 rounded-xl border border-dashed",
-        variant === "error" && "border-destructive/30 bg-destructive/5",
+        "surface-card flex flex-col items-center justify-center text-center py-20 px-6",
+        variant === "error" && "border-destructive/30",
         className
       )}
     >
       {Icon && (
         <div
           className={cn(
-            "mb-5 flex h-12 w-12 items-center justify-center rounded-xl",
-            variant === "error"
-              ? "bg-destructive/10"
-              : "bg-muted"
+            "mb-5 flex h-16 w-16 items-center justify-center rounded-full",
           )}
+          style={{
+            background: variant === "error" ? "rgba(239,68,68,0.1)" : "var(--gold-bg)",
+          }}
         >
           <Icon
-            className={cn(
-              "h-5 w-5",
-              variant === "error"
-                ? "text-destructive"
-                : "text-muted-foreground"
-            )}
+            className="h-8 w-8"
+            style={{
+              color: variant === "error" ? "rgb(239,68,68)" : "var(--gold-muted)",
+            }}
           />
         </div>
       )}
       <h3
         className={cn(
-          "text-sm font-semibold",
-          variant === "error" ? "text-destructive" : "text-foreground"
+          "font-serif text-[22px] font-semibold text-foreground",
+          variant === "error" && "text-destructive"
         )}
       >
         {title}
       </h3>
       {description && (
-        <p className="mt-1.5 text-xs text-muted-foreground max-w-xs leading-relaxed">
+        <p className="mt-2 text-[13px] text-muted-foreground max-w-[400px] mx-auto leading-relaxed">
           {description}
         </p>
       )}
