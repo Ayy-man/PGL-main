@@ -3,11 +3,16 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { DateRangeFilter } from "@/components/charts/date-range-filter";
 import { MetricsCards } from "@/components/charts/metrics-cards";
 import { UsageChart } from "@/components/charts/usage-chart";
 
 type DateRange = "7d" | "30d" | "90d";
+
+const DATE_RANGES: { value: DateRange; label: string }[] = [
+  { value: "7d", label: "7d" },
+  { value: "30d", label: "30d" },
+  { value: "90d", label: "90d" },
+];
 
 interface AnalyticsData {
   daily: Array<{
@@ -65,11 +70,16 @@ export default function TenantAnalyticsPage() {
       setError(null);
       try {
         const res = await fetch(`/api/analytics?range=${dateRange}`);
-        if (!res.ok) {
-          const body = await res.json().catch(() => ({}));
-          throw new Error(body.error || "Failed to fetch analytics");
+        const text = await res.text();
+        let json: { data: AnalyticsData } | null = null;
+        try {
+          json = JSON.parse(text);
+        } catch {
+          json = null;
         }
-        const json = await res.json();
+        if (!res.ok || !json) {
+          throw new Error("Failed to fetch analytics");
+        }
         setData(json.data);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Unknown error");
@@ -87,14 +97,38 @@ export default function TenantAnalyticsPage() {
           <h1 className="font-serif text-3xl font-bold tracking-tight">
             Team Analytics
           </h1>
-          <p className="mt-1 text-muted-foreground">
+          <p className="mt-1 text-sm text-muted-foreground">
             Usage metrics for your team
           </p>
         </div>
-        <DateRangeFilter
-          selectedRange={dateRange}
-          onRangeChange={setDateRange}
-        />
+
+        {/* Period toggle — segmented control with gold active state */}
+        <div
+          className="inline-flex rounded-md p-0.5"
+          style={{
+            background: "var(--bg-elevated)",
+            border: "1px solid var(--border-subtle)",
+          }}
+        >
+          {DATE_RANGES.map(({ value, label }) => (
+            <button
+              key={value}
+              onClick={() => setDateRange(value)}
+              className="px-3 py-1.5 text-sm font-medium rounded-sm transition-all duration-150 cursor-pointer"
+              style={
+                dateRange === value
+                  ? {
+                      background: "var(--gold-bg-strong)",
+                      color: "var(--gold-primary)",
+                      boxShadow: "0 1px 2px rgba(0,0,0,0.3)",
+                    }
+                  : { color: "rgba(232,228,220,0.5)" }
+              }
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {error && (
@@ -105,42 +139,93 @@ export default function TenantAnalyticsPage() {
 
       {loading ? (
         <div className="space-y-4">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {Array.from({ length: 6 }).map((_, i) => (
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, i) => (
               <div
                 key={i}
-                className="h-28 animate-pulse rounded-xl border bg-card"
+                className="h-28 animate-pulse rounded-[14px]"
+                style={{
+                  background: "var(--bg-card-gradient)",
+                  border: "1px solid var(--border-subtle)",
+                }}
               />
             ))}
           </div>
-          <div className="h-[400px] animate-pulse rounded-xl border bg-card" />
+          <div
+            className="h-[400px] animate-pulse rounded-[14px]"
+            style={{
+              background: "var(--bg-card-gradient)",
+              border: "1px solid var(--border-subtle)",
+            }}
+          />
         </div>
       ) : data ? (
         <>
           <MetricsCards totals={data.totals} />
-          <UsageChart data={data.daily} />
+
+          {/* Chart container with design system surface treatment */}
+          <div
+            className="rounded-[14px] p-7"
+            style={{
+              background: "var(--bg-card-gradient)",
+              border: "1px solid var(--border-subtle)",
+            }}
+          >
+            <h2 className="font-serif text-xl font-semibold mb-6">
+              Activity Over Time
+            </h2>
+            <UsageChart data={data.daily} />
+          </div>
 
           {data.userBreakdown && data.userBreakdown.length > 0 && (
-            <div className="rounded-xl border bg-card p-6">
-              <h2 className="mb-4 font-serif text-xl font-semibold">
+            <div
+              className="rounded-[14px] p-7"
+              style={{
+                background: "var(--bg-card-gradient)",
+                border: "1px solid var(--border-subtle)",
+              }}
+            >
+              <h2 className="font-serif text-xl font-semibold mb-4">
                 Team Breakdown
               </h2>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b text-left">
-                      <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">User</th>
-                      <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Searches</th>
-                      <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Profile Views</th>
-                      <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Enrichments</th>
-                      <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Exports</th>
+                    <tr
+                      className="text-left"
+                      style={{ borderBottom: "1px solid var(--border-subtle)" }}
+                    >
+                      <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                        User
+                      </th>
+                      <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                        Searches
+                      </th>
+                      <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                        Profile Views
+                      </th>
+                      <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                        Enrichments
+                      </th>
+                      <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                        Exports
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {data.userBreakdown.map((user) => (
                       <tr
                         key={user.userId}
-                        className="border-b last:border-0 transition-colors hover:bg-muted/50"
+                        className="transition-colors"
+                        style={{ borderBottom: "1px solid var(--border-subtle)" }}
+                        onMouseEnter={(e) => {
+                          (e.currentTarget as HTMLTableRowElement).style.background =
+                            "rgba(255,255,255,0.02)";
+                        }}
+                        onMouseLeave={(e) => {
+                          (e.currentTarget as HTMLTableRowElement).style.background =
+                            "transparent";
+                        }}
                       >
                         <td className="px-4 py-3 font-mono text-xs text-foreground">
                           {user.userId.slice(0, 8)}...

@@ -172,13 +172,16 @@ export default function AdminDashboard() {
           <h1 className="font-serif text-3xl font-bold tracking-tight">
             Platform Health
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-muted-foreground mt-1 text-sm">
             Real-time platform monitoring
           </p>
         </div>
         <div className="flex items-center gap-3 text-sm text-muted-foreground">
           {isRefreshing && (
-            <RefreshCw className="h-4 w-4 animate-spin text-primary" />
+            <RefreshCw
+              className="h-4 w-4 animate-spin"
+              style={{ color: "var(--gold-primary)" }}
+            />
           )}
           {lastFetched && (
             <span>Updated {formatSecondsAgo(secondsAgo)}</span>

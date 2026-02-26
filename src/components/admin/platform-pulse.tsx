@@ -17,13 +17,19 @@ interface PlatformPulseProps {
 
 function SkeletonCard() {
   return (
-    <div className="rounded-lg border border-border bg-card p-6 animate-pulse">
+    <div
+      className="rounded-[14px] p-5 animate-pulse"
+      style={{
+        background: "var(--bg-card-gradient)",
+        border: "1px solid var(--border-subtle)",
+      }}
+    >
       <div className="flex items-center justify-between mb-4">
-        <div className="h-4 w-28 bg-muted rounded" />
-        <div className="h-5 w-5 bg-muted rounded" />
+        <div className="h-3 w-28 bg-muted rounded" />
+        <div className="h-4 w-4 bg-muted rounded" />
       </div>
       <div className="h-9 w-20 bg-muted rounded mb-2" />
-      <div className="h-4 w-36 bg-muted rounded" />
+      <div className="h-3 w-36 bg-muted rounded" />
     </div>
   );
 }
@@ -38,15 +44,35 @@ interface StatCardProps {
 
 function StatCard({ label, value, subtitle, icon, accentSubtitle }: StatCardProps) {
   const animated = useCountUp(value);
+  const isNonZero = value > 0;
 
   return (
-    <div className="rounded-xl border border-border bg-card p-5">
+    <div
+      className="rounded-[14px] p-5"
+      style={{
+        background: "var(--bg-card-gradient)",
+        border: "1px solid var(--border-subtle)",
+      }}
+    >
       <div className="flex items-center justify-between mb-3">
-        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{label}</p>
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          {label}
+        </p>
         <span className="text-muted-foreground/60">{icon}</span>
       </div>
-      <p className="text-2xl font-bold tabular-nums text-foreground">{animated.toLocaleString()}</p>
-      <p className={`mt-1 text-xs ${accentSubtitle ? "text-gold" : "text-muted-foreground"}`}>
+      <p
+        className="font-serif font-bold leading-none"
+        style={{
+          fontSize: "36px",
+          color: isNonZero ? "var(--gold-primary)" : "var(--text-secondary)",
+        }}
+      >
+        {animated.toLocaleString()}
+      </p>
+      <p
+        className="mt-1.5 text-xs"
+        style={{ color: accentSubtitle ? "var(--gold-primary)" : "var(--text-secondary)" }}
+      >
         {subtitle}
       </p>
     </div>
@@ -55,20 +81,35 @@ function StatCard({ label, value, subtitle, icon, accentSubtitle }: StatCardProp
 
 function ApiQuotaPlaceholder() {
   return (
-    <div className="rounded-lg border border-border bg-card p-6">
+    <div
+      className="rounded-[14px] p-5"
+      style={{
+        background: "var(--bg-card-gradient)",
+        border: "1px solid var(--border-subtle)",
+      }}
+    >
       <div className="flex items-center justify-between mb-4">
-        <p className="text-sm text-muted-foreground">API Quota Burn</p>
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          API Quota Burn
+        </p>
         <span className="text-muted-foreground">
-          <Activity className="h-5 w-5" />
+          <Activity className="h-4 w-4" />
         </span>
       </div>
-      <p className="text-3xl font-bold tabular-nums mb-3">—</p>
+      <p
+        className="font-serif font-bold leading-none mb-3"
+        style={{ fontSize: "36px", color: "var(--text-secondary)" }}
+      >
+        —
+      </p>
       <div className="space-y-2">
         {["Apollo", "ContactOut", "Exa", "EDGAR", "Claude"].map((provider) => (
           <div key={provider} className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground w-20 shrink-0">{provider}</span>
+            <span className="text-xs text-muted-foreground w-20 shrink-0">
+              {provider}
+            </span>
             <div className="flex-1 h-1.5 bg-muted rounded-full">
-              <div className="h-1.5 w-0 bg-primary rounded-full" />
+              <div className="h-1.5 w-0 rounded-full" style={{ background: "var(--gold-primary)" }} />
             </div>
           </div>
         ))}
@@ -97,9 +138,12 @@ export function PlatformPulse({ data }: PlatformPulseProps) {
     hasAnimated.current = true;
   }
 
-  const successRate = data.totalProspects > 0
-    ? Math.round(((data.totalProspects - data.enrichmentFailed) / data.totalProspects) * 100)
-    : 0;
+  const successRate =
+    data.totalProspects > 0
+      ? Math.round(
+          ((data.totalProspects - data.enrichmentFailed) / data.totalProspects) * 100
+        )
+      : 0;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -107,7 +151,7 @@ export function PlatformPulse({ data }: PlatformPulseProps) {
         label="Total Prospects"
         value={shouldAnimate ? data.totalProspects : data.totalProspects}
         subtitle={`enrichment coverage: ${data.enrichmentCoverage}%`}
-        icon={<Users className="h-5 w-5" />}
+        icon={<Users className="h-4 w-4" />}
         accentSubtitle={false}
       />
 
@@ -115,7 +159,7 @@ export function PlatformPulse({ data }: PlatformPulseProps) {
         label="Enrichment Pipeline"
         value={successRate}
         subtitle={`${data.enrichmentFailed.toLocaleString()} failed`}
-        icon={<Activity className="h-5 w-5" />}
+        icon={<Activity className="h-4 w-4" />}
         accentSubtitle={true}
       />
 
@@ -127,7 +171,7 @@ export function PlatformPulse({ data }: PlatformPulseProps) {
         label="Active Users Today"
         value={data.activeUsersToday}
         subtitle={`7d avg: ${data.activeUsers7dAvg}`}
-        icon={<UserCheck className="h-5 w-5" />}
+        icon={<UserCheck className="h-4 w-4" />}
         accentSubtitle={false}
       />
     </div>

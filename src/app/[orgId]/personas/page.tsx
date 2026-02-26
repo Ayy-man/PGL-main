@@ -44,7 +44,7 @@ export default async function PersonasPage({
         <PersonaFormDialog
           mode="create"
           trigger={
-            <Button>
+            <Button variant="gold">
               <Plus className="h-4 w-4" />
               Create Persona
             </Button>
@@ -61,7 +61,7 @@ export default async function PersonasPage({
           <PersonaFormDialog
             mode="create"
             trigger={
-              <Button>
+              <Button variant="gold">
                 <Plus className="h-4 w-4" />
                 Create Persona
               </Button>

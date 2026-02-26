@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { Search, List, Users, BarChart3, ArrowRight } from "lucide-react";
+import { Search, ArrowRight } from "lucide-react";
 
 export default async function TenantDashboard({
   params,
@@ -18,7 +18,12 @@ export default async function TenantDashboard({
     redirect("/login");
   }
 
-  const firstName = user.user_metadata?.first_name || user.email?.split("@")[0] || "there";
+  const firstName =
+    user.user_metadata?.first_name || user.email?.split("@")[0] || "there";
+
+  const hour = new Date().getHours();
+  const greeting =
+    hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
 
   const today = new Date().toLocaleDateString("en-US", {
     weekday: "long",
@@ -27,45 +32,47 @@ export default async function TenantDashboard({
     year: "numeric",
   });
 
-  const secondaryActions = [
-    {
-      label: "Lists",
-      description: "Organize prospect pipelines",
-      href: `/${orgId}/lists`,
-      icon: List,
-    },
-    {
-      label: "Personas",
-      description: "Define ideal buyer profiles",
-      href: `/${orgId}/personas`,
-      icon: Users,
-    },
-    {
-      label: "Analytics",
-      description: "Team activity & usage",
-      href: `/${orgId}/dashboard/analytics`,
-      icon: BarChart3,
-    },
-  ];
-
   return (
     <div className="space-y-8">
-      {/* Header */}
+      {/* Greeting header */}
       <div>
-        <p className="text-xs font-medium tracking-wider uppercase text-muted-foreground">
-          {today}
-        </p>
-        <h1 className="mt-2 font-serif text-3xl font-bold tracking-tight">
-          Welcome back, {firstName}
+        <h1
+          className="font-serif font-semibold text-foreground"
+          style={{ fontSize: "38px", letterSpacing: "-0.5px" }}
+        >
+          {greeting}, {firstName}
         </h1>
+        <p className="mt-1 text-sm text-muted-foreground">{today}</p>
       </div>
 
-      {/* Hero — Search is why you're here */}
+      {/* Hero — Search is the primary action */}
       <Link
         href={`/${orgId}/search`}
-        className="group relative flex items-center gap-6 rounded-xl border border-gold/20 bg-card p-8 shadow-sm transition-all duration-200 hover:shadow-md hover:border-gold/40 cursor-pointer"
+        className="group relative flex items-center gap-6 rounded-xl p-8 transition-all duration-200 cursor-pointer block"
+        style={{
+          background: "var(--bg-card-gradient)",
+          border: "1px solid rgba(255,255,255,0.04)",
+        }}
+        onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => {
+          (e.currentTarget as HTMLAnchorElement).style.background =
+            "var(--bg-card-hover)";
+          (e.currentTarget as HTMLAnchorElement).style.border =
+            "1px solid var(--border-hover)";
+        }}
+        onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => {
+          (e.currentTarget as HTMLAnchorElement).style.background =
+            "var(--bg-card-gradient)";
+          (e.currentTarget as HTMLAnchorElement).style.border =
+            "1px solid rgba(255,255,255,0.04)";
+        }}
       >
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gold/10 text-gold transition-colors group-hover:bg-gold/15">
+        <div
+          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-colors"
+          style={{
+            background: "var(--gold-bg)",
+            color: "var(--gold-primary)",
+          }}
+        >
           <Search className="h-6 w-6" />
         </div>
         <div className="flex-1 min-w-0">
@@ -73,7 +80,10 @@ export default async function TenantDashboard({
             <span className="font-serif text-xl font-semibold text-foreground">
               Search Prospects
             </span>
-            <ArrowRight className="h-4 w-4 text-gold opacity-0 -translate-x-2 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0" />
+            <ArrowRight
+              className="h-4 w-4 opacity-0 -translate-x-2 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0"
+              style={{ color: "var(--gold-primary)" }}
+            />
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
             Find high-net-worth buyers matching your personas
@@ -81,25 +91,23 @@ export default async function TenantDashboard({
         </div>
       </Link>
 
-      {/* Secondary actions */}
-      <div className="grid gap-4 sm:grid-cols-3">
-        {secondaryActions.map((action) => (
+      {/* Quick navigation pills */}
+      <div className="flex flex-wrap gap-3">
+        {[
+          { label: "Lists", href: `/${orgId}/lists` },
+          { label: "Personas", href: `/${orgId}/personas` },
+          { label: "Analytics", href: `/${orgId}/dashboard/analytics` },
+        ].map((item) => (
           <Link
-            key={action.href}
-            href={action.href}
-            className="group flex items-start gap-3 rounded-xl border bg-card p-5 transition-all duration-150 hover:border-border hover:bg-muted/30 cursor-pointer"
+            key={item.href}
+            href={item.href}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs text-muted-foreground transition-colors hover:text-foreground cursor-pointer"
+            style={{
+              background: "var(--bg-elevated)",
+              border: "1px solid var(--border-subtle)",
+            }}
           >
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground transition-colors group-hover:text-foreground">
-              <action.icon className="h-4 w-4" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <span className="text-sm font-semibold text-foreground">
-                {action.label}
-              </span>
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                {action.description}
-              </p>
-            </div>
+            {item.label}
           </Link>
         ))}
       </div>
