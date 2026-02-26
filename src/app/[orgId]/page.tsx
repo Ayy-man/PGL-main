@@ -48,23 +48,7 @@ export default async function TenantDashboard({
       {/* Hero — Search is the primary action */}
       <Link
         href={`/${orgId}/search`}
-        className="group relative flex items-center gap-6 rounded-xl p-8 transition-all duration-200 cursor-pointer block"
-        style={{
-          background: "var(--bg-card-gradient)",
-          border: "1px solid rgba(255,255,255,0.04)",
-        }}
-        onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => {
-          (e.currentTarget as HTMLAnchorElement).style.background =
-            "var(--bg-card-hover)";
-          (e.currentTarget as HTMLAnchorElement).style.border =
-            "1px solid var(--border-hover)";
-        }}
-        onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => {
-          (e.currentTarget as HTMLAnchorElement).style.background =
-            "var(--bg-card-gradient)";
-          (e.currentTarget as HTMLAnchorElement).style.border =
-            "1px solid rgba(255,255,255,0.04)";
-        }}
+        className="card-interactive group relative flex items-center gap-6 rounded-xl p-8 cursor-pointer block"
       >
         <div
           className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-colors"

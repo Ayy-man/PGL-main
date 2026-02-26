@@ -84,17 +84,9 @@ export default async function TenantLayout({
             {/* Right: Notification bell + user avatar */}
             <div className="flex items-center gap-3">
               <button
-                className="rounded-[8px] p-2 transition-colors cursor-pointer"
+                className="ghost-hover rounded-[8px] p-2 cursor-pointer"
                 style={{ color: "var(--text-secondary-ds)" }}
                 aria-label="Notifications"
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.03)";
-                  (e.currentTarget as HTMLElement).style.color = "var(--text-primary-ds)";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = "";
-                  (e.currentTarget as HTMLElement).style.color = "var(--text-secondary-ds)";
-                }}
               >
                 <Bell className="h-4 w-4" />
               </button>

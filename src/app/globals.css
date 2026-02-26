@@ -205,6 +205,22 @@
     background: var(--bg-card-hover);
     border-color: var(--border-hover);
   }
+  .card-interactive {
+    background: var(--bg-card-gradient);
+    border: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+  .card-interactive:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--border-hover);
+  }
+  .ghost-hover {
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .ghost-hover:hover {
+    background: rgba(255,255,255,0.03);
+    color: var(--text-primary-ds);
+  }
   .ambient-glow-top {
     position: fixed;
     top: -200px;
