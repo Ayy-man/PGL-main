@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-02-26T02:09:06.369Z"
+last_updated: "2026-02-26T02:14:43.084Z"
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 34
-  completed_plans: 27
+  completed_plans: 28
 ---
 
 # Project State
@@ -49,6 +49,7 @@ Progress: [██████████] 100% (79/79 requirements)
 | Phase 04 P03 | 3 | 2 tasks | 7 files |
 | Phase 04 P04 | 10 | 2 tasks | 1 files |
 | Phase 05 P02 | 3 | 2 tasks | 6 files |
+| Phase 05 P01 | 6 | 2 tasks | 4 files |
 
 ### Phase 3 Plan Completion
 
@@ -151,6 +152,9 @@ Recent decisions affecting current work:
 - [Phase 05]: Inline style used for Dialog gradient background — Tailwind v3 cannot apply CSS variable gradients via bg- utility classes
 - [Phase 05]: surface-card CSS utility is the canonical approach for gradient glass surface treatment on all card/panel containers
 - [Phase 05]: font-serif class (not font-cormorant) used on CardTitle and EmptyState heading for Cormorant Garamond rendering — consistent with design system rule
+- [Phase 05]: Named card background --bg-card-gradient (not --bg-card) to avoid collision with shadcn OKLCH token
+- [Phase 05]: Named text tokens --text-primary-ds / --text-secondary-ds to avoid shadcn --primary collision
+- [Phase 05]: Font loading via next/font/google: DM Sans (font-sans), Cormorant Garamond (font-serif), JetBrains Mono (font-mono)
 
 ### Roadmap Evolution
 
