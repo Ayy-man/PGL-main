@@ -66,17 +66,17 @@ export default function NewUserPage() {
         </p>
       </div>
 
-      <div className="rounded-lg border border-border bg-card p-6 max-w-2xl">
+      <div className="surface-card rounded-[14px] border border-[var(--border-default)] p-6 max-w-2xl">
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="rounded-md bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-500">
+            <div className="rounded-[8px] bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive">
               {error}
             </div>
           )}
 
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium">
-              Email <span className="text-red-500">*</span>
+              Email <span className="text-destructive">*</span>
             </label>
             <input
               type="email"
@@ -84,13 +84,13 @@ export default function NewUserPage() {
               name="email"
               required
               placeholder="user@example.com"
-              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full rounded-[8px] border border-[var(--border-default)] bg-[var(--bg-input)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-primary)]/50"
             />
           </div>
 
           <div className="space-y-2">
             <label htmlFor="full_name" className="text-sm font-medium">
-              Full Name <span className="text-red-500">*</span>
+              Full Name <span className="text-destructive">*</span>
             </label>
             <input
               type="text"
@@ -98,13 +98,13 @@ export default function NewUserPage() {
               name="full_name"
               required
               placeholder="John Doe"
-              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full rounded-[8px] border border-[var(--border-default)] bg-[var(--bg-input)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-primary)]/50"
             />
           </div>
 
           <div className="space-y-2">
             <label htmlFor="password" className="text-sm font-medium">
-              Password <span className="text-red-500">*</span>
+              Password <span className="text-destructive">*</span>
             </label>
             <input
               type="password"
@@ -113,13 +113,13 @@ export default function NewUserPage() {
               required
               minLength={6}
               placeholder="Minimum 6 characters"
-              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full rounded-[8px] border border-[var(--border-default)] bg-[var(--bg-input)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-primary)]/50"
             />
           </div>
 
           <div className="space-y-2">
             <label htmlFor="role" className="text-sm font-medium">
-              Role <span className="text-red-500">*</span>
+              Role <span className="text-destructive">*</span>
             </label>
             <select
               id="role"
@@ -127,7 +127,7 @@ export default function NewUserPage() {
               required
               value={selectedRole}
               onChange={(e) => setSelectedRole(e.target.value)}
-              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full rounded-[8px] border border-[var(--border-default)] bg-[var(--bg-input)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-primary)]/50"
             >
               <option value="assistant">Assistant</option>
               <option value="agent">Agent</option>
@@ -139,10 +139,10 @@ export default function NewUserPage() {
           {selectedRole !== "super_admin" && (
             <div className="space-y-2">
               <label htmlFor="tenant_id" className="text-sm font-medium">
-                Tenant <span className="text-red-500">*</span>
+                Tenant <span className="text-destructive">*</span>
               </label>
               {loading ? (
-                <div className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-muted-foreground">
+                <div className="w-full rounded-[8px] border border-[var(--border-default)] bg-[var(--bg-input)] px-3 py-2 text-sm text-muted-foreground">
                   Loading tenants...
                 </div>
               ) : (
@@ -150,7 +150,7 @@ export default function NewUserPage() {
                   id="tenant_id"
                   name="tenant_id"
                   required
-                  className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full rounded-[8px] border border-[var(--border-default)] bg-[var(--bg-input)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-primary)]/50"
                 >
                   <option value="">Select a tenant</option>
                   {tenants.map((tenant) => (
@@ -167,13 +167,13 @@ export default function NewUserPage() {
             <button
               type="submit"
               disabled={isPending || loading}
-              className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex h-10 items-center justify-center rounded-[8px] border border-[var(--border-gold)] bg-[var(--gold-bg-strong)] px-6 text-sm font-semibold text-[var(--gold-primary)] hover:bg-[var(--gold-bg)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {isPending ? "Creating..." : "Create User"}
             </button>
             <Link
               href="/admin/users"
-              className="inline-flex h-10 items-center justify-center rounded-md border border-border px-6 text-sm font-medium hover:bg-accent"
+              className="inline-flex h-10 items-center justify-center rounded-[8px] border border-[var(--border-default)] bg-transparent px-6 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-[var(--border-hover)] transition-colors"
             >
               Cancel
             </Link>

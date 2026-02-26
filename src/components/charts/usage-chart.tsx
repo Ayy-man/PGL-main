@@ -24,10 +24,10 @@ interface UsageChartProps {
 }
 
 const LINES = [
-  { dataKey: "searchesExecuted", name: "Searches", color: "#d4af37" },
-  { dataKey: "profilesViewed", name: "Profile Views", color: "#60a5fa" },
-  { dataKey: "profilesEnriched", name: "Enrichments", color: "#34d399" },
-  { dataKey: "csvExports", name: "Exports", color: "#f472b6" },
+  { dataKey: "searchesExecuted", name: "Searches", color: "var(--gold-primary)" },
+  { dataKey: "profilesViewed", name: "Profile Views", color: "var(--chart-2)" },
+  { dataKey: "profilesEnriched", name: "Enrichments", color: "var(--success)" },
+  { dataKey: "csvExports", name: "Exports", color: "var(--chart-5)" },
 ] as const;
 
 function formatDate(dateStr: string) {
@@ -48,28 +48,28 @@ export function UsageChart({ data }: UsageChartProps) {
     <div className="rounded-xl border bg-card p-6">
       <ResponsiveContainer width="100%" height={400}>
         <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
           <XAxis
             dataKey="date"
             tickFormatter={formatDate}
-            stroke="#a1a1aa"
-            tick={{ fill: "#a1a1aa", fontSize: 12 }}
+            stroke="var(--muted-foreground)"
+            tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
           />
           <YAxis
-            stroke="#a1a1aa"
-            tick={{ fill: "#a1a1aa", fontSize: 12 }}
+            stroke="var(--muted-foreground)"
+            tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: "#18181b",
-              border: "1px solid #3f3f46",
+              backgroundColor: "var(--card)",
+              border: "1px solid var(--border)",
               borderRadius: "8px",
-              color: "#f4f4f5",
+              color: "var(--foreground)",
             }}
             labelFormatter={(label) => formatDate(String(label))}
           />
           <Legend
-            wrapperStyle={{ color: "#a1a1aa", paddingTop: "16px" }}
+            wrapperStyle={{ color: "var(--muted-foreground)", paddingTop: "16px" }}
           />
           {LINES.map(({ dataKey, name, color }) => (
             <Line

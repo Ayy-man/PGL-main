@@ -45,17 +45,17 @@ export default function NewTenantPage() {
         </p>
       </div>
 
-      <div className="rounded-lg border border-border bg-card p-6 max-w-2xl">
+      <div className="surface-card rounded-[14px] border border-[var(--border-default)] p-6 max-w-2xl">
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="rounded-md bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-500">
+            <div className="rounded-[8px] bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive">
               {error}
             </div>
           )}
 
           <div className="space-y-2">
             <label htmlFor="name" className="text-sm font-medium">
-              Tenant Name <span className="text-red-500">*</span>
+              Tenant Name <span className="text-destructive">*</span>
             </label>
             <input
               type="text"
@@ -63,13 +63,13 @@ export default function NewTenantPage() {
               name="name"
               required
               placeholder="Acme Real Estate"
-              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full rounded-[8px] border border-[var(--border-default)] bg-[var(--bg-input)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-primary)]/50"
             />
           </div>
 
           <div className="space-y-2">
             <label htmlFor="slug" className="text-sm font-medium">
-              Slug <span className="text-red-500">*</span>
+              Slug <span className="text-destructive">*</span>
             </label>
             <input
               type="text"
@@ -78,7 +78,7 @@ export default function NewTenantPage() {
               required
               placeholder="acme-real-estate"
               pattern="[a-z0-9-]+"
-              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full rounded-[8px] border border-[var(--border-default)] bg-[var(--bg-input)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-primary)]/50"
             />
             <p className="text-xs text-muted-foreground">
               URL-safe identifier (lowercase, numbers, and hyphens only)
@@ -94,7 +94,7 @@ export default function NewTenantPage() {
               id="logo_url"
               name="logo_url"
               placeholder="https://example.com/logo.png"
-              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full rounded-[8px] border border-[var(--border-default)] bg-[var(--bg-input)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-primary)]/50"
             />
           </div>
 
@@ -109,7 +109,7 @@ export default function NewTenantPage() {
                 name="primary_color"
                 defaultValue="#d4af37"
                 placeholder="#d4af37"
-                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full rounded-[8px] border border-[var(--border-default)] bg-[var(--bg-input)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-primary)]/50"
               />
             </div>
 
@@ -123,7 +123,7 @@ export default function NewTenantPage() {
                 name="secondary_color"
                 defaultValue="#f4d47f"
                 placeholder="#f4d47f"
-                className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full rounded-[8px] border border-[var(--border-default)] bg-[var(--bg-input)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-primary)]/50"
               />
             </div>
           </div>
@@ -132,13 +132,13 @@ export default function NewTenantPage() {
             <button
               type="submit"
               disabled={isPending}
-              className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex h-10 items-center justify-center rounded-[8px] border border-[var(--border-gold)] bg-[var(--gold-bg-strong)] px-6 text-sm font-semibold text-[var(--gold-primary)] hover:bg-[var(--gold-bg)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {isPending ? "Creating..." : "Create Tenant"}
             </button>
             <Link
               href="/admin/tenants"
-              className="inline-flex h-10 items-center justify-center rounded-md border border-border px-6 text-sm font-medium hover:bg-accent"
+              className="inline-flex h-10 items-center justify-center rounded-[8px] border border-[var(--border-default)] bg-transparent px-6 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-[var(--border-hover)] transition-colors"
             >
               Cancel
             </Link>

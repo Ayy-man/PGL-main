@@ -30,10 +30,10 @@ export function UserStatusToggle({ userId, isActive }: UserStatusToggleProps) {
     <button
       onClick={handleToggle}
       disabled={isPending}
-      className={`inline-flex h-8 items-center rounded-md px-3 text-xs font-medium transition-colors ${
+      className={`inline-flex h-8 items-center rounded-[8px] px-3 text-xs font-medium transition-colors ${
         currentStatus
-          ? "bg-green-500/10 text-green-500 hover:bg-green-500/20"
-          : "bg-red-500/10 text-red-500 hover:bg-red-500/20"
+          ? "bg-[var(--success-muted)] text-[var(--success)] hover:bg-[var(--success-muted)]"
+          : "bg-destructive/10 text-destructive hover:bg-destructive/15"
       } ${isPending ? "opacity-50 cursor-not-allowed" : ""}`}
     >
       {isPending ? "Updating..." : currentStatus ? "Deactivate" : "Activate"}

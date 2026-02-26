@@ -39,15 +39,15 @@ function getHeatmapClass(value: number, allValues: number[]): string {
 
   if (value === 0) {
     // Zero when others have data
-    return "text-red-400";
+    return "text-destructive";
   }
 
   const rank = nonZeroValues.findIndex((v) => v >= value);
   const pct = rank / nonZeroValues.length;
 
-  if (pct >= 0.75) return "text-emerald-400";
-  if (pct >= 0.25) return "text-amber-400";
-  return "text-red-400";
+  if (pct >= 0.75) return "text-[var(--success)]";
+  if (pct >= 0.25) return "text-[var(--warning)]";
+  return "text-destructive";
 }
 
 function isNewTenant(tenant: Tenant): boolean {

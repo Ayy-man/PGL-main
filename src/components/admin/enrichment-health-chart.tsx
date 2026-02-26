@@ -87,27 +87,27 @@ export function EnrichmentHealthChart({ data }: EnrichmentHealthChartProps) {
       <p className="text-sm text-muted-foreground mb-4">Enrichment Pipeline Health (per source, daily)</p>
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
           <XAxis
             dataKey="date"
             tickFormatter={formatDate}
-            stroke="#a1a1aa"
-            tick={{ fill: "#a1a1aa", fontSize: 11 }}
+            stroke="var(--muted-foreground)"
+            tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
           />
           <YAxis
-            stroke="#a1a1aa"
-            tick={{ fill: "#a1a1aa", fontSize: 11 }}
+            stroke="var(--muted-foreground)"
+            tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: "#18181b",
-              border: "1px solid #3f3f46",
+              backgroundColor: "var(--card)",
+              border: "1px solid var(--border)",
               borderRadius: "8px",
-              color: "#f4f4f5",
+              color: "var(--foreground)",
             }}
             labelFormatter={(label) => formatDate(String(label))}
           />
-          <Legend wrapperStyle={{ color: "#a1a1aa", paddingTop: "12px", fontSize: "11px" }} />
+          <Legend wrapperStyle={{ color: "var(--muted-foreground)", paddingTop: "12px", fontSize: "11px" }} />
 
           {SOURCES.map(({ key, label }) => (
             <>

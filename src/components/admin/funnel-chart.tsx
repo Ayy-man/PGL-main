@@ -82,10 +82,10 @@ export function FunnelChart({ data }: FunnelChartProps) {
         <RechartsFunnelChart>
           <Tooltip
             contentStyle={{
-              backgroundColor: "#18181b",
-              border: "1px solid #3f3f46",
+              backgroundColor: "var(--card)",
+              border: "1px solid var(--border)",
               borderRadius: "8px",
-              color: "#f4f4f5",
+              color: "var(--foreground)",
             }}
           />
           <Funnel
@@ -97,12 +97,12 @@ export function FunnelChart({ data }: FunnelChartProps) {
             <LabelList
               dataKey="name"
               position="right"
-              style={{ fill: "#a1a1aa", fontSize: "12px" }}
+              style={{ fill: "var(--muted-foreground)", fontSize: "12px" }}
             />
             <LabelList
               dataKey="value"
               position="center"
-              style={{ fill: "#f4f4f5", fontSize: "13px", fontWeight: "600" }}
+              style={{ fill: "var(--foreground)", fontSize: "13px", fontWeight: "600" }}
             />
           </Funnel>
         </RechartsFunnelChart>

@@ -120,7 +120,7 @@ export default function SuperAdminAnalyticsPage() {
       </div>
 
       {error && (
-        <div className="rounded-lg border border-red-900 bg-red-950 p-4 text-red-300">
+        <div className="rounded-[8px] border border-destructive/30 bg-destructive/10 p-4 text-destructive">
           {error}
         </div>
       )}

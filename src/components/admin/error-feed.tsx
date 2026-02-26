@@ -54,10 +54,10 @@ function getSourceBadgeClass(status: string): string {
   switch (status.toLowerCase()) {
     case "success":
     case "complete":
-      return "border-emerald-500/50 text-emerald-400 bg-emerald-500/10";
+      return "border-[var(--success)] text-[var(--success)] bg-[var(--success-muted)]";
     case "failed":
     case "error":
-      return "border-red-500/50 text-red-400 bg-red-500/10";
+      return "border-destructive/50 text-destructive bg-destructive/10";
     default:
       return "border-border text-muted-foreground bg-muted/30";
   }
@@ -161,7 +161,7 @@ export function ErrorFeed({ data, onPageChange }: ErrorFeedProps) {
                     </Link>
                   </td>
                   <td className="py-3 px-4">
-                    <span className="inline-flex items-center rounded-full border border-red-500/50 bg-red-500/10 px-2 py-0.5 text-xs text-red-400">
+                    <span className="inline-flex items-center rounded-full border border-destructive/50 bg-destructive/10 px-2 py-0.5 text-xs text-destructive">
                       {record.enrichmentStatus}
                     </span>
                   </td>
