@@ -156,7 +156,7 @@ export function ProfileView({
   return (
     <div className="space-y-6">
         {/* Header Section */}
-        <div className="rounded-xl border bg-card p-8">
+        <div className="rounded-[14px] border bg-card p-8" style={{ background: "var(--bg-card-gradient)" }}>
           <div className="flex items-start justify-between gap-6">
             <div className="flex-1">
               <h1 className="mb-1 font-serif text-3xl font-bold text-foreground">
@@ -239,7 +239,7 @@ export function ProfileView({
         />
 
         {/* Contact Section */}
-        <div className="rounded-xl border bg-card p-6">
+        <div className="rounded-[14px] border bg-card p-6" style={{ background: "var(--bg-card-gradient)" }}>
           <h3 className="mb-5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Contact Information
           </h3>
@@ -333,9 +333,19 @@ export function ProfileView({
         </div>
 
         {/* AI Summary Section */}
-        <div className="rounded-xl border border-gold/30 bg-gold/[0.03] p-6">
-          <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gold">
-            Why Recommended
+        <div
+          className="rounded-[14px] border border-l-2 pl-6 pr-6 py-5"
+          style={{
+            background: "var(--bg-card-gradient)",
+            borderColor: "rgba(255,255,255,0.06)",
+            borderLeftColor: "var(--border-gold)",
+          }}
+        >
+          <h3
+            className="mb-3 text-xs font-semibold uppercase tracking-wider"
+            style={{ color: "var(--gold-primary)" }}
+          >
+            AI Insight
           </h3>
           {prospect.ai_summary ? (
             <p className="text-sm text-foreground leading-relaxed">{prospect.ai_summary}</p>
@@ -348,7 +358,7 @@ export function ProfileView({
 
         {/* Lookalike Discovery Section */}
         {showLookalikeDiscovery && (
-          <div className="rounded-xl border bg-card p-6">
+          <div className="rounded-[14px] border bg-card p-6" style={{ background: "var(--bg-card-gradient)" }}>
             <h3 className="mb-5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Similar People
             </h3>
@@ -366,7 +376,7 @@ export function ProfileView({
         />
 
         {/* Lists Section */}
-        <div className="rounded-xl border bg-card p-6">
+        <div className="rounded-[14px] border bg-card p-6" style={{ background: "var(--bg-card-gradient)" }}>
           <h3 className="mb-5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             List Memberships
           </h3>

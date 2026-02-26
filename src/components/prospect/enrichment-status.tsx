@@ -29,13 +29,14 @@ const SOURCE_LABELS: Record<string, string> = {
  * EnrichmentStatus Component
  *
  * Displays per-source enrichment status indicators with visual states:
- * - pending: gray dot + "Pending"
- * - in_progress: spinning loader + "Enriching..."
- * - complete: green checkmark + "Complete"
- * - failed: red X + "Failed"
- * - skipped: gray dash + "Skipped" (e.g., SEC for non-public companies)
- * - circuit_open: orange warning + "Circuit Open"
+ * - pending: Circle icon + "Pending"
+ * - in_progress: Loader2 spinning + "Running"
+ * - complete: CheckCircle2 + "Complete"
+ * - failed: XCircle + "Failed"
+ * - skipped: Minus + "Skipped" (e.g., SEC for non-public companies)
+ * - circuit_open: Circle + "Paused"
  *
+ * Status always uses icon + color + label (color is never the only indicator).
  * Includes "Refresh Enrichment" button to manually trigger enrichment.
  */
 export function EnrichmentStatus({
@@ -66,41 +67,57 @@ export function EnrichmentStatus({
     }
   };
 
-  const renderStatusIcon = (status: SourceStatus) => {
+  const renderStatus = (status: SourceStatus) => {
     switch (status) {
       case "pending":
-        return <Circle className="h-4 w-4 text-muted-foreground" />;
+        return (
+          <span className="flex items-center gap-1.5 text-muted-foreground">
+            <Circle className="h-4 w-4 shrink-0" />
+            <span>Pending</span>
+          </span>
+        );
       case "in_progress":
-        return <Loader2 className="h-4 w-4 text-info animate-spin" />;
+        return (
+          <span className="flex items-center gap-1.5 text-info">
+            <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
+            <span>Running</span>
+          </span>
+        );
       case "complete":
-        return <CheckCircle2 className="h-4 w-4 text-success" />;
+        return (
+          <span className="flex items-center gap-1.5 text-success">
+            <CheckCircle2 className="h-4 w-4 shrink-0" />
+            <span>Complete</span>
+          </span>
+        );
       case "failed":
-        return <XCircle className="h-4 w-4 text-destructive" />;
+        return (
+          <span className="flex items-center gap-1.5 text-destructive">
+            <XCircle className="h-4 w-4 shrink-0" />
+            <span>Failed</span>
+          </span>
+        );
       case "skipped":
-        return <Minus className="h-4 w-4 text-muted-foreground" />;
+        return (
+          <span className="flex items-center gap-1.5 text-muted-foreground">
+            <Minus className="h-4 w-4 shrink-0" />
+            <span>Skipped</span>
+          </span>
+        );
       case "circuit_open":
-        return <Circle className="h-4 w-4 text-warning" />;
+        return (
+          <span className="flex items-center gap-1.5 text-warning">
+            <Circle className="h-4 w-4 shrink-0" />
+            <span>Paused</span>
+          </span>
+        );
       default:
-        return <Circle className="h-4 w-4 text-muted-foreground" />;
-    }
-  };
-
-  const renderStatusText = (status: SourceStatus) => {
-    switch (status) {
-      case "pending":
-        return <span className="text-muted-foreground">Pending</span>;
-      case "in_progress":
-        return <span className="text-info">Enriching...</span>;
-      case "complete":
-        return <span className="text-success">Complete</span>;
-      case "failed":
-        return <span className="text-destructive">Failed</span>;
-      case "skipped":
-        return <span className="text-muted-foreground">Skipped</span>;
-      case "circuit_open":
-        return <span className="text-warning">Circuit Open</span>;
-      default:
-        return <span className="text-muted-foreground">Unknown</span>;
+        return (
+          <span className="flex items-center gap-1.5 text-muted-foreground">
+            <Circle className="h-4 w-4 shrink-0" />
+            <span>Unknown</span>
+          </span>
+        );
     }
   };
 
@@ -134,15 +151,12 @@ export function EnrichmentStatus({
           return (
             <div
               key={key}
-              className="flex items-center gap-3 rounded-md border bg-background p-3"
+              className="flex flex-col gap-2 rounded-md border bg-background p-3"
             >
-              {renderStatusIcon(status)}
-              <div className="flex flex-col">
-                <span className="text-sm font-medium text-foreground">
-                  {label}
-                </span>
-                <span className="text-xs">{renderStatusText(status)}</span>
-              </div>
+              <span className="text-sm font-medium text-foreground">
+                {label}
+              </span>
+              <span className="text-xs">{renderStatus(status)}</span>
             </div>
           );
         })}
