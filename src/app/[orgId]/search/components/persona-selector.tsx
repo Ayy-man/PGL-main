@@ -60,13 +60,13 @@ export function PersonaSelector({
 
   return (
     <Select value={selectedId} onValueChange={onSelect}>
-      <SelectTrigger className="w-[320px]">
+      <SelectTrigger className="w-[480px]">
         <div className="flex items-center gap-2">
           <Search className="h-4 w-4 text-muted-foreground" />
           <SelectValue placeholder="Select a persona to search..." />
         </div>
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className="min-w-[480px]">
         {starterPersonas.length > 0 && (
           <SelectGroup>
             <SelectLabel className="text-xs text-muted-foreground uppercase tracking-wider">
