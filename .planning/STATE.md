@@ -24,9 +24,9 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 ## Current Position
 
 Phase: 5 of 5 (UI Revamp)
-Plan: 4 of 7 (In Progress)
-Status: In Progress — Phase 5 Plan 04 complete (search page rebuilt with persona card grid + prospect result cards)
-Last activity: 2026-02-26 — Phase 5 Plan 04 complete: PersonaCard grid, ProspectResultCard stack, WealthTierBadge, SearchContent rewired
+Plan: 6 of 7 (In Progress)
+Status: In Progress — Phase 5 Plan 06 complete (prospect slide-over panel and profile view)
+Last activity: 2026-02-26 — Phase 5 Plan 06 complete: 480px slide-over panel (7 sections), enrichment icon+label pattern, profile-view surface treatment
 
 Progress: [██████████] 100% (79/79 requirements)
 
@@ -163,6 +163,15 @@ Recent decisions affecting current work:
 - [Phase 05]: AddToListDialog embedded inside ProspectResultCard with Button trigger — avoids duplicate state and keeps click separation via e.stopPropagation()
 - [Phase 05]: ProspectResultCard accepts lists/orgId props directly — simpler than lifting dialog state to SearchContent
 - [Phase 05]: WealthTier derived heuristically from job title — production would use enrichment data
+- [Phase 05-06]: shadcn Sheet used for slide-over panel (not custom hand-rolled panel) per design system rule
+- [Phase 05-06]: renderStatus() consolidates icon + label into single function (replaces separate renderStatusIcon/renderStatusText)
+- [Phase 05-06]: in_progress label 'Running', circuit_open label 'Paused' per design system enrichment status icons spec
+- [Phase 05-06]: profile-view AI summary uses gold left-border (border-l-2, borderColor=var(--border-gold)) matching slide-over panel treatment
+- [Phase 05-05]: onMouseEnter/Leave handlers for CSS variable hover states on list cards — same pattern as nav items
+- [Phase 05-05]: Cormorant 36px pattern for stat values extracted to MetricsCards and PlatformPulse StatCard
+- [Phase 05-05]: Dashboard simplified to greeting + search hero + stat pills — removed secondary action grid
+- [Phase 05-05]: HTML-safe JSON parse guard (text() then try/parse) added to analytics page per dashboard.md known bug
+- [Phase 05-05]: ComingSoonCard gold pill badge uses gold-bg-strong/border-gold/gold-primary per design system admin spec
 
 ### Roadmap Evolution
 
@@ -222,8 +231,8 @@ All 4 phases and 27 plans are complete. The following items remain before produc
 
 ## Session Continuity
 
-Last session: 2026-02-25 (Phase 4 deployed + post-deploy fixes)
-Stopped at: Phase 4 deployed to Vercel with 3 post-deploy bug fixes. All 4 phases complete.
+Last session: 2026-02-26 (Phase 5 Plan 05 complete)
+Stopped at: Completed 05-06-PLAN.md — prospect slide-over panel and profile view design system migration complete.
 
 ---
 
