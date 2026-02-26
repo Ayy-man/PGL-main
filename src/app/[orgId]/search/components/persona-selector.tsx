@@ -58,23 +58,27 @@ export function PersonaSelector({
   const starterPersonas = personas.filter((p) => p.is_starter);
   const customPersonas = personas.filter((p) => !p.is_starter);
 
+  const selectedPersona = personas.find((p) => p.id === selectedId);
+
   return (
     <Select value={selectedId} onValueChange={onSelect}>
-      <SelectTrigger className="w-[480px]">
-        <div className="flex items-center gap-2">
-          <Search className="h-4 w-4 text-muted-foreground" />
-          <SelectValue placeholder="Select a persona to search..." />
+      <SelectTrigger className="w-[320px] h-10">
+        <div className="flex items-center gap-2 truncate">
+          <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <span className="truncate">
+            {selectedPersona ? selectedPersona.name : "Select a persona..."}
+          </span>
         </div>
       </SelectTrigger>
-      <SelectContent className="min-w-[480px]">
+      <SelectContent className="w-[380px]">
         {starterPersonas.length > 0 && (
           <SelectGroup>
             <SelectLabel className="text-xs text-muted-foreground uppercase tracking-wider">
               Starter Personas
             </SelectLabel>
             {starterPersonas.map((persona) => (
-              <SelectItem key={persona.id} value={persona.id}>
-                <div className="flex flex-col">
+              <SelectItem key={persona.id} value={persona.id} textValue={persona.name}>
+                <div className="flex flex-col py-0.5">
                   <span className="font-medium">{persona.name}</span>
                   <span className="text-xs text-muted-foreground">
                     {getFilterSummary(persona)}
@@ -93,8 +97,8 @@ export function PersonaSelector({
               My Personas
             </SelectLabel>
             {customPersonas.map((persona) => (
-              <SelectItem key={persona.id} value={persona.id}>
-                <div className="flex flex-col">
+              <SelectItem key={persona.id} value={persona.id} textValue={persona.name}>
+                <div className="flex flex-col py-0.5">
                   <span className="font-medium">{persona.name}</span>
                   <span className="text-xs text-muted-foreground">
                     {getFilterSummary(persona)}
