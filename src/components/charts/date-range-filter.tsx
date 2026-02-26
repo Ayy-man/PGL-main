@@ -26,7 +26,7 @@ export function DateRangeFilter({
           className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
             selectedRange === value
               ? "bg-gold text-gold-foreground"
-              : "bg-muted text-muted-foreground hover:bg-accent"
+              : "bg-white/[0.04] text-muted-foreground hover:bg-white/[0.08]"
           }`}
         >
           {label}

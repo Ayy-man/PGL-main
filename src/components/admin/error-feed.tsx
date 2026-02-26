@@ -59,30 +59,30 @@ function getSourceBadgeClass(status: string): string {
     case "error":
       return "border-destructive/50 text-destructive bg-destructive/10";
     default:
-      return "border-border text-muted-foreground bg-muted/30";
+      return "border-border text-muted-foreground bg-white/[0.03]";
   }
 }
 
 function SkeletonRow() {
   return (
-    <tr className="border-b border-border animate-pulse">
+    <tr className="border-b border-[var(--border-subtle)] animate-pulse">
       <td className="py-3 px-4">
-        <div className="h-4 w-20 bg-muted rounded" />
+        <div className="h-4 w-20 bg-white/[0.06] rounded" />
       </td>
       <td className="py-3 px-4">
-        <div className="h-4 w-24 bg-muted rounded" />
+        <div className="h-4 w-24 bg-white/[0.06] rounded" />
       </td>
       <td className="py-3 px-4">
-        <div className="h-4 w-24 bg-muted rounded" />
+        <div className="h-4 w-24 bg-white/[0.06] rounded" />
       </td>
       <td className="py-3 px-4">
-        <div className="h-4 w-28 bg-muted rounded" />
+        <div className="h-4 w-28 bg-white/[0.06] rounded" />
       </td>
       <td className="py-3 px-4">
-        <div className="h-4 w-16 bg-muted rounded" />
+        <div className="h-4 w-16 bg-white/[0.06] rounded" />
       </td>
       <td className="py-3 px-4">
-        <div className="h-4 w-12 bg-muted rounded" />
+        <div className="h-4 w-12 bg-white/[0.06] rounded" />
       </td>
     </tr>
   );
@@ -93,10 +93,10 @@ export function ErrorFeed({ data, onPageChange }: ErrorFeedProps) {
 
   if (data === null) {
     return (
-      <div className="rounded-lg border border-border bg-card overflow-hidden">
+      <div className="rounded-[14px] overflow-hidden" style={{ background: "var(--bg-card-gradient)", border: "1px solid var(--border-subtle)" }}>
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-border bg-muted/30">
+            <tr className="bg-white/[0.02]">
               <th className="py-3 px-4 text-left text-muted-foreground font-medium">Time</th>
               <th className="py-3 px-4 text-left text-muted-foreground font-medium">Tenant</th>
               <th className="py-3 px-4 text-left text-muted-foreground font-medium">User</th>
@@ -122,10 +122,10 @@ export function ErrorFeed({ data, onPageChange }: ErrorFeedProps) {
   };
 
   return (
-    <div className="rounded-lg border border-border bg-card overflow-hidden">
+    <div className="rounded-[14px] overflow-hidden" style={{ background: "var(--bg-card-gradient)", border: "1px solid var(--border-subtle)" }}>
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-border bg-muted/30">
+          <tr className="bg-white/[0.02]">
             <th className="py-3 px-4 text-left text-muted-foreground font-medium">Time</th>
             <th className="py-3 px-4 text-left text-muted-foreground font-medium">Tenant</th>
             <th className="py-3 px-4 text-left text-muted-foreground font-medium">User</th>
@@ -143,7 +143,7 @@ export function ErrorFeed({ data, onPageChange }: ErrorFeedProps) {
               <>
                 <tr
                   key={record.id}
-                  className="border-b border-border hover:bg-muted/20 cursor-pointer transition-colors"
+                  className="hover:bg-white/[0.02] cursor-pointer transition-colors"
                   onClick={() => handleRowClick(record.id)}
                 >
                   <td className="py-3 px-4 text-xs text-muted-foreground whitespace-nowrap">
@@ -175,10 +175,10 @@ export function ErrorFeed({ data, onPageChange }: ErrorFeedProps) {
                 </tr>
 
                 {isExpanded && (
-                  <tr key={`${record.id}-expanded`} className="border-b border-border">
+                  <tr key={`${record.id}-expanded`} className="border-b border-[var(--border-subtle)]">
                     <td
                       colSpan={6}
-                      className="bg-muted/30 border-l-2 border-primary/50 px-6 py-3"
+                      className="bg-white/[0.02] border-l-2 border-primary/50 px-6 py-3"
                     >
                       <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-2">
                         Per-Source Details
@@ -227,7 +227,7 @@ export function ErrorFeed({ data, onPageChange }: ErrorFeedProps) {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between border-t border-border px-4 py-3">
+        <div className="flex items-center justify-between border-t border-[var(--border-subtle)] px-4 py-3">
           <p className="text-xs text-muted-foreground">
             Page {data.page} of {totalPages} ({data.total.toLocaleString()} total)
           </p>
@@ -235,14 +235,14 @@ export function ErrorFeed({ data, onPageChange }: ErrorFeedProps) {
             <button
               onClick={() => onPageChange(data.page - 1)}
               disabled={data.page <= 1}
-              className="inline-flex items-center rounded-md border border-border px-3 py-1 text-xs text-muted-foreground hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="inline-flex items-center rounded-md border border-[var(--border-subtle)] px-3 py-1 text-xs text-muted-foreground hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               Previous
             </button>
             <button
               onClick={() => onPageChange(data.page + 1)}
               disabled={data.page >= totalPages}
-              className="inline-flex items-center rounded-md border border-border px-3 py-1 text-xs text-muted-foreground hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="inline-flex items-center rounded-md border border-[var(--border-subtle)] px-3 py-1 text-xs text-muted-foreground hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               Next
             </button>

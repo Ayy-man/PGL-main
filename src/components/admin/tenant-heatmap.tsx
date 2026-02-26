@@ -80,24 +80,24 @@ function formatRelativeTime(dateStr: string | null): string {
 
 function SkeletonRow() {
   return (
-    <tr className="border-b border-border animate-pulse">
+    <tr style={{ borderBottom: "1px solid var(--border-subtle)" }} className="animate-pulse">
       <td className="py-3 px-4">
-        <div className="h-4 w-32 bg-muted rounded" />
+        <div className="h-4 w-32 bg-white/[0.06] rounded" />
       </td>
       <td className="py-3 px-4">
-        <div className="h-4 w-8 bg-muted rounded" />
+        <div className="h-4 w-8 bg-white/[0.06] rounded" />
       </td>
       <td className="py-3 px-4">
-        <div className="h-4 w-12 bg-muted rounded" />
+        <div className="h-4 w-12 bg-white/[0.06] rounded" />
       </td>
       <td className="py-3 px-4">
-        <div className="h-4 w-12 bg-muted rounded" />
+        <div className="h-4 w-12 bg-white/[0.06] rounded" />
       </td>
       <td className="py-3 px-4">
-        <div className="h-4 w-12 bg-muted rounded" />
+        <div className="h-4 w-12 bg-white/[0.06] rounded" />
       </td>
       <td className="py-3 px-4">
-        <div className="h-4 w-20 bg-muted rounded" />
+        <div className="h-4 w-20 bg-white/[0.06] rounded" />
       </td>
     </tr>
   );
@@ -108,10 +108,10 @@ export function TenantHeatmap({ data }: TenantHeatmapProps) {
 
   if (data === null) {
     return (
-      <div className="rounded-lg border border-border bg-card overflow-hidden">
+      <div className="rounded-[14px] overflow-hidden" style={{ background: "var(--bg-card-gradient)", border: "1px solid var(--border-subtle)" }}>
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-border bg-muted/30">
+            <tr className="bg-white/[0.02]">
               <th className="py-3 px-4 text-left text-muted-foreground font-medium">Tenant</th>
               <th className="py-3 px-4 text-left text-muted-foreground font-medium">Users</th>
               <th className="py-3 px-4 text-left text-muted-foreground font-medium">Searches (7d)</th>
@@ -140,10 +140,10 @@ export function TenantHeatmap({ data }: TenantHeatmapProps) {
   };
 
   return (
-    <div className="rounded-lg border border-border bg-card overflow-hidden">
+    <div className="rounded-[14px] overflow-hidden" style={{ background: "var(--bg-card-gradient)", border: "1px solid var(--border-subtle)" }}>
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-border bg-muted/30">
+          <tr className="bg-white/[0.02]">
             <th className="py-3 px-4 text-left text-muted-foreground font-medium">Tenant</th>
             <th className="py-3 px-4 text-left text-muted-foreground font-medium">Users</th>
             <th className="py-3 px-4 text-left text-muted-foreground font-medium">Searches (7d)</th>
@@ -161,7 +161,7 @@ export function TenantHeatmap({ data }: TenantHeatmapProps) {
               <>
                 <tr
                   key={tenant.id}
-                  className="border-b border-border hover:bg-muted/20 cursor-pointer transition-colors"
+                  className="hover:bg-white/[0.02] cursor-pointer transition-colors"
                   onClick={() => handleRowClick(tenant.id)}
                 >
                   <td className="py-3 px-4">
@@ -173,7 +173,7 @@ export function TenantHeatmap({ data }: TenantHeatmapProps) {
                       )}
                       <span className="font-medium">{tenant.name}</span>
                       {isNew && (
-                        <span className="inline-flex items-center rounded-full border border-border px-2 py-0.5 text-xs text-muted-foreground">
+                        <span className="inline-flex items-center rounded-full border border-[var(--border-subtle)] px-2 py-0.5 text-xs text-muted-foreground">
                           New
                         </span>
                       )}
@@ -195,8 +195,8 @@ export function TenantHeatmap({ data }: TenantHeatmapProps) {
                 </tr>
 
                 {isExpanded && (
-                  <tr key={`${tenant.id}-expanded`} className="border-b border-border">
-                    <td colSpan={6} className="bg-muted/30 pl-10 pr-4 py-3">
+                  <tr key={`${tenant.id}-expanded`} className="border-b border-[var(--border-subtle)]">
+                    <td colSpan={6} className="bg-white/[0.02] pl-10 pr-4 py-3">
                       <div className="mb-2 flex items-center justify-between">
                         <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
                           Per-User Breakdown
@@ -215,7 +215,7 @@ export function TenantHeatmap({ data }: TenantHeatmapProps) {
                       ) : (
                         <table className="w-full text-xs">
                           <thead>
-                            <tr className="border-b border-border/50">
+                            <tr className="border-b border-[var(--border-subtle)]/50">
                               <th className="py-1.5 pr-4 text-left text-muted-foreground font-medium">User</th>
                               <th className="py-1.5 pr-4 text-left text-muted-foreground font-medium">Searches</th>
                               <th className="py-1.5 pr-4 text-left text-muted-foreground font-medium">Enrichments</th>
@@ -224,7 +224,7 @@ export function TenantHeatmap({ data }: TenantHeatmapProps) {
                           </thead>
                           <tbody>
                             {tenant.users.map((user) => (
-                              <tr key={user.id} className="border-b border-border/30 last:border-0">
+                              <tr key={user.id} className="border-b border-[var(--border-subtle)]/30 last:border-0">
                                 <td className="py-1.5 pr-4 font-medium">{user.fullName}</td>
                                 <td className="py-1.5 pr-4 text-muted-foreground">{user.searches7d.toLocaleString()}</td>
                                 <td className="py-1.5 pr-4 text-muted-foreground">{user.enrichments7d.toLocaleString()}</td>

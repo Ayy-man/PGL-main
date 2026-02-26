@@ -25,11 +25,11 @@ function SkeletonCard() {
       }}
     >
       <div className="flex items-center justify-between mb-4">
-        <div className="h-3 w-28 bg-muted rounded" />
-        <div className="h-4 w-4 bg-muted rounded" />
+        <div className="h-3 w-28 bg-white/[0.06] rounded" />
+        <div className="h-4 w-4 bg-white/[0.06] rounded" />
       </div>
-      <div className="h-9 w-20 bg-muted rounded mb-2" />
-      <div className="h-3 w-36 bg-muted rounded" />
+      <div className="h-9 w-20 bg-white/[0.06] rounded mb-2" />
+      <div className="h-3 w-36 bg-white/[0.06] rounded" />
     </div>
   );
 }
@@ -108,7 +108,7 @@ function ApiQuotaPlaceholder() {
             <span className="text-xs text-muted-foreground w-20 shrink-0">
               {provider}
             </span>
-            <div className="flex-1 h-1.5 bg-muted rounded-full">
+            <div className="flex-1 h-1.5 bg-white/[0.06] rounded-full">
               <div className="h-1.5 w-0 rounded-full" style={{ background: "var(--gold-primary)" }} />
             </div>
           </div>
