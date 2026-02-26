@@ -41,7 +41,7 @@ export function CreateListDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
+        <Button variant="gold">
           <Plus className="h-4 w-4 mr-2" />
           Create List
         </Button>
