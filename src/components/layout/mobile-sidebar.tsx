@@ -34,7 +34,14 @@ export function MobileSidebar({
   return (
     <div className="lg:hidden">
       {/* Fixed mobile header bar */}
-      <div className="fixed top-0 left-0 right-0 z-40 flex h-14 items-center gap-3 border-b border-border bg-card px-4">
+      <div
+        className="fixed top-0 left-0 right-0 z-40 flex h-14 items-center gap-3 px-4"
+        style={{
+          background: "rgba(8,8,10,0.85)",
+          backdropFilter: "blur(12px)",
+          borderBottom: "1px solid var(--border-subtle)",
+        }}
+      >
         <Button
           variant="ghost"
           size="icon"
@@ -44,15 +51,23 @@ export function MobileSidebar({
         >
           <Menu className="h-5 w-5" />
         </Button>
-        <span className="font-serif text-sm font-semibold">{tenantName}</span>
+        <span className="font-serif text-sm font-semibold text-foreground">{tenantName}</span>
       </div>
 
       {/* Spacer to push content below fixed header */}
       <div className="h-14" />
 
-      {/* Sheet drawer */}
+      {/* Sheet drawer with gradient background and gold accent */}
       <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent side="left" className="w-64 p-0 bg-card">
+        <SheetContent
+          side="left"
+          className="p-0"
+          style={{
+            width: "220px",
+            background: "var(--bg-sidebar)",
+            borderRight: "1px solid var(--border-sidebar)",
+          }}
+        >
           <SheetTitle className="sr-only">Navigation</SheetTitle>
           <div className="flex h-full flex-col">
             <SidebarContent

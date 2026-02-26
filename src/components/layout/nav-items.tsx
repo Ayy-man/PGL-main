@@ -35,13 +35,35 @@ export function NavItems({ orgId }: NavItemsProps) {
           <Link
             key={item.href}
             href={fullHref}
-            className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 cursor-pointer ${
+            className="flex items-center gap-3 rounded-[8px] px-3 py-2.5 text-sm font-medium transition-all duration-200 cursor-pointer"
+            style={
               isActive
-                ? "bg-gold/10 text-gold"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground"
-            }`}
+                ? {
+                    background: "var(--gold-bg)",
+                    color: "var(--gold-primary)",
+                    borderLeft: "3px solid var(--gold-primary)",
+                    paddingLeft: "9px", // px-3 (12px) - 3px border = 9px to preserve alignment
+                  }
+                : {
+                    color: "var(--text-secondary-ds)",
+                    borderLeft: "3px solid transparent",
+                    paddingLeft: "9px",
+                  }
+            }
+            onMouseEnter={(e) => {
+              if (!isActive) {
+                (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.02)";
+                (e.currentTarget as HTMLElement).style.color = "var(--text-primary-ds)";
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isActive) {
+                (e.currentTarget as HTMLElement).style.background = "";
+                (e.currentTarget as HTMLElement).style.color = "var(--text-secondary-ds)";
+              }
+            }}
           >
-            <item.icon className={`h-4 w-4 transition-colors duration-150 ${isActive ? "text-gold" : "text-muted-foreground group-hover:text-foreground"}`} />
+            <item.icon className="h-4 w-4 shrink-0" />
             {item.label}
           </Link>
         );
