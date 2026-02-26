@@ -575,6 +575,22 @@ Plans:
 - [ ] 04-03-PLAN.md — Dashboard UI components (stat cards, heatmap, charts, error feed)
 - [ ] 04-04-PLAN.md — Dashboard assembly: refactor admin page to client component with 60s polling
 
+### Phase 5: UI Revamp — Apply Design System (Dark Luxury Aesthetic, Gold Accents, Layered Glass Surfaces, Cormorant + DM Sans Typography, CSS Variable Token System)
+
+**Goal:** Transform every page and component to match the comprehensive design system — dark luxury aesthetic with gold accents, layered glass surfaces, Cormorant Garamond + DM Sans typography, CSS variable token system, gradient sidebar, sticky top bar, ambient gold glow, and prospect slide-over panel.
+**Requirements**: UI-01, UI-02, UI-03, UI-04, UI-05, UI-06, SRCH-02, SRCH-03, SRCH-05, LIST-02, LIST-06, ANLY-02, ANLY-05, SA-01, PROF-01, PROF-07, PROF-09
+**Depends on:** Phase 4
+**Plans:** 7 plans
+
+Plans:
+- [ ] 05-01-PLAN.md — CSS variable tokens, font swap (DM Sans + Cormorant Garamond), tailwind.config.ts extensions
+- [ ] 05-02-PLAN.md — Shared UI primitives (Button gold variant, Card surface treatment, Badge, EmptyState, Dialog)
+- [ ] 05-03-PLAN.md — Layout shell (gradient sidebar, sticky top bar, ambient glow, page transitions)
+- [ ] 05-04-PLAN.md — Search page rebuild (persona card grid + prospect result cards + wealth tier badges)
+- [ ] 05-05-PLAN.md — Lists, Dashboard, Analytics, Admin Dashboard, Personas page updates
+- [ ] 05-06-PLAN.md — Prospect slide-over panel (480px Sheet) + profile view token migration
+- [ ] 05-07-PLAN.md — Admin chart hex-to-CSS-variable migration + visual verification checkpoint
+
 ---
 
 *Roadmap created: 2026-02-08*
