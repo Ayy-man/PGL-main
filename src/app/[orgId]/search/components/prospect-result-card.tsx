@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import type { ApolloPerson } from "@/lib/apollo/types";
+import type { List } from "@/lib/lists/types";
 import { WealthTierBadge } from "./wealth-tier-badge";
+import { AddToListDialog } from "./add-to-list-dialog";
 import { Button } from "@/components/ui/button";
 import { Mail, Phone, Linkedin } from "lucide-react";
 
@@ -26,7 +28,6 @@ function getLocation(person: ApolloPerson): string {
 }
 
 // Derive a rough wealth tier from job title / seniority signals
-// In production this would come from enrichment data; for now we derive heuristically
 function getWealthTier(
   person: ApolloPerson
 ): "$500M+" | "$100M+" | "$50M+" | "$30M+" | null {
@@ -60,14 +61,16 @@ function getWealthTier(
 
 interface ProspectResultCardProps {
   prospect: ApolloPerson;
+  lists: List[];
+  orgId: string;
   onClick: () => void;
-  onAddToList: () => void;
 }
 
 export function ProspectResultCard({
   prospect,
+  lists,
+  orgId,
   onClick,
-  onAddToList,
 }: ProspectResultCardProps) {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -77,7 +80,10 @@ export function ProspectResultCard({
   const location = getLocation(prospect);
   const wealthTier = getWealthTier(prospect);
 
-  const hasEmail = Boolean(prospect.email) || prospect.email_status === "verified" || prospect.email_status === "guessed";
+  const hasEmail =
+    Boolean(prospect.email) ||
+    prospect.email_status === "verified" ||
+    prospect.email_status === "guessed";
   const hasPhone = Boolean(prospect.phone_numbers?.length);
   const hasLinkedin = Boolean(prospect.linkedin_url);
 
@@ -121,7 +127,9 @@ export function ProspectResultCard({
           {/* Title + Company */}
           {(prospect.title || prospect.organization_name) && (
             <p className="text-[13px] text-muted-foreground mt-0.5">
-              {[prospect.title, prospect.organization_name].filter(Boolean).join(" · ")}
+              {[prospect.title, prospect.organization_name]
+                .filter(Boolean)
+                .join(" · ")}
             </p>
           )}
 
@@ -151,7 +159,7 @@ export function ProspectResultCard({
         </div>
       </div>
 
-      {/* Right section */}
+      {/* Right section — stop propagation so card click doesn't fire */}
       <div
         className="flex flex-col items-end gap-3 ml-6 flex-shrink-0"
         onClick={(e) => e.stopPropagation()}
@@ -176,7 +184,9 @@ export function ProspectResultCard({
             <Mail
               className="h-3.5 w-3.5"
               style={{
-                color: hasEmail ? "var(--gold-primary)" : "rgba(255,255,255,0.25)",
+                color: hasEmail
+                  ? "var(--gold-primary)"
+                  : "rgba(255,255,255,0.25)",
               }}
             />
           </div>
@@ -199,7 +209,9 @@ export function ProspectResultCard({
             <Phone
               className="h-3.5 w-3.5"
               style={{
-                color: hasPhone ? "var(--gold-primary)" : "rgba(255,255,255,0.25)",
+                color: hasPhone
+                  ? "var(--gold-primary)"
+                  : "rgba(255,255,255,0.25)",
               }}
             />
           </div>
@@ -222,20 +234,25 @@ export function ProspectResultCard({
             <Linkedin
               className="h-3.5 w-3.5"
               style={{
-                color: hasLinkedin ? "var(--gold-primary)" : "rgba(255,255,255,0.25)",
+                color: hasLinkedin
+                  ? "var(--gold-primary)"
+                  : "rgba(255,255,255,0.25)",
               }}
             />
           </div>
         </div>
 
-        {/* Add to List button */}
-        <Button
-          variant="gold"
-          size="sm"
-          onClick={onAddToList}
-        >
-          + Add to List
-        </Button>
+        {/* Add to List dialog — trigger is the gold button */}
+        <AddToListDialog
+          prospect={prospect}
+          lists={lists}
+          orgId={orgId}
+          trigger={
+            <Button variant="gold" size="sm">
+              + Add to List
+            </Button>
+          }
+        />
       </div>
     </div>
   );

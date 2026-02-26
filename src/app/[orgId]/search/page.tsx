@@ -14,11 +14,17 @@ function SearchFallback() {
   return (
     <div className="space-y-8">
       <div>
-        <Skeleton className="h-9 w-48 mb-2" />
+        <Skeleton className="h-12 w-64 mb-3" />
         <Skeleton className="h-5 w-72" />
       </div>
-      <Skeleton className="h-10 w-[320px]" />
-      <Skeleton className="h-[500px] w-full" />
+      <div
+        className="grid gap-5"
+        style={{ gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))" }}
+      >
+        {[1, 2, 3].map((n) => (
+          <Skeleton key={n} className="h-[200px] w-full rounded-[14px]" />
+        ))}
+      </div>
     </div>
   );
 }
@@ -46,16 +52,8 @@ export default async function SearchPage({ params }: PageProps) {
   ]);
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="font-serif text-3xl font-bold tracking-tight">Search Prospects</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Select a persona to find matching prospects
-        </p>
-      </div>
-      <Suspense fallback={<SearchFallback />}>
-        <SearchContent personas={personas} lists={lists} orgId={orgId} />
-      </Suspense>
-    </div>
+    <Suspense fallback={<SearchFallback />}>
+      <SearchContent personas={personas} lists={lists} orgId={orgId} />
+    </Suspense>
   );
 }
