@@ -133,7 +133,7 @@ function PersonaCard({ persona, orgId }: { persona: Persona; orgId: string }) {
       </CardContent>
 
       <CardFooter className="flex gap-2">
-        <Button asChild size="sm" className="flex-1">
+        <Button asChild size="sm" className="flex-1 cursor-pointer">
           <Link href={`/${orgId}/search?persona=${persona.id}`}>
             <Search className="h-4 w-4" />
             Search
@@ -146,15 +146,16 @@ function PersonaCard({ persona, orgId }: { persona: Persona; orgId: string }) {
               mode="edit"
               persona={persona}
               trigger={
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="cursor-pointer">
                   <Pencil className="h-4 w-4" />
                 </Button>
               }
             />
 
             <Button
-              variant="destructive"
+              variant="ghost"
               size="sm"
+              className="text-muted-foreground hover:text-destructive cursor-pointer"
               onClick={handleDelete}
               disabled={isDeleting}
             >

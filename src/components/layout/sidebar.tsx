@@ -18,13 +18,16 @@ export function SidebarContent({
       <div className="flex items-center gap-3 border-b border-border px-5 py-5">
         <TenantLogo logoUrl={logoUrl} tenantName={tenantName} />
         <div className="flex flex-col">
-          <span className="font-serif text-sm font-semibold">
+          <span className="font-serif text-base font-semibold text-foreground">
             {tenantName}
+          </span>
+          <span className="text-[10px] font-medium tracking-widest uppercase text-gold/70">
+            PGL
           </span>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto py-6">
+      <div className="flex-1 overflow-y-auto py-5">
         <NavItems orgId={orgId} />
       </div>
     </>

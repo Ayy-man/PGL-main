@@ -21,7 +21,7 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center text-center py-16 px-6 border border-dashed rounded-xl",
+        "flex flex-col items-center justify-center text-center py-20 px-6 rounded-xl border border-dashed",
         variant === "error" && "border-destructive/30 bg-destructive/5",
         className
       )}
@@ -29,7 +29,7 @@ export function EmptyState({
       {Icon && (
         <div
           className={cn(
-            "mb-4 flex h-14 w-14 items-center justify-center rounded-full",
+            "mb-5 flex h-12 w-12 items-center justify-center rounded-xl",
             variant === "error"
               ? "bg-destructive/10"
               : "bg-muted"
@@ -37,7 +37,7 @@ export function EmptyState({
         >
           <Icon
             className={cn(
-              "h-6 w-6",
+              "h-5 w-5",
               variant === "error"
                 ? "text-destructive"
                 : "text-muted-foreground"
@@ -47,14 +47,14 @@ export function EmptyState({
       )}
       <h3
         className={cn(
-          "text-base font-semibold",
+          "text-sm font-semibold",
           variant === "error" ? "text-destructive" : "text-foreground"
         )}
       >
         {title}
       </h3>
       {description && (
-        <p className="mt-1.5 text-sm text-muted-foreground max-w-xs">
+        <p className="mt-1.5 text-xs text-muted-foreground max-w-xs leading-relaxed">
           {description}
         </p>
       )}

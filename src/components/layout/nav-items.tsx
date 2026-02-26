@@ -26,7 +26,7 @@ export function NavItems({ orgId }: NavItemsProps) {
   const pathname = usePathname();
 
   return (
-    <nav className="flex flex-col gap-1.5 px-4">
+    <nav className="flex flex-col gap-1 px-3">
       {NAV_ITEMS.map((item) => {
         const fullHref = `/${orgId}${item.href}`;
         const isActive = pathname === fullHref || pathname.startsWith(`${fullHref}/`);
@@ -35,13 +35,13 @@ export function NavItems({ orgId }: NavItemsProps) {
           <Link
             key={item.href}
             href={fullHref}
-            className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors cursor-pointer ${
+            className={`group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 cursor-pointer ${
               isActive
-                ? "bg-accent text-accent-foreground"
-                : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+                ? "bg-gold/10 text-gold"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
             }`}
           >
-            <item.icon className="h-4 w-4" />
+            <item.icon className={`h-4 w-4 transition-colors duration-150 ${isActive ? "text-gold" : "text-muted-foreground group-hover:text-foreground"}`} />
             {item.label}
           </Link>
         );

@@ -40,13 +40,13 @@ function StatCard({ label, value, subtitle, icon, accentSubtitle }: StatCardProp
   const animated = useCountUp(value);
 
   return (
-    <div className="rounded-lg border border-border bg-card p-6">
-      <div className="flex items-center justify-between mb-4">
-        <p className="text-sm text-muted-foreground">{label}</p>
-        <span className="text-muted-foreground">{icon}</span>
+    <div className="rounded-xl border border-border bg-card p-5">
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{label}</p>
+        <span className="text-muted-foreground/60">{icon}</span>
       </div>
-      <p className="text-3xl font-bold tabular-nums">{animated.toLocaleString()}</p>
-      <p className={`mt-1 text-sm ${accentSubtitle ? "text-primary" : "text-muted-foreground"}`}>
+      <p className="text-2xl font-bold tabular-nums text-foreground">{animated.toLocaleString()}</p>
+      <p className={`mt-1 text-xs ${accentSubtitle ? "text-gold" : "text-muted-foreground"}`}>
         {subtitle}
       </p>
     </div>

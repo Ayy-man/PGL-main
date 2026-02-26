@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Check, X, ListPlus } from "lucide-react";
 import { AddToListDialog } from "./add-to-list-dialog";
+import Link from "next/link";
 
 function getLocation(person: ApolloPerson): string {
   const parts = [person.city, person.state, person.country].filter(Boolean);
@@ -63,11 +64,20 @@ function createColumns(lists: List[], orgId: string): ColumnDef<ApolloPerson>[] 
       accessorKey: "name",
       header: "Name",
       enableSorting: true,
-      cell: ({ row }) => (
-        <div className="font-medium min-w-[140px]">
-          {row.original.name}
-        </div>
-      ),
+      cell: ({ row }) => {
+        const prospectId = row.original.id;
+        const name = row.original.name;
+        return prospectId ? (
+          <Link
+            href={`/${orgId}/prospects/${prospectId}`}
+            className="font-medium min-w-[140px] text-foreground hover:text-gold transition-colors cursor-pointer"
+          >
+            {name}
+          </Link>
+        ) : (
+          <div className="font-medium min-w-[140px]">{name}</div>
+        );
+      },
     },
     {
       accessorKey: "title",

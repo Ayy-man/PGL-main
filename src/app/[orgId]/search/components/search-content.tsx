@@ -57,14 +57,14 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
       ) : !searchState.persona ? (
         <EmptyState
           icon={Search}
-          title="Select a persona to search for prospects"
-          description="Choose from starter personas or create your own"
+          title="Choose a persona to begin"
+          description="Each persona defines the buyer profile you're targeting — titles, industries, seniority, and more."
         />
       ) : !isLoading && results.length === 0 ? (
         <EmptyState
           icon={Search}
-          title="No prospects found for this persona"
-          description="Try adjusting the persona filters to broaden your search"
+          title="No matching prospects"
+          description="Try broadening the persona filters — fewer constraints often surface better results."
         />
       ) : (
         <SearchResultsTable

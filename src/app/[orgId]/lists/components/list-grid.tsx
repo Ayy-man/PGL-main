@@ -44,36 +44,37 @@ export function ListGrid({ lists }: ListGridProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {lists.map((list) => (
-        <Card key={list.id} className="flex flex-col transition-colors hover:border-gold/20">
-          <CardHeader>
-            <CardTitle className="font-serif">{list.name}</CardTitle>
+        <Card key={list.id} className="flex flex-col transition-all duration-150 hover:border-gold/20">
+          <CardHeader className="pb-3">
+            <CardTitle className="font-serif text-lg">{list.name}</CardTitle>
             {list.description && (
-              <CardDescription>{list.description}</CardDescription>
+              <CardDescription className="line-clamp-2">{list.description}</CardDescription>
             )}
           </CardHeader>
           <CardContent className="flex-1">
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Members</span>
-                <span className="font-medium">{list.member_count}</span>
+            <div className="flex items-center gap-4 text-sm">
+              <div>
+                <span className="text-2xl font-bold tabular-nums text-foreground">{list.member_count}</span>
+                <span className="ml-1.5 text-xs text-muted-foreground">prospects</span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Last Updated</span>
-                <span className="font-medium">{formatDate(list.updated_at)}</span>
+              <div className="h-8 w-px bg-border" />
+              <div className="text-xs text-muted-foreground">
+                Updated {formatDate(list.updated_at)}
               </div>
             </div>
           </CardContent>
-          <CardFooter className="flex gap-2">
-            <Button asChild className="flex-1">
-              <Link href={`/${orgId}/lists/${list.id}`}>View</Link>
+          <CardFooter className="flex gap-2 pt-0">
+            <Button asChild size="sm" className="flex-1 cursor-pointer">
+              <Link href={`/${orgId}/lists/${list.id}`}>View List</Link>
             </Button>
             <Button
-              variant="destructive"
+              variant="ghost"
               size="icon"
+              className="h-8 w-8 text-muted-foreground hover:text-destructive cursor-pointer"
               onClick={() => handleDelete(list.id)}
               disabled={deletingId === list.id}
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-3.5 w-3.5" />
             </Button>
           </CardFooter>
         </Card>

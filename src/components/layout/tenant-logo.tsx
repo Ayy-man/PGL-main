@@ -17,7 +17,7 @@ export function TenantLogo({ logoUrl, tenantName, className }: TenantLogoProps) 
 
   return (
     <div
-      className={`flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground font-serif font-bold text-sm ${className || ""}`}
+      className={`flex h-8 w-8 items-center justify-center rounded-lg bg-gold/15 text-gold font-serif font-bold text-sm ring-1 ring-gold/20 ${className || ""}`}
     >
       {tenantName.charAt(0).toUpperCase()}
     </div>

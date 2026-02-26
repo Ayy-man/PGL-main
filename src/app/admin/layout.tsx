@@ -1,12 +1,5 @@
 import { requireSuperAdmin } from "@/lib/auth/rbac";
-import Link from "next/link";
-import { Building2, Users, LayoutDashboard } from "lucide-react";
-
-const ADMIN_NAV = [
-  { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-  { label: "Tenants", href: "/admin/tenants", icon: Building2 },
-  { label: "Users", href: "/admin/users", icon: Users },
-];
+import { AdminNavLinks } from "./admin-nav-links";
 
 export default async function AdminLayout({
   children,
@@ -19,29 +12,18 @@ export default async function AdminLayout({
   return (
     <div className="flex min-h-screen">
       {/* Admin sidebar */}
-      <aside className="flex h-screen w-64 flex-col border-r border-border bg-card">
-        <div className="border-b border-border px-4 py-4">
-          <span className="font-serif text-lg font-bold text-primary">
-            PGL Admin
+      <aside className="sticky top-0 flex h-screen w-64 flex-col border-r border-border bg-card">
+        <div className="border-b border-border px-5 py-5">
+          <span className="font-serif text-lg font-bold text-gold">
+            PGL
           </span>
-          <p className="text-xs text-muted-foreground mt-1">
-            Super Admin Panel
+          <p className="text-[10px] font-medium tracking-widest uppercase text-muted-foreground mt-1">
+            Admin Console
           </p>
         </div>
 
-        <nav className="flex-1 overflow-y-auto py-4 px-3">
-          <div className="flex flex-col gap-1">
-            {ADMIN_NAV.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground"
-              >
-                <item.icon className="h-4 w-4" />
-                {item.label}
-              </Link>
-            ))}
-          </div>
+        <nav className="flex-1 overflow-y-auto py-5 px-3">
+          <AdminNavLinks />
         </nav>
 
         <div className="border-t border-border p-4">

@@ -154,43 +154,46 @@ export function ProfileView({
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
         {/* Header Section */}
-        <div className="rounded-lg border bg-card p-8">
+        <div className="rounded-xl border bg-card p-8">
           <div className="flex items-start justify-between gap-6">
             <div className="flex-1">
-              <h1 className="mb-2 font-serif text-4xl font-bold text-foreground">
+              <h1 className="mb-1 font-serif text-3xl font-bold text-foreground">
                 {prospect.full_name}
               </h1>
               {prospect.title && prospect.company && (
-                <p className="mb-3 text-xl text-foreground">
-                  {prospect.title} @ {prospect.company}
+                <p className="mb-3 text-lg text-muted-foreground">
+                  {prospect.title}{" "}
+                  <span className="text-foreground/60">@</span>{" "}
+                  <span className="text-foreground">{prospect.company}</span>
                 </p>
               )}
               {prospect.location && (
                 <div className="flex items-center gap-2 text-muted-foreground">
-                  <MapPin className="h-4 w-4" />
+                  <MapPin className="h-3.5 w-3.5" />
                   <span className="text-sm">{prospect.location}</span>
                 </div>
               )}
               {isStale && (
-                <div className="mt-4 inline-flex items-center gap-2 rounded-md border border-warning/30 bg-warning-muted px-3 py-1.5 text-sm text-warning">
+                <div className="mt-4 inline-flex items-center gap-2 rounded-lg border border-warning/30 bg-warning-muted px-3 py-1.5 text-sm text-warning">
                   <AlertCircle className="h-4 w-4" />
-                  Data may be outdated - refreshing...
+                  Data may be outdated — refreshing...
                 </div>
               )}
             </div>
 
             {/* Quick Actions */}
-            <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="outline"
+                    size="sm"
                     disabled={isAddingToList}
                     className="cursor-pointer"
                   >
-                    <Plus className="mr-2 h-4 w-4" />
+                    <Plus className="mr-1.5 h-3.5 w-3.5" />
                     Add to List
                   </Button>
                 </DropdownMenuTrigger>
@@ -209,20 +212,21 @@ export function ProfileView({
 
               <Button
                 variant="outline"
+                size="sm"
                 onClick={() => setShowLookalikeDiscovery(!showLookalikeDiscovery)}
                 className="cursor-pointer"
               >
-                <UserSearch className="mr-2 h-4 w-4" />
-                {showLookalikeDiscovery ? "Hide" : "Show"} Similar People
+                <UserSearch className="mr-1.5 h-3.5 w-3.5" />
+                Similar
               </Button>
 
               <Button
-                variant="outline"
+                variant="ghost"
+                size="sm"
                 onClick={handleExport}
-                className="cursor-pointer"
+                className="text-muted-foreground cursor-pointer"
               >
-                <Download className="mr-2 h-4 w-4" />
-                Export Profile
+                <Download className="h-3.5 w-3.5" />
               </Button>
             </div>
           </div>
@@ -235,8 +239,8 @@ export function ProfileView({
         />
 
         {/* Contact Section */}
-        <div className="rounded-lg border bg-card p-6">
-          <h3 className="mb-6 font-serif text-xl font-semibold text-foreground">
+        <div className="rounded-xl border bg-card p-6">
+          <h3 className="mb-5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Contact Information
           </h3>
 
@@ -329,24 +333,24 @@ export function ProfileView({
         </div>
 
         {/* AI Summary Section */}
-        <div className="rounded-lg border border-gold bg-card p-6">
-          <h3 className="mb-4 font-serif text-xl font-semibold text-foreground">
+        <div className="rounded-xl border border-gold/30 bg-gold/[0.03] p-6">
+          <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gold">
             Why Recommended
           </h3>
           {prospect.ai_summary ? (
-            <p className="text-foreground leading-relaxed">{prospect.ai_summary}</p>
+            <p className="text-sm text-foreground leading-relaxed">{prospect.ai_summary}</p>
           ) : (
             <p className="text-sm text-muted-foreground">
-              AI summary will be generated after enrichment completes
+              AI summary will be generated after enrichment completes.
             </p>
           )}
         </div>
 
-        {/* Lookalike Discovery Section - Plan 03-08 */}
+        {/* Lookalike Discovery Section */}
         {showLookalikeDiscovery && (
-          <div className="rounded-lg border bg-card p-6">
-            <h3 className="mb-6 font-serif text-xl font-semibold text-foreground">
-              Find Similar People
+          <div className="rounded-xl border bg-card p-6">
+            <h3 className="mb-5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Similar People
             </h3>
             <LookalikeDiscovery
               prospectId={prospect.id}
@@ -362,8 +366,8 @@ export function ProfileView({
         />
 
         {/* Lists Section */}
-        <div className="rounded-lg border bg-card p-6">
-          <h3 className="mb-6 font-serif text-xl font-semibold text-foreground">
+        <div className="rounded-xl border bg-card p-6">
+          <h3 className="mb-5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             List Memberships
           </h3>
 
