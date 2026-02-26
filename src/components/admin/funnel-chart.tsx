@@ -44,8 +44,8 @@ export function FunnelChart({ data }: FunnelChartProps) {
 
   if (data === null) {
     return (
-      <div className="rounded-[14px] p-6" style={{ background: "var(--bg-card-gradient)", border: "1px solid var(--border-subtle)" }}>
-        <p className="text-sm text-muted-foreground mb-4">Search-to-Export Funnel</p>
+      <div className="surface-admin-card p-6">
+        <p className="text-sm font-medium mb-4" style={{ color: "var(--admin-text-secondary)" }}>Search-to-Export Funnel</p>
         <div className="h-[280px] flex flex-col gap-3 items-center justify-center">
           {Array.from({ length: 4 }).map((_, i) => (
             <div
@@ -66,8 +66,8 @@ export function FunnelChart({ data }: FunnelChartProps) {
 
   if (allZero) {
     return (
-      <div className="rounded-[14px] p-6" style={{ background: "var(--bg-card-gradient)", border: "1px solid var(--border-subtle)" }}>
-        <p className="text-sm text-muted-foreground mb-4">Search-to-Export Funnel (30d)</p>
+      <div className="surface-admin-card p-6">
+        <p className="text-sm font-medium mb-4" style={{ color: "var(--admin-text-secondary)" }}>Search-to-Export Funnel (30d)</p>
         <div className="h-[280px] flex items-center justify-center">
           <p className="text-sm text-muted-foreground">No activity yet. Search and export prospects to see funnel data.</p>
         </div>
@@ -76,8 +76,8 @@ export function FunnelChart({ data }: FunnelChartProps) {
   }
 
   return (
-    <div className="rounded-[14px] p-6" style={{ background: "var(--bg-card-gradient)", border: "1px solid var(--border-subtle)" }}>
-      <p className="text-sm text-muted-foreground mb-4">Search-to-Export Funnel (30d)</p>
+    <div className="surface-admin-card p-6">
+      <p className="text-sm font-medium mb-4" style={{ color: "var(--admin-text-secondary)" }}>Search-to-Export Funnel (30d)</p>
       <ResponsiveContainer width="100%" height={280}>
         <RechartsFunnelChart>
           <Tooltip

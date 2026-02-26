@@ -166,6 +166,18 @@
     --shadow-lg: 0px 12px 32px 2px hsl(0 0% 0% / 0.40), 0px 4px 6px 1px hsl(0 0% 0% / 0.40);
     --shadow-xl: 0px 12px 32px 2px hsl(0 0% 0% / 0.40), 0px 8px 10px 1px hsl(0 0% 0% / 0.40);
     --shadow-2xl: 0px 12px 32px 2px hsl(0 0% 0% / 1.00);
+
+    /* Admin-scoped tokens */
+    --admin-card-bg: linear-gradient(145deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 100%);
+    --admin-card-bg-hover: linear-gradient(145deg, rgba(212,175,55,0.08) 0%, rgba(255,255,255,0.04) 100%);
+    --admin-border: rgba(255,255,255,0.12);
+    --admin-border-hover: rgba(212,175,55,0.20);
+    --admin-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.2);
+    --admin-shadow-hover: 0 4px 16px rgba(0,0,0,0.4), 0 2px 6px rgba(0,0,0,0.25);
+    --admin-thead-bg: rgba(255,255,255,0.05);
+    --admin-row-hover: rgba(255,255,255,0.04);
+    --admin-row-border: rgba(255,255,255,0.07);
+    --admin-text-secondary: rgba(232,228,220,0.65);
   }
   body {
     letter-spacing: var(--tracking-normal);
@@ -240,5 +252,39 @@
     background: radial-gradient(circle, rgba(212,175,55,0.02) 0%, transparent 70%);
     pointer-events: none;
     z-index: 0;
+  }
+
+  /* Admin surface & table utilities */
+  .surface-admin-card {
+    background: var(--admin-card-bg);
+    border: 1px solid var(--admin-border);
+    border-radius: 14px;
+    box-shadow: var(--admin-shadow);
+    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .surface-admin-card:hover {
+    background: var(--admin-card-bg-hover);
+    border-color: var(--admin-border-hover);
+    box-shadow: var(--admin-shadow-hover);
+  }
+
+  .admin-thead { background: var(--admin-thead-bg); }
+  .admin-row-hover { transition: background 0.15s ease; }
+  .admin-row-hover:hover { background: var(--admin-row-hover); }
+
+  .admin-section-heading {
+    position: relative;
+    padding-left: 12px;
+  }
+  .admin-section-heading::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 60%;
+    border-radius: 2px;
+    background: var(--gold-primary);
   }
 }

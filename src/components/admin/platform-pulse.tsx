@@ -17,13 +17,8 @@ interface PlatformPulseProps {
 
 function SkeletonCard() {
   return (
-    <div
-      className="rounded-[14px] p-5 animate-pulse"
-      style={{
-        background: "var(--bg-card-gradient)",
-        border: "1px solid var(--border-subtle)",
-      }}
-    >
+    <div className="surface-admin-card rounded-[14px] p-5 animate-pulse">
+
       <div className="flex items-center justify-between mb-4">
         <div className="h-3 w-28 bg-white/[0.06] rounded" />
         <div className="h-4 w-4 bg-white/[0.06] rounded" />
@@ -47,18 +42,12 @@ function StatCard({ label, value, subtitle, icon, accentSubtitle }: StatCardProp
   const isNonZero = value > 0;
 
   return (
-    <div
-      className="rounded-[14px] p-5"
-      style={{
-        background: "var(--bg-card-gradient)",
-        border: "1px solid var(--border-subtle)",
-      }}
-    >
+    <div className="surface-admin-card rounded-[14px] p-5">
       <div className="flex items-center justify-between mb-3">
-        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>
           {label}
         </p>
-        <span className="text-muted-foreground/60">{icon}</span>
+        <span style={{ color: "var(--admin-text-secondary)", opacity: 0.7 }}>{icon}</span>
       </div>
       <p
         className="font-serif font-bold leading-none"
@@ -71,7 +60,7 @@ function StatCard({ label, value, subtitle, icon, accentSubtitle }: StatCardProp
       </p>
       <p
         className="mt-1.5 text-xs"
-        style={{ color: accentSubtitle ? "var(--gold-primary)" : "var(--text-secondary)" }}
+        style={{ color: accentSubtitle ? "var(--gold-primary)" : "var(--admin-text-secondary)" }}
       >
         {subtitle}
       </p>
@@ -81,18 +70,12 @@ function StatCard({ label, value, subtitle, icon, accentSubtitle }: StatCardProp
 
 function ApiQuotaPlaceholder() {
   return (
-    <div
-      className="rounded-[14px] p-5"
-      style={{
-        background: "var(--bg-card-gradient)",
-        border: "1px solid var(--border-subtle)",
-      }}
-    >
+    <div className="surface-admin-card rounded-[14px] p-5">
       <div className="flex items-center justify-between mb-4">
-        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>
           API Quota Burn
         </p>
-        <span className="text-muted-foreground">
+        <span style={{ color: "var(--admin-text-secondary)" }}>
           <Activity className="h-4 w-4" />
         </span>
       </div>
@@ -105,7 +88,7 @@ function ApiQuotaPlaceholder() {
       <div className="space-y-2">
         {["Apollo", "ContactOut", "Exa", "EDGAR", "Claude"].map((provider) => (
           <div key={provider} className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground w-20 shrink-0">
+            <span className="text-xs w-20 shrink-0" style={{ color: "var(--admin-text-secondary)" }}>
               {provider}
             </span>
             <div className="flex-1 h-1.5 bg-white/[0.06] rounded-full">

@@ -56,8 +56,8 @@ function formatDate(dateStr: string): string {
 export function EnrichmentHealthChart({ data }: EnrichmentHealthChartProps) {
   if (data === null) {
     return (
-      <div className="rounded-[14px] p-6" style={{ background: "var(--bg-card-gradient)", border: "1px solid var(--border-subtle)" }}>
-        <p className="text-sm text-muted-foreground mb-4">Enrichment Pipeline Health</p>
+      <div className="surface-admin-card p-6">
+        <p className="text-sm font-medium mb-4" style={{ color: "var(--admin-text-secondary)" }}>Enrichment Pipeline Health</p>
         <div className="h-[300px] animate-pulse flex items-end gap-2 px-4">
           {Array.from({ length: 7 }).map((_, i) => (
             <div
@@ -73,8 +73,8 @@ export function EnrichmentHealthChart({ data }: EnrichmentHealthChartProps) {
 
   if (data.length === 0) {
     return (
-      <div className="rounded-[14px] p-6" style={{ background: "var(--bg-card-gradient)", border: "1px solid var(--border-subtle)" }}>
-        <p className="text-sm text-muted-foreground mb-4">Enrichment Pipeline Health (per source, daily)</p>
+      <div className="surface-admin-card p-6">
+        <p className="text-sm font-medium mb-4" style={{ color: "var(--admin-text-secondary)" }}>Enrichment Pipeline Health (per source, daily)</p>
         <div className="h-[300px] flex items-center justify-center">
           <p className="text-sm text-muted-foreground">No enrichment data yet. Enrich prospects to see pipeline health.</p>
         </div>
@@ -83,8 +83,8 @@ export function EnrichmentHealthChart({ data }: EnrichmentHealthChartProps) {
   }
 
   return (
-    <div className="rounded-[14px] p-6" style={{ background: "var(--bg-card-gradient)", border: "1px solid var(--border-subtle)" }}>
-      <p className="text-sm text-muted-foreground mb-4">Enrichment Pipeline Health (per source, daily)</p>
+    <div className="surface-admin-card p-6">
+      <p className="text-sm font-medium mb-4" style={{ color: "var(--admin-text-secondary)" }}>Enrichment Pipeline Health (per source, daily)</p>
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />

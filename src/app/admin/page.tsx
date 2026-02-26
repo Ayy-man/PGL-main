@@ -172,7 +172,7 @@ export default function AdminDashboard() {
           <h1 className="font-serif text-3xl font-bold tracking-tight">
             Platform Health
           </h1>
-          <p className="text-muted-foreground mt-1 text-sm">
+          <p className="mt-1 text-sm" style={{ color: "var(--admin-text-secondary)" }}>
             Real-time platform monitoring
           </p>
         </div>
@@ -194,7 +194,7 @@ export default function AdminDashboard() {
 
       {/* Section 2: Tenant Activity Heatmap */}
       <section>
-        <h2 className="font-serif text-xl font-semibold mb-4">
+        <h2 className="font-serif text-xl font-semibold mb-4 admin-section-heading">
           Tenant Activity
         </h2>
         <TenantHeatmap data={heatmapData} />
@@ -202,7 +202,7 @@ export default function AdminDashboard() {
 
       {/* Section 3: Graphs (2-up layout) */}
       <section>
-        <h2 className="font-serif text-xl font-semibold mb-4">
+        <h2 className="font-serif text-xl font-semibold mb-4 admin-section-heading">
           Pipeline Analytics
         </h2>
         <div className="grid gap-6 lg:grid-cols-2">
@@ -213,7 +213,7 @@ export default function AdminDashboard() {
 
       {/* Section 4: Error/Failure Feed */}
       <section>
-        <h2 className="font-serif text-xl font-semibold mb-4">
+        <h2 className="font-serif text-xl font-semibold mb-4 admin-section-heading">
           Recent Failures
         </h2>
         <ErrorFeed data={errorData} onPageChange={handleErrorPageChange} />

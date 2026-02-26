@@ -40,32 +40,32 @@ export default async function UsersPage() {
         </Link>
       </div>
 
-      <div className="rounded-[14px] overflow-hidden" style={{ background: "var(--bg-card-gradient)", border: "1px solid var(--border-subtle)" }}>
+      <div className="surface-admin-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="bg-white/[0.02]">
-                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+              <tr className="admin-thead">
+                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>
                   Name
                 </th>
-                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>
                   Email
                 </th>
-                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>
                   Role
                 </th>
-                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>
                   Tenant
                 </th>
-                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                <th className="px-6 py-3 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--border-subtle)]">
+            <tbody className="divide-y" style={{ borderColor: "var(--admin-row-border)" }}>
               {users?.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-8 text-center text-sm text-muted-foreground">
@@ -76,7 +76,7 @@ export default async function UsersPage() {
                 users?.map((user) => {
                   const tenant = user.tenants as { name: string } | null;
                   return (
-                    <tr key={user.id} className="hover:bg-white/[0.02] transition-colors">
+                    <tr key={user.id} className="admin-row-hover">
                       <td className="px-6 py-4 text-sm font-medium">
                         {user.full_name}
                       </td>

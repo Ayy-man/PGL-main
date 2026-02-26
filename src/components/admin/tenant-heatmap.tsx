@@ -108,16 +108,16 @@ export function TenantHeatmap({ data }: TenantHeatmapProps) {
 
   if (data === null) {
     return (
-      <div className="rounded-[14px] overflow-hidden" style={{ background: "var(--bg-card-gradient)", border: "1px solid var(--border-subtle)" }}>
+      <div className="surface-admin-card overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-white/[0.02]">
-              <th className="py-3 px-4 text-left text-muted-foreground font-medium">Tenant</th>
-              <th className="py-3 px-4 text-left text-muted-foreground font-medium">Users</th>
-              <th className="py-3 px-4 text-left text-muted-foreground font-medium">Searches (7d)</th>
-              <th className="py-3 px-4 text-left text-muted-foreground font-medium">Enrichments (7d)</th>
-              <th className="py-3 px-4 text-left text-muted-foreground font-medium">Exports (7d)</th>
-              <th className="py-3 px-4 text-left text-muted-foreground font-medium">Last Active</th>
+            <tr className="admin-thead">
+              <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Tenant</th>
+              <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Users</th>
+              <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Searches (7d)</th>
+              <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Enrichments (7d)</th>
+              <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Exports (7d)</th>
+              <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Last Active</th>
             </tr>
           </thead>
           <tbody>
@@ -140,16 +140,16 @@ export function TenantHeatmap({ data }: TenantHeatmapProps) {
   };
 
   return (
-    <div className="rounded-[14px] overflow-hidden" style={{ background: "var(--bg-card-gradient)", border: "1px solid var(--border-subtle)" }}>
+    <div className="surface-admin-card overflow-hidden">
       <table className="w-full text-sm">
         <thead>
-          <tr className="bg-white/[0.02]">
-            <th className="py-3 px-4 text-left text-muted-foreground font-medium">Tenant</th>
-            <th className="py-3 px-4 text-left text-muted-foreground font-medium">Users</th>
-            <th className="py-3 px-4 text-left text-muted-foreground font-medium">Searches (7d)</th>
-            <th className="py-3 px-4 text-left text-muted-foreground font-medium">Enrichments (7d)</th>
-            <th className="py-3 px-4 text-left text-muted-foreground font-medium">Exports (7d)</th>
-            <th className="py-3 px-4 text-left text-muted-foreground font-medium">Last Active</th>
+          <tr className="admin-thead">
+            <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Tenant</th>
+            <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Users</th>
+            <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Searches (7d)</th>
+            <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Enrichments (7d)</th>
+            <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Exports (7d)</th>
+            <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Last Active</th>
           </tr>
         </thead>
         <tbody>
@@ -161,7 +161,8 @@ export function TenantHeatmap({ data }: TenantHeatmapProps) {
               <>
                 <tr
                   key={tenant.id}
-                  className="hover:bg-white/[0.02] cursor-pointer transition-colors"
+                  className="admin-row-hover cursor-pointer"
+                  style={{ borderBottom: "1px solid var(--admin-row-border)" }}
                   onClick={() => handleRowClick(tenant.id)}
                 >
                   <td className="py-3 px-4">
@@ -195,8 +196,8 @@ export function TenantHeatmap({ data }: TenantHeatmapProps) {
                 </tr>
 
                 {isExpanded && (
-                  <tr key={`${tenant.id}-expanded`} className="border-b border-[var(--border-subtle)]">
-                    <td colSpan={6} className="bg-white/[0.02] pl-10 pr-4 py-3">
+                  <tr key={`${tenant.id}-expanded`} style={{ borderBottom: "1px solid var(--admin-row-border)" }}>
+                    <td colSpan={6} className="bg-white/[0.05] pl-10 pr-4 py-3">
                       <div className="mb-2 flex items-center justify-between">
                         <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
                           Per-User Breakdown

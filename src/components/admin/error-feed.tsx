@@ -93,16 +93,16 @@ export function ErrorFeed({ data, onPageChange }: ErrorFeedProps) {
 
   if (data === null) {
     return (
-      <div className="rounded-[14px] overflow-hidden" style={{ background: "var(--bg-card-gradient)", border: "1px solid var(--border-subtle)" }}>
+      <div className="surface-admin-card overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-white/[0.02]">
-              <th className="py-3 px-4 text-left text-muted-foreground font-medium">Time</th>
-              <th className="py-3 px-4 text-left text-muted-foreground font-medium">Tenant</th>
-              <th className="py-3 px-4 text-left text-muted-foreground font-medium">User</th>
-              <th className="py-3 px-4 text-left text-muted-foreground font-medium">Prospect</th>
-              <th className="py-3 px-4 text-left text-muted-foreground font-medium">Status</th>
-              <th className="py-3 px-4 text-left text-muted-foreground font-medium">Details</th>
+            <tr className="admin-thead">
+              <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Time</th>
+              <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Tenant</th>
+              <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>User</th>
+              <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Prospect</th>
+              <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Status</th>
+              <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Details</th>
             </tr>
           </thead>
           <tbody>
@@ -122,16 +122,16 @@ export function ErrorFeed({ data, onPageChange }: ErrorFeedProps) {
   };
 
   return (
-    <div className="rounded-[14px] overflow-hidden" style={{ background: "var(--bg-card-gradient)", border: "1px solid var(--border-subtle)" }}>
+    <div className="surface-admin-card overflow-hidden">
       <table className="w-full text-sm">
         <thead>
-          <tr className="bg-white/[0.02]">
-            <th className="py-3 px-4 text-left text-muted-foreground font-medium">Time</th>
-            <th className="py-3 px-4 text-left text-muted-foreground font-medium">Tenant</th>
-            <th className="py-3 px-4 text-left text-muted-foreground font-medium">User</th>
-            <th className="py-3 px-4 text-left text-muted-foreground font-medium">Prospect</th>
-            <th className="py-3 px-4 text-left text-muted-foreground font-medium">Status</th>
-            <th className="py-3 px-4 text-left text-muted-foreground font-medium">Details</th>
+          <tr className="admin-thead">
+            <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Time</th>
+            <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Tenant</th>
+            <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>User</th>
+            <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Prospect</th>
+            <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Status</th>
+            <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Details</th>
           </tr>
         </thead>
         <tbody>
@@ -143,7 +143,8 @@ export function ErrorFeed({ data, onPageChange }: ErrorFeedProps) {
               <>
                 <tr
                   key={record.id}
-                  className="hover:bg-white/[0.02] cursor-pointer transition-colors"
+                  className="admin-row-hover cursor-pointer"
+                  style={{ borderBottom: "1px solid var(--admin-row-border)" }}
                   onClick={() => handleRowClick(record.id)}
                 >
                   <td className="py-3 px-4 text-xs text-muted-foreground whitespace-nowrap">
@@ -175,10 +176,10 @@ export function ErrorFeed({ data, onPageChange }: ErrorFeedProps) {
                 </tr>
 
                 {isExpanded && (
-                  <tr key={`${record.id}-expanded`} className="border-b border-[var(--border-subtle)]">
+                  <tr key={`${record.id}-expanded`} style={{ borderBottom: "1px solid var(--admin-row-border)" }}>
                     <td
                       colSpan={6}
-                      className="bg-white/[0.02] border-l-2 border-primary/50 px-6 py-3"
+                      className="bg-white/[0.05] border-l-2 border-primary/50 px-6 py-3"
                     >
                       <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-2">
                         Per-Source Details
@@ -227,8 +228,8 @@ export function ErrorFeed({ data, onPageChange }: ErrorFeedProps) {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between border-t border-[var(--border-subtle)] px-4 py-3">
-          <p className="text-xs text-muted-foreground">
+        <div className="flex items-center justify-between px-4 py-3" style={{ borderTop: "1px solid var(--admin-row-border)" }}>
+          <p className="text-xs" style={{ color: "var(--admin-text-secondary)" }}>
             Page {data.page} of {totalPages} ({data.total.toLocaleString()} total)
           </p>
           <div className="flex gap-2">
