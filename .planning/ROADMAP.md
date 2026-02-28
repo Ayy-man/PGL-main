@@ -38,13 +38,24 @@ Rebuild every page of the PGL platform to match the design system (design-system
 
 ---
 
-### Phase 8: Lead Search (Screen B) — COMPLETE
+### Phase 8: Lead Search (Screen B)
 
 **Goal:** Natural Language Search bar, persona pills, advanced filters, horizontal prospect result cards, bulk actions, pagination, slide-over integration.
 
 **Dependencies:** Phase 7
 
-**Status:** All 5 plans complete (08-01 through 08-05). Unified search layout with NL bar, persona pills, advanced filters, bulk actions, result cards with checkboxes, slide-over wired via URL params. Build verified, design system compliance audited.
+**Status:** 5/7 plans complete (08-01 through 08-05). Verification found 2 gaps: advanced filters not wired through to API, bulk action handlers are stubs. Gap closure plans 08-06 and 08-07 created.
+
+**Plans:** 7 plans (5 complete, 2 gap closure pending)
+
+Plans:
+- [x] 08-01-PLAN.md — useSearch hook + PersonaPills + API filterOverrides schema
+- [x] 08-02-PLAN.md — NLSearchBar + AdvancedFiltersPanel components
+- [x] 08-03-PLAN.md — BulkActionsBar + ProspectResultCard with checkbox
+- [x] 08-04-PLAN.md — SearchContent unified layout + WealthTierBadge cleanup
+- [x] 08-05-PLAN.md — Build verification + design system compliance audit
+- [ ] 08-06-PLAN.md — Gap closure: Wire advanced filter fields through to Apollo API
+- [ ] 08-07-PLAN.md — Gap closure: Implement bulk action handlers (Add to List, Export CSV, Enrich)
 
 ---
 
