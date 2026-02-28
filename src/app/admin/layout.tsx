@@ -60,19 +60,45 @@ export default async function AdminLayout({
             <AdminNavLinks />
           </nav>
 
-          {/* Footer with user email */}
-          <div className="mt-auto px-5 py-4">
-            <p
-              className="text-[11px] truncate"
-              style={{ color: "var(--text-ghost)" }}
+          {/* Footer user card */}
+          <div className="mt-auto px-4 py-4">
+            <div
+              className="rounded-lg p-3 flex items-center gap-3"
+              style={{
+                background: "rgba(255,255,255,0.05)",
+                border: "1px solid var(--border-subtle)",
+              }}
             >
-              {user.email}
-            </p>
+              <div
+                className="size-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+                style={{
+                  background: "var(--gold-bg-strong)",
+                  color: "var(--gold-primary)",
+                  border: "1px solid var(--border-gold)",
+                }}
+              >
+                {userInitials}
+              </div>
+              <div className="overflow-hidden min-w-0">
+                <p
+                  className="text-sm font-medium truncate"
+                  style={{ color: "var(--text-primary-ds)" }}
+                >
+                  Super Admin
+                </p>
+                <p
+                  className="text-xs truncate"
+                  style={{ color: "var(--text-ghost)" }}
+                >
+                  {user.email}
+                </p>
+              </div>
+            </div>
           </div>
         </aside>
 
         {/* Mobile admin sidebar */}
-        <AdminMobileSidebar userEmail={user.email} />
+        <AdminMobileSidebar userEmail={user.email} userName={userName} userInitials={userInitials} />
 
         {/* Main content */}
         <div className="flex flex-1 flex-col min-w-0">

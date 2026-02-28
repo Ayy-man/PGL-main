@@ -13,9 +13,11 @@ import { AdminNavLinks } from "./admin-nav-links";
 
 interface AdminMobileSidebarProps {
   userEmail: string;
+  userName: string;
+  userInitials: string;
 }
 
-export function AdminMobileSidebar({ userEmail }: AdminMobileSidebarProps) {
+export function AdminMobileSidebar({ userEmail, userName, userInitials }: AdminMobileSidebarProps) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
@@ -95,14 +97,40 @@ export function AdminMobileSidebar({ userEmail }: AdminMobileSidebarProps) {
               <AdminNavLinks />
             </nav>
 
-            {/* Footer */}
-            <div className="mt-auto px-5 py-4">
-              <p
-                className="text-[11px] truncate"
-                style={{ color: "var(--text-ghost)" }}
+            {/* Footer user card */}
+            <div className="mt-auto px-4 py-4">
+              <div
+                className="rounded-lg p-3 flex items-center gap-3"
+                style={{
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid var(--border-subtle)",
+                }}
               >
-                {userEmail}
-              </p>
+                <div
+                  className="size-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+                  style={{
+                    background: "var(--gold-bg-strong)",
+                    color: "var(--gold-primary)",
+                    border: "1px solid var(--border-gold)",
+                  }}
+                >
+                  {userInitials}
+                </div>
+                <div className="overflow-hidden min-w-0">
+                  <p
+                    className="text-sm font-medium truncate"
+                    style={{ color: "var(--text-primary-ds)" }}
+                  >
+                    Super Admin
+                  </p>
+                  <p
+                    className="text-xs truncate"
+                    style={{ color: "var(--text-ghost)" }}
+                  >
+                    {userEmail}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </SheetContent>
