@@ -40,7 +40,7 @@ interface ExportLogClientProps {
 }
 
 export function ExportLogClient({
-  orgId,
+  orgId: _orgId,
   initialExports,
   initialTotal,
   userMap,

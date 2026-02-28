@@ -16,6 +16,16 @@ export function AdminNavLinks() {
 
   return (
     <div className="flex flex-col gap-1">
+      {/* Section header — non-interactive label */}
+      <div className="px-3 mb-1 mt-2">
+        <p
+          className="text-[10px] font-semibold uppercase tracking-widest"
+          style={{ color: "var(--text-ghost)" }}
+        >
+          Platform Control
+        </p>
+      </div>
+
       {ADMIN_NAV.map((item) => {
         const isActive = item.exact
           ? pathname === item.href
