@@ -14,6 +14,7 @@ import { ProfileView } from "@/components/prospect/profile-view";
  * - AI-generated summary
  * - Wealth signals (web mentions, SEC transactions)
  * - List memberships
+ * - Activity log
  *
  * Automatically triggers lazy enrichment if data is missing or stale (>7 days).
  *
@@ -24,7 +25,7 @@ export default async function ProspectProfilePage({
 }: {
   params: Promise<{ orgId: string; prospectId: string }>;
 }) {
-  const { prospectId } = await params;
+  const { orgId, prospectId } = await params;
 
   // Validate user session
   const supabase = await createClient();
@@ -102,10 +103,7 @@ export default async function ProspectProfilePage({
     now - lastEnriched >= SEVEN_DAYS_MS;
 
   // If enrichment needed and not already in progress, trigger it (fire-and-forget)
-  if (
-    isStale &&
-    prospect.enrichment_status !== "in_progress"
-  ) {
+  if (isStale && prospect.enrichment_status !== "in_progress") {
     // Fire-and-forget: trigger enrichment without waiting for response
     const cookieStore = await cookies();
     fetch(
@@ -160,12 +158,23 @@ export default async function ProspectProfilePage({
       addedAt: m.added_at,
     })) || [];
 
+  // Fetch activity logs for this prospect
+  const { data: activityEntries } = await supabase
+    .from("activity_logs")
+    .select("id, action_type, user_id, created_at, metadata")
+    .eq("target_id", prospectId)
+    .eq("target_type", "prospect")
+    .order("created_at", { ascending: false })
+    .limit(20);
+
   return (
     <ProfileView
       prospect={prospect}
       enrichmentSourceStatus={enrichmentSourceStatus}
       listMemberships={formattedListMemberships}
       isStale={isStale}
+      orgId={orgId}
+      activityEntries={activityEntries ?? []}
     />
   );
 }
