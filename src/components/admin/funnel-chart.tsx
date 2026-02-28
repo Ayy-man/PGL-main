@@ -77,7 +77,7 @@ export function FunnelChart({ data }: FunnelChartProps) {
 
   return (
     <div className="surface-admin-card p-6">
-      <p className="text-sm font-medium mb-4" style={{ color: "var(--admin-text-secondary)" }}>Search-to-Export Funnel (30d)</p>
+      <p className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: "var(--admin-text-secondary)" }}>Search-to-Export Funnel (30d)</p>
       <ResponsiveContainer width="100%" height={280}>
         <RechartsFunnelChart>
           <Tooltip
