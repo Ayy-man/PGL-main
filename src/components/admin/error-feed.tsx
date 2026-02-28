@@ -1,8 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { XCircle } from "lucide-react";
 
 interface SourceDetail {
   status: string;
@@ -50,201 +48,192 @@ function formatRelativeTime(dateStr: string): string {
   });
 }
 
-function getSourceBadgeClass(status: string): string {
-  switch (status.toLowerCase()) {
-    case "success":
-    case "complete":
-      return "border-[var(--success)] text-[var(--success)] bg-[var(--success-muted)]";
-    case "failed":
-    case "error":
-      return "border-destructive/50 text-destructive bg-destructive/10";
-    default:
-      return "border-border text-muted-foreground bg-white/[0.03]";
-  }
+function ErrorEntry({ record }: { record: ErrorRecord }) {
+  const failedSources = Object.entries(record.sourceDetails)
+    .filter(([, d]) => d.status === "failed")
+    .map(([k]) => k);
+
+  return (
+    <div
+      className="flex gap-4 p-4 cursor-pointer"
+      style={{ borderBottom: "1px solid var(--border-subtle)" }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.background = "rgba(255,255,255,0.02)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = "";
+      }}
+    >
+      {/* Severity icon */}
+      <div className="mt-0.5 shrink-0">
+        <div
+          className="p-1.5 rounded"
+          style={{ color: "oklch(0.62 0.19 22)", background: "rgba(239,68,68,0.1)" }}
+        >
+          <XCircle className="h-4 w-4" />
+        </div>
+      </div>
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <div className="flex justify-between items-start">
+          <p className="text-sm font-medium" style={{ color: "var(--text-primary-ds)" }}>
+            {record.fullName} — Enrichment Failed
+          </p>
+          <span
+            className="text-[10px] whitespace-nowrap ml-2"
+            style={{ color: "var(--text-ghost)" }}
+          >
+            {formatRelativeTime(record.updatedAt)}
+          </span>
+        </div>
+        <p className="text-xs mt-0.5" style={{ color: "var(--admin-text-secondary)" }}>
+          Tenant: {record.tenantName}
+          {failedSources.length > 0 && ` · Failed: ${failedSources.join(", ")}`}
+        </p>
+      </div>
+    </div>
+  );
 }
 
-function SkeletonRow() {
+function SkeletonEntry() {
   return (
-    <tr className="animate-pulse" style={{ borderBottom: "1px solid var(--admin-row-border)" }}>
-      <td className="py-3 px-4">
-        <div className="h-4 w-20 bg-white/[0.06] rounded" />
-      </td>
-      <td className="py-3 px-4">
-        <div className="h-4 w-24 bg-white/[0.06] rounded" />
-      </td>
-      <td className="py-3 px-4">
-        <div className="h-4 w-24 bg-white/[0.06] rounded" />
-      </td>
-      <td className="py-3 px-4">
-        <div className="h-4 w-28 bg-white/[0.06] rounded" />
-      </td>
-      <td className="py-3 px-4">
-        <div className="h-4 w-16 bg-white/[0.06] rounded" />
-      </td>
-      <td className="py-3 px-4">
-        <div className="h-4 w-12 bg-white/[0.06] rounded" />
-      </td>
-    </tr>
+    <div
+      className="flex gap-4 p-4 animate-pulse"
+      style={{ borderBottom: "1px solid var(--border-subtle)" }}
+    >
+      <div className="mt-0.5 shrink-0">
+        <div className="h-7 w-7 rounded bg-white/[0.06]" />
+      </div>
+      <div className="flex-1 min-w-0 space-y-2">
+        <div className="h-4 w-3/4 bg-white/[0.06] rounded" />
+        <div className="h-3 w-1/2 bg-white/[0.06] rounded" />
+      </div>
+    </div>
   );
 }
 
 export function ErrorFeed({ data, onPageChange }: ErrorFeedProps) {
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-
   if (data === null) {
     return (
-      <div className="surface-admin-card overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="admin-thead">
-              <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Time</th>
-              <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Tenant</th>
-              <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>User</th>
-              <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Prospect</th>
-              <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Status</th>
-              <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Details</th>
-            </tr>
-          </thead>
-          <tbody>
-            {Array.from({ length: 5 }).map((_, i) => (
-              <SkeletonRow key={i} />
-            ))}
-          </tbody>
-        </table>
+      <div className="surface-admin-card rounded-[14px] overflow-hidden flex flex-col h-full">
+        {/* Header */}
+        <div
+          className="p-5 flex justify-between items-center"
+          style={{ borderBottom: "1px solid var(--border-subtle)" }}
+        >
+          <h3
+            className="text-sm font-semibold uppercase tracking-wider flex items-center gap-2"
+            style={{ color: "var(--text-primary-ds)" }}
+          >
+            <XCircle
+              className="h-[18px] w-[18px]"
+              style={{ color: "oklch(0.62 0.19 22)" }}
+            />
+            Live Error Feed
+          </h3>
+          <div className="flex items-center gap-2">
+            <span
+              className="size-2 rounded-full animate-pulse"
+              style={{ background: "oklch(0.62 0.19 22)" }}
+            />
+            <span
+              className="text-[10px] uppercase"
+              style={{ color: "var(--admin-text-secondary)" }}
+            >
+              Live
+            </span>
+          </div>
+        </div>
+        {/* Skeleton entries */}
+        <div className="flex-1 overflow-y-auto max-h-[300px]">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <SkeletonEntry key={i} />
+          ))}
+        </div>
       </div>
     );
   }
 
   const totalPages = Math.ceil(data.total / data.limit);
 
-  const handleRowClick = (id: string) => {
-    setExpandedId((prev) => (prev === id ? null : id));
-  };
-
   return (
-    <div className="surface-admin-card overflow-hidden">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="admin-thead">
-            <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Time</th>
-            <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Tenant</th>
-            <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>User</th>
-            <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Prospect</th>
-            <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Status</th>
-            <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Details</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.data.map((record) => {
-            const isExpanded = expandedId === record.id;
-            const sourceEntries = Object.entries(record.sourceDetails);
+    <div className="surface-admin-card rounded-[14px] overflow-hidden flex flex-col h-full">
+      {/* Header */}
+      <div
+        className="p-5 flex justify-between items-center"
+        style={{ borderBottom: "1px solid var(--border-subtle)" }}
+      >
+        <h3
+          className="text-sm font-semibold uppercase tracking-wider flex items-center gap-2"
+          style={{ color: "var(--text-primary-ds)" }}
+        >
+          <XCircle
+            className="h-[18px] w-[18px]"
+            style={{ color: "oklch(0.62 0.19 22)" }}
+          />
+          Live Error Feed
+        </h3>
+        <div className="flex items-center gap-2">
+          <span
+            className="size-2 rounded-full animate-pulse"
+            style={{ background: "oklch(0.62 0.19 22)" }}
+          />
+          <span
+            className="text-[10px] uppercase"
+            style={{ color: "var(--admin-text-secondary)" }}
+          >
+            Live
+          </span>
+        </div>
+      </div>
 
-            return (
-              <>
-                <tr
-                  key={record.id}
-                  className="admin-row-hover cursor-pointer"
-                  style={{ borderBottom: "1px solid var(--admin-row-border)" }}
-                  onClick={() => handleRowClick(record.id)}
-                >
-                  <td className="py-3 px-4 text-xs text-muted-foreground whitespace-nowrap">
-                    {formatRelativeTime(record.updatedAt)}
-                  </td>
-                  <td className="py-3 px-4 text-muted-foreground">{record.tenantName}</td>
-                  <td className="py-3 px-4 text-muted-foreground">{record.userName}</td>
-                  <td className="py-3 px-4">
-                    <Link
-                      href={`/${record.tenantId}/prospects/${record.id}`}
-                      className="text-primary hover:underline font-medium"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {record.fullName}
-                    </Link>
-                  </td>
-                  <td className="py-3 px-4">
-                    <span className="inline-flex items-center rounded-full border border-destructive/50 bg-destructive/10 px-2 py-0.5 text-xs text-destructive">
-                      {record.enrichmentStatus}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-muted-foreground">
-                    {isExpanded ? (
-                      <ChevronDown className="h-4 w-4" />
-                    ) : (
-                      <ChevronRight className="h-4 w-4" />
-                    )}
-                  </td>
-                </tr>
+      {/* Error entries — scrollable */}
+      <div className="flex-1 overflow-y-auto max-h-[300px]">
+        {data.data.length === 0 ? (
+          <div className="flex items-center justify-center h-full py-12">
+            <p className="text-sm" style={{ color: "var(--admin-text-secondary)" }}>
+              No failed enrichments found.
+            </p>
+          </div>
+        ) : (
+          data.data.map((record) => (
+            <ErrorEntry key={record.id} record={record} />
+          ))
+        )}
+      </div>
 
-                {isExpanded && (
-                  <tr key={`${record.id}-expanded`} style={{ borderBottom: "1px solid var(--admin-row-border)" }}>
-                    <td
-                      colSpan={6}
-                      className="border-l-2 px-6 py-3"
-                      style={{ background: "var(--admin-thead-bg)", borderLeftColor: "var(--gold-primary)" }}
-                    >
-                      <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-2">
-                        Per-Source Details
-                      </p>
-                      {sourceEntries.length === 0 ? (
-                        <p className="text-xs text-muted-foreground">No source details available.</p>
-                      ) : (
-                        <div className="flex flex-wrap gap-3">
-                          {sourceEntries.map(([source, detail]) => (
-                            <div key={source} className="flex flex-col gap-0.5">
-                              <span
-                                className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium ${getSourceBadgeClass(detail.status)}`}
-                              >
-                                {source}: {detail.status}
-                              </span>
-                              {detail.error && (
-                                <span className="text-xs text-muted-foreground ml-1">
-                                  {detail.error}
-                                </span>
-                              )}
-                              {detail.at && (
-                                <span className="text-xs text-muted-foreground/60 ml-1">
-                                  {formatRelativeTime(detail.at)}
-                                </span>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                )}
-              </>
-            );
-          })}
-
-          {data.data.length === 0 && (
-            <tr>
-              <td colSpan={6} className="py-8 text-center text-muted-foreground">
-                No failed enrichments found.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-
-      {/* Pagination */}
+      {/* Pagination footer */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between px-4 py-3" style={{ borderTop: "1px solid var(--admin-row-border)" }}>
-          <p className="text-xs" style={{ color: "var(--admin-text-secondary)" }}>
-            Page {data.page} of {totalPages} ({data.total.toLocaleString()} total)
-          </p>
+        <div
+          className="p-4 flex items-center justify-between text-xs"
+          style={{
+            borderTop: "1px solid var(--border-subtle)",
+            color: "var(--admin-text-secondary)",
+          }}
+        >
+          <span>
+            Page {data.page} of {totalPages}
+          </span>
           <div className="flex gap-2">
             <button
               onClick={() => onPageChange(data.page - 1)}
               disabled={data.page <= 1}
-              className="inline-flex items-center rounded-md border border-[var(--border-subtle)] px-3 py-1 text-xs text-muted-foreground hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="px-3 py-1 rounded text-xs disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              style={{
+                background: "rgba(255,255,255,0.05)",
+                color: "var(--text-primary-ds)",
+              }}
             >
               Previous
             </button>
             <button
               onClick={() => onPageChange(data.page + 1)}
               disabled={data.page >= totalPages}
-              className="inline-flex items-center rounded-md border border-[var(--border-subtle)] px-3 py-1 text-xs text-muted-foreground hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="px-3 py-1 rounded text-xs disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              style={{
+                background: "rgba(255,255,255,0.05)",
+                color: "var(--text-primary-ds)",
+              }}
             >
               Next
             </button>
