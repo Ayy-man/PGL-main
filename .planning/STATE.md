@@ -194,6 +194,9 @@ Recent decisions affecting current work:
 - [Phase 07]: Ambient glow divs removed from tenant layout — root layout.tsx is the sole owner
 - [Phase 07-05]: Build passes clean — img-element warnings are pre-existing linting warnings (not errors), Dynamic server usage messages for cookie-using API routes are expected and informational
 - [Phase 07-05]: All 13 design system compliance items pass without code changes — layout shell verified correct on first verification run
+- [Phase 08-02]: Native <textarea> (not shadcn Textarea) for NLSearchBar — finer auto-resize control via scrollHeight clamped between 56px and 120px without wrapper div interference
+- [Phase 08-02]: FilterInput extracted as internal sub-component in AdvancedFiltersPanel to isolate isFocused state per field without prop-drilling to parent
+- [Phase 08-02]: onMouseEnter/Leave on AdvancedFiltersPanel toggle button for CSS variable hover color — same pattern as nav items established in Phase 05-03
 - [Phase 11]: StatPills is pure Server Component; PersonaPillRow + RecentListsPreview are Client Components for onMouseEnter/Leave CSS variable hover
 - [Phase 11]: RecentListsPreview returns null when no lists (no-render); PersonaPillRow shows shared EmptyState when no personas
 - [Phase 11-dashboard-screen-a]: ActivityFeed copies ACTION_LABELS and relativeTime inline — avoids server/client module boundary issues
@@ -260,8 +263,8 @@ All 4 phases and 27 plans are complete. The following items remain before produc
 
 ## Session Continuity
 
-Last session: 2026-03-01 (Phase 7 Plan 05 complete — Phase 7 fully done)
-Stopped at: Completed 07-05-PLAN.md — Build verification passed, all 13 design system compliance items confirmed, all 10 nav routes verified against real page files, ambient glow de-duplication confirmed in root layout only.
+Last session: 2026-03-01 (Phase 8 Plan 03 complete — BulkActionsBar + ProspectResultCard checkbox)
+Stopped at: Completed 08-03-PLAN.md — BulkActionsBar created with select-all checkbox and three action buttons; ProspectResultCard updated with optional checkbox selection, gold selected state, and canonical shared WealthTierBadge import.
 
 ---
 
