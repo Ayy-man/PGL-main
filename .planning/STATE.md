@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-02-28T19:08:25.582Z"
+last_updated: "2026-02-28T19:39:50.391Z"
 progress:
-  total_phases: 7
+  total_phases: 13
   completed_phases: 5
-  total_plans: 39
-  completed_plans: 39
+  total_plans: 63
+  completed_plans: 43
 ---
 
 # Project State
@@ -58,6 +58,9 @@ Progress: [██████████] 100% (07-01, 07-02, 07-03, 07-04, 07-
 | Phase 07 P04 | 4 | 2 tasks | 2 files |
 | Phase 07 P03 | 1 | 2 tasks | 2 files |
 | Phase 07 P05 | 2 | 3 tasks | 0 files |
+| Phase 11 P01 | 74 | 3 tasks | 3 files |
+| Phase 11-dashboard-screen-a P02 | 5 | 1 tasks | 1 files |
+| Phase 08-lead-search P03 | 8 | 2 tasks | 2 files |
 
 ### Phase 3 Plan Completion
 
@@ -190,6 +193,10 @@ Recent decisions affecting current work:
 - [Phase 07]: Ambient glow divs removed from tenant layout — root layout.tsx is the sole owner
 - [Phase 07-05]: Build passes clean — img-element warnings are pre-existing linting warnings (not errors), Dynamic server usage messages for cookie-using API routes are expected and informational
 - [Phase 07-05]: All 13 design system compliance items pass without code changes — layout shell verified correct on first verification run
+- [Phase 11]: StatPills is pure Server Component; PersonaPillRow + RecentListsPreview are Client Components for onMouseEnter/Leave CSS variable hover
+- [Phase 11]: RecentListsPreview returns null when no lists (no-render); PersonaPillRow shows shared EmptyState when no personas
+- [Phase 11-dashboard-screen-a]: ActivityFeed copies ACTION_LABELS and relativeTime inline — avoids server/client module boundary issues
+- [Phase 11-dashboard-screen-a]: text-then-parse guard wraps fetch response — handles known bug where /api/activity may return HTML on error
 
 ### Roadmap Evolution
 
