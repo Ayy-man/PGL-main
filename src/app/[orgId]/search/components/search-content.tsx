@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import type { Persona } from "@/lib/personas/types";
 import type { List } from "@/lib/lists/types";
 import type { PersonaFiltersType } from "@/lib/apollo/schemas";
@@ -12,9 +13,20 @@ import { AdvancedFiltersPanel } from "./advanced-filters-panel";
 import { BulkActionsBar } from "./bulk-actions-bar";
 import { ProspectResultCard } from "./prospect-result-card";
 import { ProspectSlideOver } from "@/components/prospect/prospect-slide-over";
-import { Search, AlertCircle, RefreshCw } from "lucide-react";
+import { Search, AlertCircle, RefreshCw, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
 
 interface SearchContentProps {
   personas: Persona[];
@@ -59,6 +71,7 @@ function SkeletonCard() {
 
 export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
   const router = useRouter();
+  const { toast } = useToast();
   const {
     searchState,
     setSearchState,
@@ -67,6 +80,7 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
     isLoading,
     error,
     executeSearch,
+    setFilterOverrides,
   } = useSearch();
 
   const hasPersonaSelected = Boolean(searchState.persona);
@@ -74,10 +88,17 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
   // Bulk selection state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
-  // Reset selection when persona changes
+  // Bulk list dialog state
+  const [bulkListDialogOpen, setBulkListDialogOpen] = useState(false);
+  const [bulkMode, setBulkMode] = useState<"add" | "enrich">("add");
+  const [isBulkSubmitting, setIsBulkSubmitting] = useState(false);
+  const [bulkSelectedListIds, setBulkSelectedListIds] = useState<string[]>([]);
+
+  // Reset selection and filter overrides when persona changes
   useEffect(() => {
     setSelectedIds(new Set());
-  }, [searchState.persona]);
+    setFilterOverrides({});
+  }, [searchState.persona, setFilterOverrides]);
 
   // ----------------------------------------------------------------
   // Selection handlers
@@ -120,26 +141,108 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
   // Filter override handler
   // ----------------------------------------------------------------
   const handleApplyFilters = (filters: Partial<PersonaFiltersType>) => {
-    if (filters.keywords) {
+    if (filters.keywords !== undefined) {
       setSearchState({ keywords: filters.keywords });
     }
-    // Advanced filter overrides beyond keywords are a future enhancement
-    // The API route already supports them — just needs state management wiring
+    const { keywords: _keywords, ...nonKeywordOverrides } = filters;
+    setFilterOverrides(nonKeywordOverrides);
   };
 
   // ----------------------------------------------------------------
-  // Bulk action handlers (stubs — full implementations in later phases)
+  // Bulk action handlers
   // ----------------------------------------------------------------
   const handleBulkAddToList = () => {
-    // TODO: Open AddToListDialog for bulk selection
+    if (selectedIds.size === 0) return;
+    setBulkMode("add");
+    setBulkSelectedListIds([]);
+    setBulkListDialogOpen(true);
   };
 
   const handleBulkExport = () => {
-    // TODO: Trigger CSV export for selected prospects
+    if (selectedIds.size === 0) return;
+    const selectedProspects = results.filter((r) => selectedIds.has(r.id));
+
+    const headers = ["Name", "Title", "Company", "Location", "Email", "LinkedIn URL"];
+    const rows = selectedProspects.map((p) => [
+      p.name || `${p.first_name || ""} ${p.last_name || ""}`.trim(),
+      p.title || "",
+      p.organization_name || p.organization?.name || "",
+      [p.city, p.state, p.country].filter(Boolean).join(", "),
+      p.email || "",
+      p.linkedin_url || "",
+    ]);
+
+    const escapeField = (field: string) => {
+      if (field.includes(",") || field.includes('"') || field.includes("\n")) {
+        return `"${field.replace(/"/g, '""')}"`;
+      }
+      return field;
+    };
+
+    const csvContent = [
+      headers.map(escapeField).join(","),
+      ...rows.map((row) => row.map(escapeField).join(",")),
+    ].join("\n");
+
+    const bom = "\uFEFF";
+    const blob = new Blob([bom + csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `prospects-export-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Export complete",
+      description: `Downloaded ${selectedProspects.length} prospect${selectedProspects.length !== 1 ? "s" : ""} as CSV`,
+    });
   };
 
   const handleBulkEnrich = () => {
-    // TODO: Save selected to list then trigger enrichment
+    if (selectedIds.size === 0) return;
+    setBulkMode("enrich");
+    setBulkSelectedListIds([]);
+    setBulkListDialogOpen(true);
+  };
+
+  const handleBulkListSubmit = async () => {
+    if (bulkSelectedListIds.length === 0 || selectedIds.size === 0) return;
+    setIsBulkSubmitting(true);
+    const selectedProspects = results.filter((r) => selectedIds.has(r.id));
+    let successCount = 0;
+    let failCount = 0;
+
+    const promises = selectedProspects.map(async (prospect) => {
+      try {
+        const response = await fetch("/api/prospects/upsert", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prospect, listIds: bulkSelectedListIds }),
+        });
+        if (response.ok) {
+          successCount++;
+        } else {
+          failCount++;
+        }
+      } catch {
+        failCount++;
+      }
+    });
+
+    await Promise.allSettled(promises);
+    setIsBulkSubmitting(false);
+    setBulkListDialogOpen(false);
+
+    toast({
+      title: failCount === 0 ? "Success" : "Partial success",
+      description: `Added ${successCount} prospect${successCount !== 1 ? "s" : ""} to ${bulkSelectedListIds.length} list${bulkSelectedListIds.length !== 1 ? "s" : ""}${failCount > 0 ? `. ${failCount} failed.` : ""}`,
+      variant: failCount > 0 ? "destructive" : "default",
+    });
+
+    if (failCount === 0) setSelectedIds(new Set());
   };
 
   // ----------------------------------------------------------------
@@ -363,6 +466,99 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
           )}
         </>
       )}
+
+      {/* Bulk list selection dialog */}
+      <Dialog open={bulkListDialogOpen} onOpenChange={setBulkListDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>
+              {bulkMode === "enrich" ? "Enrich Selection" : "Add to List"}
+            </DialogTitle>
+            <DialogDescription>
+              {bulkMode === "enrich"
+                ? `Save ${selectedIds.size} prospect${selectedIds.size !== 1 ? "s" : ""} to a list to begin enrichment`
+                : `Add ${selectedIds.size} prospect${selectedIds.size !== 1 ? "s" : ""} to one or more lists`}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            {lists.length === 0 ? (
+              <div className="text-center py-8 border-2 border-dashed rounded-lg">
+                <p className="text-sm text-muted-foreground mb-3">No lists yet</p>
+                <Button size="sm" asChild>
+                  <Link href={`/${orgId}/lists`}>Create your first list</Link>
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3 max-h-[300px] overflow-y-auto">
+                {lists.map((list) => (
+                  <div
+                    key={list.id}
+                    className="flex items-start space-x-3 p-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
+                    onClick={() => {
+                      setBulkSelectedListIds((prev) =>
+                        prev.includes(list.id)
+                          ? prev.filter((id) => id !== list.id)
+                          : [...prev, list.id]
+                      );
+                    }}
+                  >
+                    <Checkbox
+                      id={`bulk-list-${list.id}`}
+                      checked={bulkSelectedListIds.includes(list.id)}
+                      onCheckedChange={() => {
+                        setBulkSelectedListIds((prev) =>
+                          prev.includes(list.id)
+                            ? prev.filter((id) => id !== list.id)
+                            : [...prev, list.id]
+                        );
+                      }}
+                    />
+                    <div className="flex-1">
+                      <Label
+                        htmlFor={`bulk-list-${list.id}`}
+                        className="font-medium cursor-pointer"
+                      >
+                        {list.name}
+                      </Label>
+                      {list.description && (
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {list.description}
+                        </p>
+                      )}
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {list.member_count}{" "}
+                        {list.member_count === 1 ? "member" : "members"}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          {lists.length > 0 && (
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setBulkListDialogOpen(false)}
+                disabled={isBulkSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleBulkListSubmit}
+                disabled={bulkSelectedListIds.length === 0 || isBulkSubmitting}
+              >
+                {isBulkSubmitting && (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                )}
+                {bulkMode === "enrich"
+                  ? "Save & Enrich"
+                  : `Add to ${bulkSelectedListIds.length} List${bulkSelectedListIds.length !== 1 ? "s" : ""}`}
+              </Button>
+            </DialogFooter>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* ProspectSlideOver — always rendered, controlled by URL param */}
       <ProspectSlideOver
