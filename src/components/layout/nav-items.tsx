@@ -9,6 +9,7 @@ import {
   Activity,
   BarChart3,
   LayoutDashboard,
+  FileDown,
 } from "lucide-react";
 
 interface NavItemsProps {
@@ -20,6 +21,7 @@ const NAV_ITEMS = [
   { label: "Lead Discovery", href: "/search",              icon: Search,          exact: false },
   { label: "Personas",       href: "/personas",            icon: Users,           exact: false },
   { label: "Lists",          href: "/lists",               icon: List,            exact: false },
+  { label: "Exports",        href: "/exports",             icon: FileDown,        exact: false },
   { label: "Activity",       href: "/dashboard/activity",  icon: Activity,        exact: false },
   { label: "Analytics",      href: "/dashboard/analytics", icon: BarChart3,       exact: false },
 ];
