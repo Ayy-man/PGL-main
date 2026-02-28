@@ -86,6 +86,7 @@ export default function AdminDashboard() {
   const [enrichmentData, setEnrichmentData] = useState<EnrichmentDataPoint[] | null>(null);
   const [funnelData, setFunnelData] = useState<FunnelDataPoint[] | null>(null);
   const [errorData, setErrorData] = useState<ErrorData | null>(null);
+  const [quotaData, setQuotaData] = useState<{ totals: Record<string, number>; days: number } | null>(null);
   const [lastFetched, setLastFetched] = useState<Date | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [errorPage, setErrorPage] = useState(1);
@@ -100,25 +101,28 @@ export default function AdminDashboard() {
     }
 
     try {
-      const [pulseRes, heatmapRes, enrichmentRes, funnelRes, errorRes] =
+      const [pulseRes, heatmapRes, enrichmentRes, funnelRes, errorRes, quotaRes] =
         await Promise.all([
           fetch("/api/admin/dashboard"),
           fetch("/api/admin/tenants/activity"),
           fetch("/api/admin/enrichment/health?days=14"),
           fetch("/api/admin/funnel?days=7"),
           fetch(`/api/admin/errors?limit=50&page=${errorPageRef.current}`),
+          fetch("/api/admin/quota?days=7"),
         ]);
 
-      const [pulse, heatmap, enrichment, funnel, errors] = await Promise.all([
+      const [pulse, heatmap, enrichment, funnel, errors, quota] = await Promise.all([
         pulseRes.ok ? pulseRes.json() : null,
         heatmapRes.ok ? heatmapRes.json() : null,
         enrichmentRes.ok ? enrichmentRes.json() : null,
         funnelRes.ok ? funnelRes.json() : null,
         errorRes.ok ? errorRes.json() : null,
+        quotaRes.ok ? quotaRes.json() : null,
       ]);
 
       if (pulse) setPulseData(pulse);
       if (heatmap) setHeatmapData(heatmap);
+      if (quota) setQuotaData(quota);
       setEnrichmentData(enrichment?.data ?? []);
       setFunnelData(funnel?.data ?? []);
       setErrorData(errors ?? { data: [], total: 0, page: 1, limit: 50 });
@@ -190,7 +194,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Section 1: Platform Pulse */}
-      <PlatformPulse data={pulseData} />
+      <PlatformPulse data={pulseData} quotaData={quotaData} />
 
       {/* Section 2: Tenant Activity Heatmap */}
       <section>
