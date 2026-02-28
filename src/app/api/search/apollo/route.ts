@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { personaId, page, pageSize } = validationResult.data;
+    const { personaId, page, pageSize, filterOverrides } = validationResult.data;
 
     // 2. Authenticate user
     const supabase = await createClient();
@@ -78,11 +78,16 @@ export async function POST(request: NextRequest) {
       console.error("Failed to update persona last used:", error);
     });
 
-    // 5. Call searchApollo
+    // 5. Merge persona filters with ad-hoc overrides (if provided)
+    const mergedFilters = filterOverrides
+      ? { ...persona.filters, ...filterOverrides }
+      : persona.filters;
+
+    // 6. Call searchApollo with merged filters
     const result = await searchApollo(
       tenantId,
       personaId,
-      persona.filters,
+      mergedFilters,
       page,
       pageSize
     );
@@ -95,7 +100,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    // 6. Error handling
+    // 7. Error handling
     if (error instanceof RateLimitError) {
       return NextResponse.json(
         {

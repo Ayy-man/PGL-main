@@ -1,15 +1,6 @@
 import { z } from "zod";
 
 /**
- * Validation schema for persona search API requests.
- */
-export const searchRequestSchema = z.object({
-  personaId: z.string().uuid(),
-  page: z.number().int().min(1).max(500).default(1),
-  pageSize: z.number().int().min(1).max(10).default(10),
-});
-
-/**
  * Persona filter criteria matching Apollo.io search capabilities.
  */
 export const PersonaFilters = z.object({
@@ -19,6 +10,16 @@ export const PersonaFilters = z.object({
   locations: z.array(z.string()).optional(),
   companySize: z.array(z.string()).optional(),
   keywords: z.string().optional(),
+});
+
+/**
+ * Validation schema for persona search API requests.
+ */
+export const searchRequestSchema = z.object({
+  personaId: z.string().uuid(),
+  page: z.number().int().min(1).max(500).default(1),
+  pageSize: z.number().int().min(1).max(10).default(10),
+  filterOverrides: PersonaFilters.optional(),
 });
 
 export type PersonaFiltersType = z.infer<typeof PersonaFilters>;
