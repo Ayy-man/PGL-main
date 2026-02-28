@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PGL Global Command Center</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Playfair+Display:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f1bf27", // Theme primary
+                        "primary-dark": "#d4a017",
+                        "background-light": "#f8f8f6",
+                        "background-dark": "#221e10", // Theme background dark
+                        "surface-dark": "#2c2616", // Derived from background-dark for surface
+                        "surface-light": "#ffffff",
+                        "accent-gold": "#f1bf27",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "serif": ["Playfair Display", "serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px",
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #221e10; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3d3521; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #f1bf27; 
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col antialiased selection:bg-primary selection:text-black">
+<div class="relative flex min-h-screen w-full overflow-hidden">
+<aside class="w-64 border-r border-white/5 bg-surface-dark/50 hidden lg:flex flex-col h-screen fixed left-0 top-0 z-50 backdrop-blur-sm">
+<div class="p-6 border-b border-white/5 flex items-center gap-3 text-primary">
+<span class="material-symbols-outlined text-3xl">admin_panel_settings</span>
+<h1 class="text-white text-xl font-serif font-bold tracking-wider">PGL ADMIN</h1>
+</div>
+<nav class="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+<div class="text-xs font-semibold text-white/40 uppercase tracking-widest px-3 mb-2">Platform Control</div>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-primary/10 text-primary border border-primary/20 shadow-[0_0_15px_rgba(241,191,39,0.1)]" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="text-sm font-medium">Command Center</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:bg-white/5 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">domain</span>
+<span class="text-sm font-medium">Tenant Registry</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:bg-white/5 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">monitoring</span>
+<span class="text-sm font-medium">Usage Metrics</span>
+</a>
+<div class="my-4 border-t border-white/5"></div>
+<div class="text-xs font-semibold text-white/40 uppercase tracking-widest px-3 mb-2">System Config</div>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:bg-white/5 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">vpn_key</span>
+<span class="text-sm font-medium">Global API Keys</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:bg-white/5 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">schema</span>
+<span class="text-sm font-medium">Master Data Schema</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:bg-white/5 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">security</span>
+<span class="text-sm font-medium">Security Policies</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-white/70 hover:bg-white/5 hover:text-white transition-colors" href="#">
+<span class="material-symbols-outlined text-[20px]">integration_instructions</span>
+<span class="text-sm font-medium">Integrations</span>
+</a>
+</nav>
+<div class="p-4 border-t border-white/5">
+<div class="bg-white/5 rounded-lg p-3 flex items-center gap-3 border border-white/5">
+<div class="size-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs shadow-inner">SA</div>
+<div class="overflow-hidden">
+<p class="text-sm text-white font-medium truncate">Super Admin</p>
+<p class="text-xs text-white/40 truncate">sysadmin@pgl.com</p>
+</div>
+</div>
+</div>
+</aside>
+<div class="flex-1 lg:ml-64 flex flex-col min-h-screen bg-gradient-to-br from-background-dark to-[#1a160d]">
+<header class="flex items-center justify-between border-b border-white/5 bg-surface-dark/80 backdrop-blur-md px-6 md:px-10 py-4 sticky top-0 z-40">
+<div class="flex flex-col">
+<h2 class="text-white text-lg font-medium tracking-wide">Global Command Center</h2>
+<p class="text-white/40 text-xs flex items-center gap-2">
+                        System Status: <span class="text-green-400 font-mono tracking-tight">OPERATIONAL</span> • v2.5.0 • <span class="text-primary/70">PGL Core</span>
+</p>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex items-center bg-white/5 rounded-lg px-3 py-1.5 border border-white/10 focus-within:border-primary/50 transition-colors w-64 shadow-inner">
+<span class="material-symbols-outlined text-white/40 text-[18px]">search</span>
+<input class="bg-transparent border-none text-sm text-white placeholder-white/40 focus:ring-0 w-full ml-2 h-full py-0" placeholder="Search tenants or logs..." type="text"/>
+</div>
+<button class="relative flex items-center justify-center size-9 rounded-lg hover:bg-white/5 text-white/70 hover:text-primary transition-colors border border-white/5">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+<span class="absolute top-2 right-2 size-2 bg-red-500 rounded-full animate-pulse"></span>
+</button>
+<button class="flex items-center justify-center size-9 rounded-lg hover:bg-white/5 text-white/70 hover:text-primary transition-colors border border-white/5">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+</button>
+</div>
+</header>
+<main class="flex-1 p-6 md:p-10 overflow-y-auto custom-scrollbar">
+<div class="flex flex-col max-w-[1600px] mx-auto gap-8">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+<div class="md:col-span-1 group relative overflow-hidden rounded-xl bg-surface-dark border border-white/5 p-6 shadow-xl">
+<div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+<span class="material-symbols-outlined text-8xl text-primary">ecg_heart</span>
+</div>
+<div class="relative z-10">
+<p class="text-white/50 text-xs font-semibold uppercase tracking-widest mb-4 flex items-center gap-2">
+<span class="size-2 rounded-full bg-primary animate-pulse-slow"></span> Platform Pulse
+                                </p>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between items-end mb-1">
+<span class="text-white/60 text-xs">Total Users</span>
+<span class="text-white font-mono text-lg">1,248</span>
+</div>
+<div class="w-full bg-white/5 rounded-full h-1">
+<div class="bg-primary h-full rounded-full w-[75%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-end mb-1">
+<span class="text-white/60 text-xs">Prospects Scraped</span>
+<span class="text-white font-mono text-lg">842k</span>
+</div>
+<div class="w-full bg-white/5 rounded-full h-1">
+<div class="bg-blue-400 h-full rounded-full w-[60%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-end mb-1">
+<span class="text-white/60 text-xs">Success Rate</span>
+<span class="text-green-400 font-mono text-lg">94.2%</span>
+</div>
+<div class="w-full bg-white/5 rounded-full h-1">
+<div class="bg-green-400 h-full rounded-full w-[94%]"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="md:col-span-1 group relative overflow-hidden rounded-xl bg-surface-dark border border-white/5 p-6 shadow-xl">
+<div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+<span class="material-symbols-outlined text-8xl text-primary">health_and_safety</span>
+</div>
+<div class="relative z-10">
+<p class="text-white/50 text-xs font-semibold uppercase tracking-widest mb-4">Enrichment Health (CB)</p>
+<div class="space-y-3">
+<div class="flex items-center justify-between p-2 rounded bg-white/5 border border-white/5">
+<div class="flex items-center gap-2">
+<div class="size-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
+<span class="text-white text-xs font-medium">Apollo Scraper</span>
+</div>
+<span class="text-[10px] text-green-400 bg-green-900/20 px-1.5 py-0.5 rounded border border-green-500/20 uppercase tracking-wider">Closed</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded bg-white/5 border border-white/5">
+<div class="flex items-center gap-2">
+<div class="size-2 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)] animate-pulse"></div>
+<span class="text-white text-xs font-medium">Exa Neural</span>
+</div>
+<span class="text-[10px] text-amber-400 bg-amber-900/20 px-1.5 py-0.5 rounded border border-amber-500/20 uppercase tracking-wider">Half-Open</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded bg-white/5 border border-white/5">
+<div class="flex items-center gap-2">
+<div class="size-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
+<span class="text-white text-xs font-medium">ContactOut</span>
+</div>
+<span class="text-[10px] text-green-400 bg-green-900/20 px-1.5 py-0.5 rounded border border-green-500/20 uppercase tracking-wider">Closed</span>
+</div>
+</div>
+</div>
+</div>
+<div class="md:col-span-1 group relative overflow-hidden rounded-xl bg-surface-dark border border-white/5 p-6 shadow-xl">
+<div class="relative z-10 h-full flex flex-col">
+<p class="text-white/50 text-xs font-semibold uppercase tracking-widest mb-4">Unit Economics (Cost/Enrich)</p>
+<div class="flex-1 flex flex-col justify-center gap-4">
+<div class="flex items-center justify-between border-b border-white/5 pb-2">
+<span class="text-white/70 text-sm">Apollo</span>
+<span class="text-white font-mono text-sm">$0.012 <span class="text-xs text-white/30">/rec</span></span>
+</div>
+<div class="flex items-center justify-between border-b border-white/5 pb-2">
+<span class="text-white/70 text-sm">Exa AI</span>
+<span class="text-white font-mono text-sm">$0.045 <span class="text-xs text-white/30">/query</span></span>
+</div>
+<div class="flex items-center justify-between border-b border-white/5 pb-2">
+<span class="text-white/70 text-sm">ContactOut</span>
+<span class="text-white font-mono text-sm">$0.080 <span class="text-xs text-white/30">/email</span></span>
+</div>
+<div class="mt-auto pt-2 text-right">
+<span class="text-[10px] text-primary">Avg Blended Cost: $0.034</span>
+</div>
+</div>
+</div>
+</div>
+<div class="md:col-span-1 group relative overflow-hidden rounded-xl bg-surface-dark border border-white/5 p-6 shadow-xl flex flex-col">
+<p class="text-white/50 text-xs font-semibold uppercase tracking-widest mb-4">Export Activity (24h)</p>
+<div class="flex-1 flex items-end gap-2 px-2 pb-2">
+<div class="w-1/5 bg-white/5 rounded-t-sm hover:bg-primary/50 transition-colors relative group/bar" style="height: 40%">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 bg-surface-dark border border-white/10 text-[10px] text-white px-1 py-0.5 rounded opacity-0 group-hover/bar:opacity-100 whitespace-nowrap z-20">W Team</div>
+</div>
+<div class="w-1/5 bg-white/5 rounded-t-sm hover:bg-primary/50 transition-colors relative group/bar" style="height: 85%">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 bg-surface-dark border border-white/10 text-[10px] text-white px-1 py-0.5 rounded opacity-0 group-hover/bar:opacity-100 whitespace-nowrap z-20">Vertex</div>
+</div>
+<div class="w-1/5 bg-white/5 rounded-t-sm hover:bg-primary/50 transition-colors relative group/bar" style="height: 60%">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 bg-surface-dark border border-white/10 text-[10px] text-white px-1 py-0.5 rounded opacity-0 group-hover/bar:opacity-100 whitespace-nowrap z-20">Helix</div>
+</div>
+<div class="w-1/5 bg-white/5 rounded-t-sm hover:bg-primary/50 transition-colors relative group/bar" style="height: 25%">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 bg-surface-dark border border-white/10 text-[10px] text-white px-1 py-0.5 rounded opacity-0 group-hover/bar:opacity-100 whitespace-nowrap z-20">Global</div>
+</div>
+<div class="w-1/5 bg-white/5 rounded-t-sm hover:bg-primary/50 transition-colors relative group/bar" style="height: 50%">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 bg-surface-dark border border-white/10 text-[10px] text-white px-1 py-0.5 rounded opacity-0 group-hover/bar:opacity-100 whitespace-nowrap z-20">Other</div>
+</div>
+</div>
+<div class="border-t border-white/10 mt-1"></div>
+<div class="flex justify-between text-[10px] text-white/30 mt-1">
+<span>00:00</span>
+<span>12:00</span>
+<span>23:59</span>
+</div>
+</div>
+</div>
+<div class="rounded-xl bg-surface-dark border border-white/5 overflow-hidden flex flex-col shadow-2xl shadow-black/40 relative">
+<div class="absolute -top-20 -left-20 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
+<div class="p-6 border-b border-white/5 flex flex-col md:flex-row justify-between items-start md:items-center bg-white/[0.02] gap-4 relative z-10">
+<div>
+<h3 class="text-xl font-serif font-medium text-white flex items-center gap-2">
+                                    Tenant Management
+                                </h3>
+<p class="text-sm text-white/40 mt-1">Manage client instances, quotas, revenue tracking, and access controls.</p>
+</div>
+<div class="flex gap-3">
+<button class="px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white transition-colors text-xs font-medium flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">filter_list</span>
+                                    Filter View
+                                </button>
+<button class="px-4 py-2 rounded-lg bg-primary hover:bg-primary-dark text-background-dark font-bold transition-colors text-xs flex items-center gap-2 shadow-[0_0_15px_rgba(241,191,39,0.3)]">
+<span class="material-symbols-outlined text-[18px]">add_business</span>
+                                    Provision New Tenant
+                                </button>
+</div>
+</div>
+<div class="overflow-x-auto relative z-10">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-white/[0.02] border-b border-white/5">
+<th class="px-6 py-4 text-xs font-semibold text-white/40 uppercase tracking-wider w-1/4">Client / Tenant</th>
+<th class="px-6 py-4 text-xs font-semibold text-white/40 uppercase tracking-wider">Plan &amp; Rev</th>
+<th class="px-6 py-4 text-xs font-semibold text-white/40 uppercase tracking-wider text-center">Seats</th>
+<th class="px-6 py-4 text-xs font-semibold text-white/40 uppercase tracking-wider">Status</th>
+<th class="px-6 py-4 text-xs font-semibold text-white/40 uppercase tracking-wider text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-white/5">
+<tr class="hover:bg-white/[0.02] transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-4">
+<div class="size-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white/50 shadow-inner">
+<span class="material-symbols-outlined">diamond</span>
+</div>
+<div>
+<p class="text-white text-sm font-semibold group-hover:text-primary transition-colors">The W Team</p>
+<p class="text-white/40 text-xs font-mono">ID: ten_wteam_001</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary border border-primary/20 tracking-wide uppercase">
+                                                        Enterprise
+                                                    </span>
+<span class="text-white font-mono text-sm">$12.5k<span class="text-white/30 text-xs">/mo</span></span>
+</div>
+<span class="text-[10px] text-white/30">Renews in 12d</span>
+</div>
+</td>
+<td class="px-6 py-4 text-center">
+<span class="text-white font-mono text-sm">18</span>
+<span class="text-white/30 text-xs">/ 20</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="size-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
+<span class="text-xs text-white/70">Active</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="text-white/40 hover:text-white hover:bg-white/10 p-2 rounded-lg transition-colors" title="Impersonate">
+<span class="material-symbols-outlined text-[18px]">login</span>
+</button>
+<button class="text-white/40 hover:text-blue-400 hover:bg-blue-400/10 p-2 rounded-lg transition-colors" title="Logs">
+<span class="material-symbols-outlined text-[18px]">history</span>
+</button>
+<button class="text-white/40 hover:text-red-400 hover:bg-red-400/10 p-2 rounded-lg transition-colors" title="Suspend Tenant">
+<span class="material-symbols-outlined text-[18px]">block</span>
+</button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-white/[0.02] transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-4">
+<div class="size-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white/50 shadow-inner">
+<span class="material-symbols-outlined">real_estate_agent</span>
+</div>
+<div>
+<p class="text-white text-sm font-semibold group-hover:text-primary transition-colors">Helix Luxury Group</p>
+<p class="text-white/40 text-xs font-mono">ID: ten_helix_042</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/10 text-purple-300 border border-purple-500/20 tracking-wide uppercase">
+                                                        Pro Tier
+                                                    </span>
+<span class="text-white font-mono text-sm">$4.2k<span class="text-white/30 text-xs">/mo</span></span>
+</div>
+<span class="text-[10px] text-white/30">Auto-renew active</span>
+</div>
+</td>
+<td class="px-6 py-4 text-center">
+<span class="text-white font-mono text-sm">5</span>
+<span class="text-white/30 text-xs">/ 10</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="size-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
+<span class="text-xs text-white/70">Active</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="text-white/40 hover:text-white hover:bg-white/10 p-2 rounded-lg transition-colors" title="Impersonate">
+<span class="material-symbols-outlined text-[18px]">login</span>
+</button>
+<button class="text-white/40 hover:text-blue-400 hover:bg-blue-400/10 p-2 rounded-lg transition-colors" title="Logs">
+<span class="material-symbols-outlined text-[18px]">history</span>
+</button>
+<button class="text-white/40 hover:text-red-400 hover:bg-red-400/10 p-2 rounded-lg transition-colors" title="Suspend Tenant">
+<span class="material-symbols-outlined text-[18px]">block</span>
+</button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-white/[0.02] transition-colors group">
+<td class="px-6 py-4">
+<div class="flex items-center gap-4">
+<div class="size-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white/50 shadow-inner">
+<span class="material-symbols-outlined">account_balance</span>
+</div>
+<div>
+<p class="text-white text-sm font-semibold group-hover:text-primary transition-colors">Vertex Capital</p>
+<p class="text-white/40 text-xs font-mono">ID: ten_vertex_089</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary border border-primary/20 tracking-wide uppercase">
+                                                        Enterprise
+                                                    </span>
+<span class="text-white font-mono text-sm">$18.0k<span class="text-white/30 text-xs">/yr</span></span>
+</div>
+<span class="text-[10px] text-white/30">Paid Annually</span>
+</div>
+</td>
+<td class="px-6 py-4 text-center">
+<span class="text-white font-mono text-sm">42</span>
+<span class="text-white/30 text-xs">/ 100</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="size-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
+<span class="text-xs text-white/70">Active</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="text-white/40 hover:text-white hover:bg-white/10 p-2 rounded-lg transition-colors" title="Impersonate">
+<span class="material-symbols-outlined text-[18px]">login</span>
+</button>
+<button class="text-white/40 hover:text-blue-400 hover:bg-blue-400/10 p-2 rounded-lg transition-colors" title="Logs">
+<span class="material-symbols-outlined text-[18px]">history</span>
+</button>
+<button class="text-white/40 hover:text-red-400 hover:bg-red-400/10 p-2 rounded-lg transition-colors" title="Suspend Tenant">
+<span class="material-symbols-outlined text-[18px]">block</span>
+</button>
+</div>
+</td>
+</tr>
+<tr class="hover:bg-white/[0.02] transition-colors group border-l-2 border-l-red-500">
+<td class="px-6 py-4">
+<div class="flex items-center gap-4">
+<div class="size-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-white/50 shadow-inner">
+<span class="material-symbols-outlined">public</span>
+</div>
+<div>
+<p class="text-white text-sm font-semibold group-hover:text-primary transition-colors">Global Estates</p>
+<p class="text-white/40 text-xs font-mono">ID: ten_global_102</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-500 border border-amber-500/20 tracking-wide uppercase">
+                                                        Basic
+                                                    </span>
+<span class="text-white font-mono text-sm">$899<span class="text-white/30 text-xs">/mo</span></span>
+</div>
+<span class="text-[10px] text-red-400 animate-pulse font-medium">Payment Overdue (3d)</span>
+</div>
+</td>
+<td class="px-6 py-4 text-center">
+<span class="text-white font-mono text-sm">2</span>
+<span class="text-white/30 text-xs">/ 3</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="size-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)]"></div>
+<span class="text-xs text-white/70">Restricted</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<div class="flex items-center justify-end gap-1">
+<button class="text-white/40 hover:text-white hover:bg-white/10 p-2 rounded-lg transition-colors" title="Impersonate">
+<span class="material-symbols-outlined text-[18px]">login</span>
+</button>
+<button class="text-white/40 hover:text-blue-400 hover:bg-blue-400/10 p-2 rounded-lg transition-colors" title="Logs">
+<span class="material-symbols-outlined text-[18px]">history</span>
+</button>
+<button class="text-red-400 bg-red-400/10 hover:bg-red-400/20 p-2 rounded-lg transition-colors" title="Unsuspend Tenant">
+<span class="material-symbols-outlined text-[18px]">play_arrow</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-4 border-t border-white/5 bg-white/[0.02] flex justify-between items-center text-xs text-white/40">
+<span>Showing 4 of 14 tenants</span>
+<div class="flex gap-2">
+<button class="px-3 py-1 rounded bg-white/5 hover:bg-white/10 text-white disabled:opacity-50" disabled="">Previous</button>
+<button class="px-3 py-1 rounded bg-white/5 hover:bg-white/10 text-white">Next</button>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6">
+<div class="rounded-xl bg-surface-dark border border-white/5 overflow-hidden flex flex-col h-full">
+<div class="p-5 border-b border-white/5 flex justify-between items-center">
+<h3 class="text-sm font-semibold text-white uppercase tracking-wider flex items-center gap-2">
+<span class="material-symbols-outlined text-red-500 text-[18px]">report</span>
+                                    Live Error Feed
+                                </h3>
+<div class="flex items-center gap-2">
+<span class="size-2 rounded-full bg-red-500 animate-pulse"></span>
+<span class="text-[10px] text-white/40 uppercase">Live</span>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto max-h-[300px] custom-scrollbar">
+<div class="flex gap-4 p-4 border-b border-white/5 hover:bg-white/[0.02] group">
+<div class="mt-0.5">
+<div class="text-red-400 bg-red-400/10 p-1.5 rounded">
+<span class="material-symbols-outlined text-[16px]">error</span>
+</div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<p class="text-white text-sm font-medium">Critical Rate Limit Exceeded</p>
+<span class="text-white/30 text-[10px] whitespace-nowrap">2m ago</span>
+</div>
+<p class="text-white/60 text-xs mt-0.5">Apollo API 429 response on Tenant: <span class="text-primary/80">Vertex Capital</span>.</p>
+<div class="mt-2 flex gap-2">
+<span class="text-[10px] bg-white/5 px-1.5 py-0.5 rounded text-white/40 font-mono">Error 429</span>
+<span class="text-[10px] bg-white/5 px-1.5 py-0.5 rounded text-white/40 font-mono">Scraper Node B</span>
+</div>
+</div>
+</div>
+<div class="flex gap-4 p-4 border-b border-white/5 hover:bg-white/[0.02] group">
+<div class="mt-0.5">
+<div class="text-amber-400 bg-amber-400/10 p-1.5 rounded">
+<span class="material-symbols-outlined text-[16px]">warning</span>
+</div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<p class="text-white text-sm font-medium">High Latency Detected</p>
+<span class="text-white/30 text-[10px] whitespace-nowrap">14m ago</span>
+</div>
+<p class="text-white/60 text-xs mt-0.5">Database write latency spike &gt; 400ms. Autoscaling triggered.</p>
+</div>
+</div>
+<div class="flex gap-4 p-4 border-b border-white/5 hover:bg-white/[0.02] group">
+<div class="mt-0.5">
+<div class="text-blue-400 bg-blue-400/10 p-1.5 rounded">
+<span class="material-symbols-outlined text-[16px]">info</span>
+</div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-start">
+<p class="text-white text-sm font-medium">System Update Scheduled</p>
+<span class="text-white/30 text-[10px] whitespace-nowrap">1h ago</span>
+</div>
+<p class="text-white/60 text-xs mt-0.5">Routine maintenance scheduled for 03:00 UTC. Notification pending.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="rounded-xl bg-surface-dark border border-white/5 overflow-hidden flex flex-col h-full">
+<div class="p-5 border-b border-white/5">
+<h3 class="text-sm font-semibold text-white uppercase tracking-wider flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">bolt</span>
+                                    System Actions
+                                </h3>
+</div>
+<div class="p-5 grid grid-cols-2 gap-4 h-full">
+<button class="p-4 rounded-lg border border-white/5 bg-white/[0.02] hover:bg-white/5 hover:border-primary/30 transition-all group flex flex-col items-start gap-2 text-left">
+<span class="material-symbols-outlined text-white/50 group-hover:text-primary transition-colors">key</span>
+<span class="text-white text-sm font-medium">Rotate Master Keys</span>
+</button>
+<button class="p-4 rounded-lg border border-white/5 bg-white/[0.02] hover:bg-white/5 hover:border-primary/30 transition-all group flex flex-col items-start gap-2 text-left">
+<span class="material-symbols-outlined text-white/50 group-hover:text-primary transition-colors">database</span>
+<span class="text-white text-sm font-medium">Flush Cache (Global)</span>
+</button>
+<button class="p-4 rounded-lg border border-white/5 bg-white/[0.02] hover:bg-white/5 hover:border-primary/30 transition-all group flex flex-col items-start gap-2 text-left">
+<span class="material-symbols-outlined text-white/50 group-hover:text-primary transition-colors">campaign</span>
+<span class="text-white text-sm font-medium">Broadcast Alert</span>
+</button>
+<button class="p-4 rounded-lg border border-white/5 bg-white/[0.02] hover:bg-white/5 hover:border-primary/30 transition-all group flex flex-col items-start gap-2 text-left">
+<span class="material-symbols-outlined text-white/50 group-hover:text-primary transition-colors">download</span>
+<span class="text-white text-sm font-medium">Export System Logs</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+
+</body></html>

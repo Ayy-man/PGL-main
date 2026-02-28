@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Export Log &amp; Usage Analytics - LuxLeads</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#d4af37", // Updated to requested gold accent
+                        "primary-dark": "#b08d2b",
+                        "background-light": "#f8f8f6",
+                        "background-dark": "#1a1814",
+                        "surface-dark": "#221e18",
+                        "border-dark": "#3e3625",
+                        "gold-accent": "#d4af37",
+                        "text-muted": "#bab29c",
+                    },
+                    fontFamily: {
+                        "sans": ["Inter", "sans-serif"],
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .text-gold {
+                color: #d4af37;
+            }
+            .bg-gold {
+                background-color: #d4af37;
+            }
+            .border-gold {
+                border-color: #d4af37;
+            }
+            .gold-gradient {
+                background: linear-gradient(135deg, #d4af37 0%, #aa8a29 100%);
+            }
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display antialiased overflow-hidden">
+<div class="relative flex h-screen w-full flex-row overflow-hidden">
+<div class="flex h-full w-64 flex-col border-r border-slate-200 dark:border-border-dark bg-white dark:bg-surface-dark">
+<div class="flex h-full flex-col justify-between p-4">
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-3 px-2 py-2">
+<div class="bg-center bg-no-repeat bg-cover rounded-full size-10 border border-slate-200 dark:border-slate-700" data-alt="LuxLeads Logo" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBHVZb2oOXClxWCFHGCC8L0oLpcxer2A9yyeqYjETUpuA4uHHFsAjpg-XYuFX7Oj1duFPR0SRdmKVnVPF5mLZMqOMFgxRVstUtcBmIevibb1b0noPhm1SdWGxZ9_cO_uQ65YRHL8f_lxVWJoPMQmC6xNCiwLqIvnjFKvumCd3VE_w7eAQgnyKVYavz9IZQU5FcbUGP-ysOSmPL_r9WO2EsBWcWrh_HJwHwJ2WTT-yzt-DFqZVwW9QgAjeVEAq9SfXRT6PXWrKWZMpw");'></div>
+<div class="flex flex-col">
+<h1 class="text-slate-900 dark:text-white text-base font-bold leading-normal">LuxLeads</h1>
+<p class="text-slate-500 dark:text-text-muted text-xs font-normal leading-normal">PGL Enterprise</p>
+</div>
+</div>
+<nav class="flex flex-col gap-2 mt-4">
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors group" href="#">
+<span class="material-symbols-outlined text-[24px] text-slate-400 group-hover:text-gold transition-colors">pie_chart</span>
+<p class="text-sm font-medium leading-normal">Dashboard</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors group" href="#">
+<span class="material-symbols-outlined text-[24px] text-slate-400 group-hover:text-gold transition-colors">search</span>
+<p class="text-sm font-medium leading-normal">Lead Discovery</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-gold/10 dark:bg-gold/10 text-gold dark:text-gold group" href="#">
+<span class="material-symbols-outlined text-[24px] text-gold" style="font-variation-settings: 'FILL' 1;">history</span>
+<p class="text-sm font-semibold leading-normal">Export Log</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors group" href="#">
+<span class="material-symbols-outlined text-[24px] text-slate-400 group-hover:text-gold transition-colors">group</span>
+<p class="text-sm font-medium leading-normal">Team</p>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors group" href="#">
+<span class="material-symbols-outlined text-[24px] text-slate-400 group-hover:text-gold transition-colors">settings</span>
+<p class="text-sm font-medium leading-normal">Settings</p>
+</a>
+</nav>
+</div>
+<div class="px-2">
+<div class="rounded-xl bg-slate-100 dark:bg-white/5 p-4 border border-slate-200 dark:border-white/10">
+<p class="text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wider">Credit Usage</p>
+<div class="h-2 w-full bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden">
+<div class="h-full bg-gold w-[82%] rounded-full"></div>
+</div>
+<div class="flex justify-between mt-2 text-xs text-slate-500 dark:text-slate-400">
+<span>4,100 / 5,000</span>
+<span class="text-gold font-medium">82%</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="flex-1 flex flex-col h-full overflow-y-auto bg-background-light dark:bg-background-dark">
+<div class="flex-1 max-w-[1400px] w-full mx-auto p-6 md:p-10 flex flex-col gap-8">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div class="flex flex-col gap-2">
+<h2 class="text-3xl md:text-4xl font-black tracking-tight text-slate-900 dark:text-white">Export Log &amp; Usage Analytics</h2>
+<p class="text-slate-500 dark:text-text-muted text-base font-normal max-w-2xl">Monitor your team's data extraction history and prospect acquisition. Securely access previous list downloads.</p>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center justify-center gap-2 rounded-lg h-12 px-6 bg-slate-200 dark:bg-white/5 text-slate-700 dark:text-slate-200 text-sm font-bold hover:bg-slate-300 dark:hover:bg-white/10 transition-all duration-200 whitespace-nowrap border border-transparent dark:border-white/10">
+<span class="material-symbols-outlined text-[20px]">filter_list</span>
+<span>Filters</span>
+</button>
+<button class="flex items-center justify-center gap-2 rounded-lg h-12 px-6 gold-gradient text-white dark:text-slate-900 text-sm font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-200 whitespace-nowrap">
+<span class="material-symbols-outlined text-[20px]">download</span>
+<span>Export All Logs</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+<div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark shadow-sm relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-6xl text-gold">file_download</span>
+</div>
+<div class="flex items-center justify-between relative z-10">
+<p class="text-slate-500 dark:text-text-muted text-sm font-medium uppercase tracking-wider">Total Monthly Exports</p>
+</div>
+<div class="flex items-end gap-3 mt-4 relative z-10">
+<p class="text-slate-900 dark:text-white text-4xl font-bold tracking-tight">128</p>
+<div class="flex items-center text-emerald-600 dark:text-emerald-400 text-sm font-medium mb-1.5 bg-emerald-100 dark:bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-500/20">
+<span class="material-symbols-outlined text-[16px]">trending_up</span>
+<span class="ml-0.5">8%</span>
+</div>
+</div>
+<p class="text-xs text-slate-400 mt-1 relative z-10">Files generated this billing cycle</p>
+</div>
+<div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark shadow-sm relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-6xl text-gold">person_add</span>
+</div>
+<div class="flex items-center justify-between relative z-10">
+<p class="text-slate-500 dark:text-text-muted text-sm font-medium uppercase tracking-wider">Unique Prospects</p>
+</div>
+<div class="flex items-end gap-3 mt-4 relative z-10">
+<p class="text-slate-900 dark:text-white text-4xl font-bold tracking-tight">4,100</p>
+<div class="flex items-center text-emerald-600 dark:text-emerald-400 text-sm font-medium mb-1.5 bg-emerald-100 dark:bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-200 dark:border-emerald-500/20">
+<span class="material-symbols-outlined text-[16px]">trending_up</span>
+<span class="ml-0.5">15%</span>
+</div>
+</div>
+<p class="text-xs text-slate-400 mt-1 relative z-10">High Net Worth Individuals found</p>
+</div>
+<div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-surface-dark border border-slate-200 dark:border-border-dark shadow-sm relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-6xl text-gold">leaderboard</span>
+</div>
+<div class="flex items-center justify-between relative z-10">
+<p class="text-slate-500 dark:text-text-muted text-sm font-medium uppercase tracking-wider">Top Exporter</p>
+</div>
+<div class="flex items-center gap-3 mt-4 relative z-10">
+<div class="flex items-center justify-center size-10 rounded-full bg-gold/20 text-gold font-bold text-sm border border-gold/30">SJ</div>
+<div>
+<p class="text-slate-900 dark:text-white text-xl font-bold tracking-tight">Sarah Jenkins</p>
+<p class="text-xs text-slate-500 dark:text-text-muted">42 Lists / 1,250 Prospects</p>
+</div>
+</div>
+<p class="text-xs text-slate-400 mt-2 relative z-10">Most active team member</p>
+</div>
+</div>
+<div class="flex flex-col gap-4">
+<div class="@container w-full overflow-hidden rounded-xl border border-slate-200 dark:border-border-dark bg-white dark:bg-surface-dark shadow-sm">
+<div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-border-dark bg-slate-50/50 dark:bg-white/5">
+<h3 class="text-sm font-bold uppercase tracking-wide text-slate-700 dark:text-slate-200">Recent Exports</h3>
+<div class="flex gap-2 text-xs text-slate-500 dark:text-text-muted">
+<span class="flex items-center gap-1"><span class="size-2 rounded-full bg-emerald-500"></span>Complete</span>
+<span class="flex items-center gap-1 ml-2"><span class="size-2 rounded-full bg-amber-500"></span>Processing</span>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full min-w-[1000px]">
+<thead>
+<tr class="bg-slate-50 dark:bg-[#2a261a] border-b border-slate-200 dark:border-border-dark">
+<th class="px-6 py-4 text-left text-xs font-bold text-gold uppercase tracking-wider w-[20%]">Timestamp</th>
+<th class="px-6 py-4 text-left text-xs font-bold text-gold uppercase tracking-wider w-[25%]">List Name</th>
+<th class="px-6 py-4 text-left text-xs font-bold text-gold uppercase tracking-wider w-[10%]">Row Count</th>
+<th class="px-6 py-4 text-left text-xs font-bold text-gold uppercase tracking-wider w-[10%]">Format</th>
+<th class="px-6 py-4 text-left text-xs font-bold text-gold uppercase tracking-wider w-[20%]">Exported By</th>
+<th class="px-6 py-4 text-right text-xs font-bold text-gold uppercase tracking-wider w-[15%]">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-[#2a261a]">
+<tr class="hover:bg-slate-50/50 dark:hover:bg-[#221e10] transition-colors group">
+<td class="px-6 py-4 text-slate-500 dark:text-text-muted text-sm font-mono">Oct 24, 10:42 AM</td>
+<td class="px-6 py-4">
+<a class="text-slate-900 dark:text-white text-sm font-medium hover:text-gold transition-colors flex items-center gap-2 group-hover:underline decoration-gold/50 underline-offset-4" href="#">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-gold text-[18px]">list_alt</span>
+                                        Hamptons Q4 Waterfront
+                                    </a>
+</td>
+<td class="px-6 py-4 text-slate-500 dark:text-slate-300 text-sm">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 dark:bg-white/5 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-white/10">142</span>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase border border-slate-200 dark:border-white/10 px-2 py-1 rounded bg-slate-50 dark:bg-white/5">CSV</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="size-6 rounded-full bg-indigo-500/20 text-indigo-400 text-[10px] font-bold flex items-center justify-center">SJ</div>
+<span class="text-slate-500 dark:text-text-muted text-sm">Sarah Jenkins</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-gold dark:text-slate-500 dark:hover:text-gold transition-colors inline-flex items-center gap-1 text-sm font-medium">
+<span class="material-symbols-outlined text-[18px]">cloud_download</span>
+                                        Re-download
+                                    </button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50/50 dark:hover:bg-[#221e10] transition-colors group">
+<td class="px-6 py-4 text-slate-500 dark:text-text-muted text-sm font-mono">Oct 24, 09:15 AM</td>
+<td class="px-6 py-4">
+<a class="text-slate-900 dark:text-white text-sm font-medium hover:text-gold transition-colors flex items-center gap-2 group-hover:underline decoration-gold/50 underline-offset-4" href="#">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-gold text-[18px]">list_alt</span>
+                                        Miami Beach Condo Owners &gt; $5M
+                                    </a>
+</td>
+<td class="px-6 py-4 text-slate-500 dark:text-slate-300 text-sm">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 dark:bg-white/5 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-white/10">350</span>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase border border-slate-200 dark:border-white/10 px-2 py-1 rounded bg-slate-50 dark:bg-white/5">CSV</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="size-6 rounded-full bg-blue-500/20 text-blue-400 text-[10px] font-bold flex items-center justify-center">MC</div>
+<span class="text-slate-500 dark:text-text-muted text-sm">Michael Chen</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-gold dark:text-slate-500 dark:hover:text-gold transition-colors inline-flex items-center gap-1 text-sm font-medium">
+<span class="material-symbols-outlined text-[18px]">cloud_download</span>
+                                        Re-download
+                                    </button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50/50 dark:hover:bg-[#221e10] transition-colors group">
+<td class="px-6 py-4 text-slate-500 dark:text-text-muted text-sm font-mono">Oct 23, 04:30 PM</td>
+<td class="px-6 py-4">
+<a class="text-slate-900 dark:text-white text-sm font-medium hover:text-gold transition-colors flex items-center gap-2 group-hover:underline decoration-gold/50 underline-offset-4" href="#">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-gold text-[18px]">list_alt</span>
+                                        Aspen Ski-In/Ski-Out Prospects
+                                    </a>
+</td>
+<td class="px-6 py-4 text-slate-500 dark:text-slate-300 text-sm">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 dark:bg-white/5 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-white/10">85</span>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase border border-slate-200 dark:border-white/10 px-2 py-1 rounded bg-slate-50 dark:bg-white/5">XLSX</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="size-6 rounded-full bg-indigo-500/20 text-indigo-400 text-[10px] font-bold flex items-center justify-center">SJ</div>
+<span class="text-slate-500 dark:text-text-muted text-sm">Sarah Jenkins</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-gold dark:text-slate-500 dark:hover:text-gold transition-colors inline-flex items-center gap-1 text-sm font-medium">
+<span class="material-symbols-outlined text-[18px]">cloud_download</span>
+                                        Re-download
+                                    </button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50/50 dark:hover:bg-[#221e10] transition-colors group">
+<td class="px-6 py-4 text-slate-500 dark:text-text-muted text-sm font-mono">Oct 23, 02:15 PM</td>
+<td class="px-6 py-4">
+<a class="text-slate-900 dark:text-white text-sm font-medium hover:text-gold transition-colors flex items-center gap-2 group-hover:underline decoration-gold/50 underline-offset-4" href="#">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-gold text-[18px]">list_alt</span>
+                                        Beverly Hills - Art Collectors
+                                    </a>
+</td>
+<td class="px-6 py-4 text-slate-500 dark:text-slate-300 text-sm">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 dark:bg-white/5 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-white/10">210</span>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase border border-slate-200 dark:border-white/10 px-2 py-1 rounded bg-slate-50 dark:bg-white/5">CSV</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="size-6 rounded-full bg-purple-500/20 text-purple-400 text-[10px] font-bold flex items-center justify-center">DR</div>
+<span class="text-slate-500 dark:text-text-muted text-sm">David Ritz</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-gold dark:text-slate-500 dark:hover:text-gold transition-colors inline-flex items-center gap-1 text-sm font-medium">
+<span class="material-symbols-outlined text-[18px]">cloud_download</span>
+                                        Re-download
+                                    </button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50/50 dark:hover:bg-[#221e10] transition-colors group">
+<td class="px-6 py-4 text-slate-500 dark:text-text-muted text-sm font-mono">Oct 22, 11:00 AM</td>
+<td class="px-6 py-4">
+<a class="text-slate-900 dark:text-white text-sm font-medium hover:text-gold transition-colors flex items-center gap-2 group-hover:underline decoration-gold/50 underline-offset-4" href="#">
+<span class="material-symbols-outlined text-slate-400 group-hover:text-gold text-[18px]">list_alt</span>
+                                        Monaco Yacht Club Members
+                                    </a>
+</td>
+<td class="px-6 py-4 text-slate-500 dark:text-slate-300 text-sm">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 dark:bg-white/5 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-white/10">55</span>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase border border-slate-200 dark:border-white/10 px-2 py-1 rounded bg-slate-50 dark:bg-white/5">CSV</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="size-6 rounded-full bg-indigo-500/20 text-indigo-400 text-[10px] font-bold flex items-center justify-center">SJ</div>
+<span class="text-slate-500 dark:text-text-muted text-sm">Sarah Jenkins</span>
+</div>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:text-gold dark:text-slate-500 dark:hover:text-gold transition-colors inline-flex items-center gap-1 text-sm font-medium">
+<span class="material-symbols-outlined text-[18px]">cloud_download</span>
+                                        Re-download
+                                    </button>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="p-8 text-center border-t border-slate-200 dark:border-border-dark bg-slate-50/30 dark:bg-white/[0.02]">
+<p class="text-sm text-slate-500 dark:text-text-muted max-w-lg mx-auto">
+<span class="block mb-2 text-gold material-symbols-outlined">diamond</span>
+                                All exports are retained for 30 days for data security. Need older archives? <a class="text-gold hover:underline" href="#">Contact Concierge Support</a>.
+                            </p>
+</div>
+</div>
+<div class="border-t border-slate-200 dark:border-border-dark bg-slate-50 dark:bg-surface-dark px-6 py-3 flex items-center justify-between">
+<p class="text-xs text-slate-500 dark:text-text-muted">Showing 1-5 of 128 exports</p>
+<div class="flex gap-2">
+<button class="px-3 py-1 text-xs font-medium text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-border-dark rounded hover:bg-white dark:hover:bg-white/10 hover:text-gold dark:hover:text-gold transition-colors disabled:opacity-50">Previous</button>
+<button class="px-3 py-1 text-xs font-medium text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-border-dark rounded hover:bg-white dark:hover:bg-white/10 hover:text-gold dark:hover:text-gold transition-colors">Next</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</body></html>

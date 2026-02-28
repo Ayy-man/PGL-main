@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Saved Personas &amp; Living Data Library</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#f1bf27",
+              "primary-dark": "#b38c1d",
+              "background-light": "#f8f8f6",
+              "background-dark": "#0a0a0a","surface-dark": "#18181b","surface-light": "#ffffff",
+              "border-dark": "#27272a","text-main": "#e6e0d4",
+              "text-muted": "#a1a1aa",
+              "accent-gold": "#d4af37",
+            },
+            fontFamily: {
+              display: ["Inter", "sans-serif"],
+            },
+            boxShadow: {
+              'glow': '0 0 15px -3px rgba(241, 191, 39, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+              'elevation': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+            },
+            animation: {
+                'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            },
+            borderRadius: {
+                'card': '12px',}
+          },
+        },
+      }
+    </script>
+<style>
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #27272a; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #f1bf27; 
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-text-main min-h-screen flex flex-col overflow-hidden">
+<header class="h-16 border-b border-border-dark bg-surface-dark px-6 flex items-center justify-between shrink-0 z-20 shadow-lg">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3">
+<div class="size-8 text-primary flex items-center justify-center rounded bg-primary/10 border border-primary/20">
+<span class="material-symbols-outlined text-2xl">diamond</span>
+</div>
+<h1 class="text-lg font-bold tracking-tight text-white">LUXE<span class="text-primary font-light">LIBRARY</span></h1>
+</div>
+<nav class="hidden md:flex items-center gap-1">
+<a class="px-4 py-2 text-sm font-medium text-white bg-white/5 rounded-lg border border-white/10" href="#">Personas</a>
+<a class="px-4 py-2 text-sm font-medium text-text-muted hover:text-white transition-colors" href="#">Campaigns</a>
+<a class="px-4 py-2 text-sm font-medium text-text-muted hover:text-white transition-colors" href="#">Prospects</a>
+<a class="px-4 py-2 text-sm font-medium text-text-muted hover:text-white transition-colors" href="#">Analytics</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden lg:block">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted material-symbols-outlined text-[20px]">search</span>
+<input class="bg-background-dark border border-border-dark rounded-lg pl-10 pr-4 py-1.5 text-sm text-white focus:outline-none focus:border-primary w-64 placeholder-text-muted/50" placeholder="Search saved lists..." type="text"/>
+<div class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
+<kbd class="hidden sm:inline-block border border-border-dark rounded px-1.5 py-0.5 text-[10px] font-mono text-text-muted bg-surface-dark">⌘K</kbd>
+</div>
+</div>
+<div class="h-6 w-px bg-border-dark mx-2"></div>
+<button class="relative p-2 text-text-muted hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-1.5 right-1.5 size-2 bg-primary rounded-full animate-pulse"></span>
+</button>
+<div class="size-9 rounded-full bg-cover bg-center border border-border-dark" data-alt="User profile avatar" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBKlBitBSqxjpWCAqS6hCjcna10yY_72YOeK0d2sMv07Yv20deZC6J3aS3pzyLrDpR24fiLzM55zdFsSRzZchb7w-4gPBTFaWxWTNMDy4wgOGSgGyhi_b3ZVGLczMtX8cU-IhlTOXTSD_3aP1vN1ghBXQYe8i1ydRebUNABbKb8YC7dpod42a3cLLTF_DpQSo6rgIR09vj9OBTKjdM2vBIq8yX5I40pbPCa3we6No7VL8eKb8x556ZDI-8cUfI4Y_uyM3ekmp1-Z4A');"></div>
+</div>
+</header>
+<main class="flex-1 flex overflow-hidden">
+<aside class="w-72 bg-surface-dark border-r border-border-dark flex flex-col shrink-0 z-10">
+<div class="p-5 border-b border-border-dark bg-background-dark/30">
+<h2 class="text-xs font-bold uppercase tracking-wider text-primary mb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">library_books</span> Library Stats
+            </h2>
+<div class="grid grid-cols-2 gap-3 mb-2">
+<div class="bg-surface-dark p-3 rounded-card border border-border-dark">
+<div class="text-2xl font-bold text-white">12</div>
+<div class="text-[10px] text-text-muted uppercase mt-1">Active Personas</div>
+</div>
+<div class="bg-surface-dark p-3 rounded-card border border-border-dark relative overflow-hidden">
+<div class="absolute top-0 right-0 w-8 h-8 bg-primary/10 rounded-bl-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-[14px]">trending_up</span>
+</div>
+<div class="text-2xl font-bold text-white">843</div>
+<div class="text-[10px] text-text-muted uppercase mt-1">New Leads Today</div>
+</div>
+</div>
+<button class="w-full mt-3 bg-primary hover:bg-primary-dark text-surface-dark font-bold py-2.5 px-4 rounded-card shadow-glow transition-all flex items-center justify-center gap-2 group">
+<span class="material-symbols-outlined text-[18px] group-hover:rotate-90 transition-transform">add_circle</span>
+                New Persona Search
+            </button>
+</div>
+<div class="flex-1 overflow-y-auto p-4 space-y-6">
+<div>
+<h3 class="text-xs font-bold text-text-muted/70 uppercase mb-3 px-2">Filter by Industry</h3>
+<div class="space-y-1">
+<label class="flex items-center gap-3 p-2 rounded hover:bg-white/5 cursor-pointer group">
+<input checked="" class="rounded border-border-dark bg-surface-dark text-primary focus:ring-primary/50 form-checkbox" type="checkbox"/>
+<span class="text-sm text-text-muted group-hover:text-white">Real Estate</span>
+<span class="ml-auto text-xs text-text-muted">4</span>
+</label>
+<label class="flex items-center gap-3 p-2 rounded hover:bg-white/5 cursor-pointer group">
+<input checked="" class="rounded border-border-dark bg-surface-dark text-primary focus:ring-primary/50 form-checkbox" type="checkbox"/>
+<span class="text-sm text-text-muted group-hover:text-white">Crypto / Web3</span>
+<span class="ml-auto text-xs text-text-muted">3</span>
+</label>
+<label class="flex items-center gap-3 p-2 rounded hover:bg-white/5 cursor-pointer group">
+<input checked="" class="rounded border-border-dark bg-surface-dark text-primary focus:ring-primary/50 form-checkbox" type="checkbox"/>
+<span class="text-sm text-text-muted group-hover:text-white">Fintech</span>
+<span class="ml-auto text-xs text-text-muted">2</span>
+</label>
+<label class="flex items-center gap-3 p-2 rounded hover:bg-white/5 cursor-pointer group">
+<input class="rounded border-border-dark bg-surface-dark text-primary focus:ring-primary/50 form-checkbox" type="checkbox"/>
+<span class="text-sm text-text-muted group-hover:text-white">Private Equity</span>
+<span class="ml-auto text-xs text-text-muted">3</span>
+</label>
+</div>
+</div>
+<div>
+<h3 class="text-xs font-bold text-text-muted/70 uppercase mb-3 px-2">Data Freshness</h3>
+<div class="space-y-1">
+<label class="flex items-center gap-3 p-2 rounded hover:bg-white/5 cursor-pointer group">
+<input checked="" class="border-border-dark bg-surface-dark text-primary focus:ring-primary/50 form-radio" name="freshness" type="radio"/>
+<span class="text-sm text-text-muted group-hover:text-white">Live (Last 24h)</span>
+</label>
+<label class="flex items-center gap-3 p-2 rounded hover:bg-white/5 cursor-pointer group">
+<input class="border-border-dark bg-surface-dark text-primary focus:ring-primary/50 form-radio" name="freshness" type="radio"/>
+<span class="text-sm text-text-muted group-hover:text-white">Past Week</span>
+</label>
+</div>
+</div>
+</div>
+</aside>
+<section class="flex-1 bg-background-dark relative flex flex-col overflow-hidden">
+<div class="absolute inset-0 z-0 opacity-20" style="background-image: radial-gradient(#3d3626 1px, transparent 1px); background-size: 24px 24px;"></div>
+<div class="relative z-10 flex-1 overflow-y-auto p-8">
+<div class="flex justify-between items-end mb-8">
+<div>
+<h2 class="text-2xl font-bold text-white mb-2">Saved Personas &amp; Living Data</h2>
+<p class="text-text-muted text-sm max-w-2xl">Your active data streams. These personas are constantly updated with new leads matching your criteria.</p>
+</div>
+<div class="flex gap-3">
+<button class="bg-surface-dark border border-border-dark hover:border-primary/50 text-text-muted hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 shadow-elevation">
+<span class="material-symbols-outlined text-[18px]">tune</span> Manage Sources
+                    </button>
+<div class="flex bg-surface-dark rounded-lg p-1 border border-border-dark shadow-elevation">
+<button class="p-1.5 rounded bg-white/10 text-white shadow-sm"><span class="material-symbols-outlined text-[20px]">grid_view</span></button>
+<button class="p-1.5 rounded text-text-muted hover:text-white hover:bg-white/5 transition-colors"><span class="material-symbols-outlined text-[20px]">view_list</span></button>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-20">
+<div class="group bg-surface-dark border border-border-dark rounded-card p-5 hover:border-primary/50 transition-all hover:shadow-glow flex flex-col relative overflow-hidden shadow-elevation">
+<div class="absolute top-0 right-0 p-3 flex gap-2">
+<button class="text-text-muted hover:text-primary transition-colors p-1" title="Run Now"><span class="material-symbols-outlined text-[20px]">play_circle</span></button>
+<button class="text-text-muted hover:text-white p-1"><span class="material-symbols-outlined text-[20px]">more_vert</span></button>
+</div>
+<div class="flex items-start gap-4 mb-4">
+<div class="size-12 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-indigo-400 text-2xl">apartment</span>
+</div>
+<div class="pr-8">
+<h3 class="text-lg font-bold text-white group-hover:text-primary transition-colors line-clamp-1">NYC Real Estate Titans</h3>
+<div class="flex items-center gap-2 mt-1 flex-wrap">
+<span class="text-[10px] uppercase font-bold text-text-muted bg-white/5 px-2 py-0.5 rounded border border-white/5">Manhattan</span>
+<span class="text-[10px] uppercase font-bold text-text-muted bg-white/5 px-2 py-0.5 rounded border border-white/5">Devs &gt; $50M</span>
+</div>
+</div>
+</div>
+<div class="bg-background-dark/50 rounded-lg p-3 border border-border-dark mb-4">
+<div class="flex items-center justify-between mb-3">
+<div>
+<div class="text-xs text-text-muted mb-0.5">Last Run</div>
+<div class="text-sm font-medium text-white">4 hours ago</div>
+</div>
+<div class="text-right">
+<div class="text-xs text-text-muted mb-0.5">Total Matches</div>
+<div class="text-sm font-bold text-white">4,289</div>
+</div>
+</div>
+<div class="h-8 w-full bg-gradient-to-r from-transparent via-indigo-500/10 to-indigo-500/20 rounded relative mb-3 overflow-hidden">
+<svg class="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 20">
+<path d="M0 15 Q 10 18, 20 12 T 40 14 T 60 8 T 80 12 T 100 5" fill="none" stroke="#818cf8" stroke-width="1.5"></path>
+</svg>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="size-2 rounded-full bg-green-500 animate-pulse"></span>
+<span class="text-xs font-semibold text-green-400 uppercase tracking-wide">Live</span>
+</div>
+<span class="inline-flex items-center gap-1.5 bg-primary/20 text-primary border border-primary/30 px-2 py-1 rounded text-xs font-bold shadow-[0_0_10px_rgba(241,191,39,0.2)]">
+                                +124 New Matches
+                            </span>
+</div>
+</div>
+<div class="flex-1">
+<div class="flex -space-x-2 overflow-hidden mb-4 pl-1">
+<img alt="" class="inline-block h-8 w-8 rounded-full ring-2 ring-surface-dark bg-neutral-800 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmO2pTy3A28lNSTi9kIM8i5zuDqpxp6zpY1Jf1tXzUBBV4jgfjY4ppKjyb9G_oI9qeMhcxGT9mq9N3XPBTEvWwEQhR5ovJVX10U7IAguwYBsPys3aywaukZLcwfOyleRbw_PHocpzIw2ohbJPSzRaQHT7k8NCG8500g0oCHCq3-yEWOcccbZAp2zctedKNWeOBxK1CsahdUvjzbdhGyXibB0RbLUYWw9ABJsWMamoFfbSiaharP7Z5RreT4JBgsbfNuoVsbULcDFQ"/>
+<img alt="" class="inline-block h-8 w-8 rounded-full ring-2 ring-surface-dark bg-neutral-800 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqNUIVDyCJd4gpDxprqwvHiKbYaRLkAtPs9oarUb0sSuQ9CF6ePuGCeEVjDZjZZhh8bls4AQ3tk46W-u2DrI0QjdZp3F8EicK-_7eGAPq47qdtXV7p_mMu9pfzvCgOmyNZovaq5VU5OZVKn2ZCwBDW-JjHUFXtuZ1eHnwBgh9dcWNMAIk2vfox4eV1VHy2fsHfOa6kbESWnt2W2JOuvK82l93V9g5hMmWaFaZvk2NYh5AXAd4_oFjuiJn5QhvWoXDKgq-goQ1dJ30"/>
+<img alt="" class="inline-block h-8 w-8 rounded-full ring-2 ring-surface-dark bg-neutral-800 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiI9Hy6pVaOnM4iNtmtKc2xfb1ojuJTEr_IBFOzru4-ziiU08vKndljBJ57KNXCO2rIy1D69iKzcSi9fAXPJqD291IcCSpfW1YvxKVzHer6TmTZWcs5Clr-wbzOJwOMr2ebTbiiqzJkKqXD9IS5syXeFuWdInfvf9D5lJ6t1c1qAyWHQ2ZIFpBPfO71l5KY-J86rwa9ZeWV3gIHD80BraqjSe25g3dgE0U8bJTphgXBarzWX0itpewI7p9npk26-wMQVsi57UCmz8"/>
+<div class="h-8 w-8 rounded-full ring-2 ring-surface-dark bg-surface-dark border border-border-dark flex items-center justify-center text-[10px] text-text-muted font-medium hover:text-white cursor-pointer">+121</div>
+</div>
+</div>
+<div class="mt-auto pt-4 border-t border-border-dark flex gap-3">
+<button class="flex-1 bg-surface-dark hover:bg-white/5 text-text-main border border-border-dark hover:border-text-muted rounded-lg py-2 text-sm font-medium transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[16px]">search</span> Search
+                        </button>
+<button class="flex-1 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 rounded-lg py-2 text-sm font-semibold transition-all flex items-center justify-center gap-2">
+                            Explore
+                            <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+<div class="group bg-surface-dark border border-dashed border-primary/40 rounded-card p-5 hover:border-primary/80 transition-all hover:shadow-glow flex flex-col relative overflow-hidden shadow-elevation">
+<div class="absolute -right-12 top-4 bg-primary text-surface-dark text-[10px] font-bold px-12 py-1 rotate-45 shadow-sm z-10">
+                        SUGGESTED
+                    </div>
+<div class="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+<button class="text-text-muted hover:text-white"><span class="material-symbols-outlined text-[20px]">more_vert</span></button>
+</div>
+<div class="flex items-start gap-4 mb-4">
+<div class="size-12 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-orange-400 text-2xl">currency_bitcoin</span>
+</div>
+<div class="pr-8">
+<h3 class="text-lg font-bold text-white group-hover:text-primary transition-colors">Soho Crypto Founders</h3>
+<div class="flex items-center gap-2 mt-1 flex-wrap">
+<span class="text-[10px] uppercase font-bold text-text-muted bg-white/5 px-2 py-0.5 rounded border border-white/5">Soho/Tribeca</span>
+<span class="text-[10px] uppercase font-bold text-text-muted bg-white/5 px-2 py-0.5 rounded border border-white/5">Seed+</span>
+</div>
+</div>
+</div>
+<div class="bg-background-dark/50 rounded-lg p-3 border border-border-dark mb-4">
+<div class="flex items-center justify-between mb-3">
+<div>
+<div class="text-xs text-text-muted mb-0.5">Trending</div>
+<div class="text-sm font-medium text-white">Top 5% Growth</div>
+</div>
+<div class="text-right">
+<div class="text-xs text-text-muted mb-0.5">Potential Pool</div>
+<div class="text-sm font-bold text-white">892</div>
+</div>
+</div>
+<div class="h-8 w-full bg-gradient-to-r from-transparent via-orange-500/10 to-orange-500/20 rounded relative mb-3 overflow-hidden">
+<svg class="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 20">
+<path d="M0 18 L 20 15 L 40 16 L 60 10 L 80 8 L 100 2" fill="none" stroke="#fb923c" stroke-width="1.5"></path>
+</svg>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="size-2 rounded-full bg-orange-500 animate-pulse"></span>
+<span class="text-xs font-semibold text-orange-400 uppercase tracking-wide">Hot Sector</span>
+</div>
+<span class="inline-flex items-center gap-1.5 text-text-muted text-xs">
+                                +40 New Leads
+                            </span>
+</div>
+</div>
+<div class="flex-1">
+<div class="flex -space-x-2 overflow-hidden mb-4 pl-1">
+<img alt="" class="inline-block h-8 w-8 rounded-full ring-2 ring-surface-dark bg-neutral-800 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1ZaNJFje5JFlgJ9mOIPArqoEugFPgWIQETxfBi5QKttrVgc9q8qdywcB6lK5WF0Yuejgluokj2J5rvjI9uxkSJTEAOQKboUxnzKypiCJnfCjryVQ0fuQiIomhEPMpjE8uWJfv-WcGqA1Tn9XrJHPfHbFUqJyp4R946IBpGRse4XxOCuJIAqjsC4WbR1G0s2O4c3d_UnOhbN58tVepn-EMjggge2aCdhzi0snrkrclkrnR_lPGsioBZrIl9zuYtxNLeFpnhAA4DM0"/>
+<img alt="" class="inline-block h-8 w-8 rounded-full ring-2 ring-surface-dark bg-neutral-800 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCf6rSPWglWr0tx9S9uYccVjICDzdL52HfWsOprF_io_QKlBRzNUMgQHlsTaXAsgZ1UOoERRExeKJMfRRsrIZPM5_N6VTQlTrMDz9FrvMOeaqb6QNnNUtEECUgJN8WtjIgH2kmCUuGq0knAFcJqMXLzQdR63EOMzEUoZhVIgWtIfXfuMHjcZGCiRvRxWSd5M3ntgBqs6u5Yluih3bL22brWGqKw9yw_r-RzSVhEnx08urdGNvxeQ4vmUSQ5dIBM7fdpZ23GZXjX5Ms"/>
+<div class="h-8 w-8 rounded-full ring-2 ring-surface-dark bg-surface-dark border border-border-dark flex items-center justify-center text-[10px] text-text-muted font-medium hover:text-white cursor-pointer">+38</div>
+</div>
+</div>
+<div class="mt-auto pt-4 border-t border-border-dark flex gap-3">
+<button class="w-full bg-primary hover:bg-primary-dark text-surface-dark font-bold py-2 px-4 rounded-lg shadow-glow transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                            Add to Library
+                        </button>
+</div>
+</div>
+<div class="group bg-surface-dark border border-border-dark rounded-card p-5 hover:border-primary/50 transition-all hover:shadow-glow flex flex-col relative overflow-hidden shadow-elevation">
+<div class="absolute top-0 right-0 p-3 flex gap-2">
+<button class="text-text-muted hover:text-primary transition-colors p-1" title="Run Now"><span class="material-symbols-outlined text-[20px]">play_circle</span></button>
+<button class="text-text-muted hover:text-white p-1"><span class="material-symbols-outlined text-[20px]">more_vert</span></button>
+</div>
+<div class="flex items-start gap-4 mb-4">
+<div class="size-12 rounded-lg bg-pink-500/10 border border-pink-500/20 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-pink-400 text-2xl">nightlife</span>
+</div>
+<div class="pr-8">
+<h3 class="text-lg font-bold text-white group-hover:text-primary transition-colors line-clamp-1">Miami Hospitality Owners</h3>
+<div class="flex items-center gap-2 mt-1 flex-wrap">
+<span class="text-[10px] uppercase font-bold text-text-muted bg-white/5 px-2 py-0.5 rounded border border-white/5">Miami Beach</span>
+<span class="text-[10px] uppercase font-bold text-text-muted bg-white/5 px-2 py-0.5 rounded border border-white/5">Multi-venue</span>
+</div>
+</div>
+</div>
+<div class="bg-background-dark/50 rounded-lg p-3 border border-border-dark mb-4">
+<div class="flex items-center justify-between mb-3">
+<div>
+<div class="text-xs text-text-muted mb-0.5">Last Run</div>
+<div class="text-sm font-medium text-white">1 hour ago</div>
+</div>
+<div class="text-right">
+<div class="text-xs text-text-muted mb-0.5">Total Matches</div>
+<div class="text-sm font-bold text-white">315</div>
+</div>
+</div>
+<div class="h-8 w-full bg-gradient-to-r from-transparent via-pink-500/10 to-pink-500/20 rounded relative mb-3 overflow-hidden">
+<svg class="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 20">
+<path d="M0 10 L 20 12 L 40 8 L 60 14 L 80 10 L 100 12" fill="none" stroke="#f472b6" stroke-width="1.5"></path>
+</svg>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="size-2 rounded-full bg-yellow-500 animate-pulse-slow"></span>
+<span class="text-xs font-semibold text-yellow-500 uppercase tracking-wide">Scanning</span>
+</div>
+<span class="inline-flex items-center gap-1.5 bg-primary/20 text-primary border border-primary/30 px-2 py-1 rounded text-xs font-bold shadow-[0_0_10px_rgba(241,191,39,0.2)]">
+                                +8 New Matches
+                            </span>
+</div>
+</div>
+<div class="flex-1">
+<div class="flex -space-x-2 overflow-hidden mb-4 pl-1">
+<img alt="" class="inline-block h-8 w-8 rounded-full ring-2 ring-surface-dark bg-neutral-800 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAD2cGPkzupWQtiBuwLFL6n5D6xmuxnir3WreHEGewzpbZ0_Y3WN5VtC_ja0EGlWgbNnmPhJ-Chu869L0NEuz8VMkfkOYjI7RJkhJHN8iv14XwI72y5BdqLt9O3BXBMXct2huniD_TRY4GO6hTUSgD7nRFIl8HbKCjr2uccs1Q7lD34POYHPILkE-3vMmYSlceHBqISHMXdmKMR8Jj2MfEoKOgu3QkXrrBL0QcV1bhwIhNCFEIrDOgzakkiFpyjuYcO0UmVVOYMCDA"/>
+<img alt="" class="inline-block h-8 w-8 rounded-full ring-2 ring-surface-dark bg-neutral-800 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCoctHzlgOeY1VATDGk0ktUyJX55QtfcqnpC5kzBhIgYlxYGrjS3CZamB2Q4BbnfGhQkhpG1yW64q6hvISG7WyUQJxc5SvxXJyC2t3sG2DyybDAxrpXBocTMLwvahMVYKZelgf247djYkQKZA03KmGmag0_zO5XuH8ld4XUNCs7gNnSOSD5QrwXy61OAwNIkWwyLrVzL6yIgrZgdCf3fdxjCPFtsucG13IgqCvgm8RupQCY_sBze1K6dyUBbzd2i93Ow83Kj3DeD2M"/>
+<img alt="" class="inline-block h-8 w-8 rounded-full ring-2 ring-surface-dark bg-neutral-800 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfLK6Lu8d7D3Tg53BfkuzRfReyDN_lahXQ7-1-4KBCo0kCbyJYuxe2Nq-U888W-wjCdPtI06ogQbPfAXSQFnic8F-0xZMgWPAzOHqLYeR2ziFYeqoN3N2wNt2ds1NAAJurJ-9AIfL6b9UWI0l13pILcH1o9UJQbPcgAP9FxGZ85VoR4NvHjIHbWpyzcwJv75qMch18r9kjQuHQeb79aPonNMEbuDcQgSlqDCacQctGjYy9lyqqxxJSqNBWdwup9ggaZcj8ovLtdM4"/>
+<div class="h-8 w-8 rounded-full ring-2 ring-surface-dark bg-surface-dark border border-border-dark flex items-center justify-center text-[10px] text-text-muted font-medium hover:text-white cursor-pointer">+6</div>
+</div>
+</div>
+<div class="mt-auto pt-4 border-t border-border-dark flex gap-3">
+<button class="flex-1 bg-surface-dark hover:bg-white/5 text-text-main border border-border-dark hover:border-text-muted rounded-lg py-2 text-sm font-medium transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[16px]">search</span> Search
+                        </button>
+<button class="flex-1 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 rounded-lg py-2 text-sm font-semibold transition-all flex items-center justify-center gap-2">
+                            Explore
+                            <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+<div class="group bg-surface-dark border border-border-dark rounded-card p-5 hover:border-primary/50 transition-all hover:shadow-glow flex flex-col relative overflow-hidden shadow-elevation">
+<div class="absolute top-0 right-0 p-3 flex gap-2">
+<button class="text-text-muted hover:text-primary transition-colors p-1" title="Run Now"><span class="material-symbols-outlined text-[20px]">play_circle</span></button>
+<button class="text-text-muted hover:text-white p-1"><span class="material-symbols-outlined text-[20px]">more_vert</span></button>
+</div>
+<div class="flex items-start gap-4 mb-4">
+<div class="size-12 rounded-lg bg-teal-500/10 border border-teal-500/20 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-teal-400 text-2xl">account_balance</span>
+</div>
+<div class="pr-8">
+<h3 class="text-lg font-bold text-white group-hover:text-primary transition-colors line-clamp-1">London Fintech Series B</h3>
+<div class="flex items-center gap-2 mt-1 flex-wrap">
+<span class="text-[10px] uppercase font-bold text-text-muted bg-white/5 px-2 py-0.5 rounded border border-white/5">Canary Wharf</span>
+<span class="text-[10px] uppercase font-bold text-text-muted bg-white/5 px-2 py-0.5 rounded border border-white/5">CEO/CTO</span>
+</div>
+</div>
+</div>
+<div class="bg-background-dark/50 rounded-lg p-3 border border-border-dark mb-4">
+<div class="flex items-center justify-between mb-3">
+<div>
+<div class="text-xs text-text-muted mb-0.5">Last Run</div>
+<div class="text-sm font-medium text-white">Yesterday</div>
+</div>
+<div class="text-right">
+<div class="text-xs text-text-muted mb-0.5">Total Matches</div>
+<div class="text-sm font-bold text-white">1,024</div>
+</div>
+</div>
+<div class="h-8 w-full bg-gradient-to-r from-transparent via-teal-500/10 to-teal-500/20 rounded relative mb-3 overflow-hidden">
+<svg class="absolute inset-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 20">
+<path d="M0 14 L 20 16 L 40 10 L 60 12 L 80 6 L 100 8" fill="none" stroke="#2dd4bf" stroke-width="1.5"></path>
+</svg>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="size-2 rounded-full bg-green-500 animate-pulse"></span>
+<span class="text-xs font-semibold text-green-400 uppercase tracking-wide">Live</span>
+</div>
+<span class="inline-flex items-center gap-1.5 bg-primary/20 text-primary border border-primary/30 px-2 py-1 rounded text-xs font-bold shadow-[0_0_10px_rgba(241,191,39,0.2)]">
+                                +15 New Matches
+                            </span>
+</div>
+</div>
+<div class="flex-1">
+<div class="flex -space-x-2 overflow-hidden mb-4 pl-1">
+<img alt="" class="inline-block h-8 w-8 rounded-full ring-2 ring-surface-dark bg-neutral-800 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7rJeje1CwIXxxT_XA8fnvq0JXZsI2i6CvAOGKx6_Gqmg_M4IHDMu-FVHCk0WaVpgj_9tzvHZnRFToOAeybfas9FuPyLjsC_XcxZ8kjdlBeGNjOqb6rIMxowndAFnv2iKo0jWIm-RI5ZPkms9JjtFS-CtWlluHZjiYmFcTGysJYegM2TyUVDy8trhgXfur1e4L9fh4ZE5WoaBFT0uHKiUEH0WPw417jgoPC2X6s14hhWPKTXOKx4tcvheOTWydDZa2jl1Y5Mnu8eg"/>
+<img alt="" class="inline-block h-8 w-8 rounded-full ring-2 ring-surface-dark bg-neutral-800 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3jJa0ElcbkUEfR6EAU2DOuO3e98qvfK7PomWo6xv8tSbUT6EQPwcTzxfujKUmA3fHU4fsB5GhOo2xUcIeiAm8FerljGN--Je6fs92PSV3Kmyashra2JnhsKXpfouwdx_SFJHiCWASciJ-7CcnAkRc5pYkcLYJvcZ00olxvx7V5UpbCBh1z6PTZWtl8M760P4zPkKNSxQjsAFflULfsd4drDa9hKMqqLpqYFS-p4g1OPIOQIACb9UmvnirKpnNjoVKCU4bFqpJQYo"/>
+<div class="h-8 w-8 rounded-full ring-2 ring-surface-dark bg-surface-dark border border-border-dark flex items-center justify-center text-[10px] text-text-muted font-medium hover:text-white cursor-pointer">+12</div>
+</div>
+</div>
+<div class="mt-auto pt-4 border-t border-border-dark flex gap-3">
+<button class="flex-1 bg-surface-dark hover:bg-white/5 text-text-main border border-border-dark hover:border-text-muted rounded-lg py-2 text-sm font-medium transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[16px]">search</span> Search
+                        </button>
+<button class="flex-1 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 rounded-lg py-2 text-sm font-semibold transition-all flex items-center justify-center gap-2">
+                            Explore
+                            <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+<button class="group bg-background-dark border-2 border-dashed border-border-dark rounded-card p-5 hover:border-primary/50 transition-all flex flex-col items-center justify-center min-h-[380px] shadow-elevation">
+<div class="size-16 rounded-full bg-surface-dark border border-border-dark group-hover:border-primary/30 flex items-center justify-center mb-4 transition-colors">
+<span class="material-symbols-outlined text-text-muted group-hover:text-primary text-3xl transition-transform group-hover:scale-110">add_circle</span>
+</div>
+<h3 class="text-lg font-bold text-white group-hover:text-primary transition-colors">Create New Persona</h3>
+<p class="text-sm text-text-muted text-center mt-2 max-w-[200px]">Define a new high-net-worth target and start gathering living data.</p>
+</button>
+</div>
+</div>
+</section>
+<aside class="w-80 bg-surface-dark border-l border-border-dark shrink-0 z-10 flex flex-col">
+<div class="flex items-center justify-between p-4 border-b border-border-dark">
+<h3 class="text-sm font-bold text-white flex items-center gap-2">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+</span>
+                Live Data Stream
+            </h3>
+<button class="text-text-muted hover:text-white"><span class="material-symbols-outlined text-[18px]">settings</span></button>
+</div>
+<div class="flex-1 overflow-y-auto">
+<div class="relative pl-6 py-4 space-y-6">
+<div class="absolute left-[23px] top-4 bottom-4 w-px bg-border-dark"></div>
+<div class="relative pr-4">
+<div class="absolute -left-[5px] mt-1.5 size-2.5 rounded-full bg-green-500 border-2 border-surface-dark ring-2 ring-green-500/20"></div>
+<div class="bg-background-dark/50 border border-border-dark rounded-lg p-3 hover:bg-white/5 transition-colors cursor-pointer group">
+<div class="flex justify-between items-start mb-1">
+<span class="text-[10px] font-bold text-green-400 uppercase tracking-wide">New Match</span>
+<span class="text-[10px] text-text-muted">2m ago</span>
+</div>
+<p class="text-sm text-white font-medium mb-1">Jonathan S.</p>
+<p class="text-xs text-text-muted">Added to <span class="text-primary group-hover:underline">NYC Real Estate Titans</span></p>
+<div class="mt-2 flex gap-2">
+<span class="text-[10px] bg-surface-dark px-1.5 py-0.5 rounded text-text-muted border border-border-dark">Acquisition: $12M</span>
+</div>
+</div>
+</div>
+<div class="relative pr-4">
+<div class="absolute -left-[5px] mt-1.5 size-2.5 rounded-full bg-blue-500 border-2 border-surface-dark ring-2 ring-blue-500/20"></div>
+<div class="bg-background-dark/50 border border-border-dark rounded-lg p-3 hover:bg-white/5 transition-colors cursor-pointer group">
+<div class="flex justify-between items-start mb-1">
+<span class="text-[10px] font-bold text-blue-400 uppercase tracking-wide">Enrichment</span>
+<span class="text-[10px] text-text-muted">14m ago</span>
+</div>
+<p class="text-sm text-white font-medium mb-1">Sarah K.</p>
+<p class="text-xs text-text-muted">Updated in <span class="text-primary group-hover:underline">Soho Crypto Founders</span></p>
+<div class="mt-2 text-xs text-text-muted italic border-l-2 border-blue-500/30 pl-2">
+                            "Found new podcast appearance discussing Web3 gaming..."
+                        </div>
+</div>
+</div>
+<div class="relative pr-4">
+<div class="absolute -left-[5px] mt-1.5 size-2.5 rounded-full bg-purple-500 border-2 border-surface-dark ring-2 ring-purple-500/20"></div>
+<div class="bg-background-dark/50 border border-border-dark rounded-lg p-3 hover:bg-white/5 transition-colors cursor-pointer group">
+<div class="flex justify-between items-start mb-1">
+<span class="text-[10px] font-bold text-purple-400 uppercase tracking-wide">Lookalike Found</span>
+<span class="text-[10px] text-text-muted">45m ago</span>
+</div>
+<p class="text-sm text-white font-medium mb-1">5 Prospects</p>
+<p class="text-xs text-text-muted">Similar to <span class="text-white">Marcus L.</span> in <span class="text-primary group-hover:underline">Miami Hospitality</span></p>
+<div class="mt-2">
+<button class="w-full py-1 text-[10px] bg-purple-500/10 text-purple-400 rounded hover:bg-purple-500/20 transition-colors">Review Matches</button>
+</div>
+</div>
+</div>
+<div class="relative pr-4">
+<div class="absolute -left-[5px] mt-1.5 size-2.5 rounded-full bg-orange-500 border-2 border-surface-dark ring-2 ring-orange-500/20"></div>
+<div class="bg-background-dark/50 border border-border-dark rounded-lg p-3 hover:bg-white/5 transition-colors cursor-pointer group">
+<div class="flex justify-between items-start mb-1">
+<span class="text-[10px] font-bold text-orange-400 uppercase tracking-wide">Alert</span>
+<span class="text-[10px] text-text-muted">1h ago</span>
+</div>
+<p class="text-sm text-white font-medium mb-1">High Value Target</p>
+<p class="text-xs text-text-muted">Net worth estimate updated &gt; $100M for prospect in <span class="text-primary group-hover:underline">London Fintech</span></p>
+</div>
+</div>
+</div>
+</div>
+</aside>
+</main>
+
+</body></html>

@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Elite Discovery &amp; NL Search</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f1bf27",
+                        "background-light": "#f8f8f6",
+                        "background-dark": "#221e10",
+                        "surface-dark": "#2c2819",
+                        "surface-light": "#ffffff",
+                        "border-dark": "#483f23",
+                        "border-light": "#e5e7eb",
+                        "text-muted-dark": "#cabc91",
+                        "text-muted-light": "#6b7280"
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "full": "9999px"
+                    },
+                    boxShadow: {
+                        "glow": "0 0 20px rgba(241, 191, 39, 0.15)",
+                        "glow-lg": "0 0 40px rgba(241, 191, 39, 0.10)"
+                    },
+                    transitionDuration: {
+                        '150': '150ms',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #483f23;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #675a32;
+        }
+        .text-glow {
+            text-shadow: 0 0 10px rgba(241, 191, 39, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display antialiased min-h-screen flex flex-col overflow-hidden text-slate-900 dark:text-slate-100">
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-border-light dark:border-border-dark px-6 py-4 bg-surface-light dark:bg-background-dark z-20 relative shadow-md">
+<div class="flex items-center gap-4 text-slate-900 dark:text-white">
+<div class="size-8 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-3xl">diamond</span>
+</div>
+<h2 class="text-slate-900 dark:text-white text-xl font-bold leading-tight tracking-tight">Elite Discovery</h2>
+</div>
+<div class="hidden lg:flex flex-1 justify-center gap-8 px-8">
+<nav class="flex items-center gap-6">
+<a class="text-primary text-sm font-medium leading-normal border-b-2 border-primary pb-0.5 shadow-glow" href="#">Lead Search</a>
+<a class="text-slate-600 dark:text-text-muted-dark hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium leading-normal duration-150" href="#">Campaigns</a>
+<a class="text-slate-600 dark:text-text-muted-dark hover:text-primary dark:hover:text-primary transition-colors text-sm font-medium leading-normal duration-150" href="#">Enrichment</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="flex items-center justify-center rounded-full size-10 hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors duration-150 text-slate-600 dark:text-text-muted-dark relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 size-2 bg-primary rounded-full animate-pulse"></span>
+</button>
+<div class="h-8 w-[1px] bg-border-light dark:bg-border-dark mx-1"></div>
+<button class="flex items-center gap-2 cursor-pointer rounded-lg pl-2 pr-1 py-1 hover:bg-slate-100 dark:hover:bg-surface-dark transition-colors duration-150 group">
+<div class="text-right hidden sm:block">
+<p class="text-xs font-medium text-slate-900 dark:text-white">Alexander P.</p>
+<p class="text-[10px] text-slate-500 dark:text-text-muted-dark">Premium Plan</p>
+</div>
+<div class="bg-center bg-no-repeat bg-cover rounded-full size-9 ring-2 ring-primary/20 group-hover:ring-primary/50 transition-all duration-150" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAdD3W8AAF5gesW87CEfNDjRSgKP07NS10FU5SLmK-TQAC6bHK777fjWJ12wt6Ju4VyJvwf72cAGk2Sek3eYTzR7O0EZWP_OTENw0qTo8wZKbhRVnLRCoscTfreygUxfwW6_863hUJuJq4n4t7T2Wfh6YzqlBjxcLCIDGcZ9gvWnKCE-ubEHvEBt6sxfnH8owwgViYClWXmZIJQFfpfajM_Ylgi7PJU3YDZo2nqE0xhoHvlRhp6fQa3N14v1fmPA5-YhnhFWenqVYc");'></div>
+</button>
+</div>
+</header>
+<div class="flex flex-1 overflow-hidden relative">
+<div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 rounded-full blur-3xl pointer-events-none z-0"></div>
+<main class="flex-1 flex flex-col h-full overflow-hidden bg-slate-50 dark:bg-background-dark/50 relative z-10">
+<div class="flex flex-col h-full">
+<div class="px-8 pt-10 pb-6 flex flex-col gap-6 max-w-7xl mx-auto w-full">
+<div class="text-center space-y-2 mb-2">
+<h1 class="text-slate-900 dark:text-white tracking-tight text-4xl font-bold leading-tight text-glow">Find Your Ideal UHNW Prospect</h1>
+<p class="text-slate-500 dark:text-text-muted-dark text-lg">Use natural language to discover high-net-worth individuals and properties.</p>
+</div>
+<div class="relative group/search z-20 w-full max-w-4xl mx-auto">
+<div class="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none text-text-muted-dark group-focus-within/search:text-primary transition-colors duration-150">
+<span class="material-symbols-outlined text-3xl">temp_preferences_custom</span>
+</div>
+<textarea class="block w-full rounded-2xl border-0 py-6 pl-16 pr-32 text-slate-900 dark:text-white bg-white dark:bg-surface-dark shadow-xl shadow-black/10 dark:shadow-black/20 ring-1 ring-inset ring-slate-200 dark:ring-border-dark placeholder:text-slate-400 dark:placeholder:text-text-muted-dark/50 focus:ring-2 focus:ring-inset focus:ring-primary text-xl leading-relaxed transition-all duration-150 font-medium resize-none overflow-hidden" placeholder="Describe your ideal prospect... (e.g., 'Tech founders in Miami with homes over $5M looking for investment properties')" rows="1"></textarea>
+<div class="absolute bottom-3 right-3 flex items-center gap-2">
+<button class="p-2 rounded-lg hover:bg-background-dark/50 text-text-muted-dark hover:text-primary transition-colors duration-150" title="Voice Search">
+<span class="material-symbols-outlined">mic</span>
+</button>
+<button class="bg-primary hover:bg-primary/90 text-background-dark font-bold py-2.5 px-6 rounded-xl transition-all duration-150 shadow-lg shadow-primary/20 flex items-center gap-2 transform active:scale-95">
+<span class="material-symbols-outlined text-[20px]">search_spark</span>
+                            Search
+                        </button>
+</div>
+</div>
+<div class="flex flex-col items-center gap-3">
+<div class="text-xs font-semibold text-text-muted-dark uppercase tracking-wider">Saved Personas</div>
+<div class="flex flex-wrap justify-center gap-3">
+<button class="group flex items-center gap-2 px-4 py-1.5 rounded-full bg-surface-dark border border-border-dark hover:border-primary/50 hover:bg-primary/5 transition-all duration-150 cursor-pointer">
+<span class="size-2 rounded-full bg-blue-500"></span>
+<span class="text-sm font-medium text-slate-300 group-hover:text-white">NYC Crypto Directors</span>
+</button>
+<button class="group flex items-center gap-2 px-4 py-1.5 rounded-full bg-surface-dark border border-border-dark hover:border-primary/50 hover:bg-primary/5 transition-all duration-150 cursor-pointer">
+<span class="size-2 rounded-full bg-purple-500"></span>
+<span class="text-sm font-medium text-slate-300 group-hover:text-white">Miami Tech Founders</span>
+</button>
+<button class="group flex items-center gap-2 px-4 py-1.5 rounded-full bg-surface-dark border border-border-dark hover:border-primary/50 hover:bg-primary/5 transition-all duration-150 cursor-pointer">
+<span class="size-2 rounded-full bg-emerald-500"></span>
+<span class="text-sm font-medium text-slate-300 group-hover:text-white">London Finance VPs</span>
+</button>
+<button class="group flex items-center gap-2 px-4 py-1.5 rounded-full bg-surface-dark border border-border-dark border-dashed text-text-muted-dark hover:text-primary hover:border-primary transition-all duration-150 cursor-pointer">
+<span class="material-symbols-outlined text-[16px]">add</span>
+<span class="text-sm font-medium">New Persona</span>
+</button>
+</div>
+</div>
+<div class="flex justify-center">
+<button class="flex items-center gap-2 text-sm text-text-muted-dark hover:text-primary transition-colors duration-150">
+<span class="material-symbols-outlined text-[18px]">tune</span>
+                        Advanced Filters
+                        <span class="material-symbols-outlined text-[18px]">expand_more</span>
+</button>
+</div>
+</div>
+<div class="flex-1 overflow-hidden px-8 pb-4 flex flex-col gap-4">
+<div class="flex items-center justify-between bg-surface-light dark:bg-surface-dark p-3 rounded-xl border border-border-light dark:border-border-dark shadow-sm">
+<div class="flex items-center gap-4 pl-2">
+<div class="flex items-center gap-2">
+<input class="size-4 rounded border-slate-300 dark:border-border-dark bg-transparent text-primary focus:ring-primary/50 focus:ring-offset-0 checked:bg-primary checked:border-primary transition-all duration-150" type="checkbox"/>
+<span class="text-sm font-medium text-slate-600 dark:text-slate-300">Select All</span>
+</div>
+<div class="h-6 w-[1px] bg-border-light dark:border-border-dark"></div>
+<span class="text-sm text-text-muted-dark">4 selected</span>
+</div>
+<div class="flex items-center gap-2">
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-primary/10 text-slate-600 dark:text-slate-300 hover:text-primary transition-colors duration-150 text-sm font-medium">
+<span class="material-symbols-outlined text-[18px]">playlist_add</span>
+                            Add to List
+                        </button>
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-primary/10 text-slate-600 dark:text-slate-300 hover:text-primary transition-colors duration-150 text-sm font-medium">
+<span class="material-symbols-outlined text-[18px]">download</span>
+                            Export CSV
+                        </button>
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-background-dark hover:bg-primary/90 transition-colors duration-150 text-sm font-bold shadow-glow">
+<span class="material-symbols-outlined text-[18px]">auto_awesome</span>
+                            Enrich Selection
+                        </button>
+</div>
+</div>
+<div class="flex-1 overflow-auto border rounded-xl border-border-light dark:border-border-dark bg-white dark:bg-surface-dark shadow-sm custom-scrollbar">
+<table class="min-w-full divide-y divide-border-light dark:divide-border-dark relative">
+<thead class="bg-slate-50 dark:bg-[#262214] sticky top-0 z-10">
+<tr>
+<th class="py-3.5 pl-4 pr-3 text-left w-12" scope="col">
+<span class="material-symbols-outlined text-slate-400 text-sm">check_box_outline_blank</span>
+</th>
+<th class="py-3.5 pl-4 pr-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-text-muted-dark" scope="col">Prospect</th>
+<th class="px-3 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-text-muted-dark" scope="col">Wealth Tier</th>
+<th class="px-3 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-text-muted-dark" scope="col">Title &amp; Company</th>
+<th class="px-3 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-text-muted-dark" scope="col">Enrichment</th>
+<th class="px-3 py-3.5 text-right text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-text-muted-dark" scope="col">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border-light dark:divide-border-dark bg-white dark:bg-surface-dark">
+<tr class="group hover:bg-primary/5 dark:hover:bg-[#2e2916] transition-colors duration-150 relative border-l-4 border-l-transparent hover:border-l-primary">
+<td class="whitespace-nowrap py-4 pl-4 pr-3 sm:pl-6">
+<input class="size-4 rounded border-slate-300 dark:border-border-dark bg-transparent text-primary focus:ring-primary/50 focus:ring-offset-0 checked:bg-primary checked:border-primary transition-all duration-150" type="checkbox"/>
+</td>
+<td class="whitespace-nowrap px-3 py-4">
+<div class="flex items-center">
+<div class="h-10 w-10 flex-shrink-0 relative">
+<div class="h-10 w-10 rounded-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD_c3zNU-6TQ4DjRp74pXQGNMgmBx5lsM2sedDt6RuPajyYoMn_EoazNBoHoZA1m2dZ057bElnVQtN_gxQYwLO0Rs3wOM_v2yvwDIyFKIG9S-tVr4b_jj9X5QfeLl8gO57SFJybsLPCDhC8M1hABFB8M8A6-850ULegL8uvMShSzepgI6-oB40dTLk2bFsZZufhsMkULDfuUTCH8SAkMBE4s_8nRea2yjEXytMXvy1sshrIgWhcgr--mMnlgEEfG9a9tw7lzBwD_yo");'></div>
+<div class="absolute -bottom-1 -right-1 bg-surface-dark rounded-full p-0.5">
+<span class="material-symbols-outlined text-[14px] text-blue-400" title="LinkedIn Verified">verified</span>
+</div>
+</div>
+<div class="ml-4">
+<div class="font-medium text-slate-900 dark:text-white group-hover:text-primary transition-colors duration-150">Michael Chen</div>
+<div class="text-sm text-slate-500 dark:text-text-muted-dark flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">location_on</span> New York, NY
+                                            </div>
+</div>
+</div>
+</td>
+<td class="whitespace-nowrap px-3 py-4">
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-semibold">
+<span class="material-symbols-outlined text-[14px] fill-current">diamond</span>
+                                        UHNW ($50M+)
+                                    </div>
+</td>
+<td class="whitespace-nowrap px-3 py-4">
+<div class="flex flex-col">
+<span class="text-sm font-medium text-slate-900 dark:text-slate-200">Director of FinTech</span>
+<span class="text-xs text-slate-500 dark:text-text-muted-dark">Vertex Systems</span>
+</div>
+</td>
+<td class="whitespace-nowrap px-3 py-4 text-sm">
+<div class="flex items-center gap-2" title="Fully Enriched">
+<div class="flex gap-1">
+<span class="size-2.5 rounded-full bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.6)]"></span>
+<span class="size-2.5 rounded-full bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.6)]"></span>
+<span class="size-2.5 rounded-full bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.6)]"></span>
+</div>
+<span class="text-xs text-slate-400 ml-1">100%</span>
+</div>
+</td>
+<td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+<div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+<button class="text-slate-400 hover:text-primary transition-colors duration-150 p-1.5 rounded hover:bg-primary/10" title="Find Lookalikes">
+<span class="material-symbols-outlined">manage_search</span>
+</button>
+<button class="text-slate-400 hover:text-primary transition-colors duration-150 p-1.5 rounded hover:bg-primary/10" title="View Profile">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</div>
+</td>
+</tr>
+<tr class="group hover:bg-primary/5 dark:hover:bg-[#2e2916] transition-colors duration-150 relative border-l-4 border-l-transparent hover:border-l-primary">
+<td class="whitespace-nowrap py-4 pl-4 pr-3 sm:pl-6">
+<input class="size-4 rounded border-slate-300 dark:border-border-dark bg-transparent text-primary focus:ring-primary/50 focus:ring-offset-0 checked:bg-primary checked:border-primary transition-all duration-150" type="checkbox"/>
+</td>
+<td class="whitespace-nowrap px-3 py-4">
+<div class="flex items-center">
+<div class="h-10 w-10 flex-shrink-0 relative">
+<div class="h-10 w-10 rounded-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBIoDmFewe8lblnsPwRqGRUflw1WfkfI5g7YGdyBuke2oaySwh1W76HhJcwNNnandqVYdEn7FgS8SjyXDx1rQVyxgV-bBjlS6OxWKdPp4T-GDR642fRXm81J8PT6BCKosaNDBc14hRYv97dun0DQb5sMMY6ahWZ-W5MzfjuaShGvMfDjCEfW4plvkh_kATJKrXrbt6mWoHVXA78HK9rWAFGkOYUW4YmZ1kU7pY6uOqr5nVc10_eVXBHgWQ25PuJRPZBnkDz2c3Zk_M");'></div>
+</div>
+<div class="ml-4">
+<div class="font-medium text-slate-900 dark:text-white group-hover:text-primary transition-colors duration-150">Sarah Jenkins</div>
+<div class="text-sm text-slate-500 dark:text-text-muted-dark flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">location_on</span> New York, NY
+                                            </div>
+</div>
+</div>
+</td>
+<td class="whitespace-nowrap px-3 py-4">
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-semibold">
+<span class="material-symbols-outlined text-[14px] fill-current">change_history</span>
+                                        HNW ($5M-10M)
+                                    </div>
+</td>
+<td class="whitespace-nowrap px-3 py-4">
+<div class="flex flex-col">
+<span class="text-sm font-medium text-slate-900 dark:text-slate-200">VP Strategy</span>
+<span class="text-xs text-slate-500 dark:text-text-muted-dark">Nebula Corp</span>
+</div>
+</td>
+<td class="whitespace-nowrap px-3 py-4 text-sm">
+<div class="flex items-center gap-2" title="Partially Enriched">
+<div class="flex gap-1">
+<span class="size-2.5 rounded-full bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.6)]"></span>
+<span class="size-2.5 rounded-full bg-primary shadow-[0_0_6px_rgba(241,191,39,0.6)]"></span>
+<span class="size-2.5 rounded-full bg-slate-700"></span>
+</div>
+<span class="text-xs text-slate-400 ml-1">65%</span>
+</div>
+</td>
+<td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+<div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+<button class="text-slate-400 hover:text-primary transition-colors duration-150 p-1.5 rounded hover:bg-primary/10" title="Find Lookalikes">
+<span class="material-symbols-outlined">manage_search</span>
+</button>
+<button class="text-slate-400 hover:text-primary transition-colors duration-150 p-1.5 rounded hover:bg-primary/10" title="View Profile">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</div>
+</td>
+</tr>
+<tr class="group hover:bg-primary/5 dark:hover:bg-[#2e2916] transition-colors duration-150 relative border-l-4 border-l-transparent hover:border-l-primary">
+<td class="whitespace-nowrap py-4 pl-4 pr-3 sm:pl-6">
+<input class="size-4 rounded border-slate-300 dark:border-border-dark bg-transparent text-primary focus:ring-primary/50 focus:ring-offset-0 checked:bg-primary checked:border-primary transition-all duration-150" type="checkbox"/>
+</td>
+<td class="whitespace-nowrap px-3 py-4">
+<div class="flex items-center">
+<div class="h-10 w-10 flex-shrink-0 relative">
+<div class="h-10 w-10 rounded-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAW-6cXBScO8WQaT6tgo0ycLx326w9ZY_66P9bj3K_3BbjDZmk7r_4atqnWNPHI8mGG7VzSJlTXnHxe3rgup6gNgr5hvLmaUUXNaySrcwmT3fICdWHCpLc852_Y910Il1gV7Jw2LewlFVY82Rx65AB19Q9dcxV5TVW3l35xn_VHPBIa_Cn-FkflVnjkoxSkc_sxNotZe7rYdbnjjkezx-Kw8MJ7-gb8RLSvSWHpbJEX0-p0jjXNsUYUpaIyyJJzw-sr2WlIKxAT4sE");'></div>
+</div>
+<div class="ml-4">
+<div class="font-medium text-slate-900 dark:text-white group-hover:text-primary transition-colors duration-150">David Kim</div>
+<div class="text-sm text-slate-500 dark:text-text-muted-dark flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">location_on</span> San Francisco, CA
+                                            </div>
+</div>
+</div>
+</td>
+<td class="whitespace-nowrap px-3 py-4">
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold">
+<span class="material-symbols-outlined text-[14px] fill-current">diamond</span>
+                                        VHNW ($10M-30M)
+                                    </div>
+</td>
+<td class="whitespace-nowrap px-3 py-4">
+<div class="flex flex-col">
+<span class="text-sm font-medium text-slate-900 dark:text-slate-200">Finance Director</span>
+<span class="text-xs text-slate-500 dark:text-text-muted-dark">Quantum Leap</span>
+</div>
+</td>
+<td class="whitespace-nowrap px-3 py-4 text-sm">
+<div class="flex items-center gap-2" title="Pending Enrichment">
+<div class="flex gap-1">
+<span class="size-2.5 rounded-full bg-primary shadow-[0_0_6px_rgba(241,191,39,0.6)] animate-pulse"></span>
+<span class="size-2.5 rounded-full bg-slate-700"></span>
+<span class="size-2.5 rounded-full bg-slate-700"></span>
+</div>
+<span class="text-xs text-slate-400 ml-1">Processing...</span>
+</div>
+</td>
+<td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+<div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+<button class="text-slate-400 hover:text-primary transition-colors duration-150 p-1.5 rounded hover:bg-primary/10" title="Find Lookalikes">
+<span class="material-symbols-outlined">manage_search</span>
+</button>
+<button class="text-slate-400 hover:text-primary transition-colors duration-150 p-1.5 rounded hover:bg-primary/10" title="View Profile">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</div>
+</td>
+</tr>
+<tr class="group hover:bg-primary/5 dark:hover:bg-[#2e2916] transition-colors duration-150 relative border-l-4 border-l-transparent hover:border-l-primary">
+<td class="whitespace-nowrap py-4 pl-4 pr-3 sm:pl-6">
+<input class="size-4 rounded border-slate-300 dark:border-border-dark bg-transparent text-primary focus:ring-primary/50 focus:ring-offset-0 checked:bg-primary checked:border-primary transition-all duration-150" type="checkbox"/>
+</td>
+<td class="whitespace-nowrap px-3 py-4">
+<div class="flex items-center">
+<div class="h-10 w-10 flex-shrink-0 relative">
+<div class="h-10 w-10 rounded-full bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBkgVQp_Lk8lFOY7YZ49NOWtDDAgrrN6ZDKOnbkvVOAezsGIMCeTi01damzRSnAr685HnybeYv77ir-zSTCes9N8dg5BgInLLS3jSHL1XkVZdUmAxLJbtIRnhHsv_66YtqLLslFb4r45h3ijDzw-LG6uJiUWF1Jb4Ez7d65C7L4vBjE2Lid8pX0hovum-9HrAieRTkz-JvLNF4ym_S5Y0W0INw2p3PbRkBYwWGCxPJxiPssItX1UiSe_ZCmYVlgxUd0wEdcqBO4bf4");'></div>
+</div>
+<div class="ml-4">
+<div class="font-medium text-slate-900 dark:text-white group-hover:text-primary transition-colors duration-150">Elena Rodriguez</div>
+<div class="text-sm text-slate-500 dark:text-text-muted-dark flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">location_on</span> New York, NY
+                                            </div>
+</div>
+</div>
+</td>
+<td class="whitespace-nowrap px-3 py-4">
+<div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-semibold">
+<span class="material-symbols-outlined text-[14px] fill-current">diamond</span>
+                                        UHNW ($50M+)
+                                    </div>
+</td>
+<td class="whitespace-nowrap px-3 py-4">
+<div class="flex flex-col">
+<span class="text-sm font-medium text-slate-900 dark:text-slate-200">Director of DeFi</span>
+<span class="text-xs text-slate-500 dark:text-text-muted-dark">Solaris Tech</span>
+</div>
+</td>
+<td class="whitespace-nowrap px-3 py-4 text-sm">
+<div class="flex items-center gap-2" title="Fully Enriched">
+<div class="flex gap-1">
+<span class="size-2.5 rounded-full bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.6)]"></span>
+<span class="size-2.5 rounded-full bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.6)]"></span>
+<span class="size-2.5 rounded-full bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.6)]"></span>
+</div>
+<span class="text-xs text-slate-400 ml-1">100%</span>
+</div>
+</td>
+<td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+<div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+<button class="text-slate-400 hover:text-primary transition-colors duration-150 p-1.5 rounded hover:bg-primary/10" title="Find Lookalikes">
+<span class="material-symbols-outlined">manage_search</span>
+</button>
+<button class="text-slate-400 hover:text-primary transition-colors duration-150 p-1.5 rounded hover:bg-primary/10" title="View Profile">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="flex items-center justify-between border-t border-border-light dark:border-border-dark py-4 px-2">
+<p class="text-sm text-slate-700 dark:text-text-muted-dark">
+                        Showing <span class="font-medium text-slate-900 dark:text-white">1</span> to <span class="font-medium text-slate-900 dark:text-white">4</span> of <span class="font-medium text-slate-900 dark:text-white">342</span> results
+                    </p>
+<nav aria-label="Pagination" class="isolate inline-flex -space-x-px rounded-md shadow-sm">
+<a class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 dark:ring-border-dark hover:bg-gray-50 dark:hover:bg-background-dark focus:z-20 focus:outline-offset-0 transition-colors duration-150" href="#">
+<span class="sr-only">Previous</span>
+<span class="material-symbols-outlined text-[20px]">chevron_left</span>
+</a>
+<a aria-current="page" class="relative z-10 inline-flex items-center bg-primary px-4 py-2 text-sm font-bold text-background-dark focus:z-20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" href="#">1</a>
+<a class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-slate-900 dark:text-white ring-1 ring-inset ring-gray-300 dark:ring-border-dark hover:bg-gray-50 dark:hover:bg-background-dark focus:z-20 focus:outline-offset-0 transition-colors duration-150" href="#">2</a>
+<a class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-slate-900 dark:text-white ring-1 ring-inset ring-gray-300 dark:ring-border-dark hover:bg-gray-50 dark:hover:bg-background-dark focus:z-20 focus:outline-offset-0 transition-colors duration-150" href="#">3</a>
+<span class="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700 dark:text-text-muted-dark ring-1 ring-inset ring-gray-300 dark:ring-border-dark focus:outline-offset-0">...</span>
+<a class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 dark:ring-border-dark hover:bg-gray-50 dark:hover:bg-background-dark focus:z-20 focus:outline-offset-0 transition-colors duration-150" href="#">
+<span class="sr-only">Next</span>
+<span class="material-symbols-outlined text-[20px]">chevron_right</span>
+</a>
+</nav>
+</div>
+</div>
+</div>
+</main>
+</div>
+
+</body></html>

@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Executive Strategy Dashboard - PGL</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Playfair+Display:wght@400;600;700;800&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#d4af37", // Gold accent requested
+                        "primary-dark": "#b08d26",
+                        "background-light": "#f8f8f6",
+                        "background-dark": "#0a0a0a", // Requested background
+                        "surface-dark": "#18181b", // Requested card color
+                        "surface-light": "#ffffff",
+                        "accent-gold": "#d4af37",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "serif": ["Playfair Display", "serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem", // 8px
+                        "xl": "0.75rem", // 12px
+                        "full": "9999px",
+                    },
+                    backdropBlur: {
+                        'md': '12px',
+                    },
+                    animation: {
+                        'ticker': 'ticker 40s linear infinite',
+                    },
+                    keyframes: {
+                        ticker: {
+                            '0%': { transform: 'translateX(100%)' },
+                            '100%': { transform: 'translateX(-100%)' },
+                        }
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #27272a; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #d4af37; 
+        }
+        .ticker-wrap {
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+            box-sizing: border-box;
+        }
+        .ticker {
+            display: inline-block;
+            padding-left: 100%;
+            animation: ticker 45s linear infinite;
+        }
+        .ticker:hover {
+            animation-play-state: paused;
+        }
+        .ticker-item {
+            display: inline-block;
+            padding: 0 2rem;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col antialiased selection:bg-primary selection:text-black">
+<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+<div class="bg-gradient-to-r from-[#b08d26] to-[#d4af37] text-black text-sm font-semibold py-2 px-4 text-center tracking-wide flex justify-center items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span>NEW PROSPECTS FOUND: 128 high-net-worth individuals identified in the last 24h. <a class="underline decoration-black/40 hover:decoration-black ml-1" href="#">View List</a></span>
+</div>
+<header class="flex items-center justify-between whitespace-nowrap border-b border-white/5 bg-[#0a0a0a]/80 backdrop-blur-md px-10 py-4 sticky top-0 z-50">
+<div class="flex items-center gap-12">
+<div class="flex items-center gap-3 text-primary">
+<div class="size-8 text-primary">
+<span class="material-symbols-outlined text-4xl">pentagon</span>
+</div>
+<h2 class="text-white text-2xl font-serif font-bold leading-tight tracking-wider">PGL</h2>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-white/90 hover:text-primary text-sm font-medium leading-normal transition-colors" href="#">Dashboard</a>
+<a class="text-white/90 hover:text-primary text-sm font-medium leading-normal transition-colors" href="#">Prospects</a>
+<a class="text-white/90 hover:text-primary text-sm font-medium leading-normal transition-colors" href="#">Exports</a>
+<a class="text-white/90 hover:text-primary text-sm font-medium leading-normal transition-colors" href="#">Settings</a>
+</nav>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden lg:flex items-center bg-white/5 rounded-full px-4 py-2 border border-white/10 focus-within:border-primary/50 transition-colors w-64">
+<span class="material-symbols-outlined text-white/40 text-[20px]">search</span>
+<input class="bg-transparent border-none text-sm text-white placeholder-white/40 focus:ring-0 w-full ml-2 h-full py-0" placeholder="Search prospects..." type="text"/>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center justify-center size-10 rounded-full hover:bg-white/5 text-white/70 hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[24px]">notifications</span>
+</button>
+</div>
+<div class="size-10 rounded-full bg-cover bg-center border border-primary/30 cursor-pointer" data-alt="Portrait of an executive in a suit" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB0LF1ZzwudONjwXMEXioXk7XJqU3FeKA2Wl0HOKiapKYUZV9FsCBE3WIXnGztPAqSS_Rmlup2z-HXzUbGInBE4PWY9HHuW__Zx1hXFbLp4r-riHzgd4ufbMjBelsi_7ewZPlgt_Zv1l-W9a53DCVjPum-LLjNAriIjxIFQZ5iGZ2pu7AIHVnRk3Xo20kgmIVhi7b87avj2vXRK6DhNNrXzPAm7MLHB1dTX0cyiSh4uBRCWCCiDfLfMgxI4KoGHJNjwIRiqfLUSGnU');"></div>
+</div>
+</header>
+<main class="flex-1 flex justify-center py-8 px-4 md:px-10">
+<div class="flex flex-col w-full max-w-[1400px] gap-8">
+<div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-2">
+<div class="flex flex-col gap-2">
+<h1 class="text-white text-4xl md:text-5xl font-serif font-medium leading-tight tracking-tight">Executive Strategy Dashboard</h1>
+<p class="text-white/50 text-base md:text-lg font-light tracking-wide">UHNW Lead Scraping &amp; Export Management.</p>
+</div>
+<div class="flex gap-3">
+<button class="px-5 py-3 rounded-lg border border-primary/30 bg-surface-dark text-primary hover:bg-primary/10 transition-colors text-sm font-medium flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">history</span>
+                        Export History
+                    </button>
+<button class="px-5 py-3 rounded-lg bg-primary hover:bg-primary-dark text-black font-bold transition-colors text-sm flex items-center gap-2 shadow-[0_0_20px_rgba(212,175,55,0.2)]">
+<span class="material-symbols-outlined text-[20px]">download</span>
+                        Download New List
+                    </button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="group relative overflow-hidden rounded-xl bg-surface-dark border border-primary/20 p-8 transition-all hover:border-primary/50 hover:shadow-[0_0_30px_rgba(212,175,55,0.1)]">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-9xl text-primary">folder_zip</span>
+</div>
+<div class="flex flex-col gap-2 relative z-10 h-full justify-between">
+<div>
+<p class="text-primary text-xs font-bold uppercase tracking-[0.2em] mb-2">Total Exports</p>
+<h3 class="text-white text-6xl font-serif font-medium tracking-tight">2,405</h3>
+</div>
+<div class="flex items-center gap-2 mt-4 pt-4 border-t border-white/5">
+<span class="text-white/60 text-sm">Leads processed this month</span>
+<span class="ml-auto text-green-400 text-xs font-medium flex items-center bg-green-400/10 px-2 py-1 rounded">
+<span class="material-symbols-outlined text-[14px] mr-1">trending_up</span> +12%
+                            </span>
+</div>
+</div>
+</div>
+<div class="group relative overflow-hidden rounded-xl bg-surface-dark border border-primary p-8 transition-all shadow-[0_0_20px_rgba(212,175,55,0.15)]">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none"></div>
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-9xl text-primary">cloud_download</span>
+</div>
+<div class="flex flex-col gap-2 relative z-10 h-full justify-between">
+<div>
+<p class="text-primary text-xs font-bold uppercase tracking-[0.2em] mb-2">Downloads Ready</p>
+<h3 class="text-white text-6xl font-serif font-medium tracking-tight">850</h3>
+</div>
+<div class="flex items-center gap-2 mt-4 pt-4 border-t border-white/10">
+<span class="text-white/60 text-sm">New verified contacts</span>
+<button class="ml-auto text-black bg-primary hover:bg-white transition-colors text-xs font-bold px-3 py-1.5 rounded uppercase tracking-wider">
+                                Download All
+                            </button>
+</div>
+</div>
+</div>
+<div class="group relative overflow-hidden rounded-xl bg-surface-dark border border-primary/20 p-8 transition-all hover:border-primary/50 hover:shadow-[0_0_30px_rgba(212,175,55,0.1)]">
+<div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+<span class="material-symbols-outlined text-9xl text-primary">diamond</span>
+</div>
+<div class="flex flex-col gap-2 relative z-10 h-full justify-between">
+<div>
+<p class="text-primary text-xs font-bold uppercase tracking-[0.2em] mb-2">Enrichment Rate</p>
+<h3 class="text-white text-6xl font-serif font-medium tracking-tight">98%</h3>
+</div>
+<div class="flex items-center gap-2 mt-4 pt-4 border-t border-white/5">
+<span class="text-white/60 text-sm">Data accuracy score</span>
+<span class="ml-auto text-primary text-xs font-medium flex items-center bg-primary/10 px-2 py-1 rounded border border-primary/20">
+                                Platinum Tier
+                            </span>
+</div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="lg:col-span-2 rounded-xl bg-surface-dark border border-white/5 flex flex-col h-full overflow-hidden">
+<div class="p-6 md:p-8 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+<div>
+<h3 class="text-xl font-serif font-medium text-white mb-1 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-2xl">table_view</span>
+                                Recent Exports
+                            </h3>
+<p class="text-sm text-white/40">History of downloaded lead lists &amp; CSVs</p>
+</div>
+<button class="text-xs font-bold tracking-widest uppercase text-primary hover:text-white transition-colors border border-primary/30 px-3 py-1.5 rounded hover:bg-white/5">View Archive</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="bg-white/[0.02] border-b border-white/5">
+<th class="px-6 py-4 text-xs font-bold text-white/30 uppercase tracking-widest">List Name</th>
+<th class="px-6 py-4 text-xs font-bold text-white/30 uppercase tracking-widest">Date &amp; Time</th>
+<th class="px-6 py-4 text-xs font-bold text-white/30 uppercase tracking-widest">Row Count</th>
+<th class="px-6 py-4 text-xs font-bold text-white/30 uppercase tracking-widest">Status</th>
+<th class="px-6 py-4 text-xs font-bold text-white/30 uppercase tracking-widest text-right">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-white/5">
+<tr class="hover:bg-white/[0.02] transition-colors group">
+<td class="px-6 py-4">
+<div class="flex flex-col">
+<span class="text-white font-medium text-sm group-hover:text-primary transition-colors">NYC Crypto Founders</span>
+<span class="text-white/30 text-xs">Target: &gt;$10M Net Worth</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-white/60 font-mono">
+                                        Oct 24, 14:30
+                                    </td>
+<td class="px-6 py-4">
+<span class="text-white font-serif text-lg">842</span>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-green-500/10 text-green-400 border border-green-500/20">
+                                            Complete
+                                        </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[20px]">download</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-white/[0.02] transition-colors group">
+<td class="px-6 py-4">
+<div class="flex flex-col">
+<span class="text-white font-medium text-sm group-hover:text-primary transition-colors">Miami Real Estate Investors</span>
+<span class="text-white/30 text-xs">Target: Multi-family owners</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-white/60 font-mono">
+                                        Oct 24, 09:15
+                                    </td>
+<td class="px-6 py-4">
+<span class="text-white font-serif text-lg">1,205</span>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-green-500/10 text-green-400 border border-green-500/20">
+                                            Complete
+                                        </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[20px]">download</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-white/[0.02] transition-colors group">
+<td class="px-6 py-4">
+<div class="flex flex-col">
+<span class="text-white font-medium text-sm group-hover:text-primary transition-colors">London Fintech VPs</span>
+<span class="text-white/30 text-xs">Target: Exits &gt; $5M</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-white/60 font-mono">
+                                        Oct 23, 16:45
+                                    </td>
+<td class="px-6 py-4">
+<span class="text-white font-serif text-lg">315</span>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
+                                            Processing
+                                        </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-white/20 cursor-not-allowed transition-colors">
+<span class="material-symbols-outlined text-[20px]">hourglass_empty</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-white/[0.02] transition-colors group">
+<td class="px-6 py-4">
+<div class="flex flex-col">
+<span class="text-white font-medium text-sm group-hover:text-primary transition-colors">Global Family Offices</span>
+<span class="text-white/30 text-xs">Target: CIOs</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm text-white/60 font-mono">
+                                        Oct 22, 11:20
+                                    </td>
+<td class="px-6 py-4">
+<span class="text-white font-serif text-lg">56</span>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-green-500/10 text-green-400 border border-green-500/20">
+                                            Complete
+                                        </span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary hover:text-white transition-colors">
+<span class="material-symbols-outlined text-[20px]">download</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="lg:col-span-1 rounded-xl bg-surface-dark border border-white/5 flex flex-col h-full overflow-hidden relative">
+<div class="p-6 border-b border-white/5 bg-white/[0.02] relative z-10 flex justify-between items-center">
+<div>
+<h3 class="text-xl font-serif font-medium text-white mb-1">Live Feed</h3>
+<p class="text-sm text-white/40">Team outreach activity</p>
+</div>
+<div class="animate-pulse size-2 bg-green-500 rounded-full"></div>
+</div>
+<div class="flex-1 overflow-y-auto p-4 relative z-10 space-y-4 max-h-[500px]">
+<div class="flex items-start gap-3 p-3 rounded-lg hover:bg-white/5 transition-colors border border-transparent hover:border-white/5 group">
+<div class="relative flex-shrink-0">
+<div class="size-10 rounded-full bg-cover bg-center border border-white/10" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDY04iqJZMlC5R1O9SuAYM5KmYR_DVY-adcVwP5WqoAcI6ay61IU4HCb8K9z8hw4dDa6ISAqs1rt-F2S16RuJ9-bT2h8PhYs_ebPcDugfQBl6wchhD_Xw61avMTPx40lis-B1zRATDqUGzqAilgBItSp9rjW30XKoALYAd5iQeSAJ0WIhK92jVJv60CIgGpD4o8GuC7WCEMQnVx2F7xYT6qIlS9Bl_SGw3zTKZM0M5Yg8K1dbNLdEumyjM0h6neAdYwlm81b9YQHho');"></div>
+<div class="absolute -bottom-1 -right-1 bg-surface-dark rounded-full p-[2px]">
+<div class="bg-gray-400 rounded-full p-[3px]">
+<span class="material-symbols-outlined text-[10px] text-black font-bold block">visibility</span>
+</div>
+</div>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-white text-xs leading-relaxed">
+<span class="font-semibold text-white/80">Maggie</span> viewed profile <span class="text-white font-medium">Alexander V.</span>
+</p>
+<p class="text-white/40 text-[10px] mt-0.5">Vertex Capital • $60M Net Worth</p>
+</div>
+<span class="text-[10px] text-white/20 whitespace-nowrap">2m</span>
+</div>
+<div class="flex items-start gap-3 p-3 rounded-lg hover:bg-white/5 transition-colors border border-transparent hover:border-white/5 group">
+<div class="relative flex-shrink-0">
+<div class="size-10 rounded-full bg-cover bg-center border border-primary/50" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD351CabbV6FxSRwiQAig0wzRP1Hig19plMB0W_clHyCPncmBrhaT1aTd6h4HqrSfznvrdRPIExxTLXYKxrvcXfqd4ZWQyvtSsAyWQU_AzES8UedMSSHcKDr3XrYw0WdTP_FMKhKC4VFIVT9lkaT0tTeRfIWQP4NdMIlhel65K9qgR92OGsz9btY6bb5-QxtyZMG6Cr-jXMtYhlABOTyjio7yq5cr21uDD8WjeDqgFTj7PQfWILurVUMQSl7xnAtLiXqUjheB-KkPI');"></div>
+<div class="absolute -bottom-1 -right-1 bg-surface-dark rounded-full p-[2px]">
+<div class="bg-primary rounded-full p-[3px]">
+<span class="material-symbols-outlined text-[10px] text-black font-bold block">mail</span>
+</div>
+</div>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-white text-xs leading-relaxed">
+<span class="font-semibold text-primary">Camila</span> contacted <span class="text-white font-medium">Sarah J.</span>
+</p>
+<p class="text-white/40 text-[10px] mt-0.5">Initial Outreach • Email Sent</p>
+</div>
+<span class="text-[10px] text-white/20 whitespace-nowrap">15m</span>
+</div>
+<div class="flex items-start gap-3 p-3 rounded-lg hover:bg-white/5 transition-colors border border-transparent hover:border-white/5 group">
+<div class="relative flex-shrink-0">
+<div class="size-10 rounded-full bg-cover bg-center border border-white/10" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDTZSK5s00NqibcHjMyte383kvlHuBDV-hYR82lTRtIX7jt1Uzd3KKZATQbTr_n-y-W9039o5cZjW8iul9BIp3ipTAWxQQriUPH83pSboGux-fUq2VmvsocYO0sjmO4kYS0gWaFKIjfyO6PplCcbBwtiD8rdfwNPknpUDzfYhnrJ24BEvyAiinP6W_Z2Uw9rlTGHn51KsvO6euoDowvlb00K8b6dmCR-H25XQupqUsBn4e5wZrLPTBGrGgoItJ4wGn_RXDLkIHBtiY');"></div>
+<div class="absolute -bottom-1 -right-1 bg-surface-dark rounded-full p-[2px]">
+<div class="bg-gray-400 rounded-full p-[3px]">
+<span class="material-symbols-outlined text-[10px] text-black font-bold block">visibility</span>
+</div>
+</div>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-white text-xs leading-relaxed">
+<span class="font-semibold text-white/80">James</span> viewed list <span class="text-white font-medium">London Fintech</span>
+</p>
+<p class="text-white/40 text-[10px] mt-0.5">Exploring 50 new leads</p>
+</div>
+<span class="text-[10px] text-white/20 whitespace-nowrap">42m</span>
+</div>
+<div class="flex items-start gap-3 p-3 rounded-lg hover:bg-white/5 transition-colors border border-transparent hover:border-white/5 group">
+<div class="relative flex-shrink-0">
+<div class="size-10 rounded-full bg-cover bg-center border border-primary/50" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBHiMRpiPHHphNrZxORaNN23NUmeZW28HPEDsjEFcZHRT8TmJroeUVvEcjTJW2ynwJ9gUtwnLdiDL76RyARMVdnwYdXkajvqHrw8g4d2iepkMEWjQa3mINi38TidfR-_OgbI-Vir3dvcszcG_brZO2iDl4u0X2JJRRV6170C6kZu9CnStJZOSGJ-hBixOCtL7VLsBnNJi7ugHAdV737dnasNQgcHcAjeaPW4C0Lo4Jywz4scm2tJUS_3Ku46wTEEkxfOhxtYmbaKpI');"></div>
+<div class="absolute -bottom-1 -right-1 bg-surface-dark rounded-full p-[2px]">
+<div class="bg-primary rounded-full p-[3px]">
+<span class="material-symbols-outlined text-[10px] text-black font-bold block">call</span>
+</div>
+</div>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-white text-xs leading-relaxed">
+<span class="font-semibold text-primary">Elena</span> called <span class="text-white font-medium">Michael Chen</span>
+</p>
+<p class="text-white/40 text-[10px] mt-0.5">Left Voicemail • Follow Up</p>
+</div>
+<span class="text-[10px] text-white/20 whitespace-nowrap">1h</span>
+</div>
+</div>
+</div>
+</div>
+<div class="rounded-xl bg-surface-dark border border-white/5 overflow-hidden">
+<div class="p-6 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+<h3 class="text-xl font-serif font-medium text-white">Target Personas</h3>
+<div class="flex gap-2">
+<button class="size-8 flex items-center justify-center rounded bg-white/5 text-white/60 hover:text-white hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+</button>
+</div>
+</div>
+<div class="p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+<div class="bg-white/5 border border-white/5 rounded-lg p-4 flex items-center justify-between hover:border-primary/50 hover:bg-white/10 transition-all cursor-pointer group">
+<div class="flex items-center gap-3">
+<div class="bg-primary/20 p-2 rounded text-primary">
+<span class="material-symbols-outlined text-[20px]">currency_bitcoin</span>
+</div>
+<div>
+<h4 class="text-white text-sm font-semibold group-hover:text-primary transition-colors">Crypto Whales</h4>
+<p class="text-white/40 text-xs">Wallet &gt; $10M</p>
+</div>
+</div>
+<span class="text-white font-serif text-lg">84</span>
+</div>
+<div class="bg-white/5 border border-white/5 rounded-lg p-4 flex items-center justify-between hover:border-primary/50 hover:bg-white/10 transition-all cursor-pointer group">
+<div class="flex items-center gap-3">
+<div class="bg-blue-500/20 p-2 rounded text-blue-400">
+<span class="material-symbols-outlined text-[20px]">apartment</span>
+</div>
+<div>
+<h4 class="text-white text-sm font-semibold group-hover:text-primary transition-colors">Commerical RE</h4>
+<p class="text-white/40 text-xs">Owners NYC</p>
+</div>
+</div>
+<span class="text-white font-serif text-lg">156</span>
+</div>
+<div class="bg-white/5 border border-white/5 rounded-lg p-4 flex items-center justify-between hover:border-primary/50 hover:bg-white/10 transition-all cursor-pointer group">
+<div class="flex items-center gap-3">
+<div class="bg-purple-500/20 p-2 rounded text-purple-400">
+<span class="material-symbols-outlined text-[20px]">rocket_launch</span>
+</div>
+<div>
+<h4 class="text-white text-sm font-semibold group-hover:text-primary transition-colors">Tech Founders</h4>
+<p class="text-white/40 text-xs">Series B+</p>
+</div>
+</div>
+<span class="text-white font-serif text-lg">92</span>
+</div>
+<div class="bg-white/5 border border-white/5 rounded-lg p-4 flex items-center justify-between hover:border-primary/50 hover:bg-white/10 transition-all cursor-pointer group">
+<div class="flex items-center gap-3">
+<div class="bg-green-500/20 p-2 rounded text-green-400">
+<span class="material-symbols-outlined text-[20px]">account_balance</span>
+</div>
+<div>
+<h4 class="text-white text-sm font-semibold group-hover:text-primary transition-colors">Family Offices</h4>
+<p class="text-white/40 text-xs">Europe</p>
+</div>
+</div>
+<span class="text-white font-serif text-lg">43</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+
+</body></html>
