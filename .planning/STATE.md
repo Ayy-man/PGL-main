@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-02-28T19:57:13.698Z"
+last_updated: "2026-02-28T19:58:05.012Z"
 progress:
   total_phases: 13
   completed_phases: 7
   total_plans: 63
-  completed_plans: 55
+  completed_plans: 57
 ---
 
 # Project State
@@ -24,9 +24,9 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 ## Current Position
 
 Phase: 13 of 13 (Admin Dashboard)
-Plan: 2 of 4 — COMPLETE
-Status: Phase 13 in progress — Plan 02 complete; "Platform Control" section header added to admin sidebar nav
-Last activity: 2026-03-01 — Phase 13 Plan 02 complete: non-interactive "Platform Control" section label added to AdminNavLinks using var(--text-ghost), 10px uppercase tracking-widest; mobile sidebar inherits automatically via component reuse; pre-existing ESLint errors fixed (underscore-prefix rule, export-log-client orgId rename)
+Plan: 1 of 4 — COMPLETE (13-01: Restore Quota API Route + Build ApiQuotaCard + Wire into PlatformPulse)
+Status: Phase 13 in progress — Plan 01 complete; PlatformPulse shows 4 live stat cards, ComingSoonCard removed
+Last activity: 2026-03-01 — Phase 13 Plan 01 complete: /api/admin/quota route restored (Upstash Redis mget, graceful zero fallback), ApiQuotaCard component with gold progress bars + tri-state rendering, PlatformPulse updated to drop ComingSoonCard+ApiQuotaPlaceholder and use ApiQuotaCard directly, admin page fetches 6 API endpoints in parallel
 
 Progress: [██████████] 100% (07-01, 07-02, 07-03, 07-04, 07-05 all complete)
 
@@ -72,6 +72,7 @@ Progress: [██████████] 100% (07-01, 07-02, 07-03, 07-04, 07-
 | Phase 09 P04 | 2 | 2 tasks | 2 files |
 | Phase 10-saved-personas-screen-c P03 | 7 | 2 tasks | 4 files |
 | Phase 13-admin-dashboard P02 | 15 | 2 tasks | 3 files |
+| Phase 13-admin-dashboard P01 | 15 | 2 tasks | 4 files |
 
 ### Phase 3 Plan Completion
 
@@ -242,6 +243,9 @@ Recent decisions affecting current work:
 - [Phase 10-saved-personas-screen-c]: grid-cols-1 lg:grid-cols-[220px_1fr_280px] for three-column responsive collapse; unfiltered personas to sidebar for accurate stats; async IIFE pattern for PromiseLike-to-Promise conversion
 - [Phase 13-admin-dashboard]: Platform Control section header uses var(--text-ghost) — subtlest text tier signals category label, non-interactive div > p with no Link/cursor/hover
 - [Phase 13-admin-dashboard]: Mobile sidebar inherits section header automatically via AdminNavLinks component reuse — no separate implementation needed
+- [Phase 13-admin-dashboard]: Inline super_admin check in quota Route Handler (not requireSuperAdmin) per Phase 04 locked decision
+- [Phase 13-admin-dashboard]: redis.mget batches all provider+date keys in single round-trip for quota aggregation
+- [Phase 13-admin-dashboard]: quotaData is optional prop in PlatformPulse for backward compatibility, ApiQuotaCard tri-state (null/all-zero/data) rendering
 
 ### Roadmap Evolution
 
@@ -301,8 +305,8 @@ All 4 phases and 27 plans are complete. The following items remain before produc
 
 ## Session Continuity
 
-Last session: 2026-03-01 (Phase 9 Plan 02 complete — SECFilingsTable, EnrichmentTab, NotesTab, ListsTab)
-Stopped at: Completed 09-02-PLAN.md — 4 standalone tab-content components built for the full prospect profile page right column: SEC filings sortable table, enrichment source card grid with per-source refresh, notes textarea + card list, and lists membership grid with gold dashed Add-to-List card. All TypeScript clean, no design token violations.
+Last session: 2026-03-01 (Phase 13 Plan 01 complete — Quota API route, ApiQuotaCard, PlatformPulse wiring)
+Stopped at: Completed 13-01-PLAN.md — /api/admin/quota route restored reading Upstash Redis api_usage keys, ApiQuotaCard with gold progress bars + tri-state (skeleton/empty/data) rendering, PlatformPulse ComingSoonCard replaced with live ApiQuotaCard, admin page now fetches 6 endpoints in parallel. pnpm build passes clean.
 
 ---
 
