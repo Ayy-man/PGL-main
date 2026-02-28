@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, Phone, Linkedin } from "lucide-react";
+import { Mail, Phone, Linkedin, ChevronRight } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { ProfileHeader } from "./profile-header";
 import { ProfileTabs, type ProfileTabName } from "./profile-tabs";
@@ -123,10 +123,14 @@ export function ProfileView({
   const transactions = prospect.insider_data?.transactions ?? [];
   const recentTransactions = transactions.slice(0, 5);
 
+  // On mobile, limit ActivityTimeline to 5 most recent events
+  const mobileActivityEntries = activityEntries.slice(0, 5);
+  const hasMoreActivity = activityEntries.length > 5;
+
   return (
     <div className="flex flex-col min-h-0">
       {/* Breadcrumbs */}
-      <div className="px-14 pt-6">
+      <div className="px-4 lg:px-14 pt-6">
         <Breadcrumbs
           items={[
             { label: "Search Results", href: `/${orgId}/search` },
@@ -149,7 +153,7 @@ export function ProfileView({
 
       {/* Lookalike Discovery (toggled by Find Lookalikes button) */}
       {showLookalikes && (
-        <div className="px-14 pt-6">
+        <div className="px-4 lg:px-14 pt-6">
           <div className="surface-card rounded-[14px] p-6">
             <h3 className="mb-5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Similar People
@@ -163,14 +167,30 @@ export function ProfileView({
       )}
 
       {/* Two-column layout */}
-      <div className="flex gap-8 p-14">
+      <div className="flex flex-col lg:flex-row gap-8 p-4 lg:p-14">
         {/* Left column: Activity Timeline */}
-        <aside className="w-[340px] shrink-0">
+        <aside className="w-full lg:w-[340px] lg:shrink-0">
           <div className="surface-card rounded-[14px] p-5">
             <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Activity
             </h3>
-            <ActivityTimeline events={activityEntries} />
+            {/* On mobile: show 5 most recent events with "View all" link */}
+            <div className="lg:hidden">
+              <ActivityTimeline events={mobileActivityEntries} />
+              {hasMoreActivity && (
+                <button
+                  className="mt-3 flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-[var(--gold-primary)] cursor-pointer"
+                  onClick={() => setActiveTab("activity")}
+                >
+                  View all activity
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+            {/* On desktop: show all events */}
+            <div className="hidden lg:block">
+              <ActivityTimeline events={activityEntries} />
+            </div>
           </div>
         </aside>
 
@@ -179,8 +199,8 @@ export function ProfileView({
           {/* Overview Tab */}
           {activeTab === "overview" && (
             <div className="space-y-6">
-              {/* Info grid — 2x3 */}
-              <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+              {/* Info grid — responsive */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 <div className="surface-card rounded-[14px] p-4">
                   <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
                     Title
