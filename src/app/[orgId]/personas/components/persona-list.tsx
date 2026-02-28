@@ -1,3 +1,5 @@
+// DEPRECATED: Replaced by persona-card-grid.tsx + persona-card.tsx in Phase 10 redesign.
+// This file is no longer imported by page.tsx.
 "use client";
 
 import { useState } from "react";
