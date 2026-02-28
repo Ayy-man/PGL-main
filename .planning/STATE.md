@@ -19,16 +19,16 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** Real estate teams can quickly find and qualify wealthy prospects by searching structured lead databases, enriching profiles with personal contact info and wealth signals, and organizing prospects into actionable lists.
 
-**Current focus:** Phase 14 (Polish + Verification) — COMPLETE
+**Current focus:** Phase 14.1 (Admin Dashboard Rebuild — Match Stitch Mockup) — IN PROGRESS
 
 ## Current Position
 
-Phase: 14 of 14 (Polish + Verification)
-Plan: 2 of 2 — COMPLETE
-Status: Phase 14 COMPLETE — All 2 plans executed, design system compliance audit passes, build verified clean
-Last activity: 2026-03-01 — Phase 14 complete. Cross-cutting audit: prefers-reduced-motion added, raw Tailwind color violations fixed, error boundaries polished, 5 loading.tsx stubs added. Build clean (exit 0), all 9 compliance checks pass, 11 vitest tests green. v2.0 UI Redesign COMPLETE.
+Phase: 14.1 of 14.1 (Admin Dashboard Rebuild — Match Stitch Mockup)
+Plan: 1 of 5 — Plan 01 COMPLETE
+Status: Phase 14.1 Plan 01 COMPLETE — Admin sidebar nav rebuilt (2 sections), user card footer added to desktop + mobile
+Last activity: 2026-02-28 — Phase 14.1 Plan 01 complete. AdminNavLinks rebuilt with Platform Control (3 items) + System Config (4 stubs). Styled user card footer (gold avatar + Super Admin label + email) added to desktop sidebar and mobile sidebar.
 
-Progress: [██████████] 100% — All 14 phases complete (06–14). v2.0 UI Redesign COMPLETE.
+Progress: [██████████] 100% (base phases) + Phase 14.1 Plan 1/5 executing
 
 ## Performance Metrics
 
@@ -272,6 +272,9 @@ Recent decisions affecting current work:
 - [Phase 14-polish-verification]: Loading skeletons use Skeleton component with rounded-[14px] for card shapes, rounded-lg for row shapes per MASTER.md border radius spec
 - [Phase 14-polish-verification]: pnpm build exit 0 confirmed: img-element warnings and Dynamic server usage messages are pre-existing expected informational messages — per Phase 07-05 locked decision
 - [Phase 14-polish-verification]: All 9 design system compliance checks pass without code changes — Phase 14-01 fully resolved all violations; v2.0 UI Redesign declared complete
+- [Phase 14.1-01]: System Config nav items render as <button> not <Link> — prevents navigation, title="Coming soon" tooltip signals non-functional state to user
+- [Phase 14.1-01]: userName prop accepted by AdminMobileSidebar for API consistency with layout.tsx even though only userInitials+userEmail are rendered in the card
+- [Phase 14.1-01]: Gold avatar circle uses var(--gold-bg-strong)/var(--gold-primary)/var(--border-gold) per design system token spec — same pattern as PersonaCard avatar
 
 ### Roadmap Evolution
 
@@ -332,8 +335,8 @@ All 4 phases and 27 plans are complete. The following items remain before produc
 
 ## Session Continuity
 
-Last session: 2026-03-01 — Phase 14 complete: Build Verification + Design System Compliance Audit
-Stopped at: v2.0 UI Redesign milestone complete. All 14 phases (06-14) executed. Next: deploy to Vercel and test with real API keys.
+Last session: 2026-02-28 — Phase 14.1 Plan 01 complete: Admin Sidebar Nav Rebuild + User Card Footer
+Stopped at: Phase 14.1-01 complete. AdminNavLinks two-section nav + System Config stubs done. User card footer added to desktop + mobile sidebar. Next: Phase 14.1 Plan 02.
 
 ---
 
