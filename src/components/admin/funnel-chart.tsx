@@ -45,7 +45,7 @@ export function FunnelChart({ data }: FunnelChartProps) {
   if (data === null) {
     return (
       <div className="surface-admin-card p-6">
-        <p className="text-sm font-medium mb-4" style={{ color: "var(--admin-text-secondary)" }}>Search-to-Export Funnel</p>
+        <p className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: "var(--admin-text-secondary)" }}>Search-to-Export Funnel</p>
         <div className="h-[280px] flex flex-col gap-3 items-center justify-center">
           {Array.from({ length: 4 }).map((_, i) => (
             <div
@@ -67,7 +67,7 @@ export function FunnelChart({ data }: FunnelChartProps) {
   if (allZero) {
     return (
       <div className="surface-admin-card p-6">
-        <p className="text-sm font-medium mb-4" style={{ color: "var(--admin-text-secondary)" }}>Search-to-Export Funnel (30d)</p>
+        <p className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: "var(--admin-text-secondary)" }}>Search-to-Export Funnel (30d)</p>
         <div className="h-[280px] flex items-center justify-center">
           <p className="text-sm text-muted-foreground">No activity yet. Search and export prospects to see funnel data.</p>
         </div>

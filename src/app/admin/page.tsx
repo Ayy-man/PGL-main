@@ -173,7 +173,7 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-serif text-3xl font-bold tracking-tight">
+          <h1 className="font-serif font-medium tracking-tight" style={{ fontSize: "38px", letterSpacing: "-0.5px" }}>
             Platform Health
           </h1>
           <p className="mt-1 text-sm" style={{ color: "var(--admin-text-secondary)" }}>

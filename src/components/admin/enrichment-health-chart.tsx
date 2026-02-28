@@ -57,7 +57,7 @@ export function EnrichmentHealthChart({ data }: EnrichmentHealthChartProps) {
   if (data === null) {
     return (
       <div className="surface-admin-card p-6">
-        <p className="text-sm font-medium mb-4" style={{ color: "var(--admin-text-secondary)" }}>Enrichment Pipeline Health</p>
+        <p className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: "var(--admin-text-secondary)" }}>Enrichment Pipeline Health</p>
         <div className="h-[300px] animate-pulse flex items-end gap-2 px-4">
           {Array.from({ length: 7 }).map((_, i) => (
             <div
@@ -74,7 +74,7 @@ export function EnrichmentHealthChart({ data }: EnrichmentHealthChartProps) {
   if (data.length === 0) {
     return (
       <div className="surface-admin-card p-6">
-        <p className="text-sm font-medium mb-4" style={{ color: "var(--admin-text-secondary)" }}>Enrichment Pipeline Health (per source, daily)</p>
+        <p className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: "var(--admin-text-secondary)" }}>Enrichment Pipeline Health (per source, daily)</p>
         <div className="h-[300px] flex items-center justify-center">
           <p className="text-sm text-muted-foreground">No enrichment data yet. Enrich prospects to see pipeline health.</p>
         </div>
