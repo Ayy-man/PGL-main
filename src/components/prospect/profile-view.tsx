@@ -1,17 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, Phone, Linkedin, ChevronRight } from "lucide-react";
+import {
+  UserSearch,
+  Mail,
+  Phone,
+  CheckCircle2,
+  Eye,
+} from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { ProfileHeader } from "./profile-header";
-import { ProfileTabs, type ProfileTabName } from "./profile-tabs";
 import { ActivityTimeline } from "./activity-timeline";
-import { SECFilingsTable } from "./sec-filings-table";
-import { EnrichmentTab } from "./enrichment-tab";
-import { NotesTab } from "./notes-tab";
-import { ListsTab } from "./lists-tab";
-import { LookalikeDiscovery } from "./lookalike-discovery";
 import { WealthSignals } from "./wealth-signals";
+import { LookalikeDiscovery } from "./lookalike-discovery";
 
 type SourceStatus =
   | "pending"
@@ -98,17 +99,14 @@ interface ProfileViewProps {
 }
 
 /**
- * ProfileView Component
+ * ProfileView — Three-column intelligence dossier layout.
  *
- * Two-column layout:
- * - Breadcrumbs > ProfileHeader > sticky ProfileTabs
- * - Left (340px): ActivityTimeline
- * - Right (flex-1): Tab content (Overview / Activity / SEC Filings / Enrichment / Notes / Lists)
+ * Matches the stitch mockup (prospect_intelligence_dossier):
+ * - Left column (3/12): Profile card, verified contact, notes
+ * - Center column (6/12): Wealth signals & intelligence, company context
+ * - Right column (3/12): Enrichment status, activity log
  *
- * LookalikeDiscovery toggled via "Find Lookalikes" button in ProfileHeader.
- * All card containers use surface-card utility. No bg-card + inline gradient style.
- *
- * Covers: PROF-01 through PROF-10
+ * No tabs — continuous scroll dossier. All information visible at once.
  */
 export function ProfileView({
   prospect,
@@ -118,43 +116,48 @@ export function ProfileView({
   orgId,
   activityEntries,
 }: ProfileViewProps) {
-  const [activeTab, setActiveTab] = useState<ProfileTabName>("overview");
   const [showLookalikes, setShowLookalikes] = useState(false);
+  const [noteText, setNoteText] = useState("");
 
-  const transactions = prospect.insider_data?.transactions ?? [];
-  const recentTransactions = transactions.slice(0, 5);
-
-  // On mobile, limit ActivityTimeline to 5 most recent events
-  const mobileActivityEntries = activityEntries.slice(0, 5);
-  const hasMoreActivity = activityEntries.length > 5;
+  const hasContact =
+    prospect.contact_data?.personal_email || prospect.contact_data?.phone;
 
   return (
-    <div className="flex flex-col min-h-0">
-      {/* Breadcrumbs */}
-      <div className="px-4 lg:px-14 pt-6">
+    <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 py-6 page-enter">
+      {/* Breadcrumbs + Find Lookalikes */}
+      <div className="flex flex-wrap gap-2 mb-6 items-center justify-between">
         <Breadcrumbs
           items={[
             { label: "Search Results", href: `/${orgId}/search` },
             { label: prospect.full_name },
           ]}
         />
+        <button
+          className="flex items-center gap-2 rounded-[8px] px-4 py-2 text-sm font-medium transition-all cursor-pointer"
+          style={{
+            background: "rgba(255,255,255,0.03)",
+            border:
+              "1px solid var(--border-default, rgba(255,255,255,0.06))",
+            color: "var(--text-primary-ds, var(--text-primary, #e8e4dc))",
+          }}
+          onMouseEnter={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.borderColor =
+              "rgba(212,175,55,0.15)";
+          }}
+          onMouseLeave={(e) => {
+            (e.currentTarget as HTMLButtonElement).style.borderColor =
+              "var(--border-default, rgba(255,255,255,0.06))";
+          }}
+          onClick={() => setShowLookalikes((prev) => !prev)}
+        >
+          <UserSearch className="h-4 w-4 shrink-0" />
+          Find Lookalikes
+        </button>
       </div>
 
-      {/* Profile Header */}
-      <ProfileHeader
-        prospect={prospect}
-        isStale={isStale}
-        orgId={orgId}
-        onFindLookalikes={() => setShowLookalikes((prev) => !prev)}
-        onAddToList={() => setActiveTab("lists")}
-      />
-
-      {/* Sticky Tab Bar */}
-      <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />
-
-      {/* Lookalike Discovery (toggled by Find Lookalikes button) */}
+      {/* Lookalike Discovery (toggled) */}
       {showLookalikes && (
-        <div className="px-4 lg:px-14 pt-6">
+        <div className="mb-6">
           <div className="surface-card rounded-[14px] p-6">
             <h3 className="mb-5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Similar People
@@ -167,361 +170,428 @@ export function ProfileView({
         </div>
       )}
 
-      {/* Two-column layout */}
-      <div className="flex flex-col lg:flex-row gap-8 p-4 lg:p-14">
-        {/* Left column: Activity Timeline */}
-        <aside className="w-full lg:w-[340px] lg:shrink-0">
+      {/* === THREE-COLUMN DOSSIER === */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* ─── LEFT COLUMN ─── */}
+        <div className="lg:col-span-3 flex flex-col gap-6">
+          {/* Profile Card */}
+          <ProfileHeader
+            prospect={prospect}
+            enrichmentSourceStatus={enrichmentSourceStatus}
+            isStale={isStale}
+            orgId={orgId}
+            onFindLookalikes={() => setShowLookalikes((prev) => !prev)}
+            onAddToList={() => {
+              console.log("Add to list triggered");
+            }}
+          />
+
+          {/* Verified Contact */}
           <div className="surface-card rounded-[14px] p-5">
-            <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Activity
+            <h3 className="text-foreground font-serif font-bold text-lg mb-4 flex items-center gap-2">
+              <CheckCircle2
+                className="h-4 w-4 shrink-0"
+                style={{ color: "var(--gold-primary)" }}
+              />
+              Verified Contact
             </h3>
-            {/* On mobile: show 5 most recent events with "View all" link */}
-            <div className="lg:hidden">
-              <ActivityTimeline events={mobileActivityEntries} />
-              {hasMoreActivity && (
-                <button
-                  className="mt-3 flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-[var(--gold-primary)] cursor-pointer"
-                  onClick={() => setActiveTab("activity")}
-                >
-                  View all activity
-                  <ChevronRight className="h-3.5 w-3.5" />
-                </button>
+            <div className="space-y-4">
+              {/* Email */}
+              {(prospect.work_email ||
+                prospect.contact_data?.personal_email) && (
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5">
+                    <Mail
+                      className="h-4 w-4"
+                      style={{
+                        color:
+                          "var(--text-tertiary, rgba(232,228,220,0.4))",
+                      }}
+                    />
+                  </div>
+                  <div className="flex-1 overflow-hidden">
+                    <p className="text-sm font-medium text-foreground truncate">
+                      {prospect.contact_data?.personal_email ||
+                        prospect.work_email}
+                    </p>
+                    <div className="flex items-center gap-2 mt-1">
+                      {prospect.contact_data?.personal_email && (
+                        <span
+                          className="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase"
+                          style={{
+                            background: "rgba(34,197,94,0.1)",
+                            color: "var(--success, #22c55e)",
+                            border: "1px solid rgba(34,197,94,0.2)",
+                          }}
+                        >
+                          Verified
+                        </span>
+                      )}
+                      {prospect.contact_data?.enriched_at && (
+                        <span className="text-[10px] text-muted-foreground">
+                          {formatRelative(prospect.contact_data.enriched_at)}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
               )}
-            </div>
-            {/* On desktop: show all events */}
-            <div className="hidden lg:block">
-              <ActivityTimeline events={activityEntries} />
+
+              {/* Phone */}
+              {(prospect.work_phone || prospect.contact_data?.phone) && (
+                <div className="flex items-start gap-3">
+                  <div className="mt-0.5">
+                    <Phone
+                      className="h-4 w-4"
+                      style={{
+                        color:
+                          "var(--text-tertiary, rgba(232,228,220,0.4))",
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">
+                      {prospect.contact_data?.phone || prospect.work_phone}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {prospect.location
+                        ? `Mobile \u00B7 ${prospect.location}`
+                        : "Mobile"}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* No contact data */}
+              {!prospect.work_email &&
+                !prospect.work_phone &&
+                !hasContact && (
+                  <p className="text-sm text-muted-foreground">
+                    No contact info yet. Will appear after enrichment.
+                  </p>
+                )}
             </div>
           </div>
-        </aside>
 
-        {/* Right column: Tab content */}
-        <div className="flex-1 min-w-0">
-          {/* Overview Tab */}
-          {activeTab === "overview" && (
-            <div className="space-y-6">
-              {/* Info grid — responsive */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                <div className="surface-card rounded-[14px] p-4">
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
-                    Title
-                  </p>
-                  <p className="text-sm font-medium text-foreground">
-                    {prospect.title || "—"}
-                  </p>
-                </div>
+          {/* List Memberships */}
+          {listMemberships.length > 0 && (
+            <div className="surface-card rounded-[14px] p-4">
+              <div
+                className="flex items-center justify-between mb-2 pb-2"
+                style={{
+                  borderBottom:
+                    "1px solid var(--border-default, rgba(255,255,255,0.06))",
+                }}
+              >
+                <p className="text-sm font-serif font-bold text-foreground">
+                  Lists
+                </p>
+                <Eye className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <div className="flex flex-wrap gap-2 mt-3">
+                {listMemberships.map((m) => (
+                  <a
+                    key={m.listId}
+                    href={`/${orgId}/lists/${m.listId}`}
+                    className="text-xs rounded-[20px] px-3 py-1 transition-colors cursor-pointer"
+                    style={{
+                      background: "rgba(255,255,255,0.03)",
+                      border:
+                        "1px solid var(--border-default, rgba(255,255,255,0.06))",
+                      color:
+                        "var(--text-primary-ds, var(--text-primary, #e8e4dc))",
+                    }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLAnchorElement).style.borderColor =
+                        "rgba(212,175,55,0.15)";
+                      (e.currentTarget as HTMLAnchorElement).style.color =
+                        "var(--gold-primary)";
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLAnchorElement).style.borderColor =
+                        "var(--border-default, rgba(255,255,255,0.06))";
+                      (e.currentTarget as HTMLAnchorElement).style.color =
+                        "var(--text-primary-ds, var(--text-primary, #e8e4dc))";
+                    }}
+                  >
+                    {m.listName}
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
 
-                <div className="surface-card rounded-[14px] p-4">
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
-                    Company
-                  </p>
-                  <p className="text-sm font-medium text-foreground">
-                    {prospect.company || "—"}
-                  </p>
-                </div>
+          {/* Internal Notes */}
+          <div className="surface-card rounded-[14px] p-4 flex flex-col">
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="text-sm font-serif font-bold text-foreground">
+                Internal Notes
+              </h3>
+              <span className="text-[10px] text-muted-foreground">
+                PGL Team
+              </span>
+            </div>
+            <textarea
+              value={noteText}
+              onChange={(e) => setNoteText(e.target.value)}
+              className="w-full rounded-[8px] p-3 text-sm text-foreground placeholder:text-muted-foreground min-h-[120px] resize-none focus:outline-none focus:ring-1"
+              style={{
+                background: "rgba(255,255,255,0.02)",
+                border:
+                  "1px solid var(--border-default, rgba(255,255,255,0.06))",
+              }}
+              placeholder="Add tenant-specific notes regarding this UHNW prospect..."
+            />
+            <div className="flex justify-end mt-2">
+              <button
+                className="text-xs font-medium cursor-pointer transition-colors"
+                style={{ color: "var(--gold-primary)" }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.color =
+                    "var(--gold-muted)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.color =
+                    "var(--gold-primary)";
+                }}
+                onClick={() => {
+                  if (noteText.trim()) {
+                    console.log("Save note (stub):", noteText.trim());
+                    setNoteText("");
+                  }
+                }}
+              >
+                Save Note
+              </button>
+            </div>
+          </div>
+        </div>
 
-                <div className="surface-card rounded-[14px] p-4">
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
-                    Location
-                  </p>
-                  <p className="text-sm font-medium text-foreground">
-                    {prospect.location || "—"}
-                  </p>
-                </div>
+        {/* ─── CENTER COLUMN ─── */}
+        <div className="lg:col-span-6 flex flex-col gap-6">
+          {/* Wealth Signals & Intelligence */}
+          <WealthSignals
+            webData={prospect.web_data}
+            insiderData={prospect.insider_data}
+          />
 
-                <div className="surface-card rounded-[14px] p-4">
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
-                    Work Email
-                  </p>
-                  {prospect.work_email ? (
-                    <a
-                      href={`mailto:${prospect.work_email}`}
-                      className="text-sm font-medium text-foreground transition-colors hover:text-[var(--gold-primary)]"
-                    >
-                      {prospect.work_email}
-                    </a>
-                  ) : (
-                    <p className="text-sm font-medium text-muted-foreground">—</p>
+          {/* Company Context */}
+          {prospect.company && (
+            <div className="surface-card rounded-[14px] p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-foreground text-lg font-bold font-serif">
+                  Company Context
+                </h3>
+                <span
+                  className="text-xs font-bold px-2 py-1 rounded"
+                  style={{
+                    background: "rgba(255,255,255,0.03)",
+                    border:
+                      "1px solid var(--border-default, rgba(255,255,255,0.06))",
+                    color:
+                      "var(--text-secondary, rgba(232,228,220,0.5))",
+                  }}
+                >
+                  {prospect.company.toUpperCase()}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  {prospect.publicly_traded_symbol && (
+                    <div>
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
+                        Ticker
+                      </p>
+                      <p className="text-sm font-semibold text-foreground font-mono">
+                        {prospect.publicly_traded_symbol}
+                      </p>
+                    </div>
+                  )}
+                  {prospect.location && (
+                    <div>
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
+                        Headquarters
+                      </p>
+                      <p className="text-sm font-semibold text-foreground">
+                        {prospect.location}
+                      </p>
+                    </div>
                   )}
                 </div>
-
-                <div className="surface-card rounded-[14px] p-4">
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
-                    Work Phone
+                <div>
+                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">
+                    Details
                   </p>
-                  {prospect.work_phone ? (
-                    <a
-                      href={`tel:${prospect.work_phone}`}
-                      className="text-sm font-medium text-foreground transition-colors hover:text-[var(--gold-primary)]"
-                    >
-                      {prospect.work_phone}
-                    </a>
-                  ) : (
-                    <p className="text-sm font-medium text-muted-foreground">—</p>
-                  )}
+                  <div className="flex flex-wrap gap-2">
+                    {prospect.title && (
+                      <span
+                        className="px-2 py-1 rounded text-xs font-medium"
+                        style={{
+                          background: "rgba(255,255,255,0.03)",
+                          border:
+                            "1px solid var(--border-default, rgba(255,255,255,0.06))",
+                          color:
+                            "var(--text-primary-ds, var(--text-primary, #e8e4dc))",
+                        }}
+                      >
+                        {prospect.title}
+                      </span>
+                    )}
+                    {prospect.company_cik && (
+                      <span
+                        className="px-2 py-1 rounded text-xs font-medium"
+                        style={{
+                          background: "rgba(255,255,255,0.03)",
+                          border:
+                            "1px solid var(--border-default, rgba(255,255,255,0.06))",
+                          color:
+                            "var(--text-primary-ds, var(--text-primary, #e8e4dc))",
+                        }}
+                      >
+                        CIK: {prospect.company_cik}
+                      </span>
+                    )}
+                  </div>
                 </div>
+              </div>
+            </div>
+          )}
+        </div>
 
-                <div className="surface-card rounded-[14px] p-4">
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
-                    LinkedIn
-                  </p>
-                  {prospect.linkedin_url ? (
-                    <a
-                      href={prospect.linkedin_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 text-sm font-medium text-foreground transition-colors hover:text-[var(--gold-primary)]"
-                    >
-                      <Linkedin className="h-3.5 w-3.5 shrink-0" />
-                      Profile
-                    </a>
-                  ) : (
-                    <p className="text-sm font-medium text-muted-foreground">—</p>
-                  )}
+        {/* ─── RIGHT COLUMN ─── */}
+        <div className="lg:col-span-3 flex flex-col gap-6">
+          {/* Enrichment Status Card */}
+          <div
+            className="rounded-[14px] p-[1px] relative overflow-hidden"
+            style={{
+              background:
+                "linear-gradient(135deg, rgba(212,175,55,0.2), transparent, rgba(212,175,55,0.08))",
+            }}
+          >
+            <div
+              className="rounded-[13px] p-5 relative z-10 h-full flex flex-col justify-between"
+              style={{
+                background: "var(--bg-card, rgba(255,255,255,0.03))",
+              }}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  Enrichment Status
+                </p>
+                <div
+                  className="px-2 py-0.5 rounded text-[10px] font-bold uppercase"
+                  style={{
+                    background:
+                      prospect.enrichment_status === "complete"
+                        ? "rgba(34,197,94,0.15)"
+                        : prospect.enrichment_status === "in_progress"
+                          ? "rgba(212,175,55,0.15)"
+                          : "rgba(255,255,255,0.05)",
+                    color:
+                      prospect.enrichment_status === "complete"
+                        ? "var(--success, #22c55e)"
+                        : prospect.enrichment_status === "in_progress"
+                          ? "var(--gold-primary)"
+                          : "var(--text-muted)",
+                    border: `1px solid ${
+                      prospect.enrichment_status === "complete"
+                        ? "rgba(34,197,94,0.25)"
+                        : prospect.enrichment_status === "in_progress"
+                          ? "rgba(212,175,55,0.25)"
+                          : "rgba(255,255,255,0.08)"
+                    }`,
+                  }}
+                >
+                  {prospect.enrichment_status === "complete"
+                    ? "Complete"
+                    : prospect.enrichment_status === "in_progress"
+                      ? "Running"
+                      : "Pending"}
                 </div>
               </div>
 
-              {/* AI Insight block */}
-              <div
-                className="rounded-[14px] border border-l-2 pl-6 pr-6 py-5"
-                style={{
-                  background: "var(--bg-card-gradient)",
-                  borderColor: "rgba(255,255,255,0.06)",
-                  borderLeftColor: "var(--border-gold)",
-                }}
-              >
-                <h3
-                  className="mb-3 text-xs font-semibold uppercase tracking-wider"
-                  style={{ color: "var(--gold-primary)" }}
-                >
-                  AI Insight
-                </h3>
-                {prospect.ai_summary ? (
-                  <p className="text-sm text-foreground leading-relaxed">
-                    {prospect.ai_summary}
-                  </p>
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    AI summary will be generated after enrichment completes.
-                  </p>
+              {/* Source status breakdown */}
+              <div className="grid grid-cols-2 gap-2 mt-3">
+                {(["contactout", "exa", "sec", "claude"] as const).map(
+                  (src) => {
+                    const status = enrichmentSourceStatus[src] ?? "pending";
+                    const isComplete = status === "complete";
+                    return (
+                      <div
+                        key={src}
+                        className="flex items-center justify-center p-2 rounded-[8px] text-xs gap-1 transition-all"
+                        style={{
+                          border: `1px solid ${isComplete ? "rgba(212,175,55,0.15)" : "var(--border-default, rgba(255,255,255,0.06))"}`,
+                          background: isComplete
+                            ? "rgba(212,175,55,0.04)"
+                            : "transparent",
+                          color: isComplete
+                            ? "var(--gold-primary)"
+                            : "var(--text-secondary, rgba(232,228,220,0.5))",
+                        }}
+                      >
+                        {isComplete && (
+                          <span
+                            className="h-1.5 w-1.5 rounded-full inline-block"
+                            style={{
+                              background: "var(--success, #22c55e)",
+                            }}
+                          />
+                        )}
+                        {src.charAt(0).toUpperCase() + src.slice(1)}
+                      </div>
+                    );
+                  }
                 )}
               </div>
 
-              {/* Wealth Signals */}
-              <WealthSignals
-                webData={prospect.web_data}
-                insiderData={prospect.insider_data}
-              />
-
-              {/* Recent SEC Transactions (top 5) */}
-              {recentTransactions.length > 0 && (
-                <div className="surface-card rounded-[14px] p-6">
-                  <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Recent SEC Transactions
-                  </h3>
-                  <SECFilingsTable
-                    transactions={recentTransactions}
-                    totalValue={prospect.insider_data?.total_value}
-                  />
-                </div>
-              )}
-
-              {/* Contact Section */}
-              <div className="surface-card rounded-[14px] p-6">
-                <h3 className="mb-5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  Contact Information
-                </h3>
-                <div className="grid gap-6 md:grid-cols-2">
-                  {/* Work Contact */}
-                  <div>
-                    <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Work
-                    </h4>
-                    <div className="space-y-3">
-                      {prospect.work_email && (
-                        <div className="flex items-center gap-3">
-                          <Mail className="h-4 w-4 text-muted-foreground" />
-                          <a
-                            href={`mailto:${prospect.work_email}`}
-                            className="text-sm text-foreground transition-colors hover:text-[var(--gold-primary)]"
-                          >
-                            {prospect.work_email}
-                          </a>
-                        </div>
-                      )}
-                      {prospect.work_phone && (
-                        <div className="flex items-center gap-3">
-                          <Phone className="h-4 w-4 text-muted-foreground" />
-                          <a
-                            href={`tel:${prospect.work_phone}`}
-                            className="text-sm text-foreground transition-colors hover:text-[var(--gold-primary)]"
-                          >
-                            {prospect.work_phone}
-                          </a>
-                        </div>
-                      )}
-                      {prospect.linkedin_url && (
-                        <div className="flex items-center gap-3">
-                          <Linkedin className="h-4 w-4 text-muted-foreground" />
-                          <a
-                            href={prospect.linkedin_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm text-foreground transition-colors hover:text-[var(--gold-primary)]"
-                          >
-                            LinkedIn Profile
-                          </a>
-                        </div>
-                      )}
-                      {!prospect.work_email &&
-                        !prospect.work_phone &&
-                        !prospect.linkedin_url && (
-                          <p className="text-sm text-muted-foreground">
-                            No work contact info
-                          </p>
-                        )}
-                    </div>
-                  </div>
-
-                  {/* Personal Contact */}
-                  <div>
-                    <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Personal (ContactOut)
-                    </h4>
-                    <div className="space-y-3">
-                      {prospect.contact_data?.personal_email && (
-                        <div className="flex items-center gap-3">
-                          <Mail className="h-4 w-4 text-muted-foreground" />
-                          <a
-                            href={`mailto:${prospect.contact_data.personal_email}`}
-                            className="text-sm text-foreground transition-colors hover:text-[var(--gold-primary)]"
-                          >
-                            {prospect.contact_data.personal_email}
-                          </a>
-                        </div>
-                      )}
-                      {prospect.contact_data?.phone && (
-                        <div className="flex items-center gap-3">
-                          <Phone className="h-4 w-4 text-muted-foreground" />
-                          <a
-                            href={`tel:${prospect.contact_data.phone}`}
-                            className="text-sm text-foreground transition-colors hover:text-[var(--gold-primary)]"
-                          >
-                            {prospect.contact_data.phone}
-                          </a>
-                        </div>
-                      )}
-                      {!prospect.contact_data && (
-                        <p className="text-sm text-muted-foreground">
-                          Not enriched — personal contact will be added after enrichment.
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Activity Tab */}
-          {activeTab === "activity" && (
-            <div className="surface-card rounded-[14px] p-6">
-              <h3 className="mb-5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Activity Log
-              </h3>
-              {activityEntries.length > 0 ? (
-                <div className="overflow-hidden rounded-md border">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="bg-background">
-                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                          Time
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                          User
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                          Action
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                          Details
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border">
-                      {activityEntries.map((entry) => (
-                        <tr
-                          key={entry.id}
-                          className="hover:bg-[rgba(255,255,255,0.02)] transition-colors"
-                        >
-                          <td className="px-4 py-3 font-mono text-xs text-muted-foreground whitespace-nowrap">
-                            {new Date(entry.created_at).toLocaleString()}
-                          </td>
-                          <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
-                            {entry.user_id.slice(0, 8)}&hellip;
-                          </td>
-                          <td className="px-4 py-3">
-                            <span className="inline-flex rounded-full px-2 py-0.5 text-xs font-medium capitalize bg-muted text-muted-foreground">
-                              {entry.action_type.replace(/_/g, " ")}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 text-xs text-muted-foreground">
-                            {entry.metadata
-                              ? JSON.stringify(entry.metadata).slice(0, 60)
-                              : "—"}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  No activity recorded yet.
+              {/* Last enriched timestamp */}
+              {prospect.last_enriched_at && (
+                <p className="text-[10px] text-muted-foreground mt-3 text-center">
+                  Last enriched{" "}
+                  {formatRelative(prospect.last_enriched_at)}
                 </p>
               )}
             </div>
-          )}
+          </div>
 
-          {/* SEC Filings Tab */}
-          {activeTab === "sec-filings" && (
-            <div className="surface-card rounded-[14px] p-6">
-              <h3 className="mb-5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                SEC Filings
-              </h3>
-              <SECFilingsTable
-                transactions={transactions}
-                totalValue={prospect.insider_data?.total_value}
-              />
-            </div>
-          )}
-
-          {/* Enrichment Tab */}
-          {activeTab === "enrichment" && (
-            <EnrichmentTab
-              sourceStatus={enrichmentSourceStatus}
-              prospectId={prospect.id}
-            />
-          )}
-
-          {/* Notes Tab */}
-          {activeTab === "notes" && (
-            <NotesTab notes={[]} prospectId={prospect.id} />
-          )}
-
-          {/* Lists Tab */}
-          {activeTab === "lists" && (
-            <ListsTab
-              memberships={listMemberships}
-              orgId={orgId}
-              onAddToList={() => {
-                // Stub: feature phase will open AddToListDialog
-                console.log("Add to list triggered from Lists tab");
+          {/* Activity Log */}
+          <div className="surface-card rounded-[14px] flex flex-col flex-1 overflow-hidden">
+            <div
+              className="p-5"
+              style={{
+                borderBottom:
+                  "1px solid var(--border-default, rgba(255,255,255,0.06))",
               }}
-            />
-          )}
+            >
+              <h3 className="text-foreground text-lg font-bold font-serif">
+                Activity Log
+              </h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                Recent team touchpoints
+              </p>
+            </div>
+            <div className="flex-1 overflow-y-auto p-3">
+              <ActivityTimeline events={activityEntries} />
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
+}
+
+function formatRelative(dateStr: string): string {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffHr = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDay = Math.floor(diffHr / 24);
+  if (diffHr < 1) return "just now";
+  if (diffHr < 24) return `${diffHr}h ago`;
+  if (diffDay < 7) return `${diffDay}d ago`;
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
 }

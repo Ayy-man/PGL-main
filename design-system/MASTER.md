@@ -23,7 +23,7 @@
 - Raw Tailwind color classes (`zinc-*`, `gray-*`, `emerald-*`) — use CSS variables only
 - Light mode — the app is forced dark (`<html class="dark">`)
 - Scale transforms on hover — use border/opacity transitions only
-- Table-row layouts for prospect results — use card layouts
+- Card layouts for prospect search results — use table with columns (Prospect, Wealth Tier, Title & Company, Enrichment, Actions)
 
 ---
 

@@ -11,7 +11,7 @@ import { PersonaPills } from "./persona-pills";
 import { NLSearchBar } from "./nl-search-bar";
 import { AdvancedFiltersPanel } from "./advanced-filters-panel";
 import { BulkActionsBar } from "./bulk-actions-bar";
-import { ProspectResultCard } from "./prospect-result-card";
+import { ProspectResultsTable } from "./prospect-results-table";
 import { ProspectSlideOver } from "@/components/prospect/prospect-slide-over";
 import { Search, AlertCircle, RefreshCw, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -34,38 +34,16 @@ interface SearchContentProps {
   orgId: string;
 }
 
-function SkeletonCard() {
+function SkeletonRow() {
   return (
-    <div
-      className="rounded-[12px] p-6 px-7 flex items-start gap-[18px] animate-pulse"
-      style={{
-        background: "var(--bg-card-gradient)",
-        border: "1px solid var(--border-subtle)",
-      }}
-    >
-      <div
-        className="flex-shrink-0 rounded-full"
-        style={{
-          width: "48px",
-          height: "48px",
-          background: "rgba(255,255,255,0.06)",
-        }}
-      />
-      <div className="flex-1 space-y-2">
-        <div
-          className="h-5 rounded"
-          style={{ width: "40%", background: "rgba(255,255,255,0.06)" }}
-        />
-        <div
-          className="h-4 rounded"
-          style={{ width: "60%", background: "rgba(255,255,255,0.04)" }}
-        />
-        <div
-          className="h-3 rounded mt-1"
-          style={{ width: "30%", background: "rgba(255,255,255,0.03)" }}
-        />
-      </div>
-    </div>
+    <tr className="animate-pulse" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
+      <td className="py-4 pl-5 pr-3"><div className="h-4 w-4 rounded" style={{ background: "rgba(255,255,255,0.06)" }} /></td>
+      <td className="px-3 py-4"><div className="flex items-center gap-3"><div className="h-10 w-10 rounded-full" style={{ background: "rgba(255,255,255,0.06)" }} /><div className="space-y-1.5"><div className="h-4 w-28 rounded" style={{ background: "rgba(255,255,255,0.06)" }} /><div className="h-3 w-20 rounded" style={{ background: "rgba(255,255,255,0.04)" }} /></div></div></td>
+      <td className="px-3 py-4"><div className="h-6 w-24 rounded-full" style={{ background: "rgba(255,255,255,0.04)" }} /></td>
+      <td className="px-3 py-4"><div className="space-y-1.5"><div className="h-4 w-32 rounded" style={{ background: "rgba(255,255,255,0.06)" }} /><div className="h-3 w-24 rounded" style={{ background: "rgba(255,255,255,0.04)" }} /></div></td>
+      <td className="px-3 py-4"><div className="flex gap-1"><div className="h-2.5 w-2.5 rounded-full" style={{ background: "rgba(255,255,255,0.06)" }} /><div className="h-2.5 w-2.5 rounded-full" style={{ background: "rgba(255,255,255,0.06)" }} /><div className="h-2.5 w-2.5 rounded-full" style={{ background: "rgba(255,255,255,0.06)" }} /></div></td>
+      <td className="px-3 py-4" />
+    </tr>
   );
 }
 
@@ -361,12 +339,22 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
                 />
               )}
 
-              {/* Loading state: skeleton cards */}
+              {/* Loading state: skeleton table */}
               {isLoading && results.length === 0 && (
-                <div className="flex flex-col gap-3">
-                  {[1, 2, 3, 4].map((n) => (
-                    <SkeletonCard key={n} />
-                  ))}
+                <div
+                  className="overflow-hidden rounded-xl"
+                  style={{
+                    border: "1px solid var(--border-default)",
+                    background: "var(--bg-card-gradient)",
+                  }}
+                >
+                  <table className="min-w-full">
+                    <tbody>
+                      {[1, 2, 3, 4].map((n) => (
+                        <SkeletonRow key={n} />
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               )}
 
@@ -379,78 +367,104 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
                 />
               )}
 
-              {/* Prospect result card stack */}
+              {/* Prospect results table */}
               {results.length > 0 && (
-                <div className="flex flex-col gap-3">
-                  {results.map((prospect) => (
-                    <ProspectResultCard
-                      key={prospect.id}
-                      prospect={prospect}
-                      lists={lists}
-                      orgId={orgId}
-                      onClick={() => handleProspectClick(prospect.id)}
-                      selected={selectedIds.has(prospect.id)}
-                      onSelect={() => handleSelect(prospect.id)}
-                    />
-                  ))}
-                </div>
+                <ProspectResultsTable
+                  results={results}
+                  selectedIds={selectedIds}
+                  onSelect={handleSelect}
+                  onSelectAll={handleSelectAll}
+                  onProspectClick={handleProspectClick}
+                />
               )}
 
-              {/* Pagination */}
+              {/* Pagination — mockup style */}
               {pagination.totalPages > 1 && (
-                <div className="flex justify-center items-center gap-2 mt-8">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    disabled={searchState.page <= 1 || isLoading}
-                    onClick={() =>
-                      setSearchState({ page: searchState.page - 1 })
-                    }
-                  >
-                    Previous
-                  </Button>
-                  {Array.from(
-                    { length: Math.min(pagination.totalPages, 7) },
-                    (_, i) => {
-                      const pageNum = i + 1;
-                      const isActive = pageNum === searchState.page;
-                      return (
-                        <button
-                          key={pageNum}
-                          onClick={() => setSearchState({ page: pageNum })}
-                          disabled={isLoading}
-                          className="h-8 w-8 rounded-[6px] text-xs font-medium transition-all duration-200 cursor-pointer"
-                          style={
-                            isActive
-                              ? {
-                                  background: "var(--gold-bg-strong)",
-                                  border: "1px solid var(--border-gold)",
-                                  color: "var(--gold-primary)",
-                                }
-                              : {
-                                  background: "rgba(255,255,255,0.02)",
-                                  border: "1px solid var(--border-subtle)",
-                                  color: "rgba(255,255,255,0.5)",
-                                }
-                          }
-                        >
-                          {pageNum}
-                        </button>
-                      );
-                    }
-                  )}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    disabled={
-                      searchState.page >= pagination.totalPages || isLoading
-                    }
-                    onClick={() =>
-                      setSearchState({ page: searchState.page + 1 })
-                    }
-                  >
-                    Next
-                  </Button>
+                <div
+                  className="flex items-center justify-between py-4 px-2"
+                  style={{ borderTop: "1px solid var(--border-subtle)" }}
+                >
+                  <p className="text-[13px]" style={{ color: "var(--text-tertiary)" }}>
+                    Showing{" "}
+                    <span style={{ color: "var(--text-primary-ds)" }} className="font-medium">
+                      {(searchState.page - 1) * 10 + 1}
+                    </span>{" "}
+                    to{" "}
+                    <span style={{ color: "var(--text-primary-ds)" }} className="font-medium">
+                      {Math.min(searchState.page * 10, pagination.totalEntries)}
+                    </span>{" "}
+                    of{" "}
+                    <span style={{ color: "var(--text-primary-ds)" }} className="font-medium">
+                      {pagination.totalEntries.toLocaleString()}
+                    </span>{" "}
+                    results
+                  </p>
+                  <nav className="isolate inline-flex -space-x-px rounded-md">
+                    <button
+                      disabled={searchState.page <= 1 || isLoading}
+                      onClick={() => setSearchState({ page: searchState.page - 1 })}
+                      className="relative inline-flex items-center rounded-l-md px-2 py-2 transition-colors duration-150 disabled:opacity-30 cursor-pointer disabled:cursor-not-allowed"
+                      style={{
+                        color: "var(--text-tertiary)",
+                        border: "1px solid var(--border-subtle)",
+                      }}
+                    >
+                      <span className="sr-only">Previous</span>
+                      <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" /></svg>
+                    </button>
+                    {Array.from(
+                      { length: Math.min(pagination.totalPages, 5) },
+                      (_, i) => {
+                        const pageNum = i + 1;
+                        const isActive = pageNum === searchState.page;
+                        return (
+                          <button
+                            key={pageNum}
+                            onClick={() => setSearchState({ page: pageNum })}
+                            disabled={isLoading}
+                            className="relative inline-flex items-center px-4 py-2 text-sm font-semibold transition-colors duration-150 cursor-pointer"
+                            style={
+                              isActive
+                                ? {
+                                    background: "var(--gold-primary)",
+                                    color: "var(--bg-root)",
+                                    zIndex: 10,
+                                  }
+                                : {
+                                    color: "var(--text-primary-ds)",
+                                    border: "1px solid var(--border-subtle)",
+                                  }
+                            }
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      }
+                    )}
+                    {pagination.totalPages > 5 && (
+                      <span
+                        className="relative inline-flex items-center px-4 py-2 text-sm font-semibold"
+                        style={{
+                          color: "var(--text-tertiary)",
+                          border: "1px solid var(--border-subtle)",
+                        }}
+                      >
+                        ...
+                      </span>
+                    )}
+                    <button
+                      disabled={searchState.page >= pagination.totalPages || isLoading}
+                      onClick={() => setSearchState({ page: searchState.page + 1 })}
+                      className="relative inline-flex items-center rounded-r-md px-2 py-2 transition-colors duration-150 disabled:opacity-30 cursor-pointer disabled:cursor-not-allowed"
+                      style={{
+                        color: "var(--text-tertiary)",
+                        border: "1px solid var(--border-subtle)",
+                      }}
+                    >
+                      <span className="sr-only">Next</span>
+                      <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" /></svg>
+                    </button>
+                  </nav>
                 </div>
               )}
             </div>
