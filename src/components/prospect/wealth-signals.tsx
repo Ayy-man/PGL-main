@@ -110,7 +110,14 @@ export function WealthSignals({ webData, insiderData }: WealthSignalsProps) {
                     href={mention.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-xs text-gold hover:text-gold-muted transition-colors"
+                    className="inline-flex items-center gap-1 text-xs transition-colors"
+                    style={{ color: "var(--gold-primary)" }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLAnchorElement).style.color = "var(--gold-muted)";
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLAnchorElement).style.color = "var(--gold-primary)";
+                    }}
                   >
                     View Source
                     <ExternalLink className="h-3.5 w-3.5" />
@@ -163,7 +170,10 @@ export function WealthSignals({ webData, insiderData }: WealthSignalsProps) {
                       <td className="px-4 py-3 text-right text-sm font-mono text-foreground">
                         {formatCurrency(tx.pricePerShare)}
                       </td>
-                      <td className="px-4 py-3 text-right text-sm font-mono font-semibold text-gold">
+                      <td
+                        className="px-4 py-3 text-right text-sm font-mono font-semibold"
+                        style={{ color: "var(--gold-primary)" }}
+                      >
                         {formatCurrency(tx.totalValue)}
                       </td>
                     </tr>
@@ -175,7 +185,10 @@ export function WealthSignals({ webData, insiderData }: WealthSignalsProps) {
               <div className="mt-3 flex justify-end">
                 <div className="text-sm">
                   <span className="text-muted-foreground">Total: </span>
-                  <span className="font-mono font-semibold text-gold">
+                  <span
+                    className="font-mono font-semibold"
+                    style={{ color: "var(--gold-primary)" }}
+                  >
                     {formatCurrency(insiderData!.total_value)}
                   </span>
                 </div>
