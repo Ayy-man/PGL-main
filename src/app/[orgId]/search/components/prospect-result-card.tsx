@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { ApolloPerson } from "@/lib/apollo/types";
 import type { List } from "@/lib/lists/types";
-import { WealthTierBadge } from "./wealth-tier-badge";
+import { WealthTierBadge } from "@/components/ui/wealth-tier-badge";
 import { AddToListDialog } from "./add-to-list-dialog";
 import { Button } from "@/components/ui/button";
 import { Mail, Phone, Linkedin } from "lucide-react";
@@ -64,6 +64,8 @@ interface ProspectResultCardProps {
   lists: List[];
   orgId: string;
   onClick: () => void;
+  selected?: boolean;
+  onSelect?: () => void;
 }
 
 export function ProspectResultCard({
@@ -71,6 +73,8 @@ export function ProspectResultCard({
   lists,
   orgId,
   onClick,
+  selected,
+  onSelect,
 }: ProspectResultCardProps) {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -94,14 +98,37 @@ export function ProspectResultCard({
       onMouseLeave={() => setIsHovered(false)}
       className="rounded-[12px] p-6 px-7 flex items-start justify-between transition-all duration-200 cursor-pointer"
       style={{
-        background: isHovered ? "var(--bg-card-hover)" : "var(--bg-card-gradient)",
-        border: isHovered
+        background: selected
+          ? "var(--gold-bg)"
+          : isHovered
+          ? "var(--bg-card-hover)"
+          : "var(--bg-card-gradient)",
+        border: selected
+          ? "1px solid var(--border-gold)"
+          : isHovered
           ? "1px solid var(--border-hover)"
           : "1px solid var(--border-subtle)",
       }}
     >
       {/* Left section */}
       <div className="flex items-start gap-[18px] flex-1 min-w-0">
+        {/* Checkbox — conditionally rendered when onSelect is provided */}
+        {onSelect && (
+          <div className="flex items-center pt-1">
+            <input
+              type="checkbox"
+              checked={selected}
+              onChange={(e) => {
+                e.stopPropagation();
+                onSelect();
+              }}
+              onClick={(e) => e.stopPropagation()}
+              className="h-4 w-4 rounded border-border accent-[var(--gold-primary)] cursor-pointer"
+              aria-label={`Select ${name}`}
+            />
+          </div>
+        )}
+
         {/* Avatar */}
         <div
           className="flex-shrink-0 flex items-center justify-center rounded-full"
