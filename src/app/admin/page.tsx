@@ -169,7 +169,7 @@ export default function AdminDashboard() {
   }, []);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 page-enter">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
