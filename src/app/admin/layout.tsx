@@ -1,5 +1,7 @@
 import { requireSuperAdmin } from "@/lib/auth/rbac";
 import { AdminNavLinks } from "./admin-nav-links";
+import { AdminMobileSidebar } from "./admin-mobile-sidebar";
+import { TopBar } from "@/components/layout/top-bar";
 
 export default async function AdminLayout({
   children,
@@ -8,21 +10,19 @@ export default async function AdminLayout({
 }) {
   // Guard: Only super_admin can access /admin routes
   const user = await requireSuperAdmin();
+  const userName = user.fullName || user.email || "Admin";
+  const userInitials = userName.charAt(0).toUpperCase() || "A";
 
   return (
     <div
       className="flex min-h-screen"
       style={{ backgroundColor: "var(--bg-root)" }}
     >
-      {/* Ambient gold glow — decorative, behind all content */}
-      <div className="ambient-glow-top" aria-hidden="true" />
-      <div className="ambient-glow-bottom" aria-hidden="true" />
-
       {/* Content layer — above ambient glow */}
       <div className="relative z-10 flex flex-1">
-        {/* Admin sidebar */}
+        {/* Desktop admin sidebar */}
         <aside
-          className="sticky top-0 flex h-screen flex-col"
+          className="hidden lg:flex sticky top-0 h-screen flex-col"
           style={{
             width: "220px",
             background: "var(--bg-sidebar)",
@@ -71,24 +71,12 @@ export default async function AdminLayout({
           </div>
         </aside>
 
+        {/* Mobile admin sidebar */}
+        <AdminMobileSidebar userEmail={user.email} />
+
         {/* Main content */}
         <div className="flex flex-1 flex-col min-w-0">
-          {/* Top bar — 56px, sticky, backdrop blur */}
-          <header
-            className="sticky top-0 z-30 flex h-14 items-center px-6"
-            style={{
-              background: "rgba(8,8,10,0.8)",
-              backdropFilter: "blur(12px)",
-              borderBottom: "1px solid var(--border-subtle)",
-            }}
-          >
-            <span
-              className="text-sm font-medium"
-              style={{ color: "var(--text-secondary-ds)" }}
-            >
-              Admin Dashboard
-            </span>
-          </header>
+          <TopBar userName={userName} userInitials={userInitials} />
 
           {/* Page content with fade-in animation */}
           <main className="flex-1 overflow-y-auto">
