@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-02-28T19:40:55.973Z"
+last_updated: "2026-02-28T19:41:01.626Z"
 progress:
   total_phases: 13
   completed_phases: 5
@@ -209,6 +209,9 @@ Recent decisions affecting current work:
 - [Phase 09-02]: EnrichmentTab maps SOURCE_KEYS to ensure all 4 canonical sources always rendered even if absent from sourceStatus record
 - [Phase 09-02]: NotesTab Add Note submit is console.log stub — feature phase will wire API call
 - [Phase 09-02]: ListsTab uses onMouseEnter/Leave for gold hover on dashed card — CSS variable values cannot be used in Tailwind hover: classes
+- [Phase 08-lead-search]: prospect+keywords added to EXISTING useQueryStates call to avoid nuqs param collision (RESEARCH.md Pitfall 5)
+- [Phase 08-lead-search]: filterOverrides spread merge replaces individual persona filter fields selectively, backward-compatible with existing callers
+- [Phase 08-lead-search]: PersonaFilters reordered to precede searchRequestSchema in schemas.ts — Zod forward references not supported
 
 ### Roadmap Evolution
 
@@ -268,8 +271,8 @@ All 4 phases and 27 plans are complete. The following items remain before produc
 
 ## Session Continuity
 
-Last session: 2026-03-01 (Phase 9 Plan 01 complete — ProfileHeader, ProfileTabs, ActivityTimeline)
-Stopped at: Completed 09-01-PLAN.md — ProfileHeader, ProfileTabs, ActivityTimeline sub-components created. TypeScript clean, no zinc-* classes, all aria-labels on icon-only buttons, all cursor-pointer on clickable elements.
+Last session: 2026-03-01 (Phase 9 Plan 02 complete — SECFilingsTable, EnrichmentTab, NotesTab, ListsTab)
+Stopped at: Completed 09-02-PLAN.md — 4 standalone tab-content components built for the full prospect profile page right column: SEC filings sortable table, enrichment source card grid with per-source refresh, notes textarea + card list, and lists membership grid with gold dashed Add-to-List card. All TypeScript clean, no design token violations.
 
 ---
 
