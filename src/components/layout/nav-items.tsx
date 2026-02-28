@@ -8,6 +8,7 @@ import {
   Users,
   Activity,
   BarChart3,
+  LayoutDashboard,
 } from "lucide-react";
 
 interface NavItemsProps {
@@ -15,11 +16,12 @@ interface NavItemsProps {
 }
 
 const NAV_ITEMS = [
-  { label: "Search", href: "/search", icon: Search },
-  { label: "Lists", href: "/lists", icon: List },
-  { label: "Personas", href: "/personas", icon: Users },
-  { label: "Activity", href: "/dashboard/activity", icon: Activity },
-  { label: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
+  { label: "Dashboard",      href: "/",                    icon: LayoutDashboard, exact: true },
+  { label: "Lead Discovery", href: "/search",              icon: Search,          exact: false },
+  { label: "Personas",       href: "/personas",            icon: Users,           exact: false },
+  { label: "Lists",          href: "/lists",               icon: List,            exact: false },
+  { label: "Activity",       href: "/dashboard/activity",  icon: Activity,        exact: false },
+  { label: "Analytics",      href: "/dashboard/analytics", icon: BarChart3,       exact: false },
 ];
 
 export function NavItems({ orgId }: NavItemsProps) {
@@ -28,8 +30,10 @@ export function NavItems({ orgId }: NavItemsProps) {
   return (
     <nav className="flex flex-col gap-1 px-3">
       {NAV_ITEMS.map((item) => {
-        const fullHref = `/${orgId}${item.href}`;
-        const isActive = pathname === fullHref || pathname.startsWith(`${fullHref}/`);
+        const fullHref = item.href === "/" ? `/${orgId}` : `/${orgId}${item.href}`;
+        const isActive = item.exact
+          ? pathname === fullHref
+          : pathname === fullHref || pathname.startsWith(`${fullHref}/`);
 
         return (
           <Link
