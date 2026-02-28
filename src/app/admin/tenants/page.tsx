@@ -3,6 +3,8 @@ import Link from "next/link";
 import { Plus } from "lucide-react";
 import { TenantStatusToggle } from "./tenant-status-toggle";
 
+export const dynamic = "force-dynamic";
+
 export default async function TenantsPage() {
   const supabase = createAdminClient();
 

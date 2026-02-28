@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useQueryStates, parseAsString, parseAsInteger } from "nuqs";
 import type { ApolloPerson } from "@/lib/apollo/types";
+import type { PersonaFiltersType } from "@/lib/apollo/schemas";
 
 interface PaginationState {
   page: number;
@@ -37,6 +38,8 @@ interface SearchResult {
   error: string | null;
   cached: boolean;
   executeSearch: () => void;
+  filterOverrides: Partial<PersonaFiltersType>;
+  setFilterOverrides: (overrides: Partial<PersonaFiltersType>) => void;
 }
 
 export function useSearch(): SearchResult {
@@ -60,6 +63,7 @@ export function useSearch(): SearchResult {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [cached, setCached] = useState(false);
+  const [filterOverrides, setFilterOverrides] = useState<Partial<PersonaFiltersType>>({});
 
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -97,7 +101,15 @@ export function useSearch(): SearchResult {
           personaId: searchState.persona,
           page: searchState.page,
           pageSize: 10,
-          ...(searchState.keywords ? { filterOverrides: { keywords: searchState.keywords } } : {}),
+          ...(() => {
+            const mergedOverrides = {
+              ...(searchState.keywords ? { keywords: searchState.keywords } : {}),
+              ...filterOverrides,
+            };
+            return Object.keys(mergedOverrides).length > 0
+              ? { filterOverrides: mergedOverrides }
+              : {};
+          })(),
         }),
         signal: controller.signal,
       });
@@ -137,7 +149,8 @@ export function useSearch(): SearchResult {
     } finally {
       setIsLoading(false);
     }
-  }, [searchState.persona, searchState.page, searchState.keywords]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchState.persona, searchState.page, searchState.keywords, JSON.stringify(filterOverrides)]);
 
   // Trigger search when persona or page changes
   useEffect(() => {
@@ -183,5 +196,7 @@ export function useSearch(): SearchResult {
     error,
     cached,
     executeSearch,
+    filterOverrides,
+    setFilterOverrides,
   };
 }

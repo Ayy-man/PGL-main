@@ -69,7 +69,7 @@ export function FunnelChart({ data }: FunnelChartProps) {
       <div className="surface-admin-card p-6">
         <p className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: "var(--admin-text-secondary)" }}>Search-to-Export Funnel (30d)</p>
         <div className="h-[280px] flex items-center justify-center">
-          <p className="text-sm text-muted-foreground">No activity yet. Search and export prospects to see funnel data.</p>
+          <p className="text-xs text-muted-foreground">No activity yet. Search and export prospects to see funnel data.</p>
         </div>
       </div>
     );

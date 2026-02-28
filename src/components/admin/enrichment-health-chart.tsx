@@ -76,7 +76,7 @@ export function EnrichmentHealthChart({ data }: EnrichmentHealthChartProps) {
       <div className="surface-admin-card p-6">
         <p className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: "var(--admin-text-secondary)" }}>Enrichment Pipeline Health (per source, daily)</p>
         <div className="h-[300px] flex items-center justify-center">
-          <p className="text-sm text-muted-foreground">No enrichment data yet. Enrich prospects to see pipeline health.</p>
+          <p className="text-xs text-muted-foreground">No enrichment data yet. Enrich prospects to see pipeline health.</p>
         </div>
       </div>
     );
