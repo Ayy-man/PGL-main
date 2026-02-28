@@ -112,12 +112,12 @@ export function TenantHeatmap({ data }: TenantHeatmapProps) {
         <table className="w-full text-sm">
           <thead>
             <tr className="admin-thead">
-              <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Tenant</th>
-              <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Users</th>
-              <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Searches (7d)</th>
-              <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Enrichments (7d)</th>
-              <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Exports (7d)</th>
-              <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Last Active</th>
+              <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Tenant</th>
+              <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Users</th>
+              <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Searches (7d)</th>
+              <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Enrichments (7d)</th>
+              <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Exports (7d)</th>
+              <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Last Active</th>
             </tr>
           </thead>
           <tbody>
@@ -144,12 +144,12 @@ export function TenantHeatmap({ data }: TenantHeatmapProps) {
       <table className="w-full text-sm">
         <thead>
           <tr className="admin-thead">
-            <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Tenant</th>
-            <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Users</th>
-            <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Searches (7d)</th>
-            <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Enrichments (7d)</th>
-            <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Exports (7d)</th>
-            <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Last Active</th>
+            <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Tenant</th>
+            <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Users</th>
+            <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Searches (7d)</th>
+            <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Enrichments (7d)</th>
+            <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Exports (7d)</th>
+            <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Last Active</th>
           </tr>
         </thead>
         <tbody>
@@ -197,7 +197,7 @@ export function TenantHeatmap({ data }: TenantHeatmapProps) {
 
                 {isExpanded && (
                   <tr key={`${tenant.id}-expanded`} style={{ borderBottom: "1px solid var(--admin-row-border)" }}>
-                    <td colSpan={6} className="bg-white/[0.05] pl-10 pr-4 py-3">
+                    <td colSpan={6} className="pl-10 pr-4 py-3" style={{ background: "var(--admin-thead-bg)" }}>
                       <div className="mb-2 flex items-center justify-between">
                         <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
                           Per-User Breakdown
@@ -216,16 +216,16 @@ export function TenantHeatmap({ data }: TenantHeatmapProps) {
                       ) : (
                         <table className="w-full text-xs">
                           <thead>
-                            <tr className="border-b border-[var(--border-subtle)]/50">
-                              <th className="py-1.5 pr-4 text-left text-muted-foreground font-medium">User</th>
-                              <th className="py-1.5 pr-4 text-left text-muted-foreground font-medium">Searches</th>
-                              <th className="py-1.5 pr-4 text-left text-muted-foreground font-medium">Enrichments</th>
-                              <th className="py-1.5 text-left text-muted-foreground font-medium">Exports</th>
+                            <tr style={{ borderBottom: "1px solid var(--admin-row-border)" }}>
+                              <th className="py-1.5 pr-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>User</th>
+                              <th className="py-1.5 pr-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Searches</th>
+                              <th className="py-1.5 pr-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Enrichments</th>
+                              <th className="py-1.5 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Exports</th>
                             </tr>
                           </thead>
                           <tbody>
                             {tenant.users.map((user) => (
-                              <tr key={user.id} className="border-b border-[var(--border-subtle)]/30 last:border-0">
+                              <tr key={user.id} style={{ borderBottom: "1px solid var(--admin-row-border)" }} className="last:border-0">
                                 <td className="py-1.5 pr-4 font-medium">{user.fullName}</td>
                                 <td className="py-1.5 pr-4 text-muted-foreground">{user.searches7d.toLocaleString()}</td>
                                 <td className="py-1.5 pr-4 text-muted-foreground">{user.enrichments7d.toLocaleString()}</td>

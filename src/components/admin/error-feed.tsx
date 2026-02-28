@@ -65,7 +65,7 @@ function getSourceBadgeClass(status: string): string {
 
 function SkeletonRow() {
   return (
-    <tr className="border-b border-[var(--border-subtle)] animate-pulse">
+    <tr className="animate-pulse" style={{ borderBottom: "1px solid var(--admin-row-border)" }}>
       <td className="py-3 px-4">
         <div className="h-4 w-20 bg-white/[0.06] rounded" />
       </td>
@@ -97,12 +97,12 @@ export function ErrorFeed({ data, onPageChange }: ErrorFeedProps) {
         <table className="w-full text-sm">
           <thead>
             <tr className="admin-thead">
-              <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Time</th>
-              <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Tenant</th>
-              <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>User</th>
-              <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Prospect</th>
-              <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Status</th>
-              <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Details</th>
+              <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Time</th>
+              <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Tenant</th>
+              <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>User</th>
+              <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Prospect</th>
+              <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Status</th>
+              <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Details</th>
             </tr>
           </thead>
           <tbody>
@@ -126,12 +126,12 @@ export function ErrorFeed({ data, onPageChange }: ErrorFeedProps) {
       <table className="w-full text-sm">
         <thead>
           <tr className="admin-thead">
-            <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Time</th>
-            <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Tenant</th>
-            <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>User</th>
-            <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Prospect</th>
-            <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Status</th>
-            <th className="py-3 px-4 text-left font-medium" style={{ color: "var(--admin-text-secondary)" }}>Details</th>
+            <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Time</th>
+            <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Tenant</th>
+            <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>User</th>
+            <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Prospect</th>
+            <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Status</th>
+            <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Details</th>
           </tr>
         </thead>
         <tbody>
@@ -179,7 +179,8 @@ export function ErrorFeed({ data, onPageChange }: ErrorFeedProps) {
                   <tr key={`${record.id}-expanded`} style={{ borderBottom: "1px solid var(--admin-row-border)" }}>
                     <td
                       colSpan={6}
-                      className="bg-white/[0.05] border-l-2 border-primary/50 px-6 py-3"
+                      className="border-l-2 px-6 py-3"
+                      style={{ background: "var(--admin-thead-bg)", borderLeftColor: "var(--gold-primary)" }}
                     >
                       <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide mb-2">
                         Per-Source Details
