@@ -50,7 +50,7 @@ export function WealthSignals({ webData, insiderData }: WealthSignalsProps) {
 
   if (!hasSignals) {
     return (
-      <div className="rounded-lg border bg-card p-6">
+      <div className="surface-card rounded-[14px] p-6">
         <h3 className="mb-4 font-serif text-xl font-semibold text-foreground">
           Wealth Signals
         </h3>
@@ -75,7 +75,7 @@ export function WealthSignals({ webData, insiderData }: WealthSignalsProps) {
   };
 
   return (
-    <div className="rounded-lg border bg-card p-6">
+    <div className="surface-card rounded-[14px] p-6">
       <h3 className="mb-6 font-serif text-xl font-semibold text-foreground">
         Wealth Signals
       </h3>
@@ -91,7 +91,7 @@ export function WealthSignals({ webData, insiderData }: WealthSignalsProps) {
               {webData!.mentions.map((mention, index) => (
                 <div
                   key={index}
-                  className="rounded-md border bg-background p-4"
+                  className="surface-card rounded-[14px] p-4"
                 >
                   <div className="mb-2 flex items-start justify-between gap-4">
                     <h5 className="font-medium text-foreground">
@@ -150,7 +150,7 @@ export function WealthSignals({ webData, insiderData }: WealthSignalsProps) {
                 </thead>
                 <tbody className="divide-y divide-border bg-card">
                   {insiderData!.transactions.map((tx, index) => (
-                    <tr key={index} className="hover:bg-muted/50 transition-colors">
+                    <tr key={index} className="hover:bg-[rgba(255,255,255,0.02)] transition-colors">
                       <td className="px-4 py-3 text-sm text-foreground">
                         {new Date(tx.date).toLocaleDateString()}
                       </td>
