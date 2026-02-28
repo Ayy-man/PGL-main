@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-02-28T19:44:56.977Z"
+last_updated: "2026-02-28T19:45:02.391Z"
 progress:
   total_phases: 13
   completed_phases: 5
@@ -220,6 +220,9 @@ Recent decisions affecting current work:
 - [Phase 08-04]: Unified search layout: NL bar + persona pills always visible, no back button needed
 - [Phase 08-04]: slideOverProspect maps ApolloPerson inline — Phase 9 will wire full enriched DB data
 - [Phase 08-04]: Bulk action handlers are stubs — server-side operations deferred to export/enrichment phases
+- [Phase 10-01]: PersonaCard uses useState for card hover style to manage multi-property hover state cleanly in React
+- [Phase 10-01]: filterTags capped at 4 per design spec (2 titles + 1 industry + 1 seniority) to keep chip row compact
+- [Phase 10-01]: matchCount derived from last sparkline value * 5 - purely decorative placeholder per plan spec
 
 ### Roadmap Evolution
 
