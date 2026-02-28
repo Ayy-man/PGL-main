@@ -1,14 +1,14 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
+milestone: v2.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-02-26T02:42:11.196Z"
+last_updated: "2026-02-28T18:58:32.659Z"
 progress:
-  total_phases: 5
+  total_phases: 7
   completed_phases: 4
-  total_plans: 34
-  completed_plans: 33
+  total_plans: 39
+  completed_plans: 36
 ---
 
 # Project State
@@ -19,16 +19,16 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** Real estate teams can quickly find and qualify wealthy prospects by searching structured lead databases, enriching profiles with personal contact info and wealth signals, and organizing prospects into actionable lists.
 
-**Current focus:** Phase 5 - UI Revamp
+**Current focus:** Phase 6 (v2.0 Phase 0) - Foundation — COMPLETE. Next: Phase 7 (Layout Shell + Navigation)
 
 ## Current Position
 
-Phase: 5 of 5 (UI Revamp)
-Plan: 7 of 7 (Checkpoint — Awaiting Visual Verification)
-Status: Paused at Task 2 checkpoint — visual verification of complete design system application across all pages
-Last activity: 2026-02-26 — Phase 5 Plan 07 Task 1 complete: all Recharts hex colors replaced with CSS variables, admin table/form pages migrated to design system tokens
+Phase: 7 of 9 (Layout Shell + Navigation)
+Plan: 1 of 5 — COMPLETE (07-01: Update Tenant Navigation Items)
+Status: In progress — 07-02 is next (Sidebar + Shell layout wiring)
+Last activity: 2026-02-28 — Phase 7 Plan 01 complete: tenant nav items updated to v2.0 structure (Dashboard first, Lead Discovery, exact match logic)
 
-Progress: [██████████] 100% (79/79 requirements)
+Progress: [████████░░] 85% (07-01 complete, 07-02 through 07-05 remaining)
 
 ## Performance Metrics
 
@@ -53,6 +53,8 @@ Progress: [██████████] 100% (79/79 requirements)
 | Phase 05-03 P03 | 3 | 2 tasks | 6 files |
 | Phase 05 P04 | 291 | 2 tasks | 5 files |
 | Phase 05-ui-revamp P07 | 7 | 1 tasks | 12 files |
+| Phase 07 P01 | 2 | 1 tasks | 1 files |
+| Phase 07 P02 | 1 | 1 tasks | 2 files |
 
 ### Phase 3 Plan Completion
 
@@ -175,6 +177,8 @@ Recent decisions affecting current work:
 - [Phase 05-05]: ComingSoonCard gold pill badge uses gold-bg-strong/border-gold/gold-primary per design system admin spec
 - [Phase 05-07]: Recharts LabelList style={{ fill: var(--muted-foreground) }} — CSS variable strings work as fill values in Recharts JS style objects
 - [Phase 05-07]: Gold CTA button pattern in admin: bg-[var(--gold-bg-strong)] border border-[var(--border-gold)] text-[var(--gold-primary)] for form submit and page action buttons
+- [Phase 07-01]: exact: true on Dashboard nav item prevents false active state on every sub-page; fullHref for root computed as /${orgId} (no trailing slash) to match Next.js pathname behavior
+- [Phase 07-02]: BarChart3 icon added for Analytics admin nav item; exact:false allows sub-route highlighting
 
 ### Roadmap Evolution
 
