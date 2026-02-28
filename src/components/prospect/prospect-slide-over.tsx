@@ -458,6 +458,7 @@ export function ProspectSlideOver({
                 <button
                   className="text-xs transition-colors cursor-pointer"
                   style={{ color: "var(--gold-primary)" }}
+                  title="Add notes on the full profile page"
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLButtonElement).style.color =
                       "var(--gold-muted)";
@@ -513,6 +514,7 @@ export function ProspectSlideOver({
                     borderColor: "rgba(212,175,55,0.3)",
                     color: "var(--gold-primary)",
                   }}
+                  title="Add to list on the full profile page"
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLButtonElement).style.background =
                       "var(--gold-bg)";
