@@ -246,6 +246,8 @@ Recent decisions affecting current work:
 - [Phase 13-admin-dashboard]: Inline super_admin check in quota Route Handler (not requireSuperAdmin) per Phase 04 locked decision
 - [Phase 13-admin-dashboard]: redis.mget batches all provider+date keys in single round-trip for quota aggregation
 - [Phase 13-admin-dashboard]: quotaData is optional prop in PlatformPulse for backward compatibility, ApiQuotaCard tri-state (null/all-zero/data) rendering
+- [Phase 11-03]: Promise.resolve(supabaseQuery).then(successFn, failureFn) pattern used — Supabase JS returns PromiseLike not Promise; .catch() only exists on full Promise; two-arg .then() is the PromiseLike-compatible error fallback
+- [Phase 11-03]: isAdmin gate skips analytics DB query entirely for non-admin roles (not just hidden in UI) — avoids wasting a DB round-trip for users who cannot see the data
 
 ### Roadmap Evolution
 

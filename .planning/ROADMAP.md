@@ -70,6 +70,14 @@ Rebuild every page of the PGL platform to match the design system (design-system
 
 **Dependencies:** Phase 7
 
+**Plans:** 3/4 plans complete
+
+Plans:
+- [x] 11-01-PLAN.md — Build StatPills (Server), PersonaPillRow (Client), RecentListsPreview (Client)
+- [x] 11-02-PLAN.md — Build ActivityFeed (Client) with /api/activity fetch and refresh
+- [x] 11-03-PLAN.md — Rewrite /[orgId]/page.tsx: greeting, alert banner, stat pills, search hero, persona row, lists + activity feed grid
+- [ ] 11-04-PLAN.md — Build verification + design system compliance audit
+
 ---
 
 ### Phase 12: Export Log (Screen E)
