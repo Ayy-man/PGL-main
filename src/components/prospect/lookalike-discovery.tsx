@@ -152,7 +152,7 @@ export function LookalikeDiscovery({
           </div>
 
           {error && (
-            <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg">
+            <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-lg">
               {error}
             </div>
           )}
@@ -181,7 +181,7 @@ export function LookalikeDiscovery({
                 </button>
               )}
               {result.savedPersonaId && (
-                <span className="bg-green-500/10 text-green-400 px-3 py-1 rounded-full text-sm">
+                <span className="bg-success-muted text-success px-3 py-1 rounded-full text-sm">
                   Saved
                 </span>
               )}
