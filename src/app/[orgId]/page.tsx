@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { Search, ArrowRight, Sparkles } from "lucide-react";
+import { Sparkles, History, Download } from "lucide-react";
 import { getPersonas } from "@/lib/personas/queries";
 import { getLists } from "@/lib/lists/queries";
-import { StatPills } from "@/components/dashboard/stat-pills";
+import { DashboardStatCards } from "@/components/dashboard/dashboard-stat-cards";
 import { PersonaPillRow } from "@/components/dashboard/persona-pill-row";
-import { RecentListsPreview } from "@/components/dashboard/recent-lists-preview";
+import { RecentExportsTable } from "@/components/dashboard/recent-exports-table";
 import { ActivityFeed } from "@/components/dashboard/activity-feed";
+import type { ActivityLogEntry } from "@/lib/activity-logger";
 
 export default async function TenantDashboard({
   params,
@@ -28,34 +29,18 @@ export default async function TenantDashboard({
   const role = user.app_metadata?.role as string;
   const isAdmin = role === "tenant_admin" || role === "super_admin";
 
-  const firstName =
-    user.user_metadata?.first_name || user.email?.split("@")[0] || "there";
-
-  const hour = new Date().getHours();
-  const greeting =
-    hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
-
-  const today = new Date().toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
-
-  // --- Parallel data fetching ---
-  // Calculate 7d date range for analytics
+  // --- Date ranges ---
   const now = new Date();
   const sevenDaysAgo = new Date(now);
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
   const startDateStr = sevenDaysAgo.toISOString().split("T")[0];
   const endDateStr = now.toISOString().split("T")[0];
 
-  // Calculate 24h ago for new prospects banner
   const twentyFourHoursAgo = new Date(
     now.getTime() - 24 * 60 * 60 * 1000
   ).toISOString();
 
-  // Build parallel fetch array
+  // --- Parallel data fetching ---
   const fetchPromises: [
     Promise<Awaited<ReturnType<typeof getPersonas>>>,
     Promise<Awaited<ReturnType<typeof getLists>>>,
@@ -68,6 +53,7 @@ export default async function TenantDashboard({
       csvExports: number;
       listsCreated: number;
     } | null>,
+    Promise<ActivityLogEntry[]>,
   ] = [
     getPersonas(tenantId).catch(() => []),
     getLists(tenantId).catch(() => []),
@@ -84,7 +70,7 @@ export default async function TenantDashboard({
         return null;
       }
     })(),
-    // Analytics totals (admin-only, 7d) — direct Supabase query, not /api/analytics
+    // Analytics totals (admin-only, 7d)
     isAdmin
       ? (async () => {
           try {
@@ -126,29 +112,60 @@ export default async function TenantDashboard({
           }
         })()
       : Promise.resolve(null),
+    // Recent exports (last 5 csv_exported entries)
+    (async () => {
+      try {
+        const { data } = await supabase
+          .from("activity_log")
+          .select("*")
+          .eq("tenant_id", tenantId)
+          .eq("action_type", "csv_exported")
+          .order("created_at", { ascending: false })
+          .limit(5);
+        return (data as ActivityLogEntry[]) ?? [];
+      } catch {
+        return [];
+      }
+    })(),
   ];
 
-  const [personas, lists, newProspectsResult, analyticsTotals] =
+  const [personas, lists, newProspectsResult, analyticsTotals, recentExports] =
     await Promise.all(fetchPromises);
   const newProspectsCount = newProspectsResult?.count ?? 0;
 
+  // Resolve user names for export entries
+  const userMap: Record<string, string> = {};
+  const uniqueUserIds = Array.from(
+    new Set(recentExports.map((e) => e.user_id))
+  );
+  if (uniqueUserIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from("user_profiles")
+      .select("id, first_name, last_name")
+      .in("id", uniqueUserIds);
+    if (profiles) {
+      for (const p of profiles) {
+        const name = [p.first_name, p.last_name].filter(Boolean).join(" ");
+        userMap[p.id] = name || p.id.slice(0, 8);
+      }
+    }
+  }
+
+  // Compute derived stats
+  const totalExports = analyticsTotals?.csvExports ?? 0;
+  const downloadsReady = lists.reduce(
+    (sum, l) => sum + (l.member_count ?? 0),
+    0
+  );
+  const profilesViewed = analyticsTotals?.profilesViewed ?? 0;
+  const profilesEnriched = analyticsTotals?.profilesEnriched ?? 0;
+  const enrichmentRate =
+    profilesViewed > 0
+      ? Math.round((profilesEnriched / profilesViewed) * 100)
+      : 0;
+
   return (
     <div className="page-enter space-y-8">
-      {/* Greeting header */}
-      <div>
-        <h1
-          className="font-serif font-semibold"
-          style={{
-            fontSize: "38px",
-            letterSpacing: "-0.5px",
-            color: "var(--text-primary)",
-          }}
-        >
-          {greeting}, {firstName}
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">{today}</p>
-      </div>
-
       {/* New prospects alert banner */}
       {newProspectsCount > 0 && (
         <div
@@ -180,56 +197,82 @@ export default async function TenantDashboard({
         </div>
       )}
 
-      {/* Stat pills (admin-only) */}
-      {isAdmin && analyticsTotals && <StatPills totals={analyticsTotals} />}
-
-      {/* Search hero — secondary action */}
-      <Link
-        href={`/${orgId}/search`}
-        className="card-interactive group relative flex items-center gap-6 rounded-[14px] p-8 cursor-pointer block"
-      >
-        <div
-          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[14px] transition-colors"
-          style={{
-            background: "var(--gold-bg)",
-            color: "var(--gold-primary)",
-          }}
-        >
-          <Search className="h-6 w-6" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span
-              className="font-serif text-xl font-semibold"
-              style={{ color: "var(--text-primary)" }}
-            >
-              Search Prospects
-            </span>
-            <ArrowRight
-              className="h-4 w-4 opacity-0 -translate-x-2 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0"
-              style={{ color: "var(--gold-primary)" }}
-            />
-          </div>
-          <p
-            className="mt-1 text-sm"
-            style={{ color: "var(--text-secondary)" }}
+      {/* Title row with action buttons */}
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div>
+          <h1
+            className="font-serif font-semibold"
+            style={{
+              fontSize: "38px",
+              letterSpacing: "-0.5px",
+              color: "var(--text-primary)",
+            }}
           >
-            Find high-net-worth buyers matching your personas
+            Executive Strategy Dashboard
+          </h1>
+          <p
+            className="mt-1 text-xs uppercase tracking-[1.5px] font-semibold"
+            style={{ color: "var(--text-tertiary)" }}
+          >
+            UHNW Lead Scraping & Export Management
           </p>
         </div>
-      </Link>
+        <div className="flex items-center gap-3 shrink-0">
+          <Link
+            href={`/${orgId}/exports`}
+            className="ghost-hover inline-flex items-center gap-2 rounded-[8px] px-4 py-2 text-sm font-medium cursor-pointer transition-colors"
+            style={{
+              border: "1px solid var(--border-default)",
+              color: "var(--text-secondary)",
+            }}
+          >
+            <History className="h-4 w-4" />
+            Export History
+          </Link>
+          <Link
+            href={`/${orgId}/search`}
+            className="card-interactive inline-flex items-center gap-2 rounded-[8px] px-4 py-2 text-sm font-semibold cursor-pointer transition-colors"
+            style={{
+              background: "var(--gold-primary)",
+              color: "var(--bg-primary)",
+            }}
+          >
+            <Download className="h-4 w-4" />
+            Download New List
+          </Link>
+        </div>
+      </div>
+
+      {/* Stat cards (admin-only) */}
+      {isAdmin && analyticsTotals && (
+        <DashboardStatCards
+          totalExports={totalExports}
+          downloadsReady={downloadsReady}
+          enrichmentRate={enrichmentRate}
+        />
+      )}
+
+      {/* Two-column layout: Recent Exports + Activity Feed */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Recent Exports table (2/3 width) */}
+        <div className="lg:col-span-2">
+          <RecentExportsTable
+            exports={recentExports}
+            userMap={userMap}
+            orgId={orgId}
+          />
+        </div>
+
+        {/* Activity Feed (1/3 width) */}
+        {isAdmin && (
+          <div className="surface-card rounded-[14px] p-5">
+            <ActivityFeed />
+          </div>
+        )}
+      </div>
 
       {/* Persona pill row (all roles) */}
       <PersonaPillRow personas={personas} orgId={orgId} />
-
-      {/* Two-column layout: Recent Lists + Activity Feed */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Recent Lists (all roles) */}
-        <RecentListsPreview lists={lists} orgId={orgId} />
-
-        {/* Activity Feed (admin-only) */}
-        {isAdmin && <ActivityFeed />}
-      </div>
     </div>
   );
 }
