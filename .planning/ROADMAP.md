@@ -76,6 +76,14 @@ Rebuild every page of the PGL platform to match the design system (design-system
 
 **Dependencies:** Phase 7
 
+**Requirements:** EXP-01, EXP-02, EXP-03, EXP-04, ACT-01, ACT-03
+
+**Plans:** 2 plans
+
+Plans:
+- [ ] 12-01-PLAN.md — Build Export Log page: nav item, server component, stat cards, client table with filters/pagination/re-download
+- [ ] 12-02-PLAN.md — Build verification + design system compliance audit
+
 ---
 
 ### Phase 13: Admin Dashboard (Screen F)
