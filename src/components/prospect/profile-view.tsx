@@ -1,29 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { EnrichmentStatus } from "./enrichment-status";
-import { WealthSignals } from "./wealth-signals";
+import { Mail, Phone, Linkedin } from "lucide-react";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { ProfileHeader } from "./profile-header";
+import { ProfileTabs, type ProfileTabName } from "./profile-tabs";
+import { ActivityTimeline } from "./activity-timeline";
+import { SECFilingsTable } from "./sec-filings-table";
+import { EnrichmentTab } from "./enrichment-tab";
+import { NotesTab } from "./notes-tab";
+import { ListsTab } from "./lists-tab";
 import { LookalikeDiscovery } from "./lookalike-discovery";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { addToListAction } from "@/app/[orgId]/lists/actions";
-import { useRouter } from "next/navigation";
-import {
-  Plus,
-  Download,
-  UserSearch,
-  MapPin,
-  Mail,
-  Phone,
-  Linkedin,
-  AlertCircle,
-} from "lucide-react";
-import Link from "next/link";
 
 type SourceStatus =
   | "pending"
@@ -99,266 +86,71 @@ interface ProfileViewProps {
   enrichmentSourceStatus: Record<string, SourceStatus>;
   listMemberships: ListMembership[];
   isStale: boolean;
+  orgId: string;
+  activityEntries: Array<{
+    id: string;
+    action_type: string;
+    user_id: string;
+    created_at: string;
+    metadata?: Record<string, unknown>;
+  }>;
 }
 
 /**
  * ProfileView Component
  *
- * Main profile view with sections:
- * 1. Header: Name, title, company, location, quick actions
- * 2. Enrichment Status Bar: Per-source status indicators
- * 3. Contact Section: Work and personal contact info
- * 4. AI Summary Section: "Why Recommended" with Claude-generated summary
- * 5. Wealth Signals Section: Web mentions and SEC transactions
- * 6. Lists Section: List memberships table
+ * Two-column layout:
+ * - Breadcrumbs > ProfileHeader > sticky ProfileTabs
+ * - Left (340px): ActivityTimeline
+ * - Right (flex-1): Tab content (Overview / Activity / SEC Filings / Enrichment / Notes / Lists)
  *
- * Uses design system tokens (gold, foreground, card, muted-foreground).
- * font-serif (Playfair Display) for headings, font-sans (Inter) for body.
+ * LookalikeDiscovery toggled via "Find Lookalikes" button in ProfileHeader.
+ * All card containers use surface-card utility. No bg-card + inline gradient style.
+ *
+ * Covers: PROF-01 through PROF-10
  */
 export function ProfileView({
   prospect,
   enrichmentSourceStatus,
   listMemberships,
   isStale,
+  orgId,
+  activityEntries,
 }: ProfileViewProps) {
-  const router = useRouter();
-  const [isAddingToList, setIsAddingToList] = useState(false);
-  const [showLookalikeDiscovery, setShowLookalikeDiscovery] = useState(false);
+  const [activeTab, setActiveTab] = useState<ProfileTabName>("overview");
+  const [showLookalikes, setShowLookalikes] = useState(false);
 
-  // Mock lists for "Add to List" dropdown - in production, fetch from API
-  const availableLists = [
-    { id: "1", name: "High Priority" },
-    { id: "2", name: "Follow Up" },
-    { id: "3", name: "Qualified Leads" },
-  ];
-
-  const handleAddToList = async (listId: string) => {
-    setIsAddingToList(true);
-    try {
-      const result = await addToListAction(listId, prospect.id);
-      if (result.success) {
-        router.refresh();
-      } else {
-        console.error("Failed to add to list:", result.error);
-      }
-    } catch (error) {
-      console.error("Error adding to list:", error);
-    } finally {
-      setIsAddingToList(false);
-    }
-  };
-
-  const handleExport = () => {
-    // Placeholder for profile export
-    console.log("Export Profile - to be implemented");
-  };
+  const transactions = prospect.insider_data?.transactions ?? [];
+  const recentTransactions = transactions.slice(0, 5);
 
   return (
-    <div className="space-y-6">
-        {/* Header Section */}
-        <div className="rounded-[14px] border bg-card p-8" style={{ background: "var(--bg-card-gradient)" }}>
-          <div className="flex items-start justify-between gap-6">
-            <div className="flex-1">
-              <h1 className="mb-1 font-serif text-3xl font-bold text-foreground">
-                {prospect.full_name}
-              </h1>
-              {prospect.title && prospect.company && (
-                <p className="mb-3 text-lg text-muted-foreground">
-                  {prospect.title}{" "}
-                  <span className="text-foreground/60">@</span>{" "}
-                  <span className="text-foreground">{prospect.company}</span>
-                </p>
-              )}
-              {prospect.location && (
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <MapPin className="h-3.5 w-3.5" />
-                  <span className="text-sm">{prospect.location}</span>
-                </div>
-              )}
-              {isStale && (
-                <div className="mt-4 inline-flex items-center gap-2 rounded-lg border border-warning/30 bg-warning-muted px-3 py-1.5 text-sm text-warning">
-                  <AlertCircle className="h-4 w-4" />
-                  Data may be outdated — refreshing...
-                </div>
-              )}
-            </div>
-
-            {/* Quick Actions */}
-            <div className="flex items-center gap-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={isAddingToList}
-                    className="cursor-pointer"
-                  >
-                    <Plus className="mr-1.5 h-3.5 w-3.5" />
-                    Add to List
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  {availableLists.map((list) => (
-                    <DropdownMenuItem
-                      key={list.id}
-                      onClick={() => handleAddToList(list.id)}
-                      className="cursor-pointer"
-                    >
-                      {list.name}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowLookalikeDiscovery(!showLookalikeDiscovery)}
-                className="cursor-pointer"
-              >
-                <UserSearch className="mr-1.5 h-3.5 w-3.5" />
-                Similar
-              </Button>
-
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleExport}
-                className="text-muted-foreground cursor-pointer"
-              >
-                <Download className="h-3.5 w-3.5" />
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        {/* Enrichment Status Bar */}
-        <EnrichmentStatus
-          sourceStatus={enrichmentSourceStatus}
-          prospectId={prospect.id}
+    <div className="flex flex-col min-h-0">
+      {/* Breadcrumbs */}
+      <div className="px-14 pt-6">
+        <Breadcrumbs
+          items={[
+            { label: "Search Results", href: `/${orgId}/search` },
+            { label: prospect.full_name },
+          ]}
         />
+      </div>
 
-        {/* Contact Section */}
-        <div className="rounded-[14px] border bg-card p-6" style={{ background: "var(--bg-card-gradient)" }}>
-          <h3 className="mb-5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            Contact Information
-          </h3>
+      {/* Profile Header */}
+      <ProfileHeader
+        prospect={prospect}
+        isStale={isStale}
+        orgId={orgId}
+        onFindLookalikes={() => setShowLookalikes((prev) => !prev)}
+        onAddToList={() => setActiveTab("lists")}
+      />
 
-          <div className="grid gap-6 md:grid-cols-2">
-            {/* Work Contact */}
-            <div>
-              <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Work
-              </h4>
-              <div className="space-y-3">
-                {prospect.work_email && (
-                  <div className="flex items-center gap-3">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
-                    <a
-                      href={`mailto:${prospect.work_email}`}
-                      className="text-sm text-foreground hover:text-gold transition-colors"
-                    >
-                      {prospect.work_email}
-                    </a>
-                  </div>
-                )}
-                {prospect.work_phone && (
-                  <div className="flex items-center gap-3">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
-                    <a
-                      href={`tel:${prospect.work_phone}`}
-                      className="text-sm text-foreground hover:text-gold transition-colors"
-                    >
-                      {prospect.work_phone}
-                    </a>
-                  </div>
-                )}
-                {prospect.linkedin_url && (
-                  <div className="flex items-center gap-3">
-                    <Linkedin className="h-4 w-4 text-muted-foreground" />
-                    <a
-                      href={prospect.linkedin_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm text-foreground hover:text-gold transition-colors"
-                    >
-                      LinkedIn Profile
-                    </a>
-                  </div>
-                )}
-                {!prospect.work_email &&
-                  !prospect.work_phone &&
-                  !prospect.linkedin_url && (
-                    <p className="text-sm text-muted-foreground">No work contact info</p>
-                  )}
-              </div>
-            </div>
+      {/* Sticky Tab Bar */}
+      <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
-            {/* Personal Contact */}
-            <div>
-              <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Personal (ContactOut)
-              </h4>
-              <div className="space-y-3">
-                {prospect.contact_data?.personal_email && (
-                  <div className="flex items-center gap-3">
-                    <Mail className="h-4 w-4 text-muted-foreground" />
-                    <a
-                      href={`mailto:${prospect.contact_data.personal_email}`}
-                      className="text-sm text-foreground hover:text-gold transition-colors"
-                    >
-                      {prospect.contact_data.personal_email}
-                    </a>
-                  </div>
-                )}
-                {prospect.contact_data?.phone && (
-                  <div className="flex items-center gap-3">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
-                    <a
-                      href={`tel:${prospect.contact_data.phone}`}
-                      className="text-sm text-foreground hover:text-gold transition-colors"
-                    >
-                      {prospect.contact_data.phone}
-                    </a>
-                  </div>
-                )}
-                {!prospect.contact_data && (
-                  <p className="text-sm text-muted-foreground">
-                    Not enriched - personal contact will be added after enrichment
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* AI Summary Section */}
-        <div
-          className="rounded-[14px] border border-l-2 pl-6 pr-6 py-5"
-          style={{
-            background: "var(--bg-card-gradient)",
-            borderColor: "rgba(255,255,255,0.06)",
-            borderLeftColor: "var(--border-gold)",
-          }}
-        >
-          <h3
-            className="mb-3 text-xs font-semibold uppercase tracking-wider"
-            style={{ color: "var(--gold-primary)" }}
-          >
-            AI Insight
-          </h3>
-          {prospect.ai_summary ? (
-            <p className="text-sm text-foreground leading-relaxed">{prospect.ai_summary}</p>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              AI summary will be generated after enrichment completes.
-            </p>
-          )}
-        </div>
-
-        {/* Lookalike Discovery Section */}
-        {showLookalikeDiscovery && (
-          <div className="rounded-[14px] border bg-card p-6" style={{ background: "var(--bg-card-gradient)" }}>
+      {/* Lookalike Discovery (toggled by Find Lookalikes button) */}
+      {showLookalikes && (
+        <div className="px-14 pt-6">
+          <div className="surface-card rounded-[14px] p-6">
             <h3 className="mb-5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Similar People
             </h3>
@@ -367,69 +159,342 @@ export function ProfileView({
               prospectName={prospect.full_name}
             />
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Wealth Signals Section */}
-        <WealthSignals
-          webData={prospect.web_data}
-          insiderData={prospect.insider_data}
-        />
+      {/* Two-column layout */}
+      <div className="flex gap-8 p-14">
+        {/* Left column: Activity Timeline */}
+        <aside className="w-[340px] shrink-0">
+          <div className="surface-card rounded-[14px] p-5">
+            <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Activity
+            </h3>
+            <ActivityTimeline events={activityEntries} />
+          </div>
+        </aside>
 
-        {/* Lists Section */}
-        <div className="rounded-[14px] border bg-card p-6" style={{ background: "var(--bg-card-gradient)" }}>
-          <h3 className="mb-5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            List Memberships
-          </h3>
+        {/* Right column: Tab content */}
+        <div className="flex-1 min-w-0">
+          {/* Overview Tab */}
+          {activeTab === "overview" && (
+            <div className="space-y-6">
+              {/* Info grid — 2x3 */}
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+                <div className="surface-card rounded-[14px] p-4">
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+                    Title
+                  </p>
+                  <p className="text-sm font-medium text-foreground">
+                    {prospect.title || "—"}
+                  </p>
+                </div>
 
-          {listMemberships.length > 0 ? (
-            <div className="overflow-hidden rounded-md border">
-              <table className="w-full">
-                <thead className="bg-background">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      List Name
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Status
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      Added Date
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border bg-card">
-                  {listMemberships.map((membership) => (
-                    <tr
-                      key={membership.listId}
-                      className="hover:bg-muted/50 transition-colors"
+                <div className="surface-card rounded-[14px] p-4">
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+                    Company
+                  </p>
+                  <p className="text-sm font-medium text-foreground">
+                    {prospect.company || "—"}
+                  </p>
+                </div>
+
+                <div className="surface-card rounded-[14px] p-4">
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+                    Location
+                  </p>
+                  <p className="text-sm font-medium text-foreground">
+                    {prospect.location || "—"}
+                  </p>
+                </div>
+
+                <div className="surface-card rounded-[14px] p-4">
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+                    Work Email
+                  </p>
+                  {prospect.work_email ? (
+                    <a
+                      href={`mailto:${prospect.work_email}`}
+                      className="text-sm font-medium text-foreground transition-colors hover:text-[var(--gold-primary)]"
                     >
-                      <td className="px-4 py-3">
-                        <Link
-                          href={`/lists/${membership.listId}`}
-                          className="text-sm font-medium text-gold hover:text-gold-muted transition-colors"
-                        >
-                          {membership.listName}
-                        </Link>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className="inline-flex rounded-full px-2 py-1 text-xs font-medium capitalize bg-muted text-muted-foreground">
-                          {membership.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-muted-foreground">
-                        {new Date(membership.addedAt).toLocaleDateString()}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                      {prospect.work_email}
+                    </a>
+                  ) : (
+                    <p className="text-sm font-medium text-muted-foreground">—</p>
+                  )}
+                </div>
+
+                <div className="surface-card rounded-[14px] p-4">
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+                    Work Phone
+                  </p>
+                  {prospect.work_phone ? (
+                    <a
+                      href={`tel:${prospect.work_phone}`}
+                      className="text-sm font-medium text-foreground transition-colors hover:text-[var(--gold-primary)]"
+                    >
+                      {prospect.work_phone}
+                    </a>
+                  ) : (
+                    <p className="text-sm font-medium text-muted-foreground">—</p>
+                  )}
+                </div>
+
+                <div className="surface-card rounded-[14px] p-4">
+                  <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">
+                    LinkedIn
+                  </p>
+                  {prospect.linkedin_url ? (
+                    <a
+                      href={prospect.linkedin_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 text-sm font-medium text-foreground transition-colors hover:text-[var(--gold-primary)]"
+                    >
+                      <Linkedin className="h-3.5 w-3.5 shrink-0" />
+                      Profile
+                    </a>
+                  ) : (
+                    <p className="text-sm font-medium text-muted-foreground">—</p>
+                  )}
+                </div>
+              </div>
+
+              {/* AI Insight block */}
+              <div
+                className="rounded-[14px] border border-l-2 pl-6 pr-6 py-5"
+                style={{
+                  background: "var(--bg-card-gradient)",
+                  borderColor: "rgba(255,255,255,0.06)",
+                  borderLeftColor: "var(--border-gold)",
+                }}
+              >
+                <h3
+                  className="mb-3 text-xs font-semibold uppercase tracking-wider"
+                  style={{ color: "var(--gold-primary)" }}
+                >
+                  AI Insight
+                </h3>
+                {prospect.ai_summary ? (
+                  <p className="text-sm text-foreground leading-relaxed">
+                    {prospect.ai_summary}
+                  </p>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    AI summary will be generated after enrichment completes.
+                  </p>
+                )}
+              </div>
+
+              {/* Recent SEC Transactions (top 5) */}
+              {recentTransactions.length > 0 && (
+                <div className="surface-card rounded-[14px] p-6">
+                  <h3 className="mb-4 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Recent SEC Transactions
+                  </h3>
+                  <SECFilingsTable
+                    transactions={recentTransactions}
+                    totalValue={prospect.insider_data?.total_value}
+                  />
+                </div>
+              )}
+
+              {/* Contact Section */}
+              <div className="surface-card rounded-[14px] p-6">
+                <h3 className="mb-5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Contact Information
+                </h3>
+                <div className="grid gap-6 md:grid-cols-2">
+                  {/* Work Contact */}
+                  <div>
+                    <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Work
+                    </h4>
+                    <div className="space-y-3">
+                      {prospect.work_email && (
+                        <div className="flex items-center gap-3">
+                          <Mail className="h-4 w-4 text-muted-foreground" />
+                          <a
+                            href={`mailto:${prospect.work_email}`}
+                            className="text-sm text-foreground transition-colors hover:text-[var(--gold-primary)]"
+                          >
+                            {prospect.work_email}
+                          </a>
+                        </div>
+                      )}
+                      {prospect.work_phone && (
+                        <div className="flex items-center gap-3">
+                          <Phone className="h-4 w-4 text-muted-foreground" />
+                          <a
+                            href={`tel:${prospect.work_phone}`}
+                            className="text-sm text-foreground transition-colors hover:text-[var(--gold-primary)]"
+                          >
+                            {prospect.work_phone}
+                          </a>
+                        </div>
+                      )}
+                      {prospect.linkedin_url && (
+                        <div className="flex items-center gap-3">
+                          <Linkedin className="h-4 w-4 text-muted-foreground" />
+                          <a
+                            href={prospect.linkedin_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-foreground transition-colors hover:text-[var(--gold-primary)]"
+                          >
+                            LinkedIn Profile
+                          </a>
+                        </div>
+                      )}
+                      {!prospect.work_email &&
+                        !prospect.work_phone &&
+                        !prospect.linkedin_url && (
+                          <p className="text-sm text-muted-foreground">
+                            No work contact info
+                          </p>
+                        )}
+                    </div>
+                  </div>
+
+                  {/* Personal Contact */}
+                  <div>
+                    <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Personal (ContactOut)
+                    </h4>
+                    <div className="space-y-3">
+                      {prospect.contact_data?.personal_email && (
+                        <div className="flex items-center gap-3">
+                          <Mail className="h-4 w-4 text-muted-foreground" />
+                          <a
+                            href={`mailto:${prospect.contact_data.personal_email}`}
+                            className="text-sm text-foreground transition-colors hover:text-[var(--gold-primary)]"
+                          >
+                            {prospect.contact_data.personal_email}
+                          </a>
+                        </div>
+                      )}
+                      {prospect.contact_data?.phone && (
+                        <div className="flex items-center gap-3">
+                          <Phone className="h-4 w-4 text-muted-foreground" />
+                          <a
+                            href={`tel:${prospect.contact_data.phone}`}
+                            className="text-sm text-foreground transition-colors hover:text-[var(--gold-primary)]"
+                          >
+                            {prospect.contact_data.phone}
+                          </a>
+                        </div>
+                      )}
+                      {!prospect.contact_data && (
+                        <p className="text-sm text-muted-foreground">
+                          Not enriched — personal contact will be added after enrichment.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              Not yet added to any lists. Use &quot;Add to List&quot; above to organize this prospect.
-            </p>
+          )}
+
+          {/* Activity Tab */}
+          {activeTab === "activity" && (
+            <div className="surface-card rounded-[14px] p-6">
+              <h3 className="mb-5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Activity Log
+              </h3>
+              {activityEntries.length > 0 ? (
+                <div className="overflow-hidden rounded-md border">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="bg-background">
+                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          Time
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          User
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          Action
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                          Details
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {activityEntries.map((entry) => (
+                        <tr
+                          key={entry.id}
+                          className="hover:bg-[rgba(255,255,255,0.02)] transition-colors"
+                        >
+                          <td className="px-4 py-3 font-mono text-xs text-muted-foreground whitespace-nowrap">
+                            {new Date(entry.created_at).toLocaleString()}
+                          </td>
+                          <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
+                            {entry.user_id.slice(0, 8)}&hellip;
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className="inline-flex rounded-full px-2 py-0.5 text-xs font-medium capitalize bg-muted text-muted-foreground">
+                              {entry.action_type.replace(/_/g, " ")}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-xs text-muted-foreground">
+                            {entry.metadata
+                              ? JSON.stringify(entry.metadata).slice(0, 60)
+                              : "—"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  No activity recorded yet.
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* SEC Filings Tab */}
+          {activeTab === "sec-filings" && (
+            <div className="surface-card rounded-[14px] p-6">
+              <h3 className="mb-5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                SEC Filings
+              </h3>
+              <SECFilingsTable
+                transactions={transactions}
+                totalValue={prospect.insider_data?.total_value}
+              />
+            </div>
+          )}
+
+          {/* Enrichment Tab */}
+          {activeTab === "enrichment" && (
+            <EnrichmentTab
+              sourceStatus={enrichmentSourceStatus}
+              prospectId={prospect.id}
+            />
+          )}
+
+          {/* Notes Tab */}
+          {activeTab === "notes" && (
+            <NotesTab notes={[]} prospectId={prospect.id} />
+          )}
+
+          {/* Lists Tab */}
+          {activeTab === "lists" && (
+            <ListsTab
+              memberships={listMemberships}
+              orgId={orgId}
+              onAddToList={() => {
+                // Stub: feature phase will open AddToListDialog
+                console.log("Add to list triggered from Lists tab");
+              }}
+            />
           )}
         </div>
+      </div>
     </div>
   );
 }
