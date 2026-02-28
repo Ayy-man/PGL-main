@@ -99,7 +99,7 @@ Plans:
 
 **Requirements:** EXP-01, EXP-02, EXP-03, EXP-04, ACT-01, ACT-03
 
-**Plans:** 3/3 plans complete
+**Plans:** 1/2 plans executed
 
 Plans:
 - [ ] 12-01-PLAN.md — Build Export Log page: nav item, server component, stat cards, client table with filters/pagination/re-download

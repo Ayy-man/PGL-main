@@ -256,6 +256,9 @@ Recent decisions affecting current work:
 - [Phase 13-admin-dashboard]: text-[11px] font-semibold uppercase tracking-wider applied to all admin table headers — replaces font-medium which did not match dashboard.md override spec
 - [Phase 13-admin-dashboard]: var(--admin-thead-bg) used for expanded row backgrounds — semantically named token replaces raw bg-white/[0.05]
 - [Phase 13-admin-dashboard]: var(--gold-primary) replaces border-primary/50 on ErrorFeed expanded row left border — consistent with profile-view AI summary gold border pattern
+- [Phase 12-export-log]: ExportLogClient owns ExportStatCards rendering (not page.tsx) — keeps stat cards reactive to filter changes without server round-trips
+- [Phase 12-export-log]: Intl.DateTimeFormat used for timestamps instead of date-fns — avoids adding a dependency for a single formatting use case
+- [Phase 12-export-log]: Array.from(new Set(...)) instead of spread [...new Set(...)] for ES2015 downlevelIteration compatibility in Server Components
 
 ### Roadmap Evolution
 
@@ -315,8 +318,8 @@ All 4 phases and 27 plans are complete. The following items remain before produc
 
 ## Session Continuity
 
-Last session: 2026-03-01 (Phase 13 Plan 03 complete — Design system compliance pass on all admin components)
-Stopped at: Completed 13-03-PLAN.md — design system compliance pass across TenantHeatmap, ErrorFeed, EnrichmentHealthChart, FunnelChart, and admin page. All table headers use text-[11px] tokens, row borders/expanded row bgs use CSS variables, chart section labels use text-xs, admin page h1 is 38px font-medium per MASTER.md. pnpm build passes clean.
+Last session: 2026-03-01 (Phase 12 Plan 01 complete — Export Log page with nav item, stat cards, filterable table, re-download)
+Stopped at: Completed 12-01-PLAN.md — Export Log page at /{orgId}/exports with sidebar nav item (FileDown), 3 stat cards (Total Monthly Exports, Unique Prospects, Top Exporter), date-filtered paginated table (6 columns), re-download button conditional on target_id, empty state. TypeScript compiles clean, pnpm build compiled successfully.
 
 ---
 
