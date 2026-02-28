@@ -1,8 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { Building2, LogIn, History, Ban, Filter, Plus } from "lucide-react";
 
 interface TenantUser {
   id: string;
@@ -29,35 +27,6 @@ interface TenantHeatmapProps {
   } | null;
 }
 
-function getHeatmapClass(value: number, allValues: number[]): string {
-  const nonZeroValues = allValues.filter((v) => v > 0).sort((a, b) => a - b);
-
-  if (nonZeroValues.length === 0) {
-    // All values are zero — new state across the board
-    return "text-muted-foreground";
-  }
-
-  if (value === 0) {
-    // Zero when others have data
-    return "text-destructive";
-  }
-
-  const rank = nonZeroValues.findIndex((v) => v >= value);
-  const pct = rank / nonZeroValues.length;
-
-  if (pct >= 0.75) return "text-[var(--success)]";
-  if (pct >= 0.25) return "text-[var(--warning)]";
-  return "text-destructive";
-}
-
-function isNewTenant(tenant: Tenant): boolean {
-  return (
-    tenant.searches7d === 0 &&
-    tenant.enrichments7d === 0 &&
-    tenant.exports7d === 0
-  );
-}
-
 function formatRelativeTime(dateStr: string | null): string {
   if (!dateStr) return "Never";
 
@@ -80,177 +49,429 @@ function formatRelativeTime(dateStr: string | null): string {
 
 function SkeletonRow() {
   return (
-    <tr style={{ borderBottom: "1px solid var(--border-subtle)" }} className="animate-pulse">
-      <td className="py-3 px-4">
-        <div className="h-4 w-32 bg-white/[0.06] rounded" />
+    <tr
+      className="animate-pulse"
+      style={{ borderBottom: "1px solid var(--border-subtle)" }}
+    >
+      <td className="px-6 py-4">
+        <div className="flex items-center gap-4">
+          <div className="size-10 rounded-lg bg-white/[0.06]" />
+          <div>
+            <div className="h-3 w-28 bg-white/[0.06] rounded mb-1" />
+            <div className="h-2 w-20 bg-white/[0.06] rounded" />
+          </div>
+        </div>
       </td>
-      <td className="py-3 px-4">
-        <div className="h-4 w-8 bg-white/[0.06] rounded" />
-      </td>
-      <td className="py-3 px-4">
-        <div className="h-4 w-12 bg-white/[0.06] rounded" />
-      </td>
-      <td className="py-3 px-4">
-        <div className="h-4 w-12 bg-white/[0.06] rounded" />
-      </td>
-      <td className="py-3 px-4">
-        <div className="h-4 w-12 bg-white/[0.06] rounded" />
-      </td>
-      <td className="py-3 px-4">
+      <td className="px-6 py-4">
         <div className="h-4 w-20 bg-white/[0.06] rounded" />
+      </td>
+      <td className="px-6 py-4 text-center">
+        <div className="h-3 w-12 bg-white/[0.06] rounded mx-auto" />
+      </td>
+      <td className="px-6 py-4">
+        <div className="h-3 w-16 bg-white/[0.06] rounded" />
+      </td>
+      <td className="px-6 py-4">
+        <div className="flex items-center justify-end gap-1">
+          <div className="h-8 w-8 rounded-lg bg-white/[0.06]" />
+          <div className="h-8 w-8 rounded-lg bg-white/[0.06]" />
+          <div className="h-8 w-8 rounded-lg bg-white/[0.06]" />
+        </div>
+      </td>
+    </tr>
+  );
+}
+
+function TenantRow({ tenant }: { tenant: Tenant }) {
+  const isActive =
+    tenant.searches7d > 0 ||
+    tenant.enrichments7d > 0 ||
+    tenant.exports7d > 0 ||
+    tenant.lastActive !== null;
+
+  return (
+    <tr
+      style={{ borderBottom: "1px solid var(--border-subtle)" }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.background = "rgba(255,255,255,0.02)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.background = "";
+      }}
+    >
+      {/* Column 1: Client / Tenant */}
+      <td className="px-6 py-4">
+        <div className="flex items-center gap-4">
+          <div
+            className="size-10 rounded-lg flex items-center justify-center shrink-0"
+            style={{
+              background: "rgba(255,255,255,0.05)",
+              border: "1px solid var(--border-subtle)",
+            }}
+          >
+            <Building2
+              className="h-5 w-5"
+              style={{ color: "var(--admin-text-secondary)" }}
+            />
+          </div>
+          <div>
+            <p
+              className="text-sm font-semibold"
+              style={{ color: "var(--text-primary-ds)" }}
+            >
+              {tenant.name}
+            </p>
+            <p
+              className="text-xs font-mono"
+              style={{ color: "var(--admin-text-secondary)" }}
+            >
+              ID: {tenant.id.substring(0, 12)}
+            </p>
+          </div>
+        </div>
+      </td>
+
+      {/* Column 2: Plan & Rev */}
+      <td className="px-6 py-4">
+        <div className="flex items-center gap-2">
+          <span
+            className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide"
+            style={{
+              background: "var(--gold-bg)",
+              border: "1px solid var(--border-gold)",
+              color: "var(--gold-primary)",
+            }}
+          >
+            Enterprise
+          </span>
+          <span
+            className="text-xs font-mono"
+            style={{ color: "var(--text-primary-ds)" }}
+          >
+            &mdash;
+          </span>
+        </div>
+      </td>
+
+      {/* Column 3: Seats */}
+      <td className="px-6 py-4 text-center">
+        <span
+          className="font-mono text-sm"
+          style={{ color: "var(--text-primary-ds)" }}
+        >
+          {tenant.userCount}
+        </span>
+        <span
+          className="text-xs ml-0.5"
+          style={{ color: "var(--admin-text-secondary)" }}
+        >
+          {" "}
+          / &mdash;
+        </span>
+      </td>
+
+      {/* Column 4: Status */}
+      <td className="px-6 py-4">
+        <div className="flex items-center gap-2">
+          <div
+            className="size-2 rounded-full"
+            style={{
+              background: isActive ? "var(--success)" : "oklch(0.62 0.19 22)",
+              boxShadow: isActive
+                ? "0 0 8px rgba(34,197,94,0.6)"
+                : "0 0 8px rgba(239,68,68,0.6)",
+            }}
+          />
+          <span
+            className="text-xs"
+            style={{ color: "var(--admin-text-secondary)" }}
+            title={
+              tenant.lastActive
+                ? `Last active: ${formatRelativeTime(tenant.lastActive)}`
+                : undefined
+            }
+          >
+            {isActive ? "Active" : "Inactive"}
+          </span>
+        </div>
+      </td>
+
+      {/* Column 5: Actions */}
+      <td className="px-6 py-4">
+        <div className="flex items-center justify-end gap-1">
+          <button
+            title="Impersonate"
+            className="p-2 rounded-lg transition-colors"
+            style={{ color: "var(--admin-text-secondary)" }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = "var(--text-primary-ds)";
+              e.currentTarget.style.background = "rgba(255,255,255,0.08)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = "var(--admin-text-secondary)";
+              e.currentTarget.style.background = "";
+            }}
+          >
+            <LogIn className="h-4 w-4" />
+          </button>
+          <button
+            title="View Logs"
+            className="p-2 rounded-lg transition-colors"
+            style={{ color: "var(--admin-text-secondary)" }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = "var(--text-primary-ds)";
+              e.currentTarget.style.background = "rgba(255,255,255,0.08)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = "var(--admin-text-secondary)";
+              e.currentTarget.style.background = "";
+            }}
+          >
+            <History className="h-4 w-4" />
+          </button>
+          <button
+            title="Suspend Tenant"
+            className="p-2 rounded-lg transition-colors"
+            style={{ color: "var(--admin-text-secondary)" }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = "oklch(0.62 0.19 22)";
+              e.currentTarget.style.background = "rgba(239,68,68,0.08)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = "var(--admin-text-secondary)";
+              e.currentTarget.style.background = "";
+            }}
+          >
+            <Ban className="h-4 w-4" />
+          </button>
+        </div>
       </td>
     </tr>
   );
 }
 
 export function TenantHeatmap({ data }: TenantHeatmapProps) {
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-
+  // Skeleton state
   if (data === null) {
     return (
-      <div className="surface-admin-card overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="admin-thead">
-              <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Tenant</th>
-              <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Users</th>
-              <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Searches (7d)</th>
-              <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Enrichments (7d)</th>
-              <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Exports (7d)</th>
-              <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Last Active</th>
-            </tr>
-          </thead>
-          <tbody>
-            {Array.from({ length: 5 }).map((_, i) => (
-              <SkeletonRow key={i} />
-            ))}
-          </tbody>
-        </table>
+      <div className="surface-admin-card rounded-[14px] overflow-hidden relative">
+        {/* Decorative blur */}
+        <div
+          className="absolute -top-20 -left-20 w-64 h-64 rounded-full blur-3xl pointer-events-none"
+          style={{ background: "rgba(212,175,55,0.05)" }}
+        />
+
+        {/* Header skeleton */}
+        <div
+          className="p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10"
+          style={{
+            borderBottom: "1px solid var(--border-subtle)",
+            background: "rgba(255,255,255,0.02)",
+          }}
+        >
+          <div>
+            <div className="h-5 w-48 bg-white/[0.06] rounded mb-2" />
+            <div className="h-3 w-72 bg-white/[0.06] rounded" />
+          </div>
+          <div className="flex gap-3">
+            <div className="h-9 w-28 bg-white/[0.06] rounded-lg" />
+            <div className="h-9 w-44 bg-white/[0.06] rounded-lg" />
+          </div>
+        </div>
+
+        {/* Table skeleton */}
+        <div className="overflow-x-auto relative z-10 animate-pulse">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr
+                style={{
+                  background: "rgba(255,255,255,0.02)",
+                  borderBottom: "1px solid var(--border-subtle)",
+                }}
+              >
+                {["Client / Tenant", "Plan & Rev", "Seats", "Status", "Actions"].map((h) => (
+                  <th
+                    key={h}
+                    className="px-6 py-4 text-[11px] font-semibold uppercase tracking-wider"
+                    style={{ color: "var(--admin-text-secondary)" }}
+                  >
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {Array.from({ length: 3 }).map((_, i) => (
+                <SkeletonRow key={i} />
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     );
   }
 
   const tenants = data.tenants;
-  const allSearches = tenants.map((t) => t.searches7d);
-  const allEnrichments = tenants.map((t) => t.enrichments7d);
-  const allExports = tenants.map((t) => t.exports7d);
-
-  const handleRowClick = (tenantId: string) => {
-    setExpandedId((prev) => (prev === tenantId ? null : tenantId));
-  };
 
   return (
-    <div className="surface-admin-card overflow-hidden">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="admin-thead">
-            <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Tenant</th>
-            <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Users</th>
-            <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Searches (7d)</th>
-            <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Enrichments (7d)</th>
-            <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Exports (7d)</th>
-            <th className="py-3 px-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Last Active</th>
-          </tr>
-        </thead>
-        <tbody>
-          {tenants.map((tenant) => {
-            const isNew = isNewTenant(tenant);
-            const isExpanded = expandedId === tenant.id;
+    <div className="surface-admin-card rounded-[14px] overflow-hidden relative">
+      {/* Decorative blur */}
+      <div
+        className="absolute -top-20 -left-20 w-64 h-64 rounded-full blur-3xl pointer-events-none"
+        style={{ background: "rgba(212,175,55,0.05)" }}
+      />
 
-            return (
-              <>
-                <tr
-                  key={tenant.id}
-                  className="admin-row-hover cursor-pointer"
-                  style={{ borderBottom: "1px solid var(--admin-row-border)" }}
-                  onClick={() => handleRowClick(tenant.id)}
-                >
-                  <td className="py-3 px-4">
-                    <div className="flex items-center gap-2">
-                      {isExpanded ? (
-                        <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
-                      ) : (
-                        <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
-                      )}
-                      <span className="font-medium">{tenant.name}</span>
-                      {isNew && (
-                        <span className="inline-flex items-center rounded-full border border-[var(--border-subtle)] px-2 py-0.5 text-xs text-muted-foreground">
-                          New
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="py-3 px-4 text-muted-foreground">{tenant.userCount}</td>
-                  <td className={`py-3 px-4 font-medium ${isNew ? "text-muted-foreground" : getHeatmapClass(tenant.searches7d, allSearches)}`}>
-                    {tenant.searches7d.toLocaleString()}
-                  </td>
-                  <td className={`py-3 px-4 font-medium ${isNew ? "text-muted-foreground" : getHeatmapClass(tenant.enrichments7d, allEnrichments)}`}>
-                    {tenant.enrichments7d.toLocaleString()}
-                  </td>
-                  <td className={`py-3 px-4 font-medium ${isNew ? "text-muted-foreground" : getHeatmapClass(tenant.exports7d, allExports)}`}>
-                    {tenant.exports7d.toLocaleString()}
-                  </td>
-                  <td className="py-3 px-4 text-muted-foreground text-xs">
-                    {formatRelativeTime(tenant.lastActive)}
-                  </td>
-                </tr>
+      {/* Header */}
+      <div
+        className="p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative z-10"
+        style={{
+          borderBottom: "1px solid var(--border-subtle)",
+          background: "rgba(255,255,255,0.02)",
+        }}
+      >
+        <div>
+          <h3
+            className="text-xl font-serif font-medium flex items-center gap-2"
+            style={{ color: "var(--text-primary-ds)" }}
+          >
+            Tenant Management
+          </h3>
+          <p
+            className="text-sm mt-1"
+            style={{ color: "var(--admin-text-secondary)" }}
+          >
+            Manage client instances, quotas, revenue tracking, and access
+            controls.
+          </p>
+        </div>
+        <div className="flex gap-3">
+          <button
+            className="px-4 py-2 rounded-lg text-xs font-medium flex items-center gap-2 transition-colors"
+            style={{
+              background: "rgba(255,255,255,0.05)",
+              border: "1px solid rgba(255,255,255,0.10)",
+              color: "var(--admin-text-secondary)",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "rgba(255,255,255,0.10)";
+              e.currentTarget.style.color = "var(--text-primary-ds)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "rgba(255,255,255,0.05)";
+              e.currentTarget.style.color = "var(--admin-text-secondary)";
+            }}
+          >
+            <Filter className="h-4 w-4" /> Filter View
+          </button>
+          <button
+            className="px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition-colors"
+            style={{
+              background: "var(--gold-primary)",
+              color: "var(--bg-root)",
+              boxShadow: "0 0 15px rgba(212,175,55,0.3)",
+            }}
+          >
+            <Plus className="h-4 w-4" /> Provision New Tenant
+          </button>
+        </div>
+      </div>
 
-                {isExpanded && (
-                  <tr key={`${tenant.id}-expanded`} style={{ borderBottom: "1px solid var(--admin-row-border)" }}>
-                    <td colSpan={6} className="pl-10 pr-4 py-3" style={{ background: "var(--admin-thead-bg)" }}>
-                      <div className="mb-2 flex items-center justify-between">
-                        <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
-                          Per-User Breakdown
-                        </p>
-                        <Link
-                          href="/admin/tenants"
-                          className="text-xs text-primary hover:underline"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          View tenant admin page
-                        </Link>
-                      </div>
-
-                      {tenant.users.length === 0 ? (
-                        <p className="text-xs text-muted-foreground py-2">No users yet.</p>
-                      ) : (
-                        <table className="w-full text-xs">
-                          <thead>
-                            <tr style={{ borderBottom: "1px solid var(--admin-row-border)" }}>
-                              <th className="py-1.5 pr-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>User</th>
-                              <th className="py-1.5 pr-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Searches</th>
-                              <th className="py-1.5 pr-4 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Enrichments</th>
-                              <th className="py-1.5 text-left text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>Exports</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {tenant.users.map((user) => (
-                              <tr key={user.id} style={{ borderBottom: "1px solid var(--admin-row-border)" }} className="last:border-0">
-                                <td className="py-1.5 pr-4 font-medium">{user.fullName}</td>
-                                <td className="py-1.5 pr-4 text-muted-foreground">{user.searches7d.toLocaleString()}</td>
-                                <td className="py-1.5 pr-4 text-muted-foreground">{user.enrichments7d.toLocaleString()}</td>
-                                <td className="py-1.5 text-muted-foreground">{user.exports7d.toLocaleString()}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      )}
-                    </td>
-                  </tr>
-                )}
-              </>
-            );
-          })}
-
-          {tenants.length === 0 && (
-            <tr>
-              <td colSpan={6} className="py-8 text-center text-muted-foreground">
-                No tenant data available.
-              </td>
+      {/* Table */}
+      <div className="overflow-x-auto relative z-10">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr
+              style={{
+                background: "rgba(255,255,255,0.02)",
+                borderBottom: "1px solid var(--border-subtle)",
+              }}
+            >
+              <th
+                className="px-6 py-4 text-[11px] font-semibold uppercase tracking-wider w-1/4"
+                style={{ color: "var(--admin-text-secondary)" }}
+              >
+                Client / Tenant
+              </th>
+              <th
+                className="px-6 py-4 text-[11px] font-semibold uppercase tracking-wider"
+                style={{ color: "var(--admin-text-secondary)" }}
+              >
+                Plan &amp; Rev
+              </th>
+              <th
+                className="px-6 py-4 text-[11px] font-semibold uppercase tracking-wider text-center"
+                style={{ color: "var(--admin-text-secondary)" }}
+              >
+                Seats
+              </th>
+              <th
+                className="px-6 py-4 text-[11px] font-semibold uppercase tracking-wider"
+                style={{ color: "var(--admin-text-secondary)" }}
+              >
+                Status
+              </th>
+              <th
+                className="px-6 py-4 text-[11px] font-semibold uppercase tracking-wider text-right"
+                style={{ color: "var(--admin-text-secondary)" }}
+              >
+                Actions
+              </th>
             </tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {tenants.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={5}
+                  className="py-8 text-center text-sm"
+                  style={{ color: "var(--admin-text-secondary)" }}
+                >
+                  No tenant data available.
+                </td>
+              </tr>
+            ) : (
+              tenants.map((tenant) => (
+                <TenantRow key={tenant.id} tenant={tenant} />
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Footer */}
+      <div
+        className="p-4 flex justify-between items-center text-xs"
+        style={{
+          borderTop: "1px solid var(--border-subtle)",
+          background: "rgba(255,255,255,0.02)",
+          color: "var(--admin-text-secondary)",
+        }}
+      >
+        <span>
+          Showing {tenants.length} tenant{tenants.length !== 1 ? "s" : ""}
+        </span>
+        <div className="flex gap-2">
+          <button
+            className="px-3 py-1 rounded text-xs disabled:opacity-50 transition-colors"
+            style={{
+              background: "rgba(255,255,255,0.05)",
+              color: "var(--text-primary-ds)",
+            }}
+            disabled
+          >
+            Previous
+          </button>
+          <button
+            className="px-3 py-1 rounded text-xs transition-colors"
+            style={{
+              background: "rgba(255,255,255,0.05)",
+              color: "var(--text-primary-ds)",
+            }}
+          >
+            Next
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
