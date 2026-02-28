@@ -18,6 +18,8 @@ interface SearchResult {
     page: number;
     sortBy: string;
     sortOrder: string;
+    prospect: string;
+    keywords: string;
   };
   setSearchState: (
     update: Partial<{
@@ -25,6 +27,8 @@ interface SearchResult {
       page: number;
       sortBy: string;
       sortOrder: string;
+      prospect: string;
+      keywords: string;
     }>
   ) => void;
   results: ApolloPerson[];
@@ -41,6 +45,8 @@ export function useSearch(): SearchResult {
     page: parseAsInteger.withDefault(1),
     sortBy: parseAsString.withDefault("name"),
     sortOrder: parseAsString.withDefault("asc"),
+    prospect: parseAsString.withDefault(""),   // slide-over URL sync
+    keywords: parseAsString.withDefault(""),    // NL search bar passthrough
   });
 
   const [results, setResults] = useState<ApolloPerson[]>([]);
@@ -91,6 +97,7 @@ export function useSearch(): SearchResult {
           personaId: searchState.persona,
           page: searchState.page,
           pageSize: 10,
+          ...(searchState.keywords ? { filterOverrides: { keywords: searchState.keywords } } : {}),
         }),
         signal: controller.signal,
       });
@@ -130,7 +137,7 @@ export function useSearch(): SearchResult {
     } finally {
       setIsLoading(false);
     }
-  }, [searchState.persona, searchState.page]);
+  }, [searchState.persona, searchState.page, searchState.keywords]);
 
   // Trigger search when persona or page changes
   useEffect(() => {
@@ -141,7 +148,7 @@ export function useSearch(): SearchResult {
     return () => clearTimeout(timer);
   }, [executeSearch]);
 
-  // Wrap setSearchState to reset page when persona changes
+  // Wrap setSearchState to reset page when persona or keywords changes
   const handleSetSearchState = useCallback(
     (
       update: Partial<{
@@ -149,16 +156,22 @@ export function useSearch(): SearchResult {
         page: number;
         sortBy: string;
         sortOrder: string;
+        prospect: string;
+        keywords: string;
       }>
     ) => {
-      if (update.persona !== undefined && update.persona !== searchState.persona) {
-        // Reset page to 1 when persona changes
+      const personaChanged =
+        update.persona !== undefined && update.persona !== searchState.persona;
+      const keywordsChanged =
+        update.keywords !== undefined && update.keywords !== searchState.keywords;
+      if (personaChanged || keywordsChanged) {
+        // Reset page to 1 when persona or keywords changes
         setSearchState({ ...update, page: 1 });
       } else {
         setSearchState(update);
       }
     },
-    [searchState.persona, setSearchState]
+    [searchState.persona, searchState.keywords, setSearchState]
   );
 
   return {
