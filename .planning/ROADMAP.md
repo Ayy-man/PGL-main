@@ -135,7 +135,7 @@ Plans:
 
 **Requirements:** SA-01, SA-02, SA-03, SA-04, SA-05, ANLY-03
 **Depends on:** Phase 14
-**Plans:** 3/5 plans executed
+**Plans:** 4/5 plans executed
 
 Plans:
 - [x] 14.1-01-PLAN.md — Sidebar nav 2 sections (Platform Control + System Config stubs) + footer user card

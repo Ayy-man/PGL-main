@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-02-28T23:41:30.784Z"
+last_updated: "2026-03-01T00:00:00.000Z"
 progress:
   total_phases: 15
   completed_phases: 12
   total_plans: 72
-  completed_plans: 70
+  completed_plans: 72
 ---
 
 # Project State
@@ -24,9 +24,9 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 ## Current Position
 
 Phase: 14.1 of 14.1 (Admin Dashboard Rebuild — Match Stitch Mockup)
-Plan: 3 of 5 — Plans 01, 02, 03 COMPLETE (02 executed after 03 — out-of-order execution)
-Status: Phase 14.1 Plans 01-03 COMPLETE — Nav sidebar rebuilt, PlatformPulse + EnrichmentHealthChart rebuilt, ApiQuotaCard + ExportActivityChart + TenantHeatmap rebuilt
-Last activity: 2026-03-01 — Phase 14.1 Plan 02 complete. PlatformPulse: single multi-metric card with Activity icon, pulsing gold dot header, 3 metric rows with progress bars. EnrichmentHealthChart: circuit-breaker card with 3 provider rows, status derived heuristically, Recharts removed.
+Plan: 4 of 5 — Plans 01, 02, 03, 04 COMPLETE
+Status: Phase 14.1 Plans 01-04 COMPLETE — Nav sidebar rebuilt, PlatformPulse + EnrichmentHealthChart rebuilt, ApiQuotaCard + ExportActivityChart + TenantHeatmap rebuilt, ErrorFeed card-feed + SystemActions grid + page.tsx Global Command Center layout assembled
+Last activity: 2026-03-01 — Phase 14.1 Plan 04 complete. ErrorFeed rebuilt as card-feed with red severity icons. SystemActions created as 2x2 stub button grid. page.tsx rewritten with "Global Command Center" header, 4-column stat cards, full-width TenantHeatmap, 2-column bottom row (ErrorFeed + SystemActions).
 
 Progress: [██████████] 100% (base phases) + Phase 14.1 Plan 1/5 executing
 
@@ -81,6 +81,7 @@ Progress: [██████████] 100% (base phases) + Phase 14.1 Plan 
 | Phase 14-polish-verification P01 | 8 | 2 tasks | 10 files |
 | Phase 14-polish-verification P02 | 5 | 2 tasks | 0 files (audit + docs) |
 | Phase 14-polish-verification P02 | 3 | 2 tasks | 2 files |
+| Phase 14.1 P04 | 3 | 2 tasks | 3 files |
 
 ### Phase 3 Plan Completion
 
@@ -282,6 +283,8 @@ Recent decisions affecting current work:
 - [Phase 14.1-03]: TenantHeatmap plan badge hardcoded as Enterprise — DB tenants table has no plan/mrr columns; MRR shown as em dash
 - [Phase 14.1-03]: isActive status in TenantHeatmap derived from 7d metrics + lastActive presence — Tenant interface has no is_active boolean field
 - [Phase 14.1-03]: Suspend action button hover uses red oklch(0.62 0.19 22) + rgba(239,68,68,0.08) background to signal destructive action distinctly from other action buttons
+- [Phase 14.1]: ErrorFeed rebuilt from table to card-feed — table layout removed; red severity icon; pulsing live dot; scrollable max-h-300px list
+- [Phase 14.1]: page.tsx header changed from serif 38px Platform Health to 18px Global Command Center with OPERATIONAL status line; FunnelChart removed from JSX (API call preserved)
 
 ### Roadmap Evolution
 
