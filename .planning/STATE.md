@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
-status: complete
-last_updated: "2026-03-01T00:00:00.000Z"
+status: unknown
+last_updated: "2026-02-28T23:41:30.784Z"
 progress:
-  total_phases: 14
-  completed_phases: 14
-  total_plans: 69
-  completed_plans: 69
+  total_phases: 15
+  completed_phases: 12
+  total_plans: 72
+  completed_plans: 70
 ---
 
 # Project State
@@ -24,9 +24,9 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 ## Current Position
 
 Phase: 14.1 of 14.1 (Admin Dashboard Rebuild — Match Stitch Mockup)
-Plan: 1 of 5 — Plan 01 COMPLETE
-Status: Phase 14.1 Plan 01 COMPLETE — Admin sidebar nav rebuilt (2 sections), user card footer added to desktop + mobile
-Last activity: 2026-02-28 — Phase 14.1 Plan 01 complete. AdminNavLinks rebuilt with Platform Control (3 items) + System Config (4 stubs). Styled user card footer (gold avatar + Super Admin label + email) added to desktop sidebar and mobile sidebar.
+Plan: 3 of 5 — Plans 01, 02, 03 COMPLETE (02 executed after 03 — out-of-order execution)
+Status: Phase 14.1 Plans 01-03 COMPLETE — Nav sidebar rebuilt, PlatformPulse + EnrichmentHealthChart rebuilt, ApiQuotaCard + ExportActivityChart + TenantHeatmap rebuilt
+Last activity: 2026-03-01 — Phase 14.1 Plan 02 complete. PlatformPulse: single multi-metric card with Activity icon, pulsing gold dot header, 3 metric rows with progress bars. EnrichmentHealthChart: circuit-breaker card with 3 provider rows, status derived heuristically, Recharts removed.
 
 Progress: [██████████] 100% (base phases) + Phase 14.1 Plan 1/5 executing
 
@@ -275,6 +275,8 @@ Recent decisions affecting current work:
 - [Phase 14.1-01]: System Config nav items render as <button> not <Link> — prevents navigation, title="Coming soon" tooltip signals non-functional state to user
 - [Phase 14.1-01]: userName prop accepted by AdminMobileSidebar for API consistency with layout.tsx even though only userInitials+userEmail are rendered in the card
 - [Phase 14.1-01]: Gold avatar circle uses var(--gold-bg-strong)/var(--gold-primary)/var(--border-gold) per design system token spec — same pattern as PersonaCard avatar
+- [Phase 14.1]: [Phase 14.1-02]: PlatformPulse rebuilt as single multi-metric card — removed 4-card grid, StatCard sub-component, useCountUp, and ApiQuotaCard import; replaced with 3 inline metric rows with thin progress bars
+- [Phase 14.1]: [Phase 14.1-02]: EnrichmentHealthChart rebuilt as circuit-breaker status card — Recharts removed, status derived heuristically (>50% fail=open, >20%=half-open, else=closed), half-open dot uses animate-pulse
 
 ### Roadmap Evolution
 
