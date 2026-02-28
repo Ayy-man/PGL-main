@@ -277,6 +277,11 @@ Recent decisions affecting current work:
 - [Phase 14.1-01]: Gold avatar circle uses var(--gold-bg-strong)/var(--gold-primary)/var(--border-gold) per design system token spec — same pattern as PersonaCard avatar
 - [Phase 14.1]: [Phase 14.1-02]: PlatformPulse rebuilt as single multi-metric card — removed 4-card grid, StatCard sub-component, useCountUp, and ApiQuotaCard import; replaced with 3 inline metric rows with thin progress bars
 - [Phase 14.1]: [Phase 14.1-02]: EnrichmentHealthChart rebuilt as circuit-breaker status card — Recharts removed, status derived heuristically (>50% fail=open, >20%=half-open, else=closed), half-open dot uses animate-pulse
+- [Phase 14.1-03]: ApiQuotaCard renders hardcoded Unit Economics costs — DB has no cost-per-call columns; $0.012 Apollo, $0.045 Exa AI, $0.080 ContactOut, $0.034 blended are aspirational display values
+- [Phase 14.1-03]: ExportActivityChart uses heatmap exports7d data for bar heights; labeled "Export Activity (7d)" since no 24h per-tenant endpoint exists
+- [Phase 14.1-03]: TenantHeatmap plan badge hardcoded as Enterprise — DB tenants table has no plan/mrr columns; MRR shown as em dash
+- [Phase 14.1-03]: isActive status in TenantHeatmap derived from 7d metrics + lastActive presence — Tenant interface has no is_active boolean field
+- [Phase 14.1-03]: Suspend action button hover uses red oklch(0.62 0.19 22) + rgba(239,68,68,0.08) background to signal destructive action distinctly from other action buttons
 
 ### Roadmap Evolution
 
@@ -337,8 +342,8 @@ All 4 phases and 27 plans are complete. The following items remain before produc
 
 ## Session Continuity
 
-Last session: 2026-02-28 — Phase 14.1 Plan 01 complete: Admin Sidebar Nav Rebuild + User Card Footer
-Stopped at: Phase 14.1-01 complete. AdminNavLinks two-section nav + System Config stubs done. User card footer added to desktop + mobile sidebar. Next: Phase 14.1 Plan 02.
+Last session: 2026-03-01 — Phase 14.1 Plan 03 complete: Unit Economics card, Export Activity chart, Tenant Management table rebuild
+Stopped at: Phase 14.1-03 complete. ApiQuotaCard rebuilt as Unit Economics. ExportActivityChart created (pure CSS bars). TenantHeatmap rebuilt as 5-column Tenant Management table with icon avatars, plan badges, status glow dots, action buttons. Next: Phase 14.1 Plan 04 (page.tsx wiring).
 
 ---
 
