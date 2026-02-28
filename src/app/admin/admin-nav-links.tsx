@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Building2, Users, LayoutDashboard } from "lucide-react";
+import { Building2, Users, LayoutDashboard, BarChart3 } from "lucide-react";
 
 const ADMIN_NAV = [
-  { label: "Dashboard", href: "/admin", icon: LayoutDashboard, exact: true },
-  { label: "Tenants", href: "/admin/tenants", icon: Building2, exact: false },
-  { label: "Users", href: "/admin/users", icon: Users, exact: false },
+  { label: "Dashboard", href: "/admin",           icon: LayoutDashboard, exact: true },
+  { label: "Tenants",   href: "/admin/tenants",   icon: Building2,       exact: false },
+  { label: "Users",     href: "/admin/users",     icon: Users,           exact: false },
+  { label: "Analytics", href: "/admin/analytics", icon: BarChart3,       exact: false },
 ];
 
 export function AdminNavLinks() {
