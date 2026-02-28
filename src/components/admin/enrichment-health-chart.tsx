@@ -1,15 +1,6 @@
 "use client";
 
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
+import { ShieldCheck } from "lucide-react";
 
 interface EnrichmentHealthChartProps {
   data: Array<{
@@ -25,45 +16,78 @@ interface EnrichmentHealthChartProps {
   }> | null;
 }
 
-// Gold-adjacent warm hues (OKLCH) — graduated by source
-const SUCCESS_COLORS = {
-  contactout: "oklch(0.84 0.10 85)",
-  exa: "oklch(0.77 0.09 85)",
-  edgar: "oklch(0.70 0.08 85)",
-  claude: "oklch(0.63 0.07 85)",
-};
-
-// Warm red tones for failures
-const FAILED_COLORS = {
-  contactout: "oklch(0.52 0.13 22)",
-  exa: "oklch(0.46 0.12 22)",
-  edgar: "oklch(0.40 0.11 22)",
-  claude: "oklch(0.35 0.10 22)",
-};
-
-const SOURCES = [
-  { key: "contactout", label: "ContactOut" },
-  { key: "exa", label: "Exa" },
-  { key: "edgar", label: "EDGAR" },
-  { key: "claude", label: "Claude" },
+const PROVIDERS = [
+  { dataPrefix: "contactout", label: "Apollo Scraper" },
+  { dataPrefix: "exa", label: "Exa Neural" },
+  { dataPrefix: "edgar", label: "ContactOut" },
 ] as const;
 
-function formatDate(dateStr: string): string {
-  const d = new Date(dateStr + "T00:00:00");
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+type CircuitStatus = "closed" | "half-open" | "open";
+
+const STATUS_CONFIG: Record<
+  CircuitStatus,
+  {
+    color: string;
+    glow: string;
+    label: string;
+    pulse: boolean;
+    badgeBg: string;
+    badgeBorder: string;
+  }
+> = {
+  closed: {
+    color: "var(--success)",
+    glow: "rgba(34,197,94,0.6)",
+    label: "Closed",
+    pulse: false,
+    badgeBg: "rgba(34,197,94,0.10)",
+    badgeBorder: "1px solid rgba(34,197,94,0.20)",
+  },
+  "half-open": {
+    color: "var(--warning)",
+    glow: "rgba(245,158,11,0.6)",
+    label: "Half-Open",
+    pulse: true,
+    badgeBg: "rgba(245,158,11,0.10)",
+    badgeBorder: "1px solid rgba(245,158,11,0.20)",
+  },
+  open: {
+    color: "oklch(0.62 0.19 22)",
+    glow: "rgba(239,68,68,0.6)",
+    label: "Open",
+    pulse: false,
+    badgeBg: "rgba(239,68,68,0.10)",
+    badgeBorder: "1px solid rgba(239,68,68,0.20)",
+  },
+};
+
+function deriveStatus(
+  successCount: number,
+  failCount: number
+): CircuitStatus {
+  const total = successCount + failCount;
+  if (total === 0) return "closed";
+  const failRatio = failCount / total;
+  if (failRatio > 0.5) return "open";
+  if (failRatio > 0.2) return "half-open";
+  return "closed";
 }
 
 export function EnrichmentHealthChart({ data }: EnrichmentHealthChartProps) {
   if (data === null) {
     return (
-      <div className="surface-admin-card p-6">
-        <p className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: "var(--admin-text-secondary)" }}>Enrichment Pipeline Health</p>
-        <div className="h-[300px] animate-pulse flex items-end gap-2 px-4">
-          {Array.from({ length: 7 }).map((_, i) => (
+      <div className="surface-admin-card rounded-[14px] p-6 relative overflow-hidden">
+        <p
+          className="text-[10px] font-semibold uppercase tracking-widest mb-4"
+          style={{ color: "var(--admin-text-secondary)" }}
+        >
+          Enrichment Health (CB)
+        </p>
+        <div className="space-y-3">
+          {Array.from({ length: 3 }).map((_, i) => (
             <div
               key={i}
-              className="flex-1 bg-white/[0.06] rounded-t"
-              style={{ height: `${40 + Math.random() * 60}%` }}
+              className="h-10 bg-white/[0.06] rounded animate-pulse"
             />
           ))}
         </div>
@@ -73,68 +97,98 @@ export function EnrichmentHealthChart({ data }: EnrichmentHealthChartProps) {
 
   if (data.length === 0) {
     return (
-      <div className="surface-admin-card p-6">
-        <p className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: "var(--admin-text-secondary)" }}>Enrichment Pipeline Health (per source, daily)</p>
-        <div className="h-[300px] flex items-center justify-center">
-          <p className="text-xs text-muted-foreground">No enrichment data yet. Enrich prospects to see pipeline health.</p>
+      <div className="surface-admin-card rounded-[14px] p-6 relative overflow-hidden">
+        <p
+          className="text-[10px] font-semibold uppercase tracking-widest mb-4"
+          style={{ color: "var(--admin-text-secondary)" }}
+        >
+          Enrichment Health (CB)
+        </p>
+        <div className="flex items-center justify-center h-20">
+          <p
+            className="text-xs"
+            style={{ color: "var(--admin-text-secondary)" }}
+          >
+            No enrichment data yet
+          </p>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="surface-admin-card p-6">
-      <p className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: "var(--admin-text-secondary)" }}>Enrichment Pipeline Health (per source, daily)</p>
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-          <XAxis
-            dataKey="date"
-            tickFormatter={formatDate}
-            stroke="var(--muted-foreground)"
-            tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
-          />
-          <YAxis
-            stroke="var(--muted-foreground)"
-            tick={{ fill: "var(--muted-foreground)", fontSize: 11 }}
-          />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: "var(--card)",
-              border: "1px solid var(--border)",
-              borderRadius: "8px",
-              color: "var(--foreground)",
-            }}
-            labelFormatter={(label) => formatDate(String(label))}
-          />
-          <Legend wrapperStyle={{ color: "var(--muted-foreground)", paddingTop: "12px", fontSize: "11px" }} />
+  const latestDay = data[data.length - 1];
 
-          {SOURCES.map(({ key, label }) => (
-            <>
-              <Bar
-                key={`${key}_success`}
-                dataKey={`${key}_success`}
-                stackId={key}
-                fill={SUCCESS_COLORS[key]}
-                name={`${label} OK`}
-                isAnimationActive={true}
-                animationBegin={100}
-                animationDuration={800}
-              />
-              <Bar
-                key={`${key}_failed`}
-                dataKey={`${key}_failed`}
-                stackId={key}
-                fill={FAILED_COLORS[key]}
-                name={`${label} Fail`}
-                isAnimationActive={true}
-                animationBegin={100}
-                animationDuration={800}
-              />
-            </>
-          ))}
-        </BarChart>
-      </ResponsiveContainer>
+  const latestDayRecord = latestDay as unknown as Record<string, number>;
+
+  const providerStatuses = PROVIDERS.map((provider) => {
+    const prefix = provider.dataPrefix;
+    const successCount = latestDayRecord[`${prefix}_success`] ?? 0;
+    const failCount = latestDayRecord[`${prefix}_failed`] ?? 0;
+    const status = deriveStatus(successCount, failCount);
+    return { ...provider, status };
+  });
+
+  return (
+    <div className="surface-admin-card rounded-[14px] p-6 relative overflow-hidden group">
+      {/* Decorative background icon */}
+      <div className="absolute top-0 right-0 p-4 pointer-events-none opacity-[0.05] group-hover:opacity-[0.10] transition-opacity">
+        <ShieldCheck
+          className="h-20 w-20"
+          style={{ color: "var(--gold-primary)" }}
+        />
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10">
+        <p
+          className="text-[10px] font-semibold uppercase tracking-widest mb-4"
+          style={{ color: "var(--admin-text-secondary)" }}
+        >
+          Enrichment Health (CB)
+        </p>
+
+        <div className="space-y-2">
+          {providerStatuses.map((provider) => {
+            const cfg = STATUS_CONFIG[provider.status];
+            return (
+              <div
+                key={provider.dataPrefix}
+                className="flex items-center justify-between p-2 rounded"
+                style={{
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,255,255,0.05)",
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <div
+                    className={`size-2 rounded-full ${cfg.pulse ? "animate-pulse" : ""}`}
+                    style={{
+                      background: cfg.color,
+                      boxShadow: `0 0 8px ${cfg.glow}`,
+                    }}
+                  />
+                  <span
+                    className="text-xs font-medium"
+                    style={{ color: "var(--text-primary-ds)" }}
+                  >
+                    {provider.label}
+                  </span>
+                </div>
+                <span
+                  className="text-[10px] uppercase tracking-wider rounded px-1.5 py-0.5"
+                  style={{
+                    color: cfg.color,
+                    background: cfg.badgeBg,
+                    border: cfg.badgeBorder,
+                  }}
+                >
+                  {cfg.label}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     </div>
   );
 }
