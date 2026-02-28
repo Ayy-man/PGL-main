@@ -102,8 +102,8 @@ Plans:
 **Plans:** 2/2 plans complete
 
 Plans:
-- [ ] 12-01-PLAN.md — Build Export Log page: nav item, server component, stat cards, client table with filters/pagination/re-download
-- [ ] 12-02-PLAN.md — Build verification + design system compliance audit
+- [x] 12-01-PLAN.md — Build Export Log page: nav item, server component, stat cards, client table with filters/pagination/re-download
+- [x] 12-02-PLAN.md — Build verification + design system compliance audit
 
 ---
 
