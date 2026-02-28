@@ -123,8 +123,18 @@ Plans:
 
 **Status:** COMPLETE — All 2 plans executed. Global design system audit, accessibility fixes, loading state skeletons, error boundary polish, build verification.
 
-**Plans:** 2/2 complete
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 14-01-PLAN.md — Cross-cutting fixes: prefers-reduced-motion, raw color violations, error boundary polish, loading.tsx stubs
 - [x] 14-02-PLAN.md — Build verification + comprehensive design system compliance audit + STATE/ROADMAP update
+
+### Phase 14.1: Admin Dashboard Rebuild — Match Stitch Mockup (INSERTED)
+
+**Goal:** [Urgent work - to be planned]
+**Requirements**: TBD
+**Depends on:** Phase 14
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 14.1 to break down)
