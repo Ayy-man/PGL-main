@@ -4,8 +4,10 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { PlatformPulse } from "@/components/admin/platform-pulse";
 import { TenantHeatmap } from "@/components/admin/tenant-heatmap";
 import { EnrichmentHealthChart } from "@/components/admin/enrichment-health-chart";
-import { FunnelChart as FunnelChartComponent } from "@/components/admin/funnel-chart";
+import { ApiQuotaCard } from "@/components/admin/api-quota-card";
+import { ExportActivityChart } from "@/components/admin/export-activity-chart";
 import { ErrorFeed } from "@/components/admin/error-feed";
+import { SystemActions } from "@/components/admin/system-actions";
 import { RefreshCw } from "lucide-react";
 
 // --- Types ---
@@ -170,58 +172,56 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-8 page-enter">
-      {/* Header */}
+      {/* Header — Global Command Center */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-serif font-medium tracking-tight" style={{ fontSize: "38px", letterSpacing: "-0.5px" }}>
-            Platform Health
-          </h1>
-          <p className="mt-1 text-sm" style={{ color: "var(--admin-text-secondary)" }}>
-            Real-time platform monitoring
+          <h2
+            className="font-medium tracking-wide"
+            style={{ fontSize: "18px", color: "var(--text-primary-ds)" }}
+          >
+            Global Command Center
+          </h2>
+          <p
+            className="text-xs flex items-center gap-2 mt-0.5"
+            style={{ color: "var(--admin-text-secondary)" }}
+          >
+            System Status:{" "}
+            <span
+              className="font-mono tracking-tight"
+              style={{ color: "var(--success)" }}
+            >
+              OPERATIONAL
+            </span>
+            {" "}• v2.5.0 •{" "}
+            <span style={{ color: "var(--gold-text)" }}>PGL Core</span>
           </p>
         </div>
-        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+        <div className="flex items-center gap-3 text-sm" style={{ color: "var(--admin-text-secondary)" }}>
           {isRefreshing && (
-            <RefreshCw
-              className="h-4 w-4 animate-spin"
-              style={{ color: "var(--gold-primary)" }}
-            />
+            <RefreshCw className="h-4 w-4 animate-spin" style={{ color: "var(--gold-primary)" }} />
           )}
           {lastFetched && (
-            <span>Updated {formatSecondsAgo(secondsAgo)}</span>
+            <span className="text-xs">Updated {formatSecondsAgo(secondsAgo)}</span>
           )}
         </div>
       </div>
 
-      {/* Section 1: Platform Pulse */}
-      <PlatformPulse data={pulseData} quotaData={quotaData} />
+      {/* Section 1: 4-column stat cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <PlatformPulse data={pulseData} quotaData={quotaData} />
+        <EnrichmentHealthChart data={enrichmentData} />
+        <ApiQuotaCard data={quotaData} />
+        <ExportActivityChart data={heatmapData} />
+      </div>
 
-      {/* Section 2: Tenant Activity Heatmap */}
-      <section>
-        <h2 className="font-serif text-xl font-semibold mb-4 admin-section-heading">
-          Tenant Activity
-        </h2>
-        <TenantHeatmap data={heatmapData} />
-      </section>
+      {/* Section 2: Tenant Management (full-width) */}
+      <TenantHeatmap data={heatmapData} />
 
-      {/* Section 3: Graphs (2-up layout) */}
-      <section>
-        <h2 className="font-serif text-xl font-semibold mb-4 admin-section-heading">
-          Pipeline Analytics
-        </h2>
-        <div className="grid gap-6 lg:grid-cols-2">
-          <EnrichmentHealthChart data={enrichmentData} />
-          <FunnelChartComponent data={funnelData} />
-        </div>
-      </section>
-
-      {/* Section 4: Error/Failure Feed */}
-      <section>
-        <h2 className="font-serif text-xl font-semibold mb-4 admin-section-heading">
-          Recent Failures
-        </h2>
+      {/* Section 3: Bottom 2-column — Error Feed + System Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6">
         <ErrorFeed data={errorData} onPageChange={handleErrorPageChange} />
-      </section>
+        <SystemActions />
+      </div>
     </div>
   );
 }
