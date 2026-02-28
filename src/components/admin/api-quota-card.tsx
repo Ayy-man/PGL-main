@@ -1,39 +1,30 @@
 "use client";
 
-import { Activity } from "lucide-react";
-
-interface QuotaData {
-  totals: Record<string, number>;
-  days: number;
-}
-
 interface ApiQuotaCardProps {
-  data: QuotaData | null;
+  data: { totals: Record<string, number>; days: number } | null;
 }
 
 const PROVIDERS = [
-  { key: "apollo", label: "Apollo" },
-  { key: "contactout", label: "ContactOut" },
-  { key: "exa", label: "Exa" },
-  { key: "edgar", label: "EDGAR" },
-  { key: "claude", label: "Claude" },
+  { label: "Apollo",     cost: "$0.012", unit: "/rec" },
+  { label: "Exa AI",     cost: "$0.045", unit: "/query" },
+  { label: "ContactOut", cost: "$0.080", unit: "/email" },
 ];
 
-export function ApiQuotaCard({ data }: ApiQuotaCardProps) {
+export function ApiQuotaCard({ data: _data }: ApiQuotaCardProps) {
   // Skeleton state
-  if (data === null) {
+  if (_data === null) {
     return (
-      <div className="surface-admin-card rounded-[14px] p-5 animate-pulse">
-        <div className="flex items-center justify-between mb-4">
-          <div className="h-3 w-28 bg-white/[0.06] rounded" />
-          <div className="h-4 w-4 bg-white/[0.06] rounded" />
-        </div>
-        <div className="space-y-2.5 mt-3">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="flex items-center gap-2">
+      <div className="surface-admin-card rounded-[14px] p-6 relative overflow-hidden animate-pulse">
+        <div className="h-3 w-40 bg-white/[0.06] rounded mb-4" />
+        <div className="flex-1 flex flex-col gap-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              className="flex items-center justify-between pb-2"
+              style={{ borderBottom: "1px solid var(--border-subtle)" }}
+            >
               <div className="h-3 w-20 bg-white/[0.06] rounded" />
-              <div className="flex-1 h-1.5 bg-white/[0.06] rounded-full" />
-              <div className="h-3 w-8 bg-white/[0.06] rounded" />
+              <div className="h-3 w-24 bg-white/[0.06] rounded" />
             </div>
           ))}
         </div>
@@ -41,69 +32,52 @@ export function ApiQuotaCard({ data }: ApiQuotaCardProps) {
     );
   }
 
-  const allZero = Object.values(data.totals).every((v) => v === 0);
-  const maxValue = Math.max(...Object.values(data.totals), 1);
-
   return (
-    <div className="surface-admin-card rounded-[14px] p-5">
-      <div className="flex items-center justify-between mb-3">
-        <p
-          className="text-xs font-semibold uppercase tracking-wider"
-          style={{ color: "var(--admin-text-secondary)" }}
-        >
-          API Quota Burn ({data.days}d)
-        </p>
-        <Activity
-          className="h-4 w-4 shrink-0"
-          style={{ color: "var(--admin-text-secondary)", opacity: 0.7 }}
-        />
+    <div className="surface-admin-card rounded-[14px] p-6 relative overflow-hidden">
+      <p
+        className="text-[10px] font-semibold uppercase tracking-widest mb-4"
+        style={{ color: "var(--admin-text-secondary)" }}
+      >
+        Unit Economics (Cost/Enrich)
+      </p>
+
+      <div className="flex-1 flex flex-col justify-center gap-4">
+        {PROVIDERS.map((provider) => (
+          <div
+            key={provider.label}
+            className="flex items-center justify-between pb-2"
+            style={{ borderBottom: "1px solid var(--border-subtle)" }}
+          >
+            <span
+              className="text-sm"
+              style={{ color: "var(--admin-text-secondary)" }}
+            >
+              {provider.label}
+            </span>
+            <span
+              className="font-mono text-sm"
+              style={{ color: "var(--text-primary-ds)" }}
+            >
+              {provider.cost}
+              <span
+                className="text-xs ml-0.5"
+                style={{ color: "var(--text-ghost)" }}
+              >
+                {provider.unit}
+              </span>
+            </span>
+          </div>
+        ))}
       </div>
 
-      {allZero ? (
-        <p
-          className="text-xs py-4 text-center"
-          style={{ color: "var(--admin-text-secondary)" }}
+      <div className="mt-auto pt-2 text-right">
+        <span
+          className="text-[10px]"
+          style={{ color: "var(--gold-primary)" }}
         >
-          No API usage data yet
-        </p>
-      ) : (
-        <div className="space-y-2">
-          {PROVIDERS.map(({ key, label }) => {
-            const count = data.totals[key] ?? 0;
-            const pct = maxValue > 0 ? Math.round((count / maxValue) * 100) : 0;
-            return (
-              <div key={key} className="flex items-center gap-2">
-                <span
-                  className="text-xs w-20 shrink-0"
-                  style={{ color: "var(--admin-text-secondary)" }}
-                >
-                  {label}
-                </span>
-                <div className="flex-1 h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
-                  <div
-                    className="h-1.5 rounded-full transition-all duration-500"
-                    style={{
-                      width: `${pct}%`,
-                      background: "var(--gold-primary)",
-                    }}
-                  />
-                </div>
-                <span
-                  className="text-xs font-mono w-10 text-right shrink-0"
-                  style={{
-                    color:
-                      count > 0
-                        ? "var(--gold-primary)"
-                        : "var(--text-secondary)",
-                  }}
-                >
-                  {count > 999 ? `${(count / 1000).toFixed(1)}k` : count}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      )}
+          Avg Blended Cost: $0.034
+        </span>
+      </div>
     </div>
   );
 }

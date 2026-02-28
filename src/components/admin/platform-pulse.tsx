@@ -1,9 +1,6 @@
 "use client";
 
-import { useRef } from "react";
-import { Users, Activity, UserCheck } from "lucide-react";
-import { useCountUp } from "@/hooks/use-count-up";
-import { ApiQuotaCard } from "@/components/admin/api-quota-card";
+import { Activity } from "lucide-react";
 
 interface PlatformPulseProps {
   data: {
@@ -16,77 +13,24 @@ interface PlatformPulseProps {
   quotaData?: { totals: Record<string, number>; days: number } | null;
 }
 
-function SkeletonCard() {
-  return (
-    <div className="surface-admin-card rounded-[14px] p-5 animate-pulse">
-
-      <div className="flex items-center justify-between mb-4">
-        <div className="h-3 w-28 bg-white/[0.06] rounded" />
-        <div className="h-4 w-4 bg-white/[0.06] rounded" />
-      </div>
-      <div className="h-9 w-20 bg-white/[0.06] rounded mb-2" />
-      <div className="h-3 w-36 bg-white/[0.06] rounded" />
-    </div>
-  );
-}
-
-interface StatCardProps {
-  label: string;
-  value: number;
-  subtitle: string;
-  icon: React.ReactNode;
-  accentSubtitle?: boolean;
-}
-
-function StatCard({ label, value, subtitle, icon, accentSubtitle }: StatCardProps) {
-  const animated = useCountUp(value);
-  const isNonZero = value > 0;
-
-  return (
-    <div className="surface-admin-card rounded-[14px] p-5">
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--admin-text-secondary)" }}>
-          {label}
-        </p>
-        <span style={{ color: "var(--admin-text-secondary)", opacity: 0.7 }}>{icon}</span>
-      </div>
-      <p
-        className="font-serif font-bold leading-none"
-        style={{
-          fontSize: "36px",
-          color: isNonZero ? "var(--gold-primary)" : "var(--text-secondary)",
-        }}
-      >
-        {animated.toLocaleString()}
-      </p>
-      <p
-        className="mt-1.5 text-xs"
-        style={{ color: accentSubtitle ? "var(--gold-primary)" : "var(--admin-text-secondary)" }}
-      >
-        {subtitle}
-      </p>
-    </div>
-  );
-}
-
-export function PlatformPulse({ data, quotaData }: PlatformPulseProps) {
-  const hasAnimated = useRef(false);
-
+export function PlatformPulse({ data }: PlatformPulseProps) {
   if (data === null) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <SkeletonCard />
-        <SkeletonCard />
-        <SkeletonCard />
-        <SkeletonCard />
+      <div className="surface-admin-card rounded-[14px] p-6 animate-pulse">
+        <div className="h-3 w-32 bg-white/[0.06] rounded mb-5" />
+        <div className="space-y-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i}>
+              <div className="flex justify-between items-end mb-1">
+                <div className="h-3 w-24 bg-white/[0.06] rounded" />
+                <div className="h-5 w-16 bg-white/[0.06] rounded" />
+              </div>
+              <div className="w-full h-1 rounded-full bg-white/[0.06]" />
+            </div>
+          ))}
+        </div>
       </div>
     );
-  }
-
-  // Only animate on first non-null data load
-  const shouldAnimate = !hasAnimated.current;
-  if (!hasAnimated.current) {
-    hasAnimated.current = true;
   }
 
   const successRate =
@@ -96,33 +40,84 @@ export function PlatformPulse({ data, quotaData }: PlatformPulseProps) {
         )
       : 0;
 
+  const prospectsDisplay =
+    data.totalProspects >= 1000
+      ? (data.totalProspects / 1000).toFixed(0) + "k"
+      : data.totalProspects.toLocaleString();
+
+  const metrics = [
+    {
+      label: "Active Users",
+      value: data.activeUsersToday.toLocaleString(),
+      pct: Math.min(data.activeUsersToday * 10, 100),
+      barColor: "var(--gold-primary)",
+      valueColor: "var(--text-primary-ds)",
+    },
+    {
+      label: "Prospects Scraped",
+      value: prospectsDisplay,
+      pct: Math.min((data.totalProspects / 1000) * 10, 100),
+      barColor: "var(--gold-primary)",
+      valueColor: "var(--text-primary-ds)",
+    },
+    {
+      label: "Success Rate",
+      value: successRate + "%",
+      pct: successRate,
+      barColor: "var(--success)",
+      valueColor: "var(--success)",
+    },
+  ];
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      <StatCard
-        label="Total Prospects"
-        value={shouldAnimate ? data.totalProspects : data.totalProspects}
-        subtitle={`enrichment coverage: ${data.enrichmentCoverage}%`}
-        icon={<Users className="h-4 w-4" />}
-        accentSubtitle={false}
-      />
+    <div className="surface-admin-card rounded-[14px] p-6 relative overflow-hidden group">
+      {/* Decorative background icon */}
+      <div className="absolute top-0 right-0 p-4 pointer-events-none opacity-[0.05] group-hover:opacity-[0.10] transition-opacity">
+        <Activity className="h-20 w-20" style={{ color: "var(--gold-primary)" }} />
+      </div>
 
-      <StatCard
-        label="Enrichment Pipeline"
-        value={successRate}
-        subtitle={`${data.enrichmentFailed.toLocaleString()} failed`}
-        icon={<Activity className="h-4 w-4" />}
-        accentSubtitle={true}
-      />
+      {/* Content */}
+      <div className="relative z-10">
+        {/* Card header */}
+        <p
+          className="text-[10px] font-semibold uppercase tracking-widest mb-4 flex items-center gap-2"
+          style={{ color: "var(--admin-text-secondary)" }}
+        >
+          <span
+            className="size-2 rounded-full animate-pulse"
+            style={{ background: "var(--gold-primary)" }}
+          />
+          Platform Pulse
+        </p>
 
-      <ApiQuotaCard data={quotaData ?? null} />
-
-      <StatCard
-        label="Active Users Today"
-        value={data.activeUsersToday}
-        subtitle={`7d avg: ${data.activeUsers7dAvg}`}
-        icon={<UserCheck className="h-4 w-4" />}
-        accentSubtitle={false}
-      />
+        {/* 3 metric rows */}
+        <div className="space-y-4">
+          {metrics.map((metric) => (
+            <div key={metric.label}>
+              <div className="flex justify-between items-end mb-1">
+                <span className="text-xs" style={{ color: "var(--admin-text-secondary)" }}>
+                  {metric.label}
+                </span>
+                <span
+                  className="font-mono text-lg"
+                  style={{ color: metric.valueColor }}
+                >
+                  {metric.value}
+                </span>
+              </div>
+              <div
+                className="w-full h-1 rounded-full"
+                style={{ background: "rgba(255,255,255,0.05)" }}
+              >
+                <div
+                  className="h-1 rounded-full transition-all duration-500"
+                  style={{ width: `${metric.pct}%`, background: metric.barColor }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
