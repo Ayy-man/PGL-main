@@ -15,7 +15,6 @@ interface BulkActionsBarProps {
 
 export function BulkActionsBar({
   selectedCount,
-  totalCount,
   allSelected,
   onSelectAll,
   onAddToList,
