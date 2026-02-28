@@ -98,10 +98,10 @@ export function ProfileHeader({
 
   return (
     <div
-      className="py-7 px-14 border-b border-border bg-gradient-to-b from-card to-background"
+      className="py-5 px-4 lg:py-7 lg:px-14 border-b border-border bg-gradient-to-b from-card to-background"
     >
-      <div className="flex items-start justify-between gap-6">
-        {/* Left: Avatar + Info */}
+      <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4 lg:gap-6">
+        {/* Left: Avatar + Info (always horizontal row) */}
         <div className="flex items-start gap-5">
           {/* Avatar */}
           <div
@@ -118,7 +118,7 @@ export function ProfileHeader({
           <div className="min-w-0">
             {/* Name */}
             <h1
-              className="font-serif text-[28px] font-bold leading-tight text-foreground"
+              className="font-serif text-[24px] lg:text-[28px] font-bold leading-tight text-foreground"
             >
               {prospect.full_name}
             </h1>
@@ -154,74 +154,69 @@ export function ProfileHeader({
         </div>
 
         {/* Right: Action buttons */}
-        <div className="flex shrink-0 flex-col items-end gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           {/* Quick contact actions */}
-          <div className="flex items-center gap-2">
-            <button
-              className="flex h-9 items-center gap-2 rounded-[8px] border border-border px-3 text-sm text-muted-foreground transition-colors cursor-pointer hover:bg-accent hover:text-foreground"
-              aria-label="Send email"
-              onClick={() => {
-                if (prospect.work_email) {
-                  window.location.href = `mailto:${prospect.work_email}`;
-                }
-              }}
-            >
-              <Mail className="h-4 w-4 shrink-0" />
-            </button>
+          <button
+            className="flex h-9 items-center gap-2 rounded-[8px] border border-border px-3 text-sm text-muted-foreground transition-colors cursor-pointer hover:bg-accent hover:text-foreground"
+            aria-label="Send email"
+            onClick={() => {
+              if (prospect.work_email) {
+                window.location.href = `mailto:${prospect.work_email}`;
+              }
+            }}
+          >
+            <Mail className="h-4 w-4 shrink-0" />
+          </button>
 
-            <button
-              className="flex h-9 items-center gap-2 rounded-[8px] border border-border px-3 text-sm text-muted-foreground transition-colors cursor-pointer hover:bg-accent hover:text-foreground"
-              aria-label="Call phone"
-              onClick={() => {
-                if (prospect.work_phone) {
-                  window.location.href = `tel:${prospect.work_phone}`;
-                }
-              }}
-            >
-              <Phone className="h-4 w-4 shrink-0" />
-            </button>
+          <button
+            className="flex h-9 items-center gap-2 rounded-[8px] border border-border px-3 text-sm text-muted-foreground transition-colors cursor-pointer hover:bg-accent hover:text-foreground"
+            aria-label="Call phone"
+            onClick={() => {
+              if (prospect.work_phone) {
+                window.location.href = `tel:${prospect.work_phone}`;
+              }
+            }}
+          >
+            <Phone className="h-4 w-4 shrink-0" />
+          </button>
 
-            <button
-              className="flex h-9 items-center gap-2 rounded-[8px] border border-border px-3 text-sm text-muted-foreground transition-colors cursor-pointer hover:bg-accent hover:text-foreground"
-              aria-label="More actions"
-            >
-              <MoreHorizontal className="h-4 w-4 shrink-0" />
-            </button>
-          </div>
+          <button
+            className="flex h-9 items-center gap-2 rounded-[8px] border border-border px-3 text-sm text-muted-foreground transition-colors cursor-pointer hover:bg-accent hover:text-foreground"
+            aria-label="More actions"
+          >
+            <MoreHorizontal className="h-4 w-4 shrink-0" />
+          </button>
 
-          {/* Add to List + Find Lookalikes */}
-          <div className="flex items-center gap-2">
-            <button
-              className="flex h-9 items-center gap-2 rounded-[8px] border border-border px-3 text-sm text-muted-foreground transition-colors cursor-pointer hover:bg-accent hover:text-foreground"
-              onClick={onAddToList}
-            >
-              <Plus className="h-4 w-4 shrink-0" />
-              Add to List
-            </button>
+          <button
+            className="flex h-9 items-center gap-2 rounded-[8px] border border-border px-3 text-sm text-muted-foreground transition-colors cursor-pointer hover:bg-accent hover:text-foreground"
+            onClick={onAddToList}
+          >
+            <Plus className="h-4 w-4 shrink-0" />
+            Add to List
+          </button>
 
-            <button
-              className="flex h-9 items-center gap-2 rounded-[8px] border border-border px-3 text-sm text-muted-foreground transition-colors cursor-pointer hover:bg-accent hover:text-foreground"
-              onClick={onFindLookalikes}
-            >
-              <UserSearch className="h-4 w-4 shrink-0" />
-              Find Lookalikes
-            </button>
+          <button
+            className="flex h-9 items-center gap-2 rounded-[8px] border border-border px-3 text-sm text-muted-foreground transition-colors cursor-pointer hover:bg-accent hover:text-foreground"
+            onClick={onFindLookalikes}
+          >
+            <UserSearch className="h-4 w-4 shrink-0" />
+            Find Lookalikes
+          </button>
 
-            {/* Draft Outreach — disabled, coming soon */}
-            <button
-              className="flex h-9 items-center gap-2 rounded-[8px] px-4 text-sm font-medium opacity-50 cursor-not-allowed"
-              style={{
-                background: "var(--gold-bg-strong)",
-                border: "1px solid var(--border-gold)",
-                color: "var(--gold-primary)",
-              }}
-              disabled
-              title="Coming Soon"
-              aria-label="Draft Outreach — Coming Soon"
-            >
-              Draft Outreach
-            </button>
-          </div>
+          {/* Draft Outreach — disabled, coming soon; hidden on mobile */}
+          <button
+            className="hidden lg:flex h-9 items-center gap-2 rounded-[8px] px-4 text-sm font-medium opacity-50 cursor-not-allowed"
+            style={{
+              background: "var(--gold-bg-strong)",
+              border: "1px solid var(--border-gold)",
+              color: "var(--gold-primary)",
+            }}
+            disabled
+            title="Coming Soon"
+            aria-label="Draft Outreach — Coming Soon"
+          >
+            Draft Outreach
+          </button>
         </div>
       </div>
     </div>
