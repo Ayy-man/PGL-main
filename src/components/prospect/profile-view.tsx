@@ -11,6 +11,7 @@ import { EnrichmentTab } from "./enrichment-tab";
 import { NotesTab } from "./notes-tab";
 import { ListsTab } from "./lists-tab";
 import { LookalikeDiscovery } from "./lookalike-discovery";
+import { WealthSignals } from "./wealth-signals";
 
 type SourceStatus =
   | "pending"
@@ -305,6 +306,12 @@ export function ProfileView({
                   </p>
                 )}
               </div>
+
+              {/* Wealth Signals */}
+              <WealthSignals
+                webData={prospect.web_data}
+                insiderData={prospect.insider_data}
+              />
 
               {/* Recent SEC Transactions (top 5) */}
               {recentTransactions.length > 0 && (
