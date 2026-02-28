@@ -24,11 +24,11 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 ## Current Position
 
 Phase: 7 of 9 (Layout Shell + Navigation)
-Plan: 3 of 5 — COMPLETE (07-03: Wire TopBar into Tenant Layout)
-Status: In progress — 07-04 is next (MobileSidebar wiring)
-Last activity: 2026-03-01 — Phase 7 Plan 03 complete: TopBar wired into tenant layout with session-derived user initials, hidden on mobile via hidden lg:flex, duplicate ambient glow divs removed
+Plan: 4 of 5 — COMPLETE (07-04: Wire TopBar into Admin Layout + Add Admin Mobile Sidebar)
+Status: In progress — 07-05 is next (final polish / verification pass)
+Last activity: 2026-03-01 — Phase 7 Plan 04 complete: AdminMobileSidebar Sheet-based drawer created, TopBar wired into admin layout with session-derived user initials, ambient glows removed, desktop aside hidden lg:flex
 
-Progress: [█████████░] 88% (07-01, 07-02, 07-03 complete, 07-04 and 07-05 remaining)
+Progress: [█████████░] 90% (07-01, 07-02, 07-03, 07-04 complete, 07-05 remaining)
 
 ## Performance Metrics
 
@@ -55,6 +55,7 @@ Progress: [█████████░] 88% (07-01, 07-02, 07-03 complete, 07
 | Phase 05-ui-revamp P07 | 7 | 1 tasks | 12 files |
 | Phase 07 P01 | 2 | 1 tasks | 1 files |
 | Phase 07 P02 | 1 | 1 tasks | 2 files |
+| Phase 07 P04 | 4 | 2 tasks | 2 files |
 | Phase 07 P03 | 1 | 2 tasks | 2 files |
 
 ### Phase 3 Plan Completion
@@ -180,6 +181,10 @@ Recent decisions affecting current work:
 - [Phase 05-07]: Gold CTA button pattern in admin: bg-[var(--gold-bg-strong)] border border-[var(--border-gold)] text-[var(--gold-primary)] for form submit and page action buttons
 - [Phase 07-01]: exact: true on Dashboard nav item prevents false active state on every sub-page; fullHref for root computed as /${orgId} (no trailing slash) to match Next.js pathname behavior
 - [Phase 07-02]: BarChart3 icon added for Analytics admin nav item; exact:false allows sub-route highlighting
+- [Phase 07-04]: AdminMobileSidebar mirrors MobileSidebar pattern: Sheet + usePathname close effect, reuses AdminNavLinks
+- [Phase 07-04]: Ambient glow divs removed from admin layout — root layout renders them, no duplication needed
+- [Phase 07-04]: Admin aside uses hidden lg:flex (was just flex) to properly hide sidebar on mobile
+- [Phase 07-04]: TopBar userName derived from user.fullName || user.email || "Admin"; userInitials from charAt(0).toUpperCase()
 - [Phase 07]: hidden lg:flex on TopBar ensures MobileSidebar header and TopBar never both show simultaneously
 - [Phase 07]: Ambient glow divs removed from tenant layout — root layout.tsx is the sole owner
 
@@ -241,8 +246,8 @@ All 4 phases and 27 plans are complete. The following items remain before produc
 
 ## Session Continuity
 
-Last session: 2026-02-26 (Phase 5 Plan 05 complete)
-Stopped at: Completed 05-06-PLAN.md — prospect slide-over panel and profile view design system migration complete.
+Last session: 2026-03-01 (Phase 7 Plan 04 complete)
+Stopped at: Completed 07-04-PLAN.md — AdminMobileSidebar created, TopBar wired into admin layout, ambient glows removed, desktop aside hidden lg:flex.
 
 ---
 
