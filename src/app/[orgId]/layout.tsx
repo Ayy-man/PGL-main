@@ -10,28 +10,42 @@ export default async function TenantLayout({
   children: React.ReactNode;
   params: Promise<{ orgId: string }>;
 }) {
-  const { orgId } = await params;
-  const supabase = await createClient();
+  let orgId: string;
+  let tenant: { id: string; name: string; slug: string; logo_url: string | null; primary_color: string | null; secondary_color: string | null; is_active: boolean };
+  let userName: string;
+  let userInitials: string;
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    redirect("/login");
+  try {
+    ({ orgId } = await params);
+    const supabase = await createClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      redirect("/login");
+    }
+
+    // Look up tenant by slug or UUID
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orgId);
+    const { data, error } = await supabase
+      .from("tenants")
+      .select("id, name, slug, logo_url, primary_color, secondary_color, is_active")
+      .eq(isUuid ? "id" : "slug", orgId)
+      .single();
+
+    if (error || !data || !data.is_active) {
+      console.error("[TenantLayout] Tenant query failed:", { orgId, error: error?.message, data });
+      notFound();
+    }
+
+    tenant = data;
+    userName = user?.user_metadata?.full_name ?? user?.email ?? "User";
+    userInitials = userName.charAt(0).toUpperCase() || "?";
+  } catch (err) {
+    // Re-throw Next.js internal errors (redirect, notFound)
+    if (err && typeof err === "object" && "digest" in err) throw err;
+    console.error("[TenantLayout] Server render error:", err);
+    throw err;
   }
-
-  // Look up tenant by slug or UUID
-  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orgId);
-  const { data: tenant, error } = await supabase
-    .from("tenants")
-    .select("id, name, slug, logo_url, primary_color, secondary_color, is_active")
-    .eq(isUuid ? "id" : "slug", orgId)
-    .single();
-
-  if (error || !tenant || !tenant.is_active) {
-    notFound();
-  }
-
-  const userName = user?.user_metadata?.full_name ?? user?.email ?? "User";
-  const userInitials = userName.charAt(0).toUpperCase() || "?";
 
   return (
     <div
