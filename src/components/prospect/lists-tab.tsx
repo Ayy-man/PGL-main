@@ -24,7 +24,7 @@ export function ListsTab({ memberships, orgId, onAddToList }: ListsTabProps) {
         <Link
           key={membership.listId}
           href={`/${orgId}/lists/${membership.listId}`}
-          className="surface-card cursor-pointer p-4 hover:bg-accent no-underline block"
+          className="card-interactive cursor-pointer p-4 no-underline block"
         >
           <p className="text-sm font-semibold text-foreground">
             {membership.listName}

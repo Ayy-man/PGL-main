@@ -217,21 +217,17 @@
     background: var(--bg-card-gradient);
     border: 1px solid var(--border-subtle);
     border-radius: 14px;
-    transition: background 0.2s ease, border-color 0.2s ease;
-  }
-  .surface-card:hover {
-    background: var(--bg-card-hover);
-    border-color: var(--border-hover);
-    box-shadow: 0 0 30px rgba(212,175,55,0.06);
   }
   .card-interactive {
     background: var(--bg-card-gradient);
-    border: 1px solid rgba(255,255,255,0.04);
-    transition: background 0.2s ease, border-color 0.2s ease;
+    border: 1px solid var(--border-subtle);
+    border-radius: 14px;
+    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
   }
   .card-interactive:hover {
     background: var(--bg-card-hover);
     border-color: var(--border-hover);
+    box-shadow: 0 0 30px rgba(212,175,55,0.06);
   }
   .ghost-hover {
     transition: background 0.15s ease, color 0.15s ease;
