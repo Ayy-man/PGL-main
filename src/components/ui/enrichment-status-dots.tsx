@@ -16,18 +16,18 @@ const SOURCE_LABELS: Record<string, string> = {
   claude: "AI",
 };
 
-function getDotColor(status: SourceStatus): string {
+function getDotStyle(status: SourceStatus): { background: string; boxShadow: string } {
   switch (status) {
     case "complete":
-      return "var(--success)";
+      return { background: "var(--success)", boxShadow: "0 0 6px rgba(34,197,94,0.6)" };
     case "in_progress":
-      return "var(--info)";
+      return { background: "var(--info)", boxShadow: "0 0 6px rgba(96,165,250,0.6)" };
     case "failed":
-      return "var(--destructive)";
+      return { background: "var(--destructive)", boxShadow: "0 0 6px rgba(239,68,68,0.6)" };
     case "circuit_open":
-      return "var(--warning)";
+      return { background: "var(--warning)", boxShadow: "0 0 6px rgba(245,158,11,0.6)" };
     default:
-      return "rgba(255,255,255,0.15)";
+      return { background: "rgba(255,255,255,0.15)", boxShadow: "none" };
   }
 }
 
@@ -42,8 +42,8 @@ export function EnrichmentStatusDots({ sourceStatus, className }: EnrichmentStat
           <div
             key={key}
             title={`${SOURCE_LABELS[key] ?? key}: ${status}`}
-            className="h-2 w-2 rounded-full shrink-0"
-            style={{ background: getDotColor(status) }}
+            className="h-2.5 w-2.5 rounded-full shrink-0"
+            style={getDotStyle(status)}
           />
         );
       })}

@@ -22,6 +22,8 @@ const buttonVariants = cva(
         link: "text-primary underline-offset-4 hover:underline",
         gold:
           "bg-[rgba(212,175,55,0.1)] border border-[rgba(212,175,55,0.25)] text-[#d4af37] font-semibold rounded-[8px] hover:bg-[rgba(212,175,55,0.18)]",
+        "gold-solid":
+          "bg-[#d4af37] text-[#0a0a0a] font-bold rounded-[8px] shadow-[0_0_20px_rgba(212,175,55,0.2)] hover:bg-[#c4a030] active:scale-[0.97] transition-all duration-150",
       },
       size: {
         default: "h-9 px-4 py-2",

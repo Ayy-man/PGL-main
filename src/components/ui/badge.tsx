@@ -23,6 +23,8 @@ const badgeVariants = cva(
           "bg-[rgba(96,165,250,0.15)] text-[#60a5fa] border-[rgba(96,165,250,0.3)]",
         gold:
           "bg-[rgba(212,175,55,0.15)] text-[#d4af37] border-[rgba(212,175,55,0.3)]",
+        "gold-solid":
+          "border-transparent bg-[#d4af37] text-[#0a0a0a] font-bold shadow-[0_0_10px_rgba(212,175,55,0.3)]",
       },
     },
     defaultVariants: {
