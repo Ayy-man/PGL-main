@@ -86,7 +86,7 @@ export default function AdminDashboard() {
   const [pulseData, setPulseData] = useState<PulseData | null>(null);
   const [heatmapData, setHeatmapData] = useState<HeatmapData | null>(null);
   const [enrichmentData, setEnrichmentData] = useState<EnrichmentDataPoint[] | null>(null);
-  const [funnelData, setFunnelData] = useState<FunnelDataPoint[] | null>(null);
+  const [_funnelData, setFunnelData] = useState<FunnelDataPoint[] | null>(null);
   const [errorData, setErrorData] = useState<ErrorData | null>(null);
   const [quotaData, setQuotaData] = useState<{ totals: Record<string, number>; days: number } | null>(null);
   const [lastFetched, setLastFetched] = useState<Date | null>(null);

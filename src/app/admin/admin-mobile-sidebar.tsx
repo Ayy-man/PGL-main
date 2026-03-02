@@ -17,7 +17,7 @@ interface AdminMobileSidebarProps {
   userInitials: string;
 }
 
-export function AdminMobileSidebar({ userEmail, userName, userInitials }: AdminMobileSidebarProps) {
+export function AdminMobileSidebar({ userEmail, userName: _userName, userInitials }: AdminMobileSidebarProps) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
