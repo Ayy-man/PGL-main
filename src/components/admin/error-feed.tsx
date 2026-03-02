@@ -11,7 +11,6 @@ interface SourceDetail {
 interface ErrorRecord {
   id: string;
   fullName: string;
-  userName: string;
   tenantName: string;
   tenantId: string;
   enrichmentStatus: string;
