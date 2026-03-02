@@ -60,7 +60,6 @@ interface ErrorData {
   data: Array<{
     id: string;
     fullName: string;
-    userName: string;
     tenantName: string;
     tenantId: string;
     enrichmentStatus: string;

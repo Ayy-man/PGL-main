@@ -16,17 +16,11 @@ interface ProspectRow {
   enrichment_source_status: Record<string, unknown> | string | null;
   updated_at: string | null;
   tenant_id: string | null;
-  user_id: string | null;
 }
 
 interface TenantRow {
   id: string;
   name: string;
-}
-
-interface UserRow {
-  id: string;
-  full_name: string | null;
 }
 
 function normalizeSourceDetails(
@@ -99,7 +93,7 @@ export async function GET(request: NextRequest) {
     const { data: prospects, error: prospectsError } = await admin
       .from("prospects")
       .select(
-        "id, full_name, enrichment_status, enrichment_source_status, updated_at, tenant_id, user_id"
+        "id, full_name, enrichment_status, enrichment_source_status, updated_at, tenant_id"
       )
       .eq("enrichment_status", "failed")
       .gte("updated_at", cutoff.toISOString())
@@ -114,16 +108,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ data: [], total, page, limit });
     }
 
-    // Collect distinct tenant and user IDs from result set
+    // Collect distinct tenant IDs from result set
     const tenantIds = Array.from(new Set(
       (prospects as ProspectRow[])
         .map((p) => p.tenant_id)
-        .filter((id): id is string => id != null)
-    ));
-
-    const userIds = Array.from(new Set(
-      (prospects as ProspectRow[])
-        .map((p) => p.user_id)
         .filter((id): id is string => id != null)
     ));
 
@@ -140,32 +128,15 @@ export async function GET(request: NextRequest) {
       throw new Error(`Tenants query failed: ${tenantsError.message}`);
     }
 
-    // Fetch user names
-    const { data: users, error: usersError } =
-      userIds.length > 0
-        ? await admin
-            .from("users")
-            .select("id, full_name")
-            .in("id", userIds)
-        : { data: [], error: null };
-
-    if (usersError) {
-      throw new Error(`Users query failed: ${usersError.message}`);
-    }
-
     // Build lookup maps
     const tenantMap = new Map<string, string>(
       (tenants ?? []).map((t: TenantRow) => [t.id, t.name])
-    );
-    const userMap = new Map<string, string>(
-      (users ?? []).map((u: UserRow) => [u.id, u.full_name ?? "Unknown"])
     );
 
     // Assemble response
     const data = (prospects as ProspectRow[]).map((p) => ({
       id: p.id,
       fullName: p.full_name ?? "Unknown",
-      userName: p.user_id ? (userMap.get(p.user_id) ?? "Unknown") : "Unknown",
       tenantName: p.tenant_id ? (tenantMap.get(p.tenant_id) ?? "Unknown") : "Unknown",
       tenantId: p.tenant_id,
       enrichmentStatus: p.enrichment_status,
