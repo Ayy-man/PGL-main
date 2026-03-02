@@ -34,9 +34,11 @@ export async function POST(request: NextRequest) {
   try {
     // 1. Parse and validate request body
     const body = await request.json();
+    console.info("[API /search/apollo] Request body:", JSON.stringify(body));
     const validationResult = searchRequestSchema.safeParse(body);
 
     if (!validationResult.success) {
+      console.error("[API /search/apollo] Validation failed:", validationResult.error.format());
       return NextResponse.json(
         {
           error: "Invalid request",
@@ -55,12 +57,15 @@ export async function POST(request: NextRequest) {
     } = await supabase.auth.getUser();
 
     if (!user) {
+      console.error("[API /search/apollo] No authenticated user");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Extract tenant ID from app_metadata
     const tenantId = user.app_metadata?.tenant_id;
+    console.info(`[API /search/apollo] User: ${user.email}, tenant: ${tenantId}`);
     if (!tenantId) {
+      console.error("[API /search/apollo] No tenant_id in app_metadata:", JSON.stringify(user.app_metadata));
       return NextResponse.json(
         { error: "No tenant associated" },
         { status: 403 }
@@ -70,8 +75,10 @@ export async function POST(request: NextRequest) {
     // 3. Fetch persona from database
     const persona = await getPersonaById(personaId, tenantId);
     if (!persona) {
+      console.error(`[API /search/apollo] Persona not found: id=${personaId}, tenant=${tenantId}`);
       return NextResponse.json({ error: "Persona not found" }, { status: 404 });
     }
+    console.info(`[API /search/apollo] Persona: ${persona.name}, filters:`, JSON.stringify(persona.filters));
 
     // 4. Update persona last used timestamp (fire-and-forget)
     updatePersonaLastUsed(personaId, tenantId).catch((error) => {
@@ -92,6 +99,8 @@ export async function POST(request: NextRequest) {
       pageSize
     );
 
+    console.info(`[API /search/apollo] Returning ${result.people.length} results (cached: ${result.cached})`);
+
     // Return results with cache-control header
     return NextResponse.json(result, {
       status: 200,
@@ -102,6 +111,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     // 7. Error handling
     if (error instanceof RateLimitError) {
+      console.warn("[API /search/apollo] Rate limit exceeded, reset at:", error.resetAt);
       return NextResponse.json(
         {
           error: "Rate limit exceeded",
@@ -120,14 +130,16 @@ export async function POST(request: NextRequest) {
     }
 
     if (error instanceof ApolloApiError) {
+      console.error("[API /search/apollo] ApolloApiError:", error.message, "status:", error.statusCode);
+      const status = error.statusCode === 429 ? 429 : 503;
       return NextResponse.json(
-        { error: "Search service temporarily unavailable" },
-        { status: 503 }
+        { error: error.message },
+        { status }
       );
     }
 
     // Log unknown errors
-    console.error("Unexpected error in Apollo search:", error);
+    console.error("[API /search/apollo] Unexpected error:", error);
 
     return NextResponse.json(
       { error: "Internal server error" },

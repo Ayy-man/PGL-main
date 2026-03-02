@@ -8,8 +8,8 @@ import { apolloBreaker, bulkEnrichPeople } from "@/lib/circuit-breaker/apollo-br
 import { getCachedData, setCachedData } from "@/lib/cache/keys";
 import { trackApiUsage } from "@/lib/enrichment/track-api-usage";
 
-/** Hard limit on results per search during testing. */
-const MAX_RESULTS_PER_SEARCH = 10;
+/** Hard limit on results per search — set to 25 for demo. */
+const MAX_RESULTS_PER_SEARCH = 25;
 
 export class RateLimitError extends Error {
   constructor(public resetAt: number) {
@@ -113,11 +113,11 @@ export async function searchApollo(
     throw new RateLimitError(rateLimitResult.reset);
   }
 
-  // 2. Check cache
+  // 2. Check cache (include filters in key so different searches aren't stale)
   const cacheKey = {
     tenantId,
     resource: "apollo:search",
-    identifier: { personaId, page, pageSize: cappedPageSize },
+    identifier: { personaId, page, pageSize: cappedPageSize, filters },
   };
 
   const cachedResult = await getCachedData<{
@@ -143,9 +143,11 @@ export async function searchApollo(
   };
 
   // 4. Search (free — returns obfuscated previews with Apollo IDs)
+  console.info(`[searchApollo] Starting search for persona=${personaId}, page=${page}, pageSize=${cappedPageSize}`);
   try {
     const searchResponse = await apolloBreaker.fire(apolloParams);
     const searchPeople = searchResponse.people || [];
+    console.info(`[searchApollo] Search returned ${searchPeople.length} people`);
 
     // 5. Bulk enrich all results to get full contact data (costs ~1 credit each)
     let enrichedPeople: ApolloPerson[] = [];
@@ -153,8 +155,9 @@ export async function searchApollo(
       const apolloIds = searchPeople.map((p) => p.id);
       try {
         enrichedPeople = await bulkEnrichPeople(apolloIds);
+        console.info(`[searchApollo] Enriched ${enrichedPeople.length} people`);
       } catch (enrichErr) {
-        console.error("[Apollo] Bulk enrich failed, falling back to search previews:", enrichErr);
+        console.error("[searchApollo] Bulk enrich failed, falling back to search previews:", enrichErr);
         // Fall back to search data with what we have
         enrichedPeople = searchPeople.map((p) => ({
           id: p.id,
@@ -174,14 +177,23 @@ export async function searchApollo(
     const result = { people: enrichedPeople, pagination };
 
     // 7. Cache results (24h TTL)
-    await setCachedData(cacheKey, result, 86400);
+    try {
+      await setCachedData(cacheKey, result, 86400);
+    } catch (cacheErr) {
+      console.error("[searchApollo] Failed to cache results (non-fatal):", cacheErr);
+    }
     trackApiUsage("apollo").catch(() => {});
 
     return { ...result, cached: false };
   } catch (error) {
+    console.error("[searchApollo] Search failed:", error);
     if (error instanceof Error) {
       if (error.message === "APOLLO_RATE_LIMIT_HIT") {
         throw new ApolloApiError("Apollo API rate limit hit", 429);
+      }
+      // Circuit breaker open state
+      if (error.message.includes("Breaker is open")) {
+        throw new ApolloApiError("Apollo API temporarily unavailable (circuit breaker open). Try again in 30 seconds.", 503);
       }
       throw new ApolloApiError(error.message, 500);
     }

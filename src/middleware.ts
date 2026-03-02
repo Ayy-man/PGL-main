@@ -20,6 +20,12 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
+  // Let API routes through after auth check — they handle their own authorization
+  if (pathname.startsWith("/api/")) {
+    await supabase.auth.getUser();
+    return response;
+  }
+
   // Refresh session and get user
   const { data: { user } } = await supabase.auth.getUser();
 

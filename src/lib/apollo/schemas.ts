@@ -18,7 +18,7 @@ export const PersonaFilters = z.object({
 export const searchRequestSchema = z.object({
   personaId: z.string().uuid(),
   page: z.number().int().min(1).max(500).default(1),
-  pageSize: z.number().int().min(1).max(10).default(10),
+  pageSize: z.number().int().min(1).max(25).default(25),
   filterOverrides: PersonaFilters.optional(),
 });
 

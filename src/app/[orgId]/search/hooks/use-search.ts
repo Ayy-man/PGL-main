@@ -100,7 +100,7 @@ export function useSearch(): SearchResult {
         body: JSON.stringify({
           personaId: searchState.persona,
           page: searchState.page,
-          pageSize: 10,
+          pageSize: 25,
           ...(() => {
             const mergedOverrides = {
               ...(searchState.keywords ? { keywords: searchState.keywords } : {}),

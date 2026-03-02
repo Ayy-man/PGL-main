@@ -66,7 +66,7 @@ export async function setCachedData<T>(
   ttl: number = 86400
 ): Promise<void> {
   const key = buildCacheKey(params);
-  await redis.set(key, JSON.stringify(data), { ex: ttl });
+  await redis.set(key, data, { ex: ttl });
 }
 
 /**
