@@ -91,7 +91,7 @@ function TenantRow({ tenant }: { tenant: Tenant }) {
 
   return (
     <tr
-      style={{ borderBottom: "1px solid var(--border-subtle)" }}
+      style={{ borderBottom: "1px solid var(--border-subtle)", transition: "background 0.15s ease" }}
       onMouseEnter={(e) => {
         e.currentTarget.style.background = "rgba(255,255,255,0.02)";
       }}
@@ -206,10 +206,14 @@ function TenantRow({ tenant }: { tenant: Tenant }) {
             onMouseEnter={(e) => {
               e.currentTarget.style.color = "var(--text-primary-ds)";
               e.currentTarget.style.background = "rgba(255,255,255,0.08)";
+              const row = e.currentTarget.closest("tr");
+              if (row) row.style.background = "";
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.color = "var(--admin-text-secondary)";
               e.currentTarget.style.background = "";
+              const row = e.currentTarget.closest("tr");
+              if (row) row.style.background = "rgba(255,255,255,0.02)";
             }}
           >
             <LogIn className="h-4 w-4" />
@@ -221,10 +225,14 @@ function TenantRow({ tenant }: { tenant: Tenant }) {
             onMouseEnter={(e) => {
               e.currentTarget.style.color = "var(--text-primary-ds)";
               e.currentTarget.style.background = "rgba(255,255,255,0.08)";
+              const row = e.currentTarget.closest("tr");
+              if (row) row.style.background = "";
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.color = "var(--admin-text-secondary)";
               e.currentTarget.style.background = "";
+              const row = e.currentTarget.closest("tr");
+              if (row) row.style.background = "rgba(255,255,255,0.02)";
             }}
           >
             <History className="h-4 w-4" />
@@ -236,10 +244,14 @@ function TenantRow({ tenant }: { tenant: Tenant }) {
             onMouseEnter={(e) => {
               e.currentTarget.style.color = "oklch(0.62 0.19 22)";
               e.currentTarget.style.background = "rgba(239,68,68,0.08)";
+              const row = e.currentTarget.closest("tr");
+              if (row) row.style.background = "";
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.color = "var(--admin-text-secondary)";
               e.currentTarget.style.background = "";
+              const row = e.currentTarget.closest("tr");
+              if (row) row.style.background = "rgba(255,255,255,0.02)";
             }}
           >
             <Ban className="h-4 w-4" />
