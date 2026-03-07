@@ -62,11 +62,16 @@ export interface Prospect {
   linkedin_url: string | null;
   enrichment_status: EnrichmentStatus;
   enriched_at: string | null;
+  last_enriched_at: string | null;
+  enrichment_source_status: Record<string, unknown> | null;
   // JSONB enrichment fields
   contact_data: ContactData | null;
   web_data: WebData | null;
   insider_data: InsiderData | null;
   ai_summary: string | null;
+  // Company public market data
+  publicly_traded_symbol: string | null;
+  company_cik: string | null;
   created_at: string;
   updated_at: string;
 }
