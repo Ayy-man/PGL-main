@@ -1,6 +1,6 @@
 "use client";
 
-import { createUserAction } from "@/app/admin/actions";
+import { inviteUser } from "@/app/actions/admin";
 import { useState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -39,11 +39,11 @@ export default function NewUserPage() {
     const formData = new FormData(e.currentTarget);
 
     startTransition(async () => {
-      const result = await createUserAction(formData);
-      if (result.success) {
+      try {
+        await inviteUser(formData);
         router.push("/admin/users");
-      } else {
-        setError(result.error || "Failed to create user");
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to create user");
       }
     });
   };

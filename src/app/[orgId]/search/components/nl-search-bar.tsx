@@ -100,7 +100,7 @@ export function NLSearchBar({
           variant="gold"
           size="sm"
           onClick={handleSearchClick}
-          disabled={isLoading || value.trim().length === 0}
+          disabled={isLoading}
         >
           Search
         </Button>

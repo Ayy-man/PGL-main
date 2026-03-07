@@ -8,7 +8,7 @@ interface PersonaPillsProps {
   personas: Persona[];
   selectedId: string;
   onSelect: (id: string) => void;
-  onCreateNew: () => void;
+  createButton?: React.ReactNode;
 }
 
 function getPersonaColor(id: string): string {
@@ -81,7 +81,7 @@ export function PersonaPills({
   personas,
   selectedId,
   onSelect,
-  onCreateNew,
+  createButton,
 }: PersonaPillsProps) {
   return (
     <div>
@@ -100,7 +100,7 @@ export function PersonaPills({
             onSelect={() => onSelect(persona.id)}
           />
         ))}
-        <NewPersonaPill onCreateNew={onCreateNew} />
+        {createButton}
       </div>
     </div>
   );

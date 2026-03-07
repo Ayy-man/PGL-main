@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { Persona } from "@/lib/personas/types";
 import type { List } from "@/lib/lists/types";
@@ -13,7 +12,8 @@ import { AdvancedFiltersPanel } from "./advanced-filters-panel";
 import { BulkActionsBar } from "./bulk-actions-bar";
 import { ProspectResultsTable } from "./prospect-results-table";
 import { ProspectSlideOver } from "@/components/prospect/prospect-slide-over";
-import { Search, AlertCircle, RefreshCw, Loader2 } from "lucide-react";
+import { Search, AlertCircle, RefreshCw, Loader2, Plus } from "lucide-react";
+import { PersonaFormDialog } from "../../personas/components/persona-form-dialog";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import {
@@ -48,7 +48,6 @@ function SkeletonRow() {
 }
 
 export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
-  const router = useRouter();
   const { toast } = useToast();
   const {
     searchState,
@@ -61,7 +60,7 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
     setFilterOverrides,
   } = useSearch();
 
-  const hasPersonaSelected = Boolean(searchState.persona);
+  const hasActiveSearch = Boolean(searchState.persona) || Boolean(searchState.keywords?.trim());
 
   // Bulk selection state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -300,7 +299,24 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
               personas={personas}
               selectedId={searchState.persona}
               onSelect={(id) => setSearchState({ persona: id })}
-              onCreateNew={() => router.push(`/${orgId}/personas/new`)}
+              createButton={
+                <PersonaFormDialog
+                  mode="create"
+                  trigger={
+                    <button
+                      className="flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[13px] font-medium transition-all duration-200 cursor-pointer shrink-0"
+                      style={{
+                        background: "transparent",
+                        border: "1px dashed var(--border-default)",
+                        color: "var(--text-secondary-ds)",
+                      }}
+                    >
+                      <Plus className="h-3 w-3" />
+                      New Persona
+                    </button>
+                  }
+                />
+              }
             />
 
             {/* Advanced Filters toggle */}
@@ -308,7 +324,7 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
           </div>
 
           {/* RESULTS SECTION — conditional on persona selected */}
-          {hasPersonaSelected ? (
+          {hasActiveSearch ? (
             <div>
               {/* Results header row */}
               <div className="flex items-center justify-between mb-4">
@@ -473,8 +489,8 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
             <div className="mt-4">
               <EmptyState
                 icon={Search}
-                title="Select a persona to search"
-                description="Choose a saved persona above or type a natural language query to discover matching prospects."
+                title="Start a search"
+                description="Type a query above and press Search, or select a saved persona to discover matching prospects."
               />
             </div>
           )}

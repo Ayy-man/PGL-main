@@ -72,28 +72,43 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 3. Fetch persona from database
-    const persona = await getPersonaById(personaId, tenantId);
-    if (!persona) {
-      console.error(`[API /search/apollo] Persona not found: id=${personaId}, tenant=${tenantId}`);
-      return NextResponse.json({ error: "Persona not found" }, { status: 404 });
+    let mergedFilters: Record<string, unknown>;
+    let searchIdentifier: string;
+
+    if (personaId) {
+      // 3a. Persona-based search — fetch persona from database
+      const persona = await getPersonaById(personaId, tenantId);
+      if (!persona) {
+        console.error(`[API /search/apollo] Persona not found: id=${personaId}, tenant=${tenantId}`);
+        return NextResponse.json({ error: "Persona not found" }, { status: 404 });
+      }
+      console.info(`[API /search/apollo] Persona: ${persona.name}, filters:`, JSON.stringify(persona.filters));
+
+      // Update persona last used timestamp (fire-and-forget)
+      updatePersonaLastUsed(personaId, tenantId).catch((error) => {
+        console.error("Failed to update persona last used:", error);
+      });
+
+      mergedFilters = filterOverrides
+        ? { ...persona.filters, ...filterOverrides }
+        : persona.filters;
+      searchIdentifier = personaId;
+    } else if (filterOverrides && Object.keys(filterOverrides).length > 0) {
+      // 3b. Keyword-only search — no persona, use filterOverrides directly
+      console.info(`[API /search/apollo] Keyword search, filters:`, JSON.stringify(filterOverrides));
+      mergedFilters = filterOverrides;
+      searchIdentifier = "keyword-search";
+    } else {
+      return NextResponse.json(
+        { error: "Either personaId or filterOverrides with keywords required" },
+        { status: 400 }
+      );
     }
-    console.info(`[API /search/apollo] Persona: ${persona.name}, filters:`, JSON.stringify(persona.filters));
 
-    // 4. Update persona last used timestamp (fire-and-forget)
-    updatePersonaLastUsed(personaId, tenantId).catch((error) => {
-      console.error("Failed to update persona last used:", error);
-    });
-
-    // 5. Merge persona filters with ad-hoc overrides (if provided)
-    const mergedFilters = filterOverrides
-      ? { ...persona.filters, ...filterOverrides }
-      : persona.filters;
-
-    // 6. Call searchApollo with merged filters
+    // 4. Call searchApollo with merged filters
     const result = await searchApollo(
       tenantId,
-      personaId,
+      searchIdentifier,
       mergedFilters,
       page,
       pageSize

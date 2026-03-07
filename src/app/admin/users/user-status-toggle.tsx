@@ -1,6 +1,6 @@
 "use client";
 
-import { toggleUserStatusAction } from "@/app/admin/actions";
+import { toggleUserStatus } from "@/app/actions/admin";
 import { useState, useTransition } from "react";
 
 interface UserStatusToggleProps {
@@ -17,11 +17,12 @@ export function UserStatusToggle({ userId, isActive }: UserStatusToggleProps) {
     setCurrentStatus(newStatus);
 
     startTransition(async () => {
-      const result = await toggleUserStatusAction(userId, newStatus);
-      if (!result.success) {
+      try {
+        await toggleUserStatus(userId);
+      } catch (err) {
         // Revert on error
         setCurrentStatus(!newStatus);
-        console.error(result.error);
+        console.error(err instanceof Error ? err.message : "Failed to toggle user status");
       }
     });
   };

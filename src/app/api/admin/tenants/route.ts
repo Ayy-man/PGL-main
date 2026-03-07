@@ -1,18 +1,25 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { requireSuperAdmin } from "@/lib/auth/rbac";
+
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    // Guard: Only super admin can fetch tenants
-    await requireSuperAdmin();
+    // Guard: Only super admin can access tenant list
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user || user.app_metadata?.role !== "super_admin") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
-    const supabase = createAdminClient();
+    const admin = createAdminClient();
 
-    const { data: tenants, error } = await supabase
+    const { data: tenants, error } = await admin
       .from("tenants")
-      .select("id, name")
-      .eq("is_active", true)
+      .select("id, name, slug, is_active")
       .order("name");
 
     if (error) {

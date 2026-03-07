@@ -143,13 +143,12 @@ export async function getListMembers(listId: string, tenantId: string): Promise<
       updated_at,
       prospects (
         id,
-        name,
+        full_name,
         title,
         company,
         location,
-        email,
-        email_status,
-        phone,
+        work_email,
+        work_phone,
         linkedin_url
       )
     `)
@@ -162,6 +161,17 @@ export async function getListMembers(listId: string, tenantId: string): Promise<
   }
 
   // Map the response to match ListMember interface
+  type RawProspect = {
+    id: string;
+    full_name: string;
+    title: string | null;
+    company: string | null;
+    location: string | null;
+    work_email: string | null;
+    work_phone: string | null;
+    linkedin_url: string | null;
+  };
+
   type RawListMember = {
     id: string;
     list_id: string;
@@ -170,31 +180,11 @@ export async function getListMembers(listId: string, tenantId: string): Promise<
     notes: string | null;
     created_at: string;
     updated_at: string;
-    prospects: Array<{
-      id: string;
-      name: string;
-      title: string | null;
-      company: string | null;
-      location: string | null;
-      email: string | null;
-      email_status: string | null;
-      phone: string | null;
-      linkedin_url: string | null;
-    }> | {
-      id: string;
-      name: string;
-      title: string | null;
-      company: string | null;
-      location: string | null;
-      email: string | null;
-      email_status: string | null;
-      phone: string | null;
-      linkedin_url: string | null;
-    };
+    prospects: RawProspect[] | RawProspect;
   };
 
   return (data || []).map((item: RawListMember) => {
-    const prospects = Array.isArray(item.prospects) ? item.prospects[0] : item.prospects;
+    const raw = Array.isArray(item.prospects) ? item.prospects[0] : item.prospects;
     return {
       id: item.id,
       list_id: item.list_id,
@@ -203,7 +193,17 @@ export async function getListMembers(listId: string, tenantId: string): Promise<
       notes: item.notes,
       added_at: item.created_at,
       updated_at: item.updated_at,
-      prospect: prospects
+      prospect: {
+        id: raw.id,
+        name: raw.full_name,
+        title: raw.title,
+        company: raw.company,
+        location: raw.location,
+        email: raw.work_email,
+        email_status: null,
+        phone: raw.work_phone,
+        linkedin_url: raw.linkedin_url
+      }
     };
   }) as ListMember[];
 }
@@ -235,13 +235,12 @@ export async function addProspectToList(
       updated_at,
       prospects (
         id,
-        name,
+        full_name,
         title,
         company,
         location,
-        email,
-        email_status,
-        phone,
+        work_email,
+        work_phone,
         linkedin_url
       )
     `)
@@ -256,6 +255,17 @@ export async function addProspectToList(
   }
 
   // Map the response to match ListMember interface
+  type RawInsertProspect = {
+    id: string;
+    full_name: string;
+    title: string | null;
+    company: string | null;
+    location: string | null;
+    work_email: string | null;
+    work_phone: string | null;
+    linkedin_url: string | null;
+  };
+
   type RawInsertData = {
     id: string;
     list_id: string;
@@ -264,31 +274,11 @@ export async function addProspectToList(
     notes: string | null;
     created_at: string;
     updated_at: string;
-    prospects: Array<{
-      id: string;
-      name: string;
-      title: string | null;
-      company: string | null;
-      location: string | null;
-      email: string | null;
-      email_status: string | null;
-      phone: string | null;
-      linkedin_url: string | null;
-    }> | {
-      id: string;
-      name: string;
-      title: string | null;
-      company: string | null;
-      location: string | null;
-      email: string | null;
-      email_status: string | null;
-      phone: string | null;
-      linkedin_url: string | null;
-    };
+    prospects: RawInsertProspect[] | RawInsertProspect;
   };
 
   const typedData = data as unknown as RawInsertData;
-  const prospects = Array.isArray(typedData.prospects) ? typedData.prospects[0] : typedData.prospects;
+  const raw = Array.isArray(typedData.prospects) ? typedData.prospects[0] : typedData.prospects;
 
   // Sync member_count on the parent list
   await syncListMemberCount(supabase, listId, tenantId);
@@ -301,7 +291,17 @@ export async function addProspectToList(
     notes: typedData.notes,
     added_at: typedData.created_at,
     updated_at: typedData.updated_at,
-    prospect: prospects
+    prospect: {
+      id: raw.id,
+      name: raw.full_name,
+      title: raw.title,
+      company: raw.company,
+      location: raw.location,
+      email: raw.work_email,
+      email_status: null,
+      phone: raw.work_phone,
+      linkedin_url: raw.linkedin_url
+    }
   } as ListMember;
 }
 

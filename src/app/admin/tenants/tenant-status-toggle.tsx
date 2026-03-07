@@ -1,6 +1,6 @@
 "use client";
 
-import { toggleTenantStatusAction } from "@/app/admin/actions";
+import { toggleTenantStatus } from "@/app/actions/admin";
 import { useState, useTransition } from "react";
 
 interface TenantStatusToggleProps {
@@ -17,11 +17,12 @@ export function TenantStatusToggle({ tenantId, isActive }: TenantStatusTogglePro
     setCurrentStatus(newStatus);
 
     startTransition(async () => {
-      const result = await toggleTenantStatusAction(tenantId, newStatus);
-      if (!result.success) {
+      try {
+        await toggleTenantStatus(tenantId);
+      } catch (err) {
         // Revert on error
         setCurrentStatus(!newStatus);
-        console.error(result.error);
+        console.error(err instanceof Error ? err.message : "Failed to toggle tenant status");
       }
     });
   };

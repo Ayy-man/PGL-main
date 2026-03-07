@@ -1,6 +1,6 @@
 "use client";
 
-import { createTenantAction } from "@/app/admin/actions";
+import { createTenant } from "@/app/actions/admin";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -18,11 +18,11 @@ export default function NewTenantPage() {
     const formData = new FormData(e.currentTarget);
 
     startTransition(async () => {
-      const result = await createTenantAction(formData);
-      if (result.success) {
+      try {
+        await createTenant(formData);
         router.push("/admin/tenants");
-      } else {
-        setError(result.error || "Failed to create tenant");
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to create tenant");
       }
     });
   };

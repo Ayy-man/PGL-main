@@ -68,7 +68,10 @@ export function useSearch(): SearchResult {
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const executeSearch = useCallback(async () => {
-    if (!searchState.persona) {
+    const hasPersona = Boolean(searchState.persona);
+    const hasKeywords = Boolean(searchState.keywords?.trim());
+
+    if (!hasPersona && !hasKeywords) {
       setResults([]);
       setPagination({
         page: 1,
@@ -94,23 +97,26 @@ export function useSearch(): SearchResult {
     setError(null);
 
     try {
+      // Build request body — personaId is optional now
+      const mergedOverrides = {
+        ...(searchState.keywords ? { keywords: searchState.keywords } : {}),
+        ...filterOverrides,
+      };
+      const body: Record<string, unknown> = {
+        page: searchState.page,
+        pageSize: 25,
+      };
+      if (searchState.persona) {
+        body.personaId = searchState.persona;
+      }
+      if (Object.keys(mergedOverrides).length > 0) {
+        body.filterOverrides = mergedOverrides;
+      }
+
       const response = await fetch("/api/search/apollo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          personaId: searchState.persona,
-          page: searchState.page,
-          pageSize: 25,
-          ...(() => {
-            const mergedOverrides = {
-              ...(searchState.keywords ? { keywords: searchState.keywords } : {}),
-              ...filterOverrides,
-            };
-            return Object.keys(mergedOverrides).length > 0
-              ? { filterOverrides: mergedOverrides }
-              : {};
-          })(),
-        }),
+        body: JSON.stringify(body),
         signal: controller.signal,
       });
 
