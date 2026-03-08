@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Plus } from "lucide-react";
 import type { Persona } from "@/lib/personas/types";
 
 interface PersonaPillsProps {
@@ -52,27 +51,6 @@ function PersonaPill({
         style={{ background: getPersonaColor(persona.id) }}
       />
       {persona.name}
-    </button>
-  );
-}
-
-function NewPersonaPill({ onCreateNew }: { onCreateNew: () => void }) {
-  const [hovered, setHovered] = useState(false);
-
-  return (
-    <button
-      onClick={onCreateNew}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        background: "transparent",
-        border: `1px dashed ${hovered ? "var(--border-hover)" : "var(--border-default)"}`,
-        color: hovered ? "var(--gold-primary)" : "var(--text-secondary-ds)",
-      }}
-      className="flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[13px] font-medium transition-all duration-200 cursor-pointer shrink-0"
-    >
-      <Plus className="h-3 w-3" />
-      New Persona
     </button>
   );
 }

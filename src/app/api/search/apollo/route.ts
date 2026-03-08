@@ -7,6 +7,7 @@ import {
   ApolloApiError,
 } from "@/lib/apollo/client";
 import { getPersonaById, updatePersonaLastUsed } from "@/lib/personas/queries";
+import type { PersonaFilters } from "@/lib/personas/types";
 
 export const dynamic = "force-dynamic";
 
@@ -72,7 +73,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let mergedFilters: Record<string, unknown>;
+    let mergedFilters: PersonaFilters;
     let searchIdentifier: string;
 
     if (personaId) {
