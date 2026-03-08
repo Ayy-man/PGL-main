@@ -20,7 +20,7 @@ export function PersonaCard({ persona }: PersonaCardProps) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [cardStyle, setCardStyle] = useState({
     background: "var(--bg-card-gradient)",
-    borderColor: "var(--border-subtle)",
+    borderColor: "var(--border-default)",
   });
 
   const handleDelete = async () => {
@@ -97,7 +97,7 @@ export function PersonaCard({ persona }: PersonaCardProps) {
       onMouseLeave={() =>
         setCardStyle({
           background: "var(--bg-card-gradient)",
-          borderColor: "var(--border-subtle)",
+          borderColor: "var(--border-default)",
         })
       }
     >

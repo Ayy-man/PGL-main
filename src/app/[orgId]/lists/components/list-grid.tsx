@@ -48,15 +48,18 @@ export function ListGrid({ lists }: ListGridProps) {
           className="flex items-center justify-between p-6 px-7 rounded-xl transition-colors cursor-pointer group"
           style={{
             background: "var(--bg-card-gradient)",
-            border: "1px solid rgba(255,255,255,0.04)",
+            border: "1px solid var(--border-default)",
+            boxShadow: "var(--card-shadow)",
           }}
           onMouseEnter={(e) => {
             (e.currentTarget as HTMLDivElement).style.background = "var(--bg-card-hover)";
             (e.currentTarget as HTMLDivElement).style.border = "1px solid var(--border-hover)";
+            (e.currentTarget as HTMLDivElement).style.boxShadow = "var(--card-shadow-hover)";
           }}
           onMouseLeave={(e) => {
             (e.currentTarget as HTMLDivElement).style.background = "var(--bg-card-gradient)";
-            (e.currentTarget as HTMLDivElement).style.border = "1px solid rgba(255,255,255,0.04)";
+            (e.currentTarget as HTMLDivElement).style.border = "1px solid var(--border-default)";
+            (e.currentTarget as HTMLDivElement).style.boxShadow = "var(--card-shadow)";
           }}
         >
           {/* Left side */}

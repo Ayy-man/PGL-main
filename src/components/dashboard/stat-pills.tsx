@@ -26,7 +26,7 @@ export function StatPills({ totals }: StatPillsProps) {
           className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs"
           style={{
             background: "var(--bg-elevated)",
-            border: "1px solid var(--border-subtle)",
+            border: "1px solid var(--border-default)",
             color: "var(--text-secondary)",
           }}
         >

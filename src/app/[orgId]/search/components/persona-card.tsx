@@ -36,7 +36,8 @@ export function PersonaCard({ persona, onSelect }: PersonaCardProps) {
         background: isHovered ? "var(--bg-card-hover)" : "var(--bg-card-gradient)",
         border: isHovered
           ? "1px solid rgba(212,175,55,0.3)"
-          : "1px solid var(--border-subtle)",
+          : "1px solid var(--border-default)",
+        boxShadow: isHovered ? "var(--card-shadow-hover)" : "var(--card-shadow)",
       }}
     >
       {/* Gold corner accent */}

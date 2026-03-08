@@ -422,7 +422,7 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
                       className="relative inline-flex items-center rounded-l-md px-2 py-2 transition-colors duration-150 disabled:opacity-30 cursor-pointer disabled:cursor-not-allowed"
                       style={{
                         color: "var(--text-tertiary)",
-                        border: "1px solid var(--border-subtle)",
+                        border: "1px solid var(--border-default)",
                       }}
                     >
                       <span className="sr-only">Previous</span>
@@ -448,7 +448,7 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
                                   }
                                 : {
                                     color: "var(--text-primary-ds)",
-                                    border: "1px solid var(--border-subtle)",
+                                    border: "1px solid var(--border-default)",
                                   }
                             }
                           >
@@ -462,7 +462,7 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
                         className="relative inline-flex items-center px-4 py-2 text-sm font-semibold"
                         style={{
                           color: "var(--text-tertiary)",
-                          border: "1px solid var(--border-subtle)",
+                          border: "1px solid var(--border-default)",
                         }}
                       >
                         ...
@@ -474,7 +474,7 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
                       className="relative inline-flex items-center rounded-r-md px-2 py-2 transition-colors duration-150 disabled:opacity-30 cursor-pointer disabled:cursor-not-allowed"
                       style={{
                         color: "var(--text-tertiary)",
-                        border: "1px solid var(--border-subtle)",
+                        border: "1px solid var(--border-default)",
                       }}
                     >
                       <span className="sr-only">Next</span>

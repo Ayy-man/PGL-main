@@ -75,17 +75,17 @@ All colors are defined as CSS custom properties in `globals.css`. Components use
 |----------|-------|-------|
 | `--bg-root` | `#08080a` | Page background (near-black) |
 | `--bg-sidebar` | `linear-gradient(180deg, #0d0d10 0%, #0a0a0d 100%)` | Sidebar panel |
-| `--bg-card` | `linear-gradient(145deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%)` | Card/surface background |
-| `--bg-card-hover` | `linear-gradient(145deg, rgba(212,175,55,0.04) 0%, rgba(255,255,255,0.02) 100%)` | Card hover state |
-| `--bg-elevated` | `rgba(255,255,255,0.03)` | Elevated surfaces (popovers, tooltips) |
-| `--bg-input` | `rgba(255,255,255,0.02)` | Input field backgrounds |
+| `--bg-card` | `linear-gradient(145deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 100%)` | Card/surface background |
+| `--bg-card-hover` | `linear-gradient(145deg, rgba(212,175,55,0.08) 0%, rgba(255,255,255,0.04) 100%)` | Card hover state |
+| `--bg-elevated` | `rgba(255,255,255,0.04)` | Elevated surfaces (popovers, tooltips) |
+| `--bg-input` | `rgba(255,255,255,0.03)` | Input field backgrounds |
 
 ### Borders
 
 | Variable | Value | Usage |
 |----------|-------|-------|
-| `--border-subtle` | `rgba(255,255,255,0.05)` | Lightest border (dividers, separators) |
-| `--border-default` | `rgba(255,255,255,0.06)` | Default border for cards and panels |
+| `--border-subtle` | `rgba(255,255,255,0.06)` | Lightest border (internal dividers, row separators) |
+| `--border-default` | `rgba(255,255,255,0.10)` | Default border for cards, panels, and interactive containers |
 | `--border-hover` | `rgba(212,175,55,0.15)` | Hover state border (gold-tinted) |
 | `--border-gold` | `rgba(212,175,55,0.25)` | Explicit gold border (active states, emphasis) |
 | `--border-sidebar` | `rgba(212,175,55,0.08)` | Sidebar right-edge accent line |
@@ -125,20 +125,38 @@ The gold accent is the signature color of the product. Used for emphasis and wea
 
 ## 4. Surface Treatment
 
-Every card, panel, and container follows the layered glass-like surface treatment. No flat solid backgrounds anywhere in the application.
+Every card, panel, and container follows the layered glass-like surface treatment. No flat solid backgrounds anywhere in the application. Cards must be clearly distinguishable from the page background.
 
-| State | Background | Border |
-|-------|-----------|--------|
-| **Rest** | `--bg-card` (gradient) | `--border-subtle` |
-| **Hover** | `--bg-card-hover` (gold-tinted gradient) | `--border-hover` |
-| **Active / Selected** | `--gold-bg` | `--border-gold` |
+| State | Background | Border | Shadow |
+|-------|-----------|--------|--------|
+| **Rest** | `--bg-card` (gradient, 7% opacity) | `--border-default` (10% opacity) | `--card-shadow` |
+| **Hover** | `--bg-card-hover` (gold-tinted gradient) | `--border-hover` | `--card-shadow-hover` |
+| **Active / Selected** | `--gold-bg` | `--border-gold` | `--card-shadow-hover` |
+
+### Shadow Tokens
+
+| Variable | Value | Usage |
+|----------|-------|-------|
+| `--card-shadow` | `0 2px 8px rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.2)` | Cards at rest — subtle depth |
+| `--card-shadow-hover` | `0 4px 16px rgba(0,0,0,0.4), 0 2px 6px rgba(0,0,0,0.25)` | Cards on hover — elevated |
+
+### Border Usage
+
+| Context | Variable | Why |
+|---------|----------|-----|
+| Card/panel container outlines | `--border-default` (10%) | Visible separation from background |
+| Internal dividers (row separators, section breaks) | `--border-subtle` (6%) | Subtle, doesn't compete with card outline |
+| Hover states | `--border-hover` | Gold-tinted, interactive feedback |
 
 ### Rules
 
 1. Every card/panel uses `--bg-card` gradient at rest, transitions to `--bg-card-hover` on hover
-2. Borders are `--border-subtle` at rest, `--border-hover` on hover
-3. Never use a flat solid color for any surface — always a gradient or transparent overlay
-4. Elevated surfaces (popovers, dropdowns) use `--bg-elevated` with backdrop blur
+2. Card container borders use `--border-default` (not `--border-subtle`) — cards must be readable against the background
+3. Internal dividers inside cards (row borders, section separators) use `--border-subtle`
+4. All cards include `--card-shadow` at rest for depth, `--card-shadow-hover` on hover
+5. Never use a flat solid color for any surface — always a gradient or transparent overlay
+6. Elevated surfaces (popovers, dropdowns) use `--bg-elevated` with backdrop blur
+7. Prefer the `.surface-card` utility class over inline styles — it includes bg, border, shadow, and hover in one class
 
 ---
 
@@ -156,17 +174,18 @@ Every card, panel, and container follows the layered glass-like surface treatmen
 
 ## 6. Shadows
 
-Dark mode shadows use deep opacity for a realistic layered effect.
+Dark mode shadows use deep opacity for a realistic layered effect. Card shadows are system-wide — every card gets the same shadow treatment regardless of admin or tenant context.
 
-| Level | Usage | Description |
-|-------|-------|-------------|
-| **Subtle** | Cards at rest | Barely visible lift, maintains surface layering |
-| **Medium** | Popovers, dropdowns | Clear elevation above the surface below |
-| **Heavy** | Dialogs, modals | Strong elevation with blur on the backdrop |
+| Level | Token | Value | Usage |
+|-------|-------|-------|-------|
+| **Card** | `--card-shadow` | `0 2px 8px rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.2)` | All cards at rest |
+| **Card hover** | `--card-shadow-hover` | `0 4px 16px rgba(0,0,0,0.4), 0 2px 6px rgba(0,0,0,0.25)` | Cards on hover |
+| **Medium** | — | Context-specific | Popovers, dropdowns |
+| **Heavy** | — | Context-specific | Dialogs, modals with backdrop blur |
 
 ### Rules
 
-1. Cards get subtle shadow elevation
+1. Cards get `--card-shadow` at rest, `--card-shadow-hover` on hover
 2. Popovers and dropdowns get medium shadow
 3. Dialogs get heavy shadow with backdrop blur
 4. All shadows use deep opacity values appropriate for dark backgrounds

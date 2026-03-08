@@ -57,8 +57,9 @@ export function PersonasLibrarySidebar({
       className="hidden lg:flex flex-col gap-6 overflow-y-auto"
       style={{
         background: "var(--bg-card-gradient)",
-        border: "1px solid var(--border-subtle)",
+        border: "1px solid var(--border-default)",
         borderRadius: "14px",
+        boxShadow: "var(--card-shadow)",
         padding: "24px",
       }}
     >

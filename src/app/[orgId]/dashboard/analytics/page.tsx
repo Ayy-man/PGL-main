@@ -107,7 +107,7 @@ export default function TenantAnalyticsPage() {
           className="inline-flex rounded-md p-0.5"
           style={{
             background: "var(--bg-elevated)",
-            border: "1px solid var(--border-subtle)",
+            border: "1px solid var(--border-default)",
           }}
         >
           {DATE_RANGES.map(({ value, label }) => (
@@ -143,20 +143,12 @@ export default function TenantAnalyticsPage() {
             {Array.from({ length: 4 }).map((_, i) => (
               <div
                 key={i}
-                className="h-28 animate-pulse rounded-[14px]"
-                style={{
-                  background: "var(--bg-card-gradient)",
-                  border: "1px solid var(--border-subtle)",
-                }}
+                className="h-28 animate-pulse surface-card rounded-[14px]"
               />
             ))}
           </div>
           <div
-            className="h-[400px] animate-pulse rounded-[14px]"
-            style={{
-              background: "var(--bg-card-gradient)",
-              border: "1px solid var(--border-subtle)",
-            }}
+            className="h-[400px] animate-pulse surface-card rounded-[14px]"
           />
         </div>
       ) : data ? (
@@ -165,11 +157,7 @@ export default function TenantAnalyticsPage() {
 
           {/* Chart container with design system surface treatment */}
           <div
-            className="rounded-[14px] p-7"
-            style={{
-              background: "var(--bg-card-gradient)",
-              border: "1px solid var(--border-subtle)",
-            }}
+            className="surface-card rounded-[14px] p-7"
           >
             <h2 className="font-serif text-xl font-semibold mb-6">
               Activity Over Time
@@ -179,11 +167,7 @@ export default function TenantAnalyticsPage() {
 
           {data.userBreakdown && data.userBreakdown.length > 0 && (
             <div
-              className="rounded-[14px] p-7"
-              style={{
-                background: "var(--bg-card-gradient)",
-                border: "1px solid var(--border-subtle)",
-              }}
+              className="surface-card rounded-[14px] p-7"
             >
               <h2 className="font-serif text-xl font-semibold mb-4">
                 Team Breakdown

@@ -167,7 +167,7 @@ function FilterInput({ label, value, onChange, placeholder }: FilterInputProps) 
         className="rounded-[8px] px-3 py-2 text-[13px] w-full outline-none"
         style={{
           background: "var(--bg-input)",
-          border: `1px solid ${isFocused ? "var(--border-hover)" : "var(--border-subtle)"}`,
+          border: `1px solid ${isFocused ? "var(--border-hover)" : "var(--border-default)"}`,
           color: "var(--text-primary-ds)",
           transition: "border-color 0.2s ease",
         }}

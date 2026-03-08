@@ -87,6 +87,10 @@ Same as MASTER dashboard density:
 
 Route: `/admin`
 
+### Card Treatment
+
+Admin cards use the same system-wide `.surface-card` treatment as all other cards. The admin-scoped CSS tokens (`--admin-card-bg`, `--admin-border`, `--admin-shadow`) are aliased to the base card tokens for consistency. No separate styling is needed for admin vs tenant cards.
+
 ### Stat Cards
 
 Same card treatment as analytics stat cards above:

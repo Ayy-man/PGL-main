@@ -42,7 +42,7 @@ export function PersonaPillRow({ personas, orgId }: PersonaPillRowProps) {
             className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm cursor-pointer transition-colors"
             style={{
               background: "var(--bg-elevated)",
-              border: "1px solid var(--border-subtle)",
+              border: "1px solid var(--border-default)",
               color: "var(--text-secondary)",
             }}
             onMouseEnter={(e) => {
@@ -50,7 +50,7 @@ export function PersonaPillRow({ personas, orgId }: PersonaPillRowProps) {
               e.currentTarget.style.color = "var(--text-primary)";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = "var(--border-subtle)";
+              e.currentTarget.style.borderColor = "var(--border-default)";
               e.currentTarget.style.color = "var(--text-secondary)";
             }}
           >

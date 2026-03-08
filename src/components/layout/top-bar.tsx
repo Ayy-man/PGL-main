@@ -35,13 +35,13 @@ export function TopBar({ userName, userInitials = "?", avatarUrl }: TopBarProps)
           className="h-9 w-full rounded-[8px] pl-9 pr-16 text-[13px] font-sans text-foreground placeholder:text-muted-foreground outline-none transition-all duration-200"
           style={{
             background: "var(--bg-input)",
-            border: "1px solid var(--border-subtle)",
+            border: "1px solid var(--border-default)",
           }}
           onFocus={(e) => {
             (e.currentTarget as HTMLInputElement).style.borderColor = "var(--border-hover)";
           }}
           onBlur={(e) => {
-            (e.currentTarget as HTMLInputElement).style.borderColor = "var(--border-subtle)";
+            (e.currentTarget as HTMLInputElement).style.borderColor = "var(--border-default)";
           }}
         />
         <kbd

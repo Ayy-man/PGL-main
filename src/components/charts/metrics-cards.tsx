@@ -58,11 +58,7 @@ export function MetricsCards({ totals }: MetricsCardsProps) {
         return (
           <div
             key={key}
-            className="rounded-[14px] p-5"
-            style={{
-              background: "var(--bg-card-gradient)",
-              border: "1px solid var(--border-subtle)",
-            }}
+            className="surface-card rounded-[14px] p-5"
           >
             <div className="flex items-center justify-between mb-3">
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">

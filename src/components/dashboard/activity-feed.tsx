@@ -122,11 +122,7 @@ export function ActivityFeed() {
         </div>
       ) : entries.length === 0 ? (
         <div
-          className="flex flex-col items-center justify-center py-8 text-center rounded-[14px]"
-          style={{
-            background: "var(--bg-card-gradient)",
-            border: "1px solid var(--border-subtle)",
-          }}
+          className="surface-card flex flex-col items-center justify-center py-8 text-center rounded-[14px]"
         >
           <Activity
             className="h-8 w-8 mb-2"
