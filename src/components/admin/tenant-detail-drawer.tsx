@@ -251,10 +251,10 @@ function SubMetricBar({
   return (
     <div className="space-y-1">
       <div className="flex justify-between">
-        <span className="text-xs" style={{ color: "var(--admin-text-secondary)" }}>
+        <span className="text-sm" style={{ color: "var(--admin-text-secondary)" }}>
           {label}
         </span>
-        <span className="text-xs" style={{ color: "var(--admin-text-secondary)" }}>
+        <span className="text-sm" style={{ color: "var(--admin-text-secondary)" }}>
           {value}/{max}
         </span>
       </div>
@@ -410,12 +410,12 @@ function DrawerHeader({
             </>
           )}
         </div>
-        <p className="text-xs truncate" style={{ color: "var(--admin-text-secondary)" }}>
+        <p className="text-sm truncate" style={{ color: "var(--admin-text-secondary)" }}>
           /{tenant.slug}
         </p>
         <div className="flex items-center gap-3 mt-2">
           <span
-            className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
+            className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
               isActive
                 ? "bg-[var(--success-muted)] text-[var(--success)]"
                 : "bg-destructive/10 text-destructive"
@@ -423,7 +423,7 @@ function DrawerHeader({
           >
             {isActive ? "Active" : "Inactive"}
           </span>
-          <span className="text-xs" style={{ color: "var(--admin-text-secondary)" }}>
+          <span className="text-sm" style={{ color: "var(--admin-text-secondary)" }}>
             Created {new Date(tenant.created_at).toLocaleDateString()}
           </span>
           <div className="flex items-center gap-1.5 ml-auto">
@@ -474,11 +474,11 @@ function SeatUtilizationCard({ users }: { users: TenantUser[] }) {
   return (
     <div className="surface-admin-card rounded-[14px] p-4">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="font-serif text-sm font-semibold" style={{ color: "var(--text-primary-ds)" }}>
+        <h3 className="font-serif text-base font-semibold" style={{ color: "var(--text-primary-ds)" }}>
           Team
         </h3>
         <span
-          className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium"
+          className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium"
           style={{
             background: "var(--gold-bg)",
             color: "var(--gold-primary)",
@@ -501,15 +501,15 @@ function SeatUtilizationCard({ users }: { users: TenantUser[] }) {
           <div key={user.id} className="flex items-center gap-3 py-1">
             <InitialCircle name={user.full_name || user.email} size={24} />
             <div className="flex-1 min-w-0">
-              <p className="text-sm truncate" style={{ color: "var(--text-primary-ds)" }}>
+              <p className="text-base truncate" style={{ color: "var(--text-primary-ds)" }}>
                 {user.full_name || user.email.split("@")[0]}
               </p>
-              <p className="text-xs truncate" style={{ color: "var(--admin-text-secondary)" }}>
+              <p className="text-sm truncate" style={{ color: "var(--admin-text-secondary)" }}>
                 {user.email}
               </p>
             </div>
             <span
-              className="flex-shrink-0 rounded-full px-2 py-0.5 text-[10px] uppercase tracking-wider font-medium"
+              className="flex-shrink-0 rounded-full px-2 py-0.5 text-xs uppercase tracking-wider font-medium"
               style={{
                 border: "1px solid var(--border-gold)",
                 color: "var(--gold-primary)",
@@ -517,14 +517,14 @@ function SeatUtilizationCard({ users }: { users: TenantUser[] }) {
             >
               {user.role}
             </span>
-            <span className="flex-shrink-0 text-[10px]" style={{ color: "var(--admin-text-secondary)" }}>
+            <span className="flex-shrink-0 text-xs" style={{ color: "var(--admin-text-secondary)" }}>
               {relativeTime(user.last_sign_in_at)}
             </span>
           </div>
         ))}
       </div>
       <button
-        className="w-full mt-3 inline-flex h-8 items-center justify-center gap-2 rounded-[8px] text-xs font-medium transition-colors"
+        className="w-full mt-3 inline-flex h-9 items-center justify-center gap-2 rounded-[8px] text-sm font-medium transition-colors"
         style={{
           border: "1px solid var(--border-gold)",
           color: "var(--gold-primary)",
@@ -543,7 +543,7 @@ function SeatUtilizationCard({ users }: { users: TenantUser[] }) {
 function HealthScoreCard({ health }: { health: HealthData }) {
   return (
     <div className="surface-admin-card rounded-[14px] p-4">
-      <h3 className="font-serif text-sm font-semibold mb-3" style={{ color: "var(--text-primary-ds)" }}>
+      <h3 className="font-serif text-base font-semibold mb-3" style={{ color: "var(--text-primary-ds)" }}>
         Health Score
       </h3>
       <div className="flex justify-center mb-4">
@@ -572,10 +572,10 @@ function UsageStatsCard({ usage }: { usage: UsageData }) {
   return (
     <div className="surface-admin-card rounded-[14px] p-4">
       <div className="flex items-baseline gap-2 mb-3">
-        <h3 className="font-serif text-sm font-semibold" style={{ color: "var(--text-primary-ds)" }}>
+        <h3 className="font-serif text-base font-semibold" style={{ color: "var(--text-primary-ds)" }}>
           Usage
         </h3>
-        <span className="text-xs" style={{ color: "var(--admin-text-secondary)" }}>
+        <span className="text-sm" style={{ color: "var(--admin-text-secondary)" }}>
           (30 days)
         </span>
       </div>
@@ -586,10 +586,10 @@ function UsageStatsCard({ usage }: { usage: UsageData }) {
           const isNegative = change.startsWith("-");
           return (
             <div key={m.key} className="space-y-1">
-              <p className="text-xs" style={{ color: "var(--admin-text-secondary)" }}>
+              <p className="text-sm" style={{ color: "var(--admin-text-secondary)" }}>
                 {m.label}
               </p>
-              <p className="font-serif text-lg" style={{ color: "var(--gold-primary)" }}>
+              <p className="font-serif text-xl" style={{ color: "var(--gold-primary)" }}>
                 {m.value.toLocaleString()}
               </p>
               <MiniSparkline data={usage.sparklines[m.key] ?? []} width={60} height={24} />
@@ -597,7 +597,7 @@ function UsageStatsCard({ usage }: { usage: UsageData }) {
                 {isPositive && <TrendingUp className="h-3 w-3" style={{ color: "var(--success)" }} />}
                 {isNegative && <TrendingDown className="h-3 w-3 text-destructive" />}
                 <span
-                  className="text-[10px]"
+                  className="text-xs"
                   style={{
                     color: isPositive
                       ? "var(--success)"
@@ -641,12 +641,12 @@ function TopPersonasCard({ personas }: { personas: PersonaData[] }) {
   if (personas.length === 0) {
     return (
       <div className="surface-admin-card rounded-[14px] p-4">
-        <h3 className="font-serif text-sm font-semibold mb-3" style={{ color: "var(--text-primary-ds)" }}>
+        <h3 className="font-serif text-base font-semibold mb-3" style={{ color: "var(--text-primary-ds)" }}>
           Top Personas
         </h3>
         <div className="flex flex-col items-center justify-center py-6 gap-2">
           <Compass className="h-8 w-8" style={{ color: "var(--admin-text-secondary)" }} />
-          <p className="text-sm" style={{ color: "var(--admin-text-secondary)" }}>
+          <p className="text-base" style={{ color: "var(--admin-text-secondary)" }}>
             No personas created yet
           </p>
         </div>
@@ -656,7 +656,7 @@ function TopPersonasCard({ personas }: { personas: PersonaData[] }) {
 
   return (
     <div className="surface-admin-card rounded-[14px] p-4">
-      <h3 className="font-serif text-sm font-semibold mb-3" style={{ color: "var(--text-primary-ds)" }}>
+      <h3 className="font-serif text-base font-semibold mb-3" style={{ color: "var(--text-primary-ds)" }}>
         Top Personas
       </h3>
       <div className="space-y-3">
@@ -664,10 +664,10 @@ function TopPersonasCard({ personas }: { personas: PersonaData[] }) {
           const tags = extractTags(persona.filters);
           return (
             <div key={persona.id}>
-              <p className="text-sm font-medium" style={{ color: "var(--text-primary-ds)" }}>
+              <p className="text-base font-medium" style={{ color: "var(--text-primary-ds)" }}>
                 {persona.name}
               </p>
-              <p className="text-xs" style={{ color: "var(--admin-text-secondary)" }}>
+              <p className="text-sm" style={{ color: "var(--admin-text-secondary)" }}>
                 {persona.last_used_at
                   ? `Last used: ${relativeTime(persona.last_used_at)}`
                   : "Never used"}
@@ -677,7 +677,7 @@ function TopPersonasCard({ personas }: { personas: PersonaData[] }) {
                   {tags.map((tag) => (
                     <span
                       key={tag}
-                      className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px]"
+                      className="inline-flex items-center rounded-full px-2 py-0.5 text-xs"
                       style={{
                         background: "var(--gold-bg)",
                         color: "var(--gold-primary)",
@@ -706,15 +706,15 @@ function GrowthTrendCard({ sparklines }: { sparklines: Record<string, SparklineP
     return (
       <div className="surface-admin-card rounded-[14px] p-4">
         <div className="flex items-baseline gap-2 mb-3">
-          <h3 className="font-serif text-sm font-semibold" style={{ color: "var(--text-primary-ds)" }}>
+          <h3 className="font-serif text-base font-semibold" style={{ color: "var(--text-primary-ds)" }}>
             Growth
           </h3>
-          <span className="text-xs" style={{ color: "var(--admin-text-secondary)" }}>
+          <span className="text-sm" style={{ color: "var(--admin-text-secondary)" }}>
             (90 days)
           </span>
         </div>
         <div className="flex items-center justify-center py-6">
-          <p className="text-sm" style={{ color: "var(--admin-text-secondary)" }}>
+          <p className="text-base" style={{ color: "var(--admin-text-secondary)" }}>
             Not enough data yet
           </p>
         </div>
@@ -725,10 +725,10 @@ function GrowthTrendCard({ sparklines }: { sparklines: Record<string, SparklineP
   return (
     <div className="surface-admin-card rounded-[14px] p-4">
       <div className="flex items-baseline gap-2 mb-3">
-        <h3 className="font-serif text-sm font-semibold" style={{ color: "var(--text-primary-ds)" }}>
+        <h3 className="font-serif text-base font-semibold" style={{ color: "var(--text-primary-ds)" }}>
           Growth
         </h3>
-        <span className="text-xs" style={{ color: "var(--admin-text-secondary)" }}>
+        <span className="text-sm" style={{ color: "var(--admin-text-secondary)" }}>
           (90 days)
         </span>
       </div>
@@ -742,12 +742,12 @@ function GrowthTrendCard({ sparklines }: { sparklines: Record<string, SparklineP
 function QuotaLimitsCard() {
   return (
     <div className="surface-admin-card rounded-[14px] p-4">
-      <h3 className="font-serif text-sm font-semibold mb-3" style={{ color: "var(--text-primary-ds)" }}>
+      <h3 className="font-serif text-base font-semibold mb-3" style={{ color: "var(--text-primary-ds)" }}>
         Quota & Limits
       </h3>
       <div className="flex flex-col items-center justify-center py-6 gap-2">
         <Lock className="h-8 w-8" style={{ color: "var(--admin-text-secondary)" }} />
-        <p className="text-sm" style={{ color: "var(--admin-text-secondary)" }}>
+        <p className="text-base" style={{ color: "var(--admin-text-secondary)" }}>
           Coming soon
         </p>
       </div>
@@ -855,9 +855,9 @@ export function TenantDetailDrawer({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="w-[580px] sm:max-w-[580px] p-0 overflow-hidden flex flex-col"
+        className="w-[680px] sm:max-w-[680px] p-0 overflow-hidden flex flex-col"
         style={{
-          background: "var(--admin-card-bg, var(--background))",
+          background: "oklch(0.16 0.01 80)",
           borderColor: "var(--border-subtle)",
         }}
       >
