@@ -305,7 +305,7 @@
 
   .admin-thead { background: var(--admin-thead-bg); }
   .admin-row-hover { transition: background 0.15s ease; }
-  .admin-row-hover:hover { background: var(--admin-row-hover); }
+  .admin-row-hover:hover { background: rgba(212,175,55,0.05); }
 
   /* ── Drill-down hover ───────────────────────────────────────────
    * When a child interactive is hovered, the parent container
@@ -314,11 +314,12 @@
    * Apply .row-hover / .entry-hover to nestable hover targets.
    * ────────────────────────────────────────────────────────────── */
 
-  /* Row / entry hover utilities */
+  /* Row / entry hover utilities — gold-tinted so the drill-down
+     handoff from card → row is clearly visible. */
   .row-hover  { transition: background 0.15s ease; }
-  .row-hover:hover  { background: rgba(255,255,255,0.02); }
+  .row-hover:hover  { background: rgba(212,175,55,0.05); }
   .entry-hover { transition: background 0.15s ease; }
-  .entry-hover:hover { background: rgba(255,255,255,0.02); }
+  .entry-hover:hover { background: rgba(212,175,55,0.05); }
 
   /* Gold-tinted row variant (prospect tables) */
   .row-hover-gold {
