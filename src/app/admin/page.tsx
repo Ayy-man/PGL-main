@@ -79,6 +79,28 @@ function formatSecondsAgo(seconds: number): string {
   return minutes === 1 ? "1 min ago" : `${minutes} min ago`;
 }
 
+type SystemStatus = "OPERATIONAL" | "DEGRADED" | "INCIDENT";
+
+function deriveSystemStatus(
+  pulse: PulseData | null,
+  errors: ErrorData | null
+): SystemStatus {
+  if (!pulse) return "OPERATIONAL"; // Still loading
+  const { enrichmentFailed, totalProspects } = pulse;
+  const failureRate = totalProspects > 0 ? enrichmentFailed / totalProspects : 0;
+  // High failure rate or many recent errors → incident
+  if (failureRate > 0.05 || (errors && errors.total > 20)) return "INCIDENT";
+  // Any failures at all → degraded
+  if (enrichmentFailed > 0 || (errors && errors.total > 0)) return "DEGRADED";
+  return "OPERATIONAL";
+}
+
+const STATUS_CONFIG: Record<SystemStatus, { label: string; color: string }> = {
+  OPERATIONAL: { label: "OPERATIONAL", color: "var(--success)" },
+  DEGRADED: { label: "DEGRADED", color: "oklch(0.80 0.15 85)" },
+  INCIDENT: { label: "INCIDENT", color: "oklch(0.62 0.19 22)" },
+};
+
 // --- Page Component ---
 
 export default function AdminDashboard() {
@@ -169,6 +191,9 @@ export default function AdminDashboard() {
     }
   }, []);
 
+  const systemStatus = deriveSystemStatus(pulseData, errorData);
+  const statusCfg = STATUS_CONFIG[systemStatus];
+
   return (
     <div className="space-y-8 page-enter">
       {/* Header — Global Command Center */}
@@ -187,9 +212,9 @@ export default function AdminDashboard() {
             System Status:{" "}
             <span
               className="font-mono tracking-tight"
-              style={{ color: "var(--success)" }}
+              style={{ color: statusCfg.color }}
             >
-              OPERATIONAL
+              {statusCfg.label}
             </span>
             {" "}• v2.5.0 •{" "}
             <span style={{ color: "var(--gold-text)" }}>PGL Core</span>
