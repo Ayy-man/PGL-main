@@ -16,12 +16,14 @@ interface MobileSidebarProps {
   orgId: string;
   tenantName: string;
   logoUrl: string | null;
+  userRole?: string;
 }
 
 export function MobileSidebar({
   orgId,
   tenantName,
   logoUrl,
+  userRole,
 }: MobileSidebarProps) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
@@ -74,6 +76,7 @@ export function MobileSidebar({
               orgId={orgId}
               tenantName={tenantName}
               logoUrl={logoUrl}
+              userRole={userRole}
             />
           </div>
         </SheetContent>

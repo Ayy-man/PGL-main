@@ -10,17 +10,32 @@ export default function NewTenantPage() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
+    setSuccess(null);
 
     const formData = new FormData(e.currentTarget);
 
     startTransition(async () => {
       try {
-        await createTenant(formData);
-        router.push("/admin/tenants");
+        const result = await createTenant(formData);
+        const adminEmail = formData.get("admin_email") as string;
+
+        if (result.warning) {
+          // Tenant created but invite had issues
+          setSuccess(result.warning);
+          setTimeout(() => router.push("/admin/tenants"), 3000);
+        } else if (adminEmail) {
+          setSuccess(
+            `Tenant created successfully. Invite sent to ${adminEmail}.`
+          );
+          setTimeout(() => router.push("/admin/tenants"), 2000);
+        } else {
+          router.push("/admin/tenants");
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to create tenant");
       }
@@ -53,6 +68,12 @@ export default function NewTenantPage() {
             </div>
           )}
 
+          {success && (
+            <div className="rounded-[8px] bg-emerald-500/10 border border-emerald-500/20 p-3 text-sm text-emerald-600 dark:text-emerald-400">
+              {success}
+            </div>
+          )}
+
           <div className="space-y-2">
             <label htmlFor="name" className="text-sm font-medium">
               Tenant Name <span className="text-destructive">*</span>
@@ -82,6 +103,22 @@ export default function NewTenantPage() {
             />
             <p className="text-xs text-muted-foreground">
               URL-safe identifier (lowercase, numbers, and hyphens only)
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="admin_email" className="text-sm font-medium">
+              Admin Email
+            </label>
+            <input
+              type="email"
+              id="admin_email"
+              name="admin_email"
+              placeholder="admin@acme-realestate.com"
+              className="w-full rounded-[8px] border border-[var(--border-default)] bg-[var(--bg-input)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-primary)]/50"
+            />
+            <p className="text-xs text-muted-foreground">
+              Send an invite to the tenant&apos;s first admin
             </p>
           </div>
 

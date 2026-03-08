@@ -14,6 +14,7 @@ export default async function TenantLayout({
   let tenant: { id: string; name: string; slug: string; logo_url: string | null; primary_color: string | null; secondary_color: string | null; is_active: boolean };
   let userName: string;
   let userInitials: string;
+  let userRole: string;
 
   try {
     ({ orgId } = await params);
@@ -40,6 +41,7 @@ export default async function TenantLayout({
     tenant = data;
     userName = user?.user_metadata?.full_name ?? user?.email ?? "User";
     userInitials = userName.charAt(0).toUpperCase() || "?";
+    userRole = (user?.app_metadata?.role as string) || "assistant";
   } catch (err) {
     // Re-throw Next.js internal errors (redirect, notFound)
     if (err && typeof err === "object" && "digest" in err) throw err;
@@ -58,6 +60,7 @@ export default async function TenantLayout({
           orgId={orgId}
           tenantName={tenant.name}
           logoUrl={tenant.logo_url}
+          userRole={userRole}
         />
 
         <div className="flex flex-1 flex-col min-w-0">

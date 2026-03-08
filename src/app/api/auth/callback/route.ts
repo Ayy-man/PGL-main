@@ -15,6 +15,17 @@ export async function GET(request: Request) {
       const tenantId = user?.app_metadata?.tenant_id;
       const role = user?.app_metadata?.role;
 
+      // Redirect users who haven't completed onboarding to the
+      // tenant confirmation page (catches magic link clicks from invites)
+      if (
+        user?.app_metadata?.onboarding_completed === false &&
+        role !== "super_admin"
+      ) {
+        return NextResponse.redirect(
+          `${origin}/onboarding/confirm-tenant`
+        );
+      }
+
       if (role === 'super_admin') {
         return NextResponse.redirect(`${origin}/admin`);
       }

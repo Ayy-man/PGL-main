@@ -15,6 +15,7 @@ export const createTenantSchema = z.object({
   logo_url: z.string().url().nullable().optional(),
   primary_color: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Must be hex color").default("#d4af37"),
   secondary_color: z.string().regex(/^#[0-9a-fA-F]{6}$/, "Must be hex color").default("#f4d47f"),
+  admin_email: z.string().email("Invalid email address").toLowerCase().optional().or(z.literal("")),
 });
 
 export const inviteUserSchema = z.object({

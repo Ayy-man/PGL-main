@@ -14,9 +14,19 @@ import {
 
 interface NavItemsProps {
   orgId: string;
+  userRole?: string;
 }
 
-const NAV_ITEMS = [
+interface NavItem {
+  label: string;
+  href: string;
+  icon: typeof LayoutDashboard;
+  exact: boolean;
+  /** If set, only show for these roles */
+  roles?: string[];
+}
+
+const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard",      href: "/",                    icon: LayoutDashboard, exact: true },
   { label: "Lead Discovery", href: "/search",              icon: Search,          exact: false },
   { label: "Personas",       href: "/personas",            icon: Users,           exact: false },
@@ -24,14 +34,19 @@ const NAV_ITEMS = [
   { label: "Exports",        href: "/exports",             icon: FileDown,        exact: false },
   { label: "Activity",       href: "/dashboard/activity",  icon: Activity,        exact: false },
   { label: "Analytics",      href: "/dashboard/analytics", icon: BarChart3,       exact: false },
+  { label: "Team",           href: "/team",                icon: Users,           exact: false, roles: ["tenant_admin", "super_admin"] },
 ];
 
-export function NavItems({ orgId }: NavItemsProps) {
+export function NavItems({ orgId, userRole }: NavItemsProps) {
   const pathname = usePathname();
+
+  const visibleItems = NAV_ITEMS.filter(
+    (item) => !item.roles || (userRole && item.roles.includes(userRole))
+  );
 
   return (
     <nav className="flex flex-col gap-1 px-3">
-      {NAV_ITEMS.map((item) => {
+      {visibleItems.map((item) => {
         const fullHref = item.href === "/" ? `/${orgId}` : `/${orgId}${item.href}`;
         const isActive = item.exact
           ? pathname === fullHref

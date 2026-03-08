@@ -4,26 +4,43 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { requireSuperAdmin } from "@/lib/auth/rbac";
 import { createTenantSchema, inviteUserSchema } from "@/lib/validations/schemas";
 import { revalidatePath } from "next/cache";
+import { logActivity } from "@/lib/activity-logger";
 
 /**
- * Create a new tenant. Super admin only.
+ * Create a new tenant with optional admin invite. Super admin only.
+ *
+ * If `admin_email` is provided in the form data, the function will:
+ * 1. Create the tenant
+ * 2. Invite the admin user via Supabase Auth
+ * 3. Set app_metadata (role, tenant_id, onboarding_completed)
+ * 4. Create the public.users row
+ *
+ * If tenant creation succeeds but invite fails, returns success with a warning.
  */
 export async function createTenant(formData: FormData) {
-  await requireSuperAdmin();
+  const currentUser = await requireSuperAdmin();
 
-  const validated = createTenantSchema.parse({
+  const raw = {
     name: formData.get("name"),
     slug: formData.get("slug"),
     logo_url: formData.get("logo_url") || null,
     primary_color: formData.get("primary_color") || "#d4af37",
     secondary_color: formData.get("secondary_color") || "#f4d47f",
-  });
+    admin_email: formData.get("admin_email") || undefined,
+  };
+
+  const validated = createTenantSchema.parse(raw);
+
+  // Extract admin_email before inserting tenant (it's not a DB column)
+  const adminEmail = validated.admin_email || undefined;
+  const { admin_email: _removed, ...tenantData } = validated;
 
   const supabase = createAdminClient();
 
-  const { data, error } = await supabase
+  // 1. Create the tenant
+  const { data: tenant, error } = await supabase
     .from("tenants")
-    .insert(validated)
+    .insert(tenantData)
     .select()
     .single();
 
@@ -34,8 +51,90 @@ export async function createTenant(formData: FormData) {
     throw new Error(`Failed to create tenant: ${error.message}`);
   }
 
+  // 2. Log tenant_created activity
+  await logActivity({
+    tenantId: tenant.id,
+    userId: currentUser.id,
+    actionType: "tenant_created",
+    metadata: {
+      tenant_name: tenant.name,
+      ...(adminEmail ? { admin_email: adminEmail } : {}),
+    },
+  });
+
+  // 3. If admin_email provided, invite the admin user
+  let warning: string | undefined;
+
+  if (adminEmail) {
+    try {
+      const redirectTo = `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/api/auth/callback`;
+
+      // a. Invite user via Supabase Auth
+      const { data: inviteData, error: inviteError } =
+        await supabase.auth.admin.inviteUserByEmail(adminEmail, {
+          data: { full_name: "" },
+          redirectTo,
+        });
+
+      if (inviteError) {
+        if (
+          inviteError.message.includes("already been registered") ||
+          inviteError.message.includes("already exists")
+        ) {
+          warning = `Tenant created, but invite failed: a user with email ${adminEmail} already exists.`;
+        } else {
+          warning = `Tenant created, but invite failed: ${inviteError.message}`;
+        }
+      } else if (inviteData?.user) {
+        const invitedUserId = inviteData.user.id;
+
+        // b. Update app_metadata via updateUserById
+        const { error: metaError } =
+          await supabase.auth.admin.updateUserById(invitedUserId, {
+            app_metadata: {
+              role: "tenant_admin",
+              tenant_id: tenant.id,
+              onboarding_completed: false,
+            },
+          });
+
+        if (metaError) {
+          warning = `Tenant created and invite sent, but failed to set admin metadata: ${metaError.message}`;
+        }
+
+        // c. Create public.users row
+        const { error: profileError } = await supabase.from("users").insert({
+          id: invitedUserId,
+          email: adminEmail,
+          full_name: "",
+          role: "tenant_admin",
+          tenant_id: tenant.id,
+          is_active: true,
+        });
+
+        if (profileError) {
+          warning = `Tenant created and invite sent, but failed to create user profile: ${profileError.message}`;
+        }
+
+        // d. Log user_invited activity
+        await logActivity({
+          tenantId: tenant.id,
+          userId: currentUser.id,
+          actionType: "user_invited",
+          metadata: {
+            email: adminEmail,
+            role: "tenant_admin",
+            invited_by: currentUser.id,
+          },
+        });
+      }
+    } catch (inviteErr) {
+      warning = `Tenant created, but admin invite failed: ${inviteErr instanceof Error ? inviteErr.message : "Unknown error"}`;
+    }
+  }
+
   revalidatePath("/admin/tenants");
-  return data;
+  return { ...tenant, warning };
 }
 
 /**

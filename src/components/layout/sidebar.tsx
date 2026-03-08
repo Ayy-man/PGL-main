@@ -5,12 +5,14 @@ interface SidebarProps {
   orgId: string;
   tenantName: string;
   logoUrl: string | null;
+  userRole?: string;
 }
 
 export function SidebarContent({
   orgId,
   tenantName,
   logoUrl,
+  userRole,
 }: SidebarProps) {
   const initials = tenantName.charAt(0).toUpperCase();
 
@@ -47,7 +49,7 @@ export function SidebarContent({
 
       {/* Navigation */}
       <div className="flex-1 overflow-y-auto py-2">
-        <NavItems orgId={orgId} />
+        <NavItems orgId={orgId} userRole={userRole} />
       </div>
 
       {/* Footer */}
@@ -63,7 +65,7 @@ export function SidebarContent({
   );
 }
 
-export function Sidebar({ orgId, tenantName, logoUrl }: SidebarProps) {
+export function Sidebar({ orgId, tenantName, logoUrl, userRole }: SidebarProps) {
   return (
     <>
       {/* Desktop sidebar — hidden below lg */}
@@ -75,11 +77,11 @@ export function Sidebar({ orgId, tenantName, logoUrl }: SidebarProps) {
           borderRight: "1px solid var(--border-sidebar)",
         }}
       >
-        <SidebarContent orgId={orgId} tenantName={tenantName} logoUrl={logoUrl} />
+        <SidebarContent orgId={orgId} tenantName={tenantName} logoUrl={logoUrl} userRole={userRole} />
       </aside>
 
       {/* Mobile sidebar — visible below lg */}
-      <MobileSidebar orgId={orgId} tenantName={tenantName} logoUrl={logoUrl} />
+      <MobileSidebar orgId={orgId} tenantName={tenantName} logoUrl={logoUrl} userRole={userRole} />
     </>
   );
 }

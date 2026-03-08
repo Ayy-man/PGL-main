@@ -39,6 +39,27 @@ export async function middleware(request: NextRequest) {
   const role = user.app_metadata?.role;
   const userTenantId = user.app_metadata?.tenant_id;
 
+  // Onboarding redirect: users with onboarding_completed === false
+  // must complete onboarding before accessing the app.
+  // Super admins are exempt (they don't go through onboarding).
+  if (
+    user.app_metadata?.onboarding_completed === false &&
+    role !== "super_admin" &&
+    !pathname.startsWith("/onboarding/confirm-tenant") &&
+    !pathname.startsWith("/onboarding/set-password") &&
+    !pathname.startsWith("/api/auth/callback")
+  ) {
+    return NextResponse.redirect(
+      new URL("/onboarding/confirm-tenant", request.url)
+    );
+  }
+
+  // Skip tenant resolution for onboarding routes (user is authenticated but
+  // tenant setup may not be finalized yet)
+  if (pathname.startsWith("/onboarding/")) {
+    return response;
+  }
+
   // Handle /admin routes
   if (pathname.startsWith("/admin")) {
     if (role !== "super_admin") {

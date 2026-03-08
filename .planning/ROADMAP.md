@@ -2,14 +2,14 @@
 
 **Project:** Phronesis Growth Labs — Full frontend rebuild to match design system + stitch mockups
 **Milestone:** v2.0 — UI Redesign
-**Phases:** 9 (Phase 0–8)
-**Constraint:** Preserve all business logic, API integrations, auth flows. UI layer only.
+**Phases:** 11 (Phase 6–15, including 14.1)
+**Constraint:** Preserve all business logic, API integrations, auth flows. UI layer only (Phases 6–14.1). Phase 15 adds new functionality.
 
 ---
 
 ## Overview
 
-Rebuild every page of the PGL platform to match the design system (design-system/MASTER.md) and stitch mockup UX direction. Six screens redesigned: Tenant Dashboard, Lead Search, Saved Personas, Prospect Profile, Export Log, Admin Dashboard. Phase 0 establishes shared components; Phases 1–7 build each screen; Phase 8 polishes and verifies.
+Rebuild every page of the PGL platform to match the design system (design-system/MASTER.md) and stitch mockup UX direction. Six screens redesigned: Tenant Dashboard, Lead Search, Saved Personas, Prospect Profile, Export Log, Admin Dashboard. Foundation → screen builds → polish → admin rebuild → tenant management redesign.
 
 ---
 
@@ -144,3 +144,38 @@ Plans:
 - [x] 14.1-03-PLAN.md — Unit Economics card + Export Activity mini chart + Tenant Management table
 - [x] 14.1-04-PLAN.md — ErrorFeed card-feed + SystemActions grid + page.tsx layout assembly
 - [x] 14.1-05-PLAN.md — Build verification + design system compliance audit + STATE/ROADMAP update
+
+---
+
+### Phase 15: Tenant Management Redesign — Invite Flows, Onboarding, Detail Drawer, Team Management
+
+**Goal:** Redesign tenant management with email-based invite flows (Supabase Auth), admin onboarding confirmation step, rich tenant detail slide-over drawer (health score, usage stats, seat utilization, activity tabs with 3-level drill-down), and tenant-scoped team management page for tenant admins to invite their own users.
+
+**Dependencies:** Phase 14.1
+
+**Deliverables:**
+- Email-based admin invite flow (Supabase `inviteUserByEmail` + custom onboarding redirect)
+- `/onboarding/confirm-tenant` page — invited admin confirms/edits tenant name, slug, colors, sets password
+- `onboarding_completed` metadata flag with middleware redirect logic
+- Tenant detail slide-over drawer on `/admin/tenants` — header, seat utilization, health score, usage sparklines, top personas, growth trend, quota/limits, tabbed activity card
+- 3-level drill-down: table → drawer → centered modal (full activity log viewer)
+- `/[orgId]/team` page — tenant admin invites users via email, manages team members
+- Email-based user invite flow (tenant admin scope, `agent`/`assistant` roles only)
+- New activity log action types: `tenant_created`, `tenant_renamed`, `tenant_settings_updated`, `tenant_confirmed`, `user_invited`, `user_invite_accepted`
+- Audit trail for all tenant name/setting changes with before/after metadata
+
+**Requirements:** Multi-tenant admin UX, invite-based onboarding, tenant detail visibility, team self-management
+
+**Status:** COMPLETE — All 8 plans executed. Build verified (pnpm build exit 0). Design system compliance audit: 10/15 files pass (remaining are acceptable SVG rgba patterns per Phase 05 decision).
+
+**Plans:** 8/8 plans complete
+
+Plans:
+- [x] 15-01-PLAN.md — Activity logger updates + new action types + middleware onboarding redirect
+- [x] 15-02-PLAN.md — Refactor Create Tenant + admin invite flow (form + server action + inviteUserByEmail)
+- [x] 15-03-PLAN.md — Onboarding page /onboarding/confirm-tenant (confirm tenant settings + set password)
+- [x] 15-04-PLAN.md — Tenant detail API endpoints (details, usage, health, personas, activity)
+- [x] 15-05-PLAN.md — Tenant detail slide-over drawer (header, seats, health, usage, personas, growth, quota)
+- [x] 15-06-PLAN.md — Tabbed activity card with 3-level drill-down modal
+- [x] 15-07-PLAN.md — Team management page /[orgId]/team + user invite flow + simple user onboarding
+- [x] 15-08-PLAN.md — Build verification + design system compliance audit
