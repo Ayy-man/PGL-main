@@ -91,13 +91,8 @@ function TenantRow({ tenant }: { tenant: Tenant }) {
 
   return (
     <tr
-      style={{ borderBottom: "1px solid var(--border-subtle)", transition: "background 0.15s ease" }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.background = "rgba(255,255,255,0.02)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.background = "";
-      }}
+      className="row-hover"
+      style={{ borderBottom: "1px solid var(--border-subtle)" }}
     >
       {/* Column 1: Client / Tenant */}
       <td className="px-6 py-4">
@@ -201,58 +196,19 @@ function TenantRow({ tenant }: { tenant: Tenant }) {
         <div className="flex items-center justify-end gap-1">
           <button
             title="Impersonate"
-            className="p-2 rounded-lg transition-colors"
-            style={{ color: "var(--admin-text-secondary)" }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = "var(--text-primary-ds)";
-              e.currentTarget.style.background = "rgba(255,255,255,0.08)";
-              const row = e.currentTarget.closest("tr");
-              if (row) row.style.background = "";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = "var(--admin-text-secondary)";
-              e.currentTarget.style.background = "";
-              const row = e.currentTarget.closest("tr");
-              if (row) row.style.background = "rgba(255,255,255,0.02)";
-            }}
+            className="p-2 rounded-lg transition-colors text-[var(--admin-text-secondary)] hover:text-[var(--text-primary-ds)] hover:bg-white/[0.08]"
           >
             <LogIn className="h-4 w-4" />
           </button>
           <button
             title="View Logs"
-            className="p-2 rounded-lg transition-colors"
-            style={{ color: "var(--admin-text-secondary)" }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = "var(--text-primary-ds)";
-              e.currentTarget.style.background = "rgba(255,255,255,0.08)";
-              const row = e.currentTarget.closest("tr");
-              if (row) row.style.background = "";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = "var(--admin-text-secondary)";
-              e.currentTarget.style.background = "";
-              const row = e.currentTarget.closest("tr");
-              if (row) row.style.background = "rgba(255,255,255,0.02)";
-            }}
+            className="p-2 rounded-lg transition-colors text-[var(--admin-text-secondary)] hover:text-[var(--text-primary-ds)] hover:bg-white/[0.08]"
           >
             <History className="h-4 w-4" />
           </button>
           <button
             title="Suspend Tenant"
-            className="p-2 rounded-lg transition-colors"
-            style={{ color: "var(--admin-text-secondary)" }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.color = "oklch(0.62 0.19 22)";
-              e.currentTarget.style.background = "rgba(239,68,68,0.08)";
-              const row = e.currentTarget.closest("tr");
-              if (row) row.style.background = "";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.color = "var(--admin-text-secondary)";
-              e.currentTarget.style.background = "";
-              const row = e.currentTarget.closest("tr");
-              if (row) row.style.background = "rgba(255,255,255,0.02)";
-            }}
+            className="p-2 rounded-lg transition-colors text-[var(--admin-text-secondary)] hover:text-[oklch(0.62_0.19_22)] hover:bg-[rgba(239,68,68,0.08)]"
           >
             <Ban className="h-4 w-4" />
           </button>

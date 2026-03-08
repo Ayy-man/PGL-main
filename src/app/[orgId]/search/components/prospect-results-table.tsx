@@ -145,23 +145,9 @@ export function ProspectResultsTable({
               <tr
                 key={prospect.id}
                 onClick={() => onProspectClick(prospect.id)}
-                className="group transition-colors duration-150 cursor-pointer"
-                style={{
-                  borderBottom: "1px solid var(--border-subtle)",
-                  borderLeft: "4px solid transparent",
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLTableRowElement).style.background =
-                    "rgba(212,175,55,0.03)";
-                  (e.currentTarget as HTMLTableRowElement).style.borderLeftColor =
-                    "var(--gold-primary)";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLTableRowElement).style.background =
-                    isSelected ? "rgba(212,175,55,0.05)" : "transparent";
-                  (e.currentTarget as HTMLTableRowElement).style.borderLeftColor =
-                    isSelected ? "var(--gold-primary)" : "transparent";
-                }}
+                className="row-hover-gold group transition-colors duration-150 cursor-pointer"
+                data-selected={isSelected || undefined}
+                style={{ borderBottom: "1px solid var(--border-subtle)" }}
               >
                 {/* Checkbox */}
                 <td className="whitespace-nowrap py-4 pl-5 pr-3">
@@ -276,40 +262,14 @@ export function ProspectResultsTable({
                     onClick={(e) => e.stopPropagation()}
                   >
                     <button
-                      className="p-1.5 rounded transition-colors duration-150 cursor-pointer"
+                      className="p-1.5 rounded transition-colors duration-150 cursor-pointer text-[var(--text-tertiary)] hover:text-[var(--gold-primary)] hover:bg-[rgba(212,175,55,0.1)]"
                       title="Find Lookalikes"
-                      style={{ color: "var(--text-tertiary)" }}
-                      onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLButtonElement).style.color =
-                          "var(--gold-primary)";
-                        (e.currentTarget as HTMLButtonElement).style.background =
-                          "rgba(212,175,55,0.1)";
-                      }}
-                      onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLButtonElement).style.color =
-                          "var(--text-tertiary)";
-                        (e.currentTarget as HTMLButtonElement).style.background =
-                          "transparent";
-                      }}
                     >
                       <Search className="h-[18px] w-[18px]" />
                     </button>
                     <button
-                      className="p-1.5 rounded transition-colors duration-150 cursor-pointer"
+                      className="p-1.5 rounded transition-colors duration-150 cursor-pointer text-[var(--text-tertiary)] hover:text-[var(--gold-primary)] hover:bg-[rgba(212,175,55,0.1)]"
                       title="View Profile"
-                      style={{ color: "var(--text-tertiary)" }}
-                      onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLButtonElement).style.color =
-                          "var(--gold-primary)";
-                        (e.currentTarget as HTMLButtonElement).style.background =
-                          "rgba(212,175,55,0.1)";
-                      }}
-                      onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLButtonElement).style.color =
-                          "var(--text-tertiary)";
-                        (e.currentTarget as HTMLButtonElement).style.background =
-                          "transparent";
-                      }}
                     >
                       <Eye className="h-[18px] w-[18px]" />
                     </button>

@@ -54,14 +54,8 @@ function ErrorEntry({ record }: { record: ErrorRecord }) {
 
   return (
     <div
-      className="flex gap-4 p-4 cursor-pointer"
+      className="entry-hover flex gap-4 p-4 cursor-pointer"
       style={{ borderBottom: "1px solid var(--border-subtle)" }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.background = "rgba(255,255,255,0.02)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.background = "";
-      }}
     >
       {/* Severity icon */}
       <div className="mt-0.5 shrink-0">

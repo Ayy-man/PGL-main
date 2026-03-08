@@ -307,6 +307,61 @@
   .admin-row-hover { transition: background 0.15s ease; }
   .admin-row-hover:hover { background: var(--admin-row-hover); }
 
+  /* ── Drill-down hover ───────────────────────────────────────────
+   * When a child interactive is hovered, the parent container
+   * reverts to its resting state so only the innermost target
+   * is visually highlighted.  Uses CSS :has() — no JS needed.
+   * Apply .row-hover / .entry-hover to nestable hover targets.
+   * ────────────────────────────────────────────────────────────── */
+
+  /* Row / entry hover utilities */
+  .row-hover  { transition: background 0.15s ease; }
+  .row-hover:hover  { background: rgba(255,255,255,0.02); }
+  .entry-hover { transition: background 0.15s ease; }
+  .entry-hover:hover { background: rgba(255,255,255,0.02); }
+
+  /* Gold-tinted row variant (prospect tables) */
+  .row-hover-gold {
+    transition: background 0.15s ease, border-left-color 0.15s ease;
+    border-left: 4px solid transparent;
+  }
+  .row-hover-gold:hover {
+    background: rgba(212,175,55,0.03);
+    border-left-color: var(--gold-primary);
+  }
+  .row-hover-gold[data-selected] {
+    background: rgba(212,175,55,0.05);
+    border-left-color: var(--gold-primary);
+  }
+
+  /* Level 1 — card suppresses when any child interactive is hovered */
+  .surface-admin-card:hover:has(.row-hover:hover, .admin-row-hover:hover, .entry-hover:hover, button:hover, a:hover) {
+    background: var(--admin-card-bg);
+    border-color: var(--admin-border);
+    box-shadow: var(--admin-shadow);
+  }
+  .card-interactive:hover:has(.row-hover:hover, .entry-hover:hover, button:hover, a:hover) {
+    background: var(--bg-card-gradient);
+    border-color: var(--border-subtle);
+    box-shadow: none;
+  }
+
+  /* Level 2 — row/entry suppresses when a button or link inside is hovered */
+  .row-hover:hover:has(button:hover, a:hover),
+  .row-hover-gold:hover:has(button:hover, a:hover, input:hover),
+  .admin-row-hover:hover:has(button:hover, a:hover),
+  .entry-hover:hover:has(button:hover, a:hover) {
+    background: transparent;
+  }
+  .row-hover-gold:hover:has(button:hover, a:hover, input:hover) {
+    border-left-color: transparent;
+  }
+  /* Selected gold rows keep their state even during child drill-down */
+  .row-hover-gold[data-selected]:hover:has(button:hover, a:hover, input:hover) {
+    background: rgba(212,175,55,0.05);
+    border-left-color: var(--gold-primary);
+  }
+
   .admin-section-heading {
     position: relative;
     padding-left: 12px;

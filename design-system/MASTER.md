@@ -235,6 +235,29 @@ import { Search, List, Users } from "lucide-react"
 | Table rows | Background `rgba(255,255,255,0.02)` |
 | Nav items (inactive) | Background `rgba(255,255,255,0.02)`, color `--text-primary` |
 
+### Drill-Down Hover (Nested Interactives)
+
+When interactive elements are nested (card > row > button), only the **innermost** hovered element highlights. Parent containers automatically revert to their resting state via CSS `:has()`. This prevents visual conflicts where multiple layers highlight simultaneously.
+
+**CSS utility classes (globals.css):**
+
+| Class | Purpose |
+|-------|---------|
+| `.row-hover` | Table rows — subtle white hover `rgba(255,255,255,0.02)` |
+| `.row-hover-gold` | Prospect rows — gold-tinted hover with left border accent |
+| `.entry-hover` | Feed/list entries — subtle white hover |
+
+**How it works:**
+- `.surface-admin-card:hover:has(.row-hover:hover, ...)` reverts card to base state
+- `.row-hover:hover:has(button:hover, a:hover)` reverts row to base state
+- The innermost hovered element keeps its highlight
+
+**Rules for new components:**
+1. Never use inline `onMouseEnter/onMouseLeave` for hover styling — use CSS classes
+2. Apply `.row-hover` or `.entry-hover` to hoverable children inside cards
+3. Buttons/links inside rows get automatic drill-down — no extra classes needed
+4. For gold-tinted row hover, use `.row-hover-gold` with `data-selected` for persistent selection state
+
 ### Transitions
 
 All interactive elements: `transition: all 0.2s ease`
