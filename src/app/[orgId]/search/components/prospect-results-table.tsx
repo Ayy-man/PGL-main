@@ -258,7 +258,7 @@ export function ProspectResultsTable({
                 {/* Actions — visible on hover */}
                 <td className="relative whitespace-nowrap py-4 pl-3 pr-5 text-right">
                   <div
-                    className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150"
+                    className="flex items-center justify-end gap-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-150"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <button

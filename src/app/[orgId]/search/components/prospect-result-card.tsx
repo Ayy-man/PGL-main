@@ -146,7 +146,7 @@ export function ProspectResultCard({
         <div className="flex-1 min-w-0">
           {/* Name + wealth badge */}
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-serif text-[20px] font-semibold text-foreground">
+            <span className="font-serif text-base sm:text-[20px] font-semibold text-foreground">
               {name}
             </span>
             {wealthTier && <WealthTierBadge tier={wealthTier} />}
@@ -196,7 +196,7 @@ export function ProspectResultCard({
         <div className="flex items-center gap-2">
           {/* Email */}
           <div
-            className="h-7 w-7 rounded-full flex items-center justify-center"
+            className="h-9 w-9 rounded-full flex items-center justify-center"
             style={
               hasEmail
                 ? {
@@ -221,7 +221,7 @@ export function ProspectResultCard({
 
           {/* Phone */}
           <div
-            className="h-7 w-7 rounded-full flex items-center justify-center"
+            className="h-9 w-9 rounded-full flex items-center justify-center"
             style={
               hasPhone
                 ? {
@@ -246,7 +246,7 @@ export function ProspectResultCard({
 
           {/* LinkedIn */}
           <div
-            className="h-7 w-7 rounded-full flex items-center justify-center"
+            className="h-9 w-9 rounded-full flex items-center justify-center"
             style={
               hasLinkedin
                 ? {

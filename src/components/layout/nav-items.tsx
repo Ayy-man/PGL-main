@@ -56,7 +56,7 @@ export function NavItems({ orgId, userRole }: NavItemsProps) {
           <Link
             key={item.href}
             href={fullHref}
-            className="flex items-center gap-3 rounded-[8px] px-3 py-2.5 text-sm font-medium transition-all duration-200 cursor-pointer"
+            className="flex items-center gap-3 rounded-[8px] px-3 py-3 text-sm font-medium transition-all duration-200 cursor-pointer"
             style={
               isActive
                 ? {

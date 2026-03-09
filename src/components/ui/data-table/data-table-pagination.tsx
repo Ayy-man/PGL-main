@@ -46,7 +46,7 @@ export function DataTablePagination({
         <Button
           variant="outline"
           size="icon"
-          className="h-8 w-8"
+          className="h-10 w-10"
           onClick={() => onPageChange(0)}
           disabled={!canGoPrevious}
           aria-label="First page"
@@ -56,7 +56,7 @@ export function DataTablePagination({
         <Button
           variant="outline"
           size="icon"
-          className="h-8 w-8"
+          className="h-10 w-10"
           onClick={() => onPageChange(pageIndex - 1)}
           disabled={!canGoPrevious}
           aria-label="Previous page"
@@ -73,7 +73,7 @@ export function DataTablePagination({
         <Button
           variant="outline"
           size="icon"
-          className="h-8 w-8"
+          className="h-10 w-10"
           onClick={() => onPageChange(pageIndex + 1)}
           disabled={!canGoNext}
           aria-label="Next page"
@@ -83,7 +83,7 @@ export function DataTablePagination({
         <Button
           variant="outline"
           size="icon"
-          className="h-8 w-8"
+          className="h-10 w-10"
           onClick={() => onPageChange(pageCount - 1)}
           disabled={!canGoNext}
           aria-label="Last page"

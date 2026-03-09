@@ -222,11 +222,6 @@
     box-shadow: var(--card-shadow);
     transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
   }
-  .surface-card:hover {
-    background: var(--bg-card-hover);
-    border-color: var(--border-hover);
-    box-shadow: var(--card-shadow-hover);
-  }
   .card-interactive {
     background: var(--bg-card-gradient);
     border: 1px solid var(--border-default);
@@ -234,17 +229,8 @@
     box-shadow: var(--card-shadow);
     transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
   }
-  .card-interactive:hover {
-    background: var(--bg-card-hover);
-    border-color: var(--border-hover);
-    box-shadow: var(--card-shadow-hover);
-  }
   .ghost-hover {
     transition: background 0.15s ease, color 0.15s ease;
-  }
-  .ghost-hover:hover {
-    background: rgba(255,255,255,0.03);
-    color: var(--text-primary-ds);
   }
   .ambient-glow-top {
     position: fixed;
@@ -307,15 +293,8 @@
     box-shadow: var(--admin-shadow);
     transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
   }
-  .surface-admin-card:hover {
-    background: var(--admin-card-bg-hover);
-    border-color: var(--admin-border-hover);
-    box-shadow: var(--admin-shadow-hover);
-  }
-
   .admin-thead { background: var(--admin-thead-bg); }
   .admin-row-hover { transition: background 0.15s ease; }
-  .admin-row-hover:hover { background: rgba(212,175,55,0.05); }
 
   /* ── Drill-down hover ───────────────────────────────────────────
    * When a child interactive is hovered, the parent container
@@ -324,54 +303,80 @@
    * Apply .row-hover / .entry-hover to nestable hover targets.
    * ────────────────────────────────────────────────────────────── */
 
-  /* Row / entry hover utilities — gold-tinted so the drill-down
-     handoff from card → row is clearly visible. */
+  /* Row / entry hover utilities — transitions apply always */
   .row-hover  { transition: background 0.15s ease; }
-  .row-hover:hover  { background: rgba(212,175,55,0.05); }
   .entry-hover { transition: background 0.15s ease; }
-  .entry-hover:hover { background: rgba(212,175,55,0.05); }
 
-  /* Gold-tinted row variant (prospect tables) */
+  /* Gold-tinted row variant (prospect tables) — transitions + selected always */
   .row-hover-gold {
     transition: background 0.15s ease, border-left-color 0.15s ease;
     border-left: 4px solid transparent;
-  }
-  .row-hover-gold:hover {
-    background: rgba(212,175,55,0.03);
-    border-left-color: var(--gold-primary);
   }
   .row-hover-gold[data-selected] {
     background: rgba(212,175,55,0.05);
     border-left-color: var(--gold-primary);
   }
 
-  /* Level 1 — card suppresses when any child interactive is hovered */
-  .surface-admin-card:hover:has(.row-hover:hover, .admin-row-hover:hover, .entry-hover:hover, button:hover, a:hover) {
-    background: var(--admin-card-bg);
-    border-color: var(--admin-border);
-    box-shadow: var(--admin-shadow);
-  }
-  .card-interactive:hover:has(.row-hover:hover, .entry-hover:hover, button:hover, a:hover),
-  .surface-card:hover:has(.row-hover:hover, .entry-hover:hover, button:hover, a:hover) {
-    background: var(--bg-card-gradient);
-    border-color: var(--border-default);
-    box-shadow: var(--card-shadow);
-  }
+  /* ── Hover-only states (guarded for pointer devices) ────────── */
+  @media (hover: hover) {
+    /* Surface card hover */
+    .surface-card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-hover);
+      box-shadow: var(--card-shadow-hover);
+    }
+    .card-interactive:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-hover);
+      box-shadow: var(--card-shadow-hover);
+    }
+    .ghost-hover:hover {
+      background: rgba(255,255,255,0.03);
+      color: var(--text-primary-ds);
+    }
+    .surface-admin-card:hover {
+      background: var(--admin-card-bg-hover);
+      border-color: var(--admin-border-hover);
+      box-shadow: var(--admin-shadow-hover);
+    }
 
-  /* Level 2 — row/entry suppresses when a button or link inside is hovered */
-  .row-hover:hover:has(button:hover, a:hover),
-  .row-hover-gold:hover:has(button:hover, a:hover, input:hover),
-  .admin-row-hover:hover:has(button:hover, a:hover),
-  .entry-hover:hover:has(button:hover, a:hover) {
-    background: transparent;
-  }
-  .row-hover-gold:hover:has(button:hover, a:hover, input:hover) {
-    border-left-color: transparent;
-  }
-  /* Selected gold rows keep their state even during child drill-down */
-  .row-hover-gold[data-selected]:hover:has(button:hover, a:hover, input:hover) {
-    background: rgba(212,175,55,0.05);
-    border-left-color: var(--gold-primary);
+    /* Row / entry hover */
+    .admin-row-hover:hover { background: rgba(212,175,55,0.05); }
+    .row-hover:hover  { background: rgba(212,175,55,0.05); }
+    .entry-hover:hover { background: rgba(212,175,55,0.05); }
+    .row-hover-gold:hover {
+      background: rgba(212,175,55,0.03);
+      border-left-color: var(--gold-primary);
+    }
+
+    /* Level 1 — card suppresses when any child interactive is hovered */
+    .surface-admin-card:hover:has(.row-hover:hover, .admin-row-hover:hover, .entry-hover:hover, button:hover, a:hover) {
+      background: var(--admin-card-bg);
+      border-color: var(--admin-border);
+      box-shadow: var(--admin-shadow);
+    }
+    .card-interactive:hover:has(.row-hover:hover, .entry-hover:hover, button:hover, a:hover),
+    .surface-card:hover:has(.row-hover:hover, .entry-hover:hover, button:hover, a:hover) {
+      background: var(--bg-card-gradient);
+      border-color: var(--border-default);
+      box-shadow: var(--card-shadow);
+    }
+
+    /* Level 2 — row/entry suppresses when a button or link inside is hovered */
+    .row-hover:hover:has(button:hover, a:hover),
+    .row-hover-gold:hover:has(button:hover, a:hover, input:hover),
+    .admin-row-hover:hover:has(button:hover, a:hover),
+    .entry-hover:hover:has(button:hover, a:hover) {
+      background: transparent;
+    }
+    .row-hover-gold:hover:has(button:hover, a:hover, input:hover) {
+      border-left-color: transparent;
+    }
+    /* Selected gold rows keep their state even during child drill-down */
+    .row-hover-gold[data-selected]:hover:has(button:hover, a:hover, input:hover) {
+      background: rgba(212,175,55,0.05);
+      border-left-color: var(--gold-primary);
+    }
   }
 
   .admin-section-heading {

@@ -49,7 +49,7 @@ export function AdminNavLinks() {
           <Link
             key={item.href}
             href={item.href}
-            className="flex items-center gap-3 rounded-[8px] px-3 py-2.5 text-sm font-medium transition-all duration-200 cursor-pointer"
+            className="flex items-center gap-3 rounded-[8px] px-3 py-3 text-sm font-medium transition-all duration-200 cursor-pointer"
             style={
               isActive
                 ? {
@@ -104,7 +104,7 @@ export function AdminNavLinks() {
           key={item.label}
           onClick={(e) => e.preventDefault()}
           title="Coming soon"
-          className="flex items-center gap-3 rounded-[8px] px-3 py-2.5 text-sm font-medium cursor-default opacity-60 w-full text-left"
+          className="flex items-center gap-3 rounded-[8px] px-3 py-3 text-sm font-medium cursor-default opacity-60 w-full text-left"
           style={{
             color: "var(--text-secondary-ds)",
             borderLeft: "3px solid transparent",
