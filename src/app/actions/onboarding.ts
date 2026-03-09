@@ -5,29 +5,13 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logActivity } from "@/lib/activity-logger";
 import { tenantSlugSchema } from "@/lib/validations/schemas";
+import { isValidTheme } from "@/lib/tenant-theme";
 
 const confirmOnboardingSchema = z
   .object({
     name: z.string().min(1, "Name is required").max(100),
     slug: tenantSlugSchema,
-    logo_url: z
-      .string()
-      .url("Must be a valid URL")
-      .or(z.literal(""))
-      .optional()
-      .transform((v) => v || null),
-    primary_color: z
-      .string()
-      .regex(/^#[0-9a-fA-F]{6}$/, "Must be hex color")
-      .optional()
-      .or(z.literal(""))
-      .transform((v) => v || null),
-    secondary_color: z
-      .string()
-      .regex(/^#[0-9a-fA-F]{6}$/, "Must be hex color")
-      .optional()
-      .or(z.literal(""))
-      .transform((v) => v || null),
+    theme: z.string().optional().default("gold"),
     password: z.string().min(8, "Password must be at least 8 characters"),
     confirm_password: z.string(),
   })
@@ -63,9 +47,7 @@ export async function confirmTenantOnboarding(formData: FormData) {
   const raw = {
     name: formData.get("name"),
     slug: formData.get("slug"),
-    logo_url: formData.get("logo_url") || "",
-    primary_color: formData.get("primary_color") || "",
-    secondary_color: formData.get("secondary_color") || "",
+    theme: formData.get("theme") || "gold",
     password: formData.get("password"),
     confirm_password: formData.get("confirm_password"),
   };
@@ -76,8 +58,7 @@ export async function confirmTenantOnboarding(formData: FormData) {
     return { error: firstError.message };
   }
 
-  const { name, slug, logo_url, primary_color, secondary_color, password } =
-    parsed.data;
+  const { name, slug, theme, password } = parsed.data;
 
   const admin = createAdminClient();
 
@@ -85,7 +66,7 @@ export async function confirmTenantOnboarding(formData: FormData) {
     // 5. Fetch current tenant data for before/after logging
     const { data: oldTenant, error: fetchError } = await admin
       .from("tenants")
-      .select("name, slug, logo_url, primary_color, secondary_color")
+      .select("name, slug, logo_url, theme")
       .eq("id", tenantId)
       .single();
 
@@ -93,13 +74,11 @@ export async function confirmTenantOnboarding(formData: FormData) {
       return { error: "Tenant not found" };
     }
 
-    // 6. Update tenant record
+    // 6. Update tenant record (logo is uploaded directly via LogoUpload component)
     const newValues = {
       name,
       slug,
-      logo_url,
-      primary_color: primary_color || "#d4af37",
-      secondary_color: secondary_color || "#f4d47f",
+      theme: isValidTheme(theme || "gold") ? theme : "gold",
     };
 
     const { data: updatedTenant, error: updateError } = await admin
