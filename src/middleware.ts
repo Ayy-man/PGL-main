@@ -33,6 +33,11 @@ export async function middleware(request: NextRequest) {
   if (!user) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("redirect", pathname);
+    // Pass tenant slug so the login page can show tenant branding
+    const segments = pathname.split("/").filter(Boolean);
+    if (segments[0] && !["admin", "login", "signup", "onboarding"].includes(segments[0])) {
+      loginUrl.searchParams.set("tenant", segments[0]);
+    }
     return NextResponse.redirect(loginUrl);
   }
 
