@@ -39,7 +39,7 @@ export async function GET() {
     const admin = createAdminClient();
     const { data: tenant, error: tenantError } = await admin
       .from("tenants")
-      .select("id, name, slug, logo_url, primary_color, secondary_color")
+      .select("id, name, slug, logo_url, theme")
       .eq("id", tenantId)
       .single();
 
