@@ -3,14 +3,15 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { confirmTenantOnboarding } from "@/app/actions/onboarding";
+import { ThemePicker } from "@/components/ui/theme-picker";
+import { LogoUpload } from "@/components/ui/logo-upload";
 
 interface TenantData {
   id: string;
   name: string;
   slug: string;
   logo_url: string | null;
-  primary_color: string | null;
-  secondary_color: string | null;
+  theme: string | null;
 }
 
 export default function ConfirmTenantPage() {
@@ -24,9 +25,8 @@ export default function ConfirmTenantPage() {
   // Form state
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
-  const [logoUrl, setLogoUrl] = useState("");
-  const [primaryColor, setPrimaryColor] = useState("");
-  const [secondaryColor, setSecondaryColor] = useState("");
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [theme, setTheme] = useState("gold");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -43,9 +43,8 @@ export default function ConfirmTenantPage() {
         setTenant(data);
         setName(data.name || "");
         setSlug(data.slug || "");
-        setLogoUrl(data.logo_url || "");
-        setPrimaryColor(data.primary_color || "#d4af37");
-        setSecondaryColor(data.secondary_color || "#f4d47f");
+        setLogoUrl(data.logo_url || null);
+        setTheme(data.theme || "gold");
       } catch {
         setFetchError("Failed to connect to server");
       } finally {
@@ -64,9 +63,7 @@ export default function ConfirmTenantPage() {
       const formData = new FormData();
       formData.set("name", name);
       formData.set("slug", slug);
-      formData.set("logo_url", logoUrl);
-      formData.set("primary_color", primaryColor);
-      formData.set("secondary_color", secondaryColor);
+      formData.set("theme", theme);
       formData.set("password", password);
       formData.set("confirm_password", confirmPassword);
 
@@ -221,143 +218,40 @@ export default function ConfirmTenantPage() {
           </p>
         </div>
 
-        {/* Logo URL */}
+        {/* Brand Theme */}
         <div className="space-y-1">
           <label
-            htmlFor="logo_url"
             className="block text-sm font-medium"
             style={{ color: "var(--text-primary-ds)" }}
           >
-            Logo URL
-            <span
-              className="ml-1 text-xs font-normal"
-              style={{ color: "var(--text-secondary-ds)" }}
-            >
-              (optional)
-            </span>
+            Brand Theme
           </label>
-          <input
-            id="logo_url"
-            type="url"
-            value={logoUrl}
-            onChange={(e) => setLogoUrl(e.target.value)}
-            placeholder="https://example.com/logo.png"
-            disabled={submitting}
-            className="w-full rounded-[8px] border px-3 py-2 text-sm outline-none transition-colors disabled:opacity-50 placeholder:opacity-40"
-            style={{
-              borderColor: "var(--border-default)",
-              backgroundColor: "var(--bg-input)",
-              color: "var(--text-primary-ds)",
-            }}
-            onFocus={(e) => {
-              e.currentTarget.style.borderColor = "var(--gold-primary)";
-              e.currentTarget.style.boxShadow =
-                "0 0 0 2px rgba(212,175,55,0.25)";
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.borderColor = "var(--border-default)";
-              e.currentTarget.style.boxShadow = "none";
-            }}
-          />
+          <ThemePicker value={theme} onChange={setTheme} />
+          <input type="hidden" name="theme" value={theme} />
         </div>
 
-        {/* Primary Color */}
-        <div className="space-y-1">
-          <label
-            htmlFor="primary_color"
-            className="block text-sm font-medium"
-            style={{ color: "var(--text-primary-ds)" }}
-          >
-            Primary Color
-            <span
-              className="ml-1 text-xs font-normal"
-              style={{ color: "var(--text-secondary-ds)" }}
+        {/* Company Logo */}
+        {_tenant && (
+          <div className="space-y-1">
+            <label
+              className="block text-sm font-medium"
+              style={{ color: "var(--text-primary-ds)" }}
             >
-              (optional)
-            </span>
-          </label>
-          <div className="flex items-center gap-2">
-            <input
-              id="primary_color"
-              type="text"
-              value={primaryColor}
-              onChange={(e) => setPrimaryColor(e.target.value)}
-              placeholder="#d4af37"
-              disabled={submitting}
-              className="flex-1 rounded-[8px] border px-3 py-2 text-sm outline-none transition-colors disabled:opacity-50 placeholder:opacity-40"
-              style={{
-                borderColor: "var(--border-default)",
-                backgroundColor: "var(--bg-input)",
-                color: "var(--text-primary-ds)",
-              }}
-              onFocus={(e) => {
-                e.currentTarget.style.borderColor = "var(--gold-primary)";
-                e.currentTarget.style.boxShadow =
-                  "0 0 0 2px rgba(212,175,55,0.25)";
-              }}
-              onBlur={(e) => {
-                e.currentTarget.style.borderColor = "var(--border-default)";
-                e.currentTarget.style.boxShadow = "none";
-              }}
-            />
-            <div
-              className="size-10 rounded-[8px] border shrink-0"
-              style={{
-                backgroundColor: primaryColor || "#d4af37",
-                borderColor: "var(--border-default)",
-              }}
+              Company Logo
+              <span
+                className="ml-1 text-xs font-normal"
+                style={{ color: "var(--text-secondary-ds)" }}
+              >
+                (optional)
+              </span>
+            </label>
+            <LogoUpload
+              tenantId={_tenant.id}
+              currentUrl={logoUrl}
+              onUploaded={setLogoUrl}
             />
           </div>
-        </div>
-
-        {/* Secondary Color */}
-        <div className="space-y-1">
-          <label
-            htmlFor="secondary_color"
-            className="block text-sm font-medium"
-            style={{ color: "var(--text-primary-ds)" }}
-          >
-            Secondary Color
-            <span
-              className="ml-1 text-xs font-normal"
-              style={{ color: "var(--text-secondary-ds)" }}
-            >
-              (optional)
-            </span>
-          </label>
-          <div className="flex items-center gap-2">
-            <input
-              id="secondary_color"
-              type="text"
-              value={secondaryColor}
-              onChange={(e) => setSecondaryColor(e.target.value)}
-              placeholder="#f4d47f"
-              disabled={submitting}
-              className="flex-1 rounded-[8px] border px-3 py-2 text-sm outline-none transition-colors disabled:opacity-50 placeholder:opacity-40"
-              style={{
-                borderColor: "var(--border-default)",
-                backgroundColor: "var(--bg-input)",
-                color: "var(--text-primary-ds)",
-              }}
-              onFocus={(e) => {
-                e.currentTarget.style.borderColor = "var(--gold-primary)";
-                e.currentTarget.style.boxShadow =
-                  "0 0 0 2px rgba(212,175,55,0.25)";
-              }}
-              onBlur={(e) => {
-                e.currentTarget.style.borderColor = "var(--border-default)";
-                e.currentTarget.style.boxShadow = "none";
-              }}
-            />
-            <div
-              className="size-10 rounded-[8px] border shrink-0"
-              style={{
-                backgroundColor: secondaryColor || "#f4d47f",
-                borderColor: "var(--border-default)",
-              }}
-            />
-          </div>
-        </div>
+        )}
 
         {/* Divider */}
         <div
