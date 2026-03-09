@@ -9,7 +9,7 @@ interface MobileHeaderProps {
 }
 
 export function MobileHeader({
-  orgId,
+  orgId: _orgId,
   tenantName,
   logoUrl,
   userName,
