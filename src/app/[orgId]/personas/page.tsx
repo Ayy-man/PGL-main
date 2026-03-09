@@ -28,18 +28,28 @@ export default async function PersonasPage({
 
   const personas = await getPersonas(tenantId);
 
-  // Query real prospect count for this tenant
-  const { count: prospectCount } = await supabase
-    .from("prospects")
-    .select("*", { count: "exact", head: true })
-    .eq("tenant_id", tenantId);
+  // Parallel: prospect count + activity check
+  const [prospectResult, activityResult] = await Promise.all([
+    supabase
+      .from("prospects")
+      .select("*", { count: "exact", head: true })
+      .eq("tenant_id", tenantId),
+    supabase
+      .from("activity_log")
+      .select("id", { count: "exact", head: true })
+      .eq("tenant_id", tenantId)
+      .limit(1),
+  ]);
+
+  const prospectCount = prospectResult.count ?? 0;
+  const hasActivity = (activityResult.count ?? 0) > 0;
 
   return (
     <div className="space-y-6 page-enter">
       {/* Breadcrumbs */}
       <Breadcrumbs items={[{ label: "Personas" }]} />
 
-      {/* Page header — matches Screen C mockup */}
+      {/* Page header */}
       <div>
         <h1
           className="font-serif text-[38px] font-medium"
@@ -64,7 +74,7 @@ export default async function PersonasPage({
           description="Create a persona to define your ideal buyer profile and start searching for qualified prospects."
         />
       ) : (
-        <PersonasLayout personas={personas} prospectCount={prospectCount ?? 0} />
+        <PersonasLayout personas={personas} prospectCount={prospectCount} hasActivity={hasActivity} />
       )}
     </div>
   );

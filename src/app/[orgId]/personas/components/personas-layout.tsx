@@ -9,9 +9,10 @@ import { LiveDataStream } from "./live-data-stream";
 interface PersonasLayoutProps {
   personas: Persona[];
   prospectCount: number;
+  hasActivity: boolean;
 }
 
-export function PersonasLayout({ personas, prospectCount }: PersonasLayoutProps) {
+export function PersonasLayout({ personas, prospectCount, hasActivity }: PersonasLayoutProps) {
   const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
   const [freshness, setFreshness] = useState<"live" | "past_week">("live");
 
@@ -38,7 +39,14 @@ export function PersonasLayout({ personas, prospectCount }: PersonasLayoutProps)
   }, [personas, selectedIndustries, freshness]);
 
   return (
-    <div className="grid gap-5 min-h-0 grid-cols-1 lg:grid-cols-[220px_1fr_280px]">
+    <div
+      className="grid gap-5 min-h-0 grid-cols-1"
+      style={{
+        gridTemplateColumns: hasActivity
+          ? "220px 1fr 280px"
+          : "220px 1fr",
+      }}
+    >
       {/* Left sidebar — Library Stats + filters */}
       <PersonasLibrarySidebar
         personas={personas}
@@ -52,8 +60,8 @@ export function PersonasLayout({ personas, prospectCount }: PersonasLayoutProps)
       {/* Center — Persona card grid (filtered) */}
       <PersonaCardGrid personas={filteredPersonas} />
 
-      {/* Right sidebar — Live Data Stream */}
-      <LiveDataStream />
+      {/* Right sidebar — Live Data Stream (only when there's activity) */}
+      {hasActivity && <LiveDataStream />}
     </div>
   );
 }

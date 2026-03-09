@@ -5,12 +5,18 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import type { Persona } from "@/lib/personas/types";
 import { Badge } from "@/components/ui/badge";
-import { Search, Pencil, Trash2, Compass } from "lucide-react";
+import { Search, Pencil, Trash2, Briefcase, MapPin, Users, Tag } from "lucide-react";
 import { PersonaFormDialog } from "./persona-form-dialog";
 import { deletePersonaAction } from "../actions";
 
 interface PersonaCardProps {
   persona: Persona;
+}
+
+interface FilterSection {
+  icon: React.ElementType;
+  label: string;
+  values: string[];
 }
 
 export function PersonaCard({ persona }: PersonaCardProps) {
@@ -37,27 +43,34 @@ export function PersonaCard({ persona }: PersonaCardProps) {
     }
   };
 
-  const filterTags = useMemo(() => {
-    const tags: string[] = [];
-    if (persona.filters.titles) tags.push(...persona.filters.titles.slice(0, 2));
-    if (persona.filters.industries)
-      tags.push(...persona.filters.industries.slice(0, 1));
-    if (persona.filters.seniorities) {
-      tags.push(
-        ...persona.filters.seniorities
-          .slice(0, 1)
-          .map((s) => s.replace("_", " "))
-      );
-    }
-    return tags.filter(Boolean).slice(0, 4);
+  const filterSections = useMemo(() => {
+    const sections: FilterSection[] = [];
+    const f = persona.filters;
+    if (f.titles?.length)
+      sections.push({ icon: Briefcase, label: "Titles", values: f.titles });
+    if (f.seniorities?.length)
+      sections.push({
+        icon: Users,
+        label: "Seniority",
+        values: f.seniorities.map((s) => s.replace(/_/g, " ")),
+      });
+    if (f.industries?.length)
+      sections.push({ icon: Tag, label: "Industries", values: f.industries });
+    if (f.locations?.length)
+      sections.push({ icon: MapPin, label: "Locations", values: f.locations });
+    if (f.companySize?.length)
+      sections.push({ icon: Users, label: "Company Size", values: f.companySize });
+    return sections;
   }, [persona.filters]);
+
+  const totalFilters = filterSections.reduce((n, s) => n + s.values.length, 0);
 
   const lastUsedDisplay = persona.last_used_at
     ? new Date(persona.last_used_at).toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
       })
-    : "Never run";
+    : "Never";
 
   const searchHref = `/${orgId}/search?persona=${persona.id}`;
 
@@ -69,7 +82,7 @@ export function PersonaCard({ persona }: PersonaCardProps) {
 
   return (
     <div
-      className="rounded-[14px] p-7 cursor-pointer transition-all flex flex-col gap-4"
+      className="rounded-[14px] flex flex-col transition-all overflow-hidden"
       style={{
         background: cardStyle.background,
         border: `1px solid ${cardStyle.borderColor}`,
@@ -87,84 +100,141 @@ export function PersonaCard({ persona }: PersonaCardProps) {
         })
       }
     >
-      {/* Row 1: Name + Suggested badge */}
-      <div className="flex items-start justify-between gap-2">
-        <h3
-          className="font-serif text-[22px] font-semibold leading-tight"
-          style={{ color: "var(--text-primary)" }}
-        >
-          {persona.name}
-        </h3>
-        {persona.is_starter && (
-          <Badge
-            variant="gold"
-            className="shrink-0 text-[10px] uppercase tracking-wide"
+      {/* Top section */}
+      <div className="p-6 pb-4 flex flex-col gap-3">
+        {/* Name + badge row */}
+        <div className="flex items-start justify-between gap-2">
+          <h3
+            className="font-serif text-[24px] font-semibold leading-tight"
+            style={{ color: "var(--text-primary)" }}
           >
-            Suggested
-          </Badge>
+            {persona.name}
+          </h3>
+          {persona.is_starter && (
+            <Badge
+              variant="gold"
+              className="shrink-0 text-[10px] uppercase tracking-wide"
+            >
+              Suggested
+            </Badge>
+          )}
+        </div>
+
+        {/* Description */}
+        {persona.description && (
+          <p
+            className="text-[13px] leading-relaxed line-clamp-2"
+            style={{ color: "var(--text-secondary)" }}
+          >
+            {persona.description}
+          </p>
         )}
+
+        {/* Stats row */}
+        <div className="flex items-center gap-4 mt-1">
+          <div className="flex items-center gap-1.5">
+            <span
+              className="text-[11px] uppercase tracking-wide"
+              style={{ color: "var(--text-tertiary)" }}
+            >
+              Last Run
+            </span>
+            <span
+              className="text-[12px] font-medium"
+              style={{ color: "var(--text-primary)" }}
+            >
+              {lastUsedDisplay}
+            </span>
+          </div>
+          <div
+            className="h-3"
+            style={{ width: 1, background: "var(--border-subtle)" }}
+          />
+          <div className="flex items-center gap-1.5">
+            <span
+              className="text-[11px] uppercase tracking-wide"
+              style={{ color: "var(--text-tertiary)" }}
+            >
+              Filters
+            </span>
+            <span
+              className="text-[12px] font-mono font-medium"
+              style={{ color: "var(--gold-primary)" }}
+            >
+              {totalFilters}
+            </span>
+          </div>
+        </div>
       </div>
 
-      {/* Row 2: Description */}
-      {persona.description && (
-        <p
-          className="text-[13px] leading-relaxed line-clamp-2"
-          style={{ color: "var(--text-secondary)" }}
+      {/* Filter criteria section */}
+      {filterSections.length > 0 && (
+        <div
+          className="px-6 py-4 flex flex-col gap-3"
+          style={{
+            borderTop: "1px solid var(--border-subtle)",
+            background: "rgba(255,255,255,0.015)",
+          }}
         >
-          {persona.description}
-        </p>
-      )}
-
-      {/* Row 3: Filter tags chips */}
-      {filterTags.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {filterTags.map((tag) => (
-            <span
-              key={tag}
-              className="text-[11px] px-2.5 py-0.5 rounded-[6px]"
-              style={{
-                background: "var(--bg-elevated)",
-                border: "1px solid var(--border-default)",
-                color: "var(--text-secondary)",
-              }}
-            >
-              {tag}
-            </span>
-          ))}
+          {filterSections.map((section) => {
+            const Icon = section.icon;
+            return (
+              <div key={section.label} className="flex items-start gap-2">
+                <Icon
+                  className="h-3.5 w-3.5 mt-0.5 shrink-0"
+                  style={{ color: "var(--text-tertiary)" }}
+                />
+                <div className="flex flex-wrap gap-1.5">
+                  {section.values.map((val) => (
+                    <span
+                      key={val}
+                      className="text-[11px] px-2 py-0.5 rounded-[5px] capitalize"
+                      style={{
+                        background: "var(--bg-elevated)",
+                        border: "1px solid var(--border-default)",
+                        color: "var(--text-secondary)",
+                      }}
+                    >
+                      {val}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+          {persona.filters.keywords && (
+            <div className="flex items-start gap-2">
+              <Search
+                className="h-3.5 w-3.5 mt-0.5 shrink-0"
+                style={{ color: "var(--text-tertiary)" }}
+              />
+              <span
+                className="text-[11px] italic"
+                style={{ color: "var(--text-tertiary)" }}
+              >
+                &ldquo;{persona.filters.keywords}&rdquo;
+              </span>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Row 4: Last run */}
-      <div className="flex items-center gap-1.5">
-        <span
-          className="text-[11px] uppercase tracking-wide"
-          style={{ color: "var(--text-tertiary)" }}
-        >
-          Last Run
-        </span>
-        <span className="text-[13px]" style={{ color: "var(--text-primary)" }}>
-          {lastUsedDisplay}
-        </span>
-      </div>
-
-      {/* Row 6: Action buttons */}
-      <div className="flex items-center gap-2 flex-wrap">
+      {/* Action bar */}
+      <div
+        className="px-6 py-4 flex items-center gap-2"
+        style={{ borderTop: "1px solid var(--border-subtle)" }}
+      >
         <Link
           href={searchHref}
-          className="flex items-center gap-1.5 text-[12px] px-3 py-1.5 rounded-[8px] cursor-pointer transition-all"
-          style={ghostButtonStyle}
+          className="flex items-center gap-1.5 text-[12px] font-medium px-4 py-2 rounded-[8px] cursor-pointer transition-all"
+          style={{
+            background: "var(--gold-bg)",
+            border: "1px solid var(--border-gold)",
+            color: "var(--gold-primary)",
+          }}
         >
           <Search className="h-3.5 w-3.5" />
-          Search
-        </Link>
-
-        <Link
-          href={searchHref}
-          className="flex items-center gap-1.5 text-[12px] px-3 py-1.5 rounded-[8px] cursor-pointer transition-all"
-          style={ghostButtonStyle}
-        >
-          <Compass className="h-3.5 w-3.5" />
-          Explore
+          Search Prospects
         </Link>
 
         {!persona.is_starter && (
@@ -174,7 +244,7 @@ export function PersonaCard({ persona }: PersonaCardProps) {
               persona={persona}
               trigger={
                 <button
-                  className="flex items-center gap-1.5 text-[12px] px-3 py-1.5 rounded-[8px] cursor-pointer transition-all"
+                  className="flex items-center gap-1.5 text-[12px] px-3 py-2 rounded-[8px] cursor-pointer transition-all"
                   style={ghostButtonStyle}
                 >
                   <Pencil className="h-3.5 w-3.5" />
@@ -184,7 +254,7 @@ export function PersonaCard({ persona }: PersonaCardProps) {
             />
 
             <button
-              className="flex items-center gap-1.5 text-[12px] px-3 py-1.5 rounded-[8px] cursor-pointer transition-all"
+              className="flex items-center gap-1.5 text-[12px] px-3 py-2 rounded-[8px] cursor-pointer transition-all ml-auto"
               style={ghostButtonStyle}
               onClick={handleDelete}
               disabled={isDeleting}
@@ -198,7 +268,7 @@ export function PersonaCard({ persona }: PersonaCardProps) {
               }}
             >
               <Trash2 className="h-3.5 w-3.5" />
-              {isDeleting ? "Deleting..." : "Delete"}
+              {isDeleting ? "..." : "Delete"}
             </button>
           </>
         )}
