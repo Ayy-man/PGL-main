@@ -81,17 +81,22 @@ function formatSecondsAgo(seconds: number): string {
 
 type SystemStatus = "OPERATIONAL" | "DEGRADED" | "INCIDENT";
 
-function deriveSystemStatus(
-  pulse: PulseData | null,
-  errors: ErrorData | null
-): SystemStatus {
-  if (!pulse) return "OPERATIONAL"; // Still loading
-  const { enrichmentFailed, totalProspects } = pulse;
-  const failureRate = totalProspects > 0 ? enrichmentFailed / totalProspects : 0;
-  // High failure rate or many recent errors → incident
-  if (failureRate > 0.05 || (errors && errors.total > 20)) return "INCIDENT";
-  // Any failures at all → degraded
-  if (enrichmentFailed > 0 || (errors && errors.total > 0)) return "DEGRADED";
+function deriveSystemStatus(errors: ErrorData | null): SystemStatus {
+  if (!errors) return "OPERATIONAL"; // Still loading
+
+  // Only count errors from the last 24 hours — older ones don't affect status
+  const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
+  const recentErrors = errors.data.filter(
+    (e) => new Date(e.updatedAt).getTime() > oneDayAgo
+  );
+  const recentCount = recentErrors.length;
+
+  // Many recent failures → incident (red)
+  if (recentCount >= 10) return "INCIDENT";
+  // Some recent failures → degraded (yellow)
+  if (recentCount > 0) return "DEGRADED";
+  // No recent failures → operational (green)
+  // This naturally clears after 24h even if older errors remain in the feed
   return "OPERATIONAL";
 }
 
@@ -191,7 +196,7 @@ export default function AdminDashboard() {
     }
   }, []);
 
-  const systemStatus = deriveSystemStatus(pulseData, errorData);
+  const systemStatus = deriveSystemStatus(errorData);
   const statusCfg = STATUS_CONFIG[systemStatus];
 
   return (
