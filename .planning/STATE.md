@@ -25,8 +25,8 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 
 Phase: 16 of 16 (Tenant Branding — Logo Upload, Curated Themes, Per-Tenant Theming)
 Plan: 3 of 8 — IN PROGRESS
-Status: Phase 16 executing — Plan 16-03 (ThemePicker Component) complete.
-Last activity: 2026-03-09 — Plan 16-03 complete. ThemePicker visual component created with 8 gradient swatches, glow selection, keyboard accessibility.
+Status: Phase 16 executing — Plan 16-02 (Logo Upload API + LogoUpload Component) complete.
+Last activity: 2026-03-09 — Plan 16-02 complete. Logo upload POST endpoint with auth + validation + Supabase Storage upload, plus LogoUpload drop zone component with drag-and-drop, live preview, and design system styling.
 
 Progress: [███████████████░░░] 83% (15/18 phases complete) — Phase 16 next
 
@@ -84,6 +84,7 @@ Progress: [███████████████░░░] 83% (15/18 ph
 | Phase 14.1 P04 | 3 | 2 tasks | 3 files |
 | Phase 14.1 P05 | 5 | 2 tasks | 0 files (build verification + compliance audit) |
 | Phase 14.1-admin-dashboard-rebuild-match-stitch-mockup P05 | 8 | 2 tasks | 3 files |
+| Phase 16 P02 | 105s | 2 tasks | 2 files |
 
 ### Phase 3 Plan Completion
 
@@ -292,6 +293,10 @@ Recent decisions affecting current work:
 - [Phase 14.1-05]: Phase 14.1 complete — Admin dashboard fully rebuilt to match stitch executive_strategy_dashboard_2 mockup
 - [Phase 14.1-admin-dashboard-rebuild-match-stitch-mockup]: pnpm build exit 0 confirmed after clearing stale .next cache — sucrase/fast-glob symlink resolution error was a cache artifact
 - [Phase 14.1-admin-dashboard-rebuild-match-stitch-mockup]: All 9 design system compliance checks pass on 11 scoped admin files — Tailwind hover:CSS-var violations in out-of-scope tenants/ and users/ sub-pages logged to deferred-items.md
+- [Phase 16-02]: Inline super_admin + tenant_admin auth check in logo upload Route Handler (consistent with Phase 04 pattern)
+- [Phase 16-02]: Client-side file validation mirrors server-side for immediate UX feedback before network round-trip
+- [Phase 16-02]: URL.createObjectURL for instant local preview before upload completes; revoked on failure
+- [Phase 16-02]: oklch(0.62 0.19 22) for error text color — consistent with Phase 14.1-03 destructive action pattern
 
 ### Roadmap Evolution
 
@@ -355,8 +360,8 @@ All phases complete (6–15). The following items remain before production launc
 
 ## Session Continuity
 
-Last session: 2026-03-09 — Completed 16-03-PLAN.md (ThemePicker Component).
-Stopped at: Completed 16-03-PLAN.md. Next: 16-04-PLAN.md.
+Last session: 2026-03-09 — Completed 16-02-PLAN.md (Logo Upload API + LogoUpload Component).
+Stopped at: Completed 16-02-PLAN.md.
 
 ---
 
