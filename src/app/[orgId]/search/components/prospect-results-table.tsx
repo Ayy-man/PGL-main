@@ -64,222 +64,299 @@ export function ProspectResultsTable({
 
   return (
     <div
-      className="overflow-auto rounded-xl"
+      className="rounded-xl"
       style={{
         border: "1px solid var(--border-default)",
         background: "var(--bg-card-gradient)",
       }}
     >
-      <table className="min-w-full">
-        {/* Sticky header */}
-        <thead
-          className="sticky top-0 z-10"
-          style={{ background: "rgba(255,255,255,0.03)" }}
-        >
-          <tr
-            style={{
-              borderBottom: "1px solid var(--border-subtle)",
-            }}
+      {/* Desktop table */}
+      <div className="hidden md:block overflow-auto">
+        <table className="min-w-full">
+          {/* Sticky header */}
+          <thead
+            className="sticky top-0 z-10"
+            style={{ background: "rgba(255,255,255,0.03)" }}
           >
-            <th className="py-3.5 pl-5 pr-3 text-left w-12" scope="col">
-              <input
-                type="checkbox"
-                checked={allSelected}
-                onChange={onSelectAll}
-                className="h-4 w-4 rounded border-border accent-[var(--gold-primary)] cursor-pointer"
-                aria-label="Select all"
-              />
-            </th>
-            <th
-              className="py-3.5 pl-4 pr-3 text-left text-[11px] font-semibold uppercase tracking-wider"
-              style={{ color: "var(--text-tertiary)" }}
-              scope="col"
+            <tr
+              style={{
+                borderBottom: "1px solid var(--border-subtle)",
+              }}
             >
-              Prospect
-            </th>
-            <th
-              className="px-3 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider"
-              style={{ color: "var(--text-tertiary)" }}
-              scope="col"
-            >
-              Wealth Tier
-            </th>
-            <th
-              className="px-3 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider"
-              style={{ color: "var(--text-tertiary)" }}
-              scope="col"
-            >
-              Title &amp; Company
-            </th>
-            <th
-              className="px-3 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider"
-              style={{ color: "var(--text-tertiary)" }}
-              scope="col"
-            >
-              Enrichment
-            </th>
-            <th
-              className="px-3 py-3.5 text-right text-[11px] font-semibold uppercase tracking-wider"
-              style={{ color: "var(--text-tertiary)" }}
-              scope="col"
-            >
-              Actions
-            </th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {results.map((prospect) => {
-            const name =
-              prospect.name ||
-              `${prospect.first_name} ${prospect.last_name}`;
-            const initials = getInitials(name);
-            const avatarGradient = getAvatarGradient(name);
-            const location = [prospect.city, prospect.state, prospect.country]
-              .filter(Boolean)
-              .join(", ");
-            const wealthTier = getWealthTier(prospect);
-            const isSelected = selectedIds.has(prospect.id);
-
-            return (
-              <tr
-                key={prospect.id}
-                onClick={() => onProspectClick(prospect.id)}
-                className="row-hover-gold group transition-colors duration-150 cursor-pointer"
-                data-selected={isSelected || undefined}
-                style={{ borderBottom: "1px solid var(--border-subtle)" }}
+              <th className="py-3.5 pl-5 pr-3 text-left w-12" scope="col">
+                <input
+                  type="checkbox"
+                  checked={allSelected}
+                  onChange={onSelectAll}
+                  className="h-4 w-4 rounded border-border accent-[var(--gold-primary)] cursor-pointer"
+                  aria-label="Select all"
+                />
+              </th>
+              <th
+                className="py-3.5 pl-4 pr-3 text-left text-[11px] font-semibold uppercase tracking-wider"
+                style={{ color: "var(--text-tertiary)" }}
+                scope="col"
               >
-                {/* Checkbox */}
-                <td className="whitespace-nowrap py-4 pl-5 pr-3">
-                  <input
-                    type="checkbox"
-                    checked={isSelected}
-                    onChange={(e) => {
-                      e.stopPropagation();
-                      onSelect(prospect.id);
-                    }}
-                    onClick={(e) => e.stopPropagation()}
-                    className="h-4 w-4 rounded border-border accent-[var(--gold-primary)] cursor-pointer"
-                    aria-label={`Select ${name}`}
-                  />
-                </td>
+                Prospect
+              </th>
+              <th
+                className="px-3 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider"
+                style={{ color: "var(--text-tertiary)" }}
+                scope="col"
+              >
+                Wealth Tier
+              </th>
+              <th
+                className="px-3 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider"
+                style={{ color: "var(--text-tertiary)" }}
+                scope="col"
+              >
+                Title &amp; Company
+              </th>
+              <th
+                className="px-3 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider"
+                style={{ color: "var(--text-tertiary)" }}
+                scope="col"
+              >
+                Enrichment
+              </th>
+              <th
+                className="px-3 py-3.5 text-right text-[11px] font-semibold uppercase tracking-wider"
+                style={{ color: "var(--text-tertiary)" }}
+                scope="col"
+              >
+                Actions
+              </th>
+            </tr>
+          </thead>
 
-                {/* Prospect: Avatar + Name + Location */}
-                <td className="whitespace-nowrap px-3 py-4">
-                  <div className="flex items-center">
-                    <div
-                      className="h-10 w-10 flex-shrink-0 rounded-full flex items-center justify-center"
-                      style={{ background: avatarGradient }}
-                    >
-                      <span className="font-serif text-[14px] text-white/80">
-                        {initials}
+          <tbody>
+            {results.map((prospect) => {
+              const name =
+                prospect.name ||
+                `${prospect.first_name} ${prospect.last_name}`;
+              const initials = getInitials(name);
+              const avatarGradient = getAvatarGradient(name);
+              const location = [prospect.city, prospect.state, prospect.country]
+                .filter(Boolean)
+                .join(", ");
+              const wealthTier = getWealthTier(prospect);
+              const isSelected = selectedIds.has(prospect.id);
+
+              return (
+                <tr
+                  key={prospect.id}
+                  onClick={() => onProspectClick(prospect.id)}
+                  className="row-hover-gold group transition-colors duration-150 cursor-pointer"
+                  data-selected={isSelected || undefined}
+                  style={{ borderBottom: "1px solid var(--border-subtle)" }}
+                >
+                  {/* Checkbox */}
+                  <td className="whitespace-nowrap py-4 pl-5 pr-3">
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        onSelect(prospect.id);
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                      className="h-4 w-4 rounded border-border accent-[var(--gold-primary)] cursor-pointer"
+                      aria-label={`Select ${name}`}
+                    />
+                  </td>
+
+                  {/* Prospect: Avatar + Name + Location */}
+                  <td className="whitespace-nowrap px-3 py-4">
+                    <div className="flex items-center">
+                      <div
+                        className="h-10 w-10 flex-shrink-0 rounded-full flex items-center justify-center"
+                        style={{ background: avatarGradient }}
+                      >
+                        <span className="font-serif text-[14px] text-white/80">
+                          {initials}
+                        </span>
+                      </div>
+                      <div className="ml-3">
+                        <div
+                          className="text-[14px] font-medium transition-colors duration-150 group-hover:text-[var(--gold-primary)]"
+                          style={{ color: "var(--text-primary-ds)" }}
+                        >
+                          {name}
+                        </div>
+                        {location && (
+                          <div
+                            className="text-[12px] flex items-center gap-1 mt-0.5"
+                            style={{ color: "var(--text-tertiary)" }}
+                          >
+                            <MapPin className="h-3 w-3" />
+                            {location}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </td>
+
+                  {/* Wealth Tier */}
+                  <td className="whitespace-nowrap px-3 py-4">
+                    {wealthTier ? (
+                      <WealthTierBadge tier={wealthTier} />
+                    ) : (
+                      <span
+                        className="text-[12px]"
+                        style={{ color: "var(--text-ghost)" }}
+                      >
+                        —
+                      </span>
+                    )}
+                  </td>
+
+                  {/* Title & Company */}
+                  <td className="whitespace-nowrap px-3 py-4">
+                    <div className="flex flex-col">
+                      <span
+                        className="text-[13px] font-medium"
+                        style={{ color: "var(--text-secondary-ds)" }}
+                      >
+                        {prospect.title || "—"}
+                      </span>
+                      <span
+                        className="text-[12px] mt-0.5"
+                        style={{ color: "var(--text-tertiary)" }}
+                      >
+                        {prospect.organization_name ||
+                          prospect.organization?.name ||
+                          ""}
                       </span>
                     </div>
-                    <div className="ml-3">
-                      <div
-                        className="text-[14px] font-medium transition-colors duration-150 group-hover:text-[var(--gold-primary)]"
-                        style={{ color: "var(--text-primary-ds)" }}
-                      >
-                        {name}
+                  </td>
+
+                  {/* Enrichment status dots */}
+                  <td className="whitespace-nowrap px-3 py-4 text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className="flex gap-1">
+                        <span
+                          className="h-2.5 w-2.5 rounded-full"
+                          style={{ background: "rgba(255,255,255,0.15)" }}
+                        />
+                        <span
+                          className="h-2.5 w-2.5 rounded-full"
+                          style={{ background: "rgba(255,255,255,0.15)" }}
+                        />
+                        <span
+                          className="h-2.5 w-2.5 rounded-full"
+                          style={{ background: "rgba(255,255,255,0.15)" }}
+                        />
                       </div>
-                      {location && (
-                        <div
-                          className="text-[12px] flex items-center gap-1 mt-0.5"
-                          style={{ color: "var(--text-tertiary)" }}
-                        >
-                          <MapPin className="h-3 w-3" />
-                          {location}
-                        </div>
-                      )}
+                      <span
+                        className="text-[11px] ml-1"
+                        style={{ color: "var(--text-ghost)" }}
+                      >
+                        Not enriched
+                      </span>
                     </div>
-                  </div>
-                </td>
+                  </td>
 
-                {/* Wealth Tier */}
-                <td className="whitespace-nowrap px-3 py-4">
-                  {wealthTier ? (
-                    <WealthTierBadge tier={wealthTier} />
-                  ) : (
-                    <span
-                      className="text-[12px]"
-                      style={{ color: "var(--text-ghost)" }}
+                  {/* Actions — visible on hover */}
+                  <td className="relative whitespace-nowrap py-4 pl-3 pr-5 text-right">
+                    <div
+                      className="flex items-center justify-end gap-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-150"
+                      onClick={(e) => e.stopPropagation()}
                     >
-                      —
-                    </span>
+                      <button
+                        className="p-1.5 rounded transition-colors duration-150 cursor-pointer text-[var(--text-tertiary)] hover:text-[var(--gold-primary)] hover:bg-[rgba(212,175,55,0.1)]"
+                        title="Find Lookalikes"
+                      >
+                        <Search className="h-[18px] w-[18px]" />
+                      </button>
+                      <button
+                        className="p-1.5 rounded transition-colors duration-150 cursor-pointer text-[var(--text-tertiary)] hover:text-[var(--gold-primary)] hover:bg-[rgba(212,175,55,0.1)]"
+                        title="View Profile"
+                      >
+                        <Eye className="h-[18px] w-[18px]" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile card list */}
+      <div className="md:hidden divide-y" style={{ borderColor: "var(--border-subtle)" }}>
+        {results.map((prospect) => {
+          const name =
+            prospect.name ||
+            `${prospect.first_name} ${prospect.last_name}`;
+          const location = [prospect.city, prospect.state]
+            .filter(Boolean)
+            .join(", ");
+          const isSelected = selectedIds.has(prospect.id);
+          const wealthTier = getWealthTier(prospect);
+
+          return (
+            <div
+              key={prospect.id}
+              className="p-4 space-y-2 cursor-pointer"
+              onClick={() => onProspectClick(prospect.id)}
+            >
+              <div className="flex items-start gap-3">
+                {/* Checkbox */}
+                <input
+                  type="checkbox"
+                  className="mt-1 h-5 w-5 rounded accent-[var(--gold-primary)] cursor-pointer"
+                  checked={isSelected}
+                  onChange={() => onSelect(prospect.id)}
+                  onClick={(e) => e.stopPropagation()}
+                  aria-label={`Select ${name}`}
+                />
+                {/* Name + details */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate" style={{ color: "var(--text-primary-ds)" }}>
+                    {name}
+                  </p>
+                  <p className="text-xs truncate" style={{ color: "var(--text-secondary)" }}>
+                    {prospect.title || "—"}
+                    {(prospect.organization_name || prospect.organization?.name) &&
+                      ` at ${prospect.organization_name || prospect.organization?.name}`}
+                  </p>
+                  {location && (
+                    <p className="text-xs mt-0.5 flex items-center gap-1" style={{ color: "var(--text-tertiary)" }}>
+                      <MapPin className="h-3 w-3 shrink-0" />
+                      {location}
+                    </p>
                   )}
-                </td>
-
-                {/* Title & Company */}
-                <td className="whitespace-nowrap px-3 py-4">
-                  <div className="flex flex-col">
-                    <span
-                      className="text-[13px] font-medium"
-                      style={{ color: "var(--text-secondary-ds)" }}
-                    >
-                      {prospect.title || "—"}
-                    </span>
-                    <span
-                      className="text-[12px] mt-0.5"
-                      style={{ color: "var(--text-tertiary)" }}
-                    >
-                      {prospect.organization_name ||
-                        prospect.organization?.name ||
-                        ""}
-                    </span>
-                  </div>
-                </td>
-
-                {/* Enrichment status dots */}
-                <td className="whitespace-nowrap px-3 py-4 text-sm">
-                  <div className="flex items-center gap-2">
-                    <div className="flex gap-1">
-                      <span
-                        className="h-2.5 w-2.5 rounded-full"
-                        style={{ background: "rgba(255,255,255,0.15)" }}
-                      />
-                      <span
-                        className="h-2.5 w-2.5 rounded-full"
-                        style={{ background: "rgba(255,255,255,0.15)" }}
-                      />
-                      <span
-                        className="h-2.5 w-2.5 rounded-full"
-                        style={{ background: "rgba(255,255,255,0.15)" }}
-                      />
-                    </div>
-                    <span
-                      className="text-[11px] ml-1"
-                      style={{ color: "var(--text-ghost)" }}
-                    >
-                      Not enriched
-                    </span>
-                  </div>
-                </td>
-
-                {/* Actions — visible on hover */}
-                <td className="relative whitespace-nowrap py-4 pl-3 pr-5 text-right">
-                  <div
-                    className="flex items-center justify-end gap-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-150"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <button
-                      className="p-1.5 rounded transition-colors duration-150 cursor-pointer text-[var(--text-tertiary)] hover:text-[var(--gold-primary)] hover:bg-[rgba(212,175,55,0.1)]"
-                      title="Find Lookalikes"
-                    >
-                      <Search className="h-[18px] w-[18px]" />
-                    </button>
-                    <button
-                      className="p-1.5 rounded transition-colors duration-150 cursor-pointer text-[var(--text-tertiary)] hover:text-[var(--gold-primary)] hover:bg-[rgba(212,175,55,0.1)]"
-                      title="View Profile"
-                    >
-                      <Eye className="h-[18px] w-[18px]" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+                </div>
+                {wealthTier && <WealthTierBadge tier={wealthTier} />}
+              </div>
+              {/* Action buttons — always visible on mobile */}
+              <div
+                className="flex items-center gap-2 pl-8"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium transition-colors cursor-pointer"
+                  style={{ color: "var(--text-tertiary)", border: "1px solid var(--border-subtle)" }}
+                  title="Find Lookalikes"
+                >
+                  <Search className="h-3.5 w-3.5" />
+                  Lookalikes
+                </button>
+                <button
+                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium transition-colors cursor-pointer"
+                  style={{ color: "var(--text-tertiary)", border: "1px solid var(--border-subtle)" }}
+                  title="View Profile"
+                >
+                  <Eye className="h-3.5 w-3.5" />
+                  Profile
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
