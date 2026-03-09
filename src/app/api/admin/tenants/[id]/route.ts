@@ -93,18 +93,30 @@ export async function PATCH(
     const admin = createAdminClient();
     const body = await request.json();
 
-    // Only allow updating name for now
-    const { name } = body;
-    if (!name || typeof name !== "string" || name.trim().length === 0) {
+    // Build update payload from allowed fields
+    const { name, theme, logo_url } = body;
+    const updates: Record<string, unknown> = {};
+
+    if (typeof name === "string" && name.trim().length > 0) {
+      updates.name = name.trim();
+    }
+    if (typeof theme === "string" && theme.trim().length > 0) {
+      updates.theme = theme.trim();
+    }
+    if (logo_url === null || (typeof logo_url === "string" && logo_url.trim().length > 0)) {
+      updates.logo_url = logo_url === null ? null : logo_url.trim();
+    }
+
+    if (Object.keys(updates).length === 0) {
       return NextResponse.json(
-        { error: "Name is required and must be a non-empty string" },
+        { error: "No valid fields to update" },
         { status: 400 }
       );
     }
 
     const { data: tenant, error } = await admin
       .from("tenants")
-      .update({ name: name.trim() })
+      .update(updates)
       .eq("id", id)
       .select()
       .single();
@@ -116,13 +128,23 @@ export async function PATCH(
       );
     }
 
-    // Log tenant_renamed activity
-    await logActivity({
-      tenantId: id,
-      userId: user.id,
-      actionType: "tenant_renamed",
-      metadata: { new_name: name.trim() },
-    });
+    // Log activity for notable changes
+    if (updates.name) {
+      await logActivity({
+        tenantId: id,
+        userId: user.id,
+        actionType: "tenant_renamed",
+        metadata: { new_name: updates.name },
+      });
+    }
+    if (updates.theme) {
+      await logActivity({
+        tenantId: id,
+        userId: user.id,
+        actionType: "tenant_theme_changed",
+        metadata: { theme: updates.theme },
+      });
+    }
 
     return NextResponse.json({ tenant });
   } catch (error) {
