@@ -5,6 +5,7 @@ import { requireSuperAdmin } from "@/lib/auth/rbac";
 import { createTenantSchema, inviteUserSchema } from "@/lib/validations/schemas";
 import { revalidatePath } from "next/cache";
 import { logActivity } from "@/lib/activity-logger";
+import { isValidTheme } from "@/lib/tenant-theme";
 
 /**
  * Create a new tenant with optional admin invite. Super admin only.
@@ -24,8 +25,7 @@ export async function createTenant(formData: FormData) {
     name: formData.get("name"),
     slug: formData.get("slug"),
     logo_url: formData.get("logo_url") || null,
-    primary_color: formData.get("primary_color") || "#d4af37",
-    secondary_color: formData.get("secondary_color") || "#f4d47f",
+    theme: formData.get("theme") || "gold",
     admin_email: formData.get("admin_email") || undefined,
   };
 
@@ -33,7 +33,11 @@ export async function createTenant(formData: FormData) {
 
   // Extract admin_email before inserting tenant (it's not a DB column)
   const adminEmail = validated.admin_email || undefined;
-  const { admin_email: _removed, ...tenantData } = validated;
+  const { admin_email: _removed, theme: rawTheme, ...tenantFields } = validated;
+  const tenantData = {
+    ...tenantFields,
+    theme: isValidTheme(rawTheme || "gold") ? rawTheme : "gold",
+  };
 
   const supabase = createAdminClient();
 
