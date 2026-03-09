@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Menu } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Menu, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/sheet";
 import { SidebarContent } from "./sidebar";
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
+import Link from "next/link";
 
 interface MobileSidebarProps {
   orgId: string;
@@ -37,23 +37,33 @@ export function MobileSidebar({
     <div className="lg:hidden">
       {/* Fixed mobile header bar */}
       <div
-        className="fixed top-0 left-0 right-0 z-40 flex h-14 items-center gap-3 px-4 pl-safe"
+        className="fixed top-0 left-0 right-0 z-40 flex h-14 items-center justify-between px-4 pl-safe"
         style={{
           background: "rgba(8,8,10,0.85)",
           backdropFilter: "blur(12px)",
           borderBottom: "1px solid var(--border-subtle)",
         }}
       >
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setOpen(true)}
-          aria-label="Open navigation menu"
-          className="h-9 w-9"
-        >
-          <Menu className="h-5 w-5" />
-        </Button>
         <span className="font-serif text-sm font-semibold text-foreground">{tenantName}</span>
+        <div className="flex items-center gap-2">
+          <Link
+            href={`/${orgId}/search`}
+            className="flex items-center justify-center h-10 w-10 rounded-lg transition-colors"
+            style={{ color: "var(--text-secondary-ds)" }}
+            aria-label="Search prospects"
+          >
+            <Search className="h-5 w-5" />
+          </Link>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setOpen(true)}
+            aria-label="Open navigation menu"
+            className="h-11 w-11"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
 
       {/* Spacer to push content below fixed header */}

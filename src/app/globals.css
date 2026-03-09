@@ -213,8 +213,12 @@
 .page-enter { animation: fadeIn 0.4s ease forwards; }
 
 @media (prefers-reduced-motion: reduce) {
-  .page-enter {
-    animation: none;
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
@@ -404,4 +408,28 @@
   .pt-safe { padding-top: env(safe-area-inset-top); }
   .pl-safe { padding-left: env(safe-area-inset-left); }
   .pr-safe { padding-right: env(safe-area-inset-right); }
+
+  /* Scroll affordance — fade edge on horizontally scrollable containers */
+  .scroll-fade-right {
+    position: relative;
+  }
+  .scroll-fade-right::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 32px;
+    background: linear-gradient(to right, transparent, var(--bg-root));
+    pointer-events: none;
+    z-index: 1;
+  }
+}
+
+/* Hide ambient glow on mobile — saves GPU compositing */
+@media (max-width: 767px) {
+  .ambient-glow-top,
+  .ambient-glow-bottom {
+    display: none;
+  }
 }
