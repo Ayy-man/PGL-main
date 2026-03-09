@@ -8,9 +8,10 @@ import { LiveDataStream } from "./live-data-stream";
 
 interface PersonasLayoutProps {
   personas: Persona[];
+  prospectCount: number;
 }
 
-export function PersonasLayout({ personas }: PersonasLayoutProps) {
+export function PersonasLayout({ personas, prospectCount }: PersonasLayoutProps) {
   const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
   const [freshness, setFreshness] = useState<"live" | "past_week">("live");
 
@@ -41,6 +42,7 @@ export function PersonasLayout({ personas }: PersonasLayoutProps) {
       {/* Left sidebar — Library Stats + filters */}
       <PersonasLibrarySidebar
         personas={personas}
+        prospectCount={prospectCount}
         selectedIndustries={selectedIndustries}
         onIndustryChange={setSelectedIndustries}
         freshness={freshness}

@@ -8,7 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import { Search, Pencil, Trash2, Compass } from "lucide-react";
 import { PersonaFormDialog } from "./persona-form-dialog";
 import { deletePersonaAction } from "../actions";
-import { PersonaSparkline } from "./persona-sparkline";
 
 interface PersonaCardProps {
   persona: Persona;
@@ -38,16 +37,6 @@ export function PersonaCard({ persona }: PersonaCardProps) {
     }
   };
 
-  const sparklineData = useMemo(() => {
-    let seed = persona.id
-      .split("")
-      .reduce((acc, c) => acc + c.charCodeAt(0), 0);
-    return Array.from({ length: 7 }, () => {
-      seed = (seed * 9301 + 49297) % 233280;
-      return { value: Math.floor((seed / 233280) * 500) + 100 };
-    });
-  }, [persona.id]);
-
   const filterTags = useMemo(() => {
     const tags: string[] = [];
     if (persona.filters.titles) tags.push(...persona.filters.titles.slice(0, 2));
@@ -69,9 +58,6 @@ export function PersonaCard({ persona }: PersonaCardProps) {
         day: "numeric",
       })
     : "Never run";
-
-  const lastValue = sparklineData[sparklineData.length - 1]?.value ?? 100;
-  const matchCount = `~${lastValue * 5} matches`;
 
   const searchHref = `/${orgId}/search?persona=${persona.id}`;
 
@@ -148,37 +134,18 @@ export function PersonaCard({ persona }: PersonaCardProps) {
         </div>
       )}
 
-      {/* Row 4: Stats row */}
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col gap-0.5">
-          <span
-            className="text-[11px] uppercase tracking-wide"
-            style={{ color: "var(--text-tertiary)" }}
-          >
-            Last Run
-          </span>
-          <span className="text-[13px]" style={{ color: "var(--text-primary)" }}>
-            {lastUsedDisplay}
-          </span>
-        </div>
-        <div className="flex flex-col gap-0.5 items-end">
-          <span
-            className="text-[11px] uppercase tracking-wide"
-            style={{ color: "var(--text-tertiary)" }}
-          >
-            Total
-          </span>
-          <span
-            className="text-[13px] font-mono"
-            style={{ color: "var(--gold-primary)" }}
-          >
-            {matchCount}
-          </span>
-        </div>
+      {/* Row 4: Last run */}
+      <div className="flex items-center gap-1.5">
+        <span
+          className="text-[11px] uppercase tracking-wide"
+          style={{ color: "var(--text-tertiary)" }}
+        >
+          Last Run
+        </span>
+        <span className="text-[13px]" style={{ color: "var(--text-primary)" }}>
+          {lastUsedDisplay}
+        </span>
       </div>
-
-      {/* Row 5: Sparkline */}
-      <PersonaSparkline data={sparklineData} />
 
       {/* Row 6: Action buttons */}
       <div className="flex items-center gap-2 flex-wrap">

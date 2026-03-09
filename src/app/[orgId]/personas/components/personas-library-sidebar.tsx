@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 
 interface PersonasLibrarySidebarProps {
   personas: Persona[];
+  prospectCount: number;
   selectedIndustries: string[];
   onIndustryChange: (industries: string[]) => void;
   freshness: "live" | "past_week";
@@ -15,23 +16,13 @@ interface PersonasLibrarySidebarProps {
 
 export function PersonasLibrarySidebar({
   personas,
+  prospectCount,
   selectedIndustries,
   onIndustryChange,
   freshness,
   onFreshnessChange,
 }: PersonasLibrarySidebarProps) {
   const activeCount = personas.length;
-
-  const totalEstimate = useMemo(() => {
-    const total = personas.reduce((sum, p) => {
-      // Deterministic pseudo-random per persona based on id char codes
-      const seed = p.id
-        .split("")
-        .reduce((acc, char) => acc + char.charCodeAt(0), 0);
-      return sum + (seed % 200) * 5 + 50;
-    }, 0);
-    return total.toLocaleString();
-  }, [personas]);
 
   const industries = useMemo(() => {
     const set = new Set<string>();
@@ -105,13 +96,13 @@ export function PersonasLibrarySidebar({
               className="font-mono text-[22px] font-semibold"
               style={{ color: "var(--text-primary)" }}
             >
-              {totalEstimate}
+              {prospectCount.toLocaleString()}
             </div>
             <div
               className="text-[11px]"
               style={{ color: "var(--text-tertiary)" }}
             >
-              Est. Matches
+              Saved Prospects
             </div>
           </div>
         </div>
