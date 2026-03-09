@@ -2,14 +2,14 @@
 
 **Project:** Phronesis Growth Labs — Full frontend rebuild to match design system + stitch mockups
 **Milestone:** v2.0 — UI Redesign
-**Phases:** 13 (Phase 6–17, including 14.1)
-**Constraint:** Preserve all business logic, API integrations, auth flows. UI layer only (Phases 6–14.1). Phases 15–16 add new functionality.
+**Phases:** 14 (Phase 6–18, including 14.1)
+**Constraint:** Preserve all business logic, API integrations, auth flows. UI layer only (Phases 6–14.1). Phases 15–18 add new functionality.
 
 ---
 
 ## Overview
 
-Rebuild every page of the PGL platform to match the design system (design-system/MASTER.md) and stitch mockup UX direction. Six screens redesigned: Tenant Dashboard, Lead Search, Saved Personas, Prospect Profile, Export Log, Admin Dashboard. Foundation → screen builds → polish → admin rebuild → tenant management redesign → tenant branding → mobile optimization.
+Rebuild every page of the PGL platform to match the design system (design-system/MASTER.md) and stitch mockup UX direction. Six screens redesigned: Tenant Dashboard, Lead Search, Saved Personas, Prospect Profile, Export Log, Admin Dashboard. Foundation → screen builds → polish → admin rebuild → tenant management redesign → tenant branding → mobile optimization → mobile bottom navigation.
 
 ---
 
@@ -246,3 +246,31 @@ Plans:
 - [x] 17-05-PLAN.md — Spacing & components (responsive padding, form stacking, safe area)
 - [x] 17-06-PLAN.md — Mobile feature parity (search access, ambient glow GPU, reduced motion)
 - [x] 17-07-PLAN.md — Build verification + design system compliance audit
+
+---
+
+### Phase 18: Mobile Bottom Navigation — ClickUp-Style Tab Bar + Quick Actions
+
+**Goal:** Replace the hamburger-menu mobile navigation with a native-app-style bottom tab bar (Home, Search, Personas, More) plus a "+" floating action button for quick creates. Follows ClickUp's mobile app patterns: bottom dock for primary navigation, bottom sheet drawers for secondary nav ("More") and quick actions ("+"), simplified mobile header (no hamburger).
+
+**Dependencies:** Phase 17
+
+**Deliverables:**
+- `MobileBottomNav` component — fixed bottom tab bar with 4 labeled tabs (Home, Search, Personas, More) + circular "+" action button
+- "More" bottom sheet — 2-column grid of secondary nav tiles (Lists, Exports, Activity, Analytics, Team) with colored icon backgrounds
+- "+" Quick Actions bottom sheet — vertical action list (Search Prospects, Create Persona, Export Data) with descriptions
+- Simplified mobile header — org logo + name (left), user avatar (right), no hamburger menu, no search icon
+- Layout updates — bottom content padding to clear fixed tab bar, pass user props to mobile header
+- Route-aware active tab highlighting with gold-tinted pill indicator
+- Safe area inset handling on bottom nav
+
+**Requirements:** ClickUp mobile pattern compliance, bottom tab bar with 4+1 layout, bottom sheet drawers for secondary nav and quick actions, no hamburger menu on mobile, design system MASTER.md compliance
+
+**Status:** PLANNED — 3 plans ready for execution
+
+**Plans:** 0/3 complete
+
+Plans:
+- [ ] 18-01-PLAN.md — MobileBottomNav component (tab bar + "More" sheet + "+" sheet)
+- [ ] 18-02-PLAN.md — Mobile header rewrite + layout integration + create persona trigger
+- [ ] 18-03-PLAN.md — Build verification + design system compliance audit
