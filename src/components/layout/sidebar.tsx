@@ -21,15 +21,15 @@ export function SidebarContent({
       {/* Team header */}
       <div className="flex items-center gap-3 px-5 py-5">
         <div
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full font-serif font-bold text-sm"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg font-serif font-bold text-sm overflow-hidden"
           style={{
-            background: "linear-gradient(135deg, rgba(212,175,55,0.2), rgba(212,175,55,0.05))",
+            background: "var(--gold-bg-strong)",
             color: "var(--gold-primary)",
             border: "1px solid var(--border-gold)",
           }}
         >
           {logoUrl ? (
-            <img src={logoUrl} alt={`${tenantName} logo`} className="h-full w-full rounded-full object-cover" />
+            <img src={logoUrl} alt={`${tenantName} logo`} className="h-full w-full object-cover" />
           ) : (
             initials
           )}

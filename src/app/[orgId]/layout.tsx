@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import { Sidebar } from "@/components/layout/sidebar";
 import { TopBar } from "@/components/layout/top-bar";
+import { getThemeCSSVariables, isValidTheme, DEFAULT_THEME } from "@/lib/tenant-theme";
 
 export default async function TenantLayout({
   children,
@@ -11,7 +12,7 @@ export default async function TenantLayout({
   params: Promise<{ orgId: string }>;
 }) {
   let orgId: string;
-  let tenant: { id: string; name: string; slug: string; logo_url: string | null; primary_color: string | null; secondary_color: string | null; is_active: boolean };
+  let tenant: { id: string; name: string; slug: string; logo_url: string | null; theme: string | null; is_active: boolean };
   let userName: string;
   let userInitials: string;
   let userRole: string;
@@ -29,7 +30,7 @@ export default async function TenantLayout({
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orgId);
     const { data, error } = await supabase
       .from("tenants")
-      .select("id, name, slug, logo_url, primary_color, secondary_color, is_active")
+      .select("id, name, slug, logo_url, theme, is_active")
       .eq(isUuid ? "id" : "slug", orgId)
       .single();
 
@@ -49,11 +50,19 @@ export default async function TenantLayout({
     throw err;
   }
 
+  // Compute per-tenant CSS variable overrides
+  const themeKey = tenant.theme && isValidTheme(tenant.theme) ? tenant.theme : DEFAULT_THEME;
+  const cssVars = getThemeCSSVariables(themeKey);
+  const themeStyle = `:root { ${Object.entries(cssVars).map(([k, v]) => `${k}: ${v}`).join("; ")} }`;
+
   return (
     <div
       className="flex min-h-screen"
       style={{ backgroundColor: "var(--bg-root)" }}
     >
+      {/* Per-tenant theme override — server-rendered, no flash */}
+      <style dangerouslySetInnerHTML={{ __html: themeStyle }} />
+
       {/* Content layer — above ambient glow (rendered in root layout) */}
       <div className="relative z-10 flex flex-1">
         <Sidebar
