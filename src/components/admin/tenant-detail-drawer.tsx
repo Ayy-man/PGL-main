@@ -20,6 +20,8 @@ import {
 import Image from "next/image";
 import { toggleTenantStatus } from "@/app/actions/admin";
 import { TenantActivityCard } from "@/components/admin/tenant-activity-card";
+import { ThemePicker } from "@/components/ui/theme-picker";
+import { LogoUpload } from "@/components/ui/logo-upload";
 
 // ── Types ─────────────────────────────────────────────────────────
 
@@ -38,8 +40,7 @@ interface TenantData {
   name: string;
   slug: string;
   logo_url: string | null;
-  primary_color: string;
-  secondary_color: string;
+  theme: string;
   is_active: boolean;
   created_at: string;
 }
@@ -314,9 +315,19 @@ function InitialCircle({
 function DrawerHeader({
   tenant,
   onNameSaved,
+  localTheme,
+  onThemeChange,
+  localLogoUrl,
+  onLogoUploaded,
+  onLogoRemoved,
 }: {
   tenant: TenantData;
   onNameSaved: (name: string) => void;
+  localTheme: string;
+  onThemeChange: (theme: string) => void;
+  localLogoUrl: string | null;
+  onLogoUploaded: (url: string) => void;
+  onLogoRemoved: () => void;
 }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(tenant.name);
@@ -372,94 +383,99 @@ function DrawerHeader({
   };
 
   return (
-    <div className="flex items-start gap-4">
-      <InitialCircle name={tenant.name} size={48} logoUrl={tenant.logo_url} />
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          {isEditing ? (
-            <input
-              ref={inputRef}
-              value={editName}
-              onChange={(e) => setEditName(e.target.value)}
-              onBlur={saveName}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") saveName();
-                if (e.key === "Escape") {
-                  setEditName(tenant.name);
-                  setIsEditing(false);
-                }
-              }}
-              className="font-serif text-xl font-bold bg-transparent border-b outline-none"
-              style={{
-                color: "var(--text-primary-ds)",
-                borderColor: "var(--border-gold)",
-              }}
-            />
-          ) : (
-            <>
-              <SheetTitle className="font-serif text-xl font-bold truncate" style={{ color: "var(--text-primary-ds)" }}>
-                {tenant.name}
-              </SheetTitle>
-              <button
-                onClick={() => setIsEditing(true)}
-                className="flex-shrink-0 opacity-50 hover:opacity-100 transition-opacity"
-                style={{ color: "var(--admin-text-secondary)" }}
-              >
-                <Pencil className="h-3.5 w-3.5" />
-              </button>
-            </>
-          )}
-        </div>
-        <p className="text-sm truncate" style={{ color: "var(--admin-text-secondary)" }}>
-          /{tenant.slug}
-        </p>
-        <div className="flex items-center gap-3 mt-2">
-          <span
-            className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
-              isActive
-                ? "bg-[var(--success-muted)] text-[var(--success)]"
-                : "bg-destructive/10 text-destructive"
-            }`}
-          >
-            {isActive ? "Active" : "Inactive"}
-          </span>
-          <span className="text-sm" style={{ color: "var(--admin-text-secondary)" }}>
-            Created {new Date(tenant.created_at).toLocaleDateString()}
-          </span>
-          <div className="flex items-center gap-1.5 ml-auto">
-            <div
-              className="rounded-full"
-              style={{
-                width: 16,
-                height: 16,
-                background: tenant.primary_color || "#d4af37",
-              }}
-            />
-            <div
-              className="rounded-full"
-              style={{
-                width: 16,
-                height: 16,
-                background: tenant.secondary_color || "#f4d47f",
-              }}
-            />
+    <div className="space-y-4">
+      <div className="flex items-start gap-4">
+        <InitialCircle name={tenant.name} size={48} logoUrl={localLogoUrl} />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            {isEditing ? (
+              <input
+                ref={inputRef}
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                onBlur={saveName}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") saveName();
+                  if (e.key === "Escape") {
+                    setEditName(tenant.name);
+                    setIsEditing(false);
+                  }
+                }}
+                className="font-serif text-xl font-bold bg-transparent border-b outline-none"
+                style={{
+                  color: "var(--text-primary-ds)",
+                  borderColor: "var(--border-gold)",
+                }}
+              />
+            ) : (
+              <>
+                <SheetTitle className="font-serif text-xl font-bold truncate" style={{ color: "var(--text-primary-ds)" }}>
+                  {tenant.name}
+                </SheetTitle>
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="flex-shrink-0 opacity-50 hover:opacity-100 transition-opacity"
+                  style={{ color: "var(--admin-text-secondary)" }}
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                </button>
+              </>
+            )}
+          </div>
+          <p className="text-sm truncate" style={{ color: "var(--admin-text-secondary)" }}>
+            /{tenant.slug}
+          </p>
+          <div className="flex items-center gap-3 mt-2">
+            <span
+              className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                isActive
+                  ? "bg-[var(--success-muted)] text-[var(--success)]"
+                  : "bg-destructive/10 text-destructive"
+              }`}
+            >
+              {isActive ? "Active" : "Inactive"}
+            </span>
+            <span className="text-sm" style={{ color: "var(--admin-text-secondary)" }}>
+              Created {new Date(tenant.created_at).toLocaleDateString()}
+            </span>
           </div>
         </div>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            handleToggle();
+          }}
+          disabled={isToggling}
+          className={`flex-shrink-0 inline-flex h-8 items-center rounded-[8px] px-3 text-xs font-medium transition-colors ${
+            isActive
+              ? "bg-[var(--success-muted)] text-[var(--success)] hover:bg-[var(--success-muted)]"
+              : "bg-destructive/10 text-destructive hover:bg-destructive/15"
+          } ${isToggling ? "opacity-50 cursor-not-allowed" : ""}`}
+        >
+          {isToggling ? "Updating..." : isActive ? "Deactivate" : "Activate"}
+        </button>
       </div>
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          handleToggle();
-        }}
-        disabled={isToggling}
-        className={`flex-shrink-0 inline-flex h-8 items-center rounded-[8px] px-3 text-xs font-medium transition-colors ${
-          isActive
-            ? "bg-[var(--success-muted)] text-[var(--success)] hover:bg-[var(--success-muted)]"
-            : "bg-destructive/10 text-destructive hover:bg-destructive/15"
-        } ${isToggling ? "opacity-50 cursor-not-allowed" : ""}`}
-      >
-        {isToggling ? "Updating..." : isActive ? "Deactivate" : "Activate"}
-      </button>
+
+      {/* Theme picker */}
+      <div className="surface-admin-card rounded-[14px] p-4 space-y-3">
+        <h4 className="text-sm font-semibold" style={{ color: "var(--text-primary-ds)" }}>
+          Brand Theme
+        </h4>
+        <ThemePicker value={localTheme} onChange={onThemeChange} />
+      </div>
+
+      {/* Logo upload */}
+      <div className="surface-admin-card rounded-[14px] p-4 space-y-3">
+        <h4 className="text-sm font-semibold" style={{ color: "var(--text-primary-ds)" }}>
+          Tenant Logo
+        </h4>
+        <LogoUpload
+          tenantId={tenant.id}
+          currentUrl={localLogoUrl}
+          onUploaded={onLogoUploaded}
+          onRemoved={onLogoRemoved}
+        />
+      </div>
     </div>
   );
 }
@@ -798,6 +814,8 @@ export function TenantDetailDrawer({
   const [health, setHealth] = useState<HealthData | null>(null);
   const [usage, setUsage] = useState<UsageData | null>(null);
   const [personas, setPersonas] = useState<PersonaData[]>([]);
+  const [localTheme, setLocalTheme] = useState(tenant?.theme || "gold");
+  const [localLogoUrl, setLocalLogoUrl] = useState<string | null>(tenant?.logo_url || null);
 
   const fetchData = useCallback(async (id: string) => {
     setLoading(true);
@@ -820,6 +838,8 @@ export function TenantDetailDrawer({
       if (tenantData) {
         setTenant(tenantData.tenant);
         setUsers(tenantData.users ?? []);
+        setLocalTheme(tenantData.tenant?.theme || "gold");
+        setLocalLogoUrl(tenantData.tenant?.logo_url || null);
       }
       if (usageData) setUsage(usageData);
       if (healthData) setHealth(healthData);
@@ -842,6 +862,8 @@ export function TenantDetailDrawer({
       setHealth(null);
       setUsage(null);
       setPersonas([]);
+      setLocalTheme("gold");
+      setLocalLogoUrl(null);
     }
   }, [open, tenantId, fetchData]);
 
@@ -850,6 +872,40 @@ export function TenantDetailDrawer({
       setTenant({ ...tenant, name });
     }
   };
+
+  async function handleThemeChange(newTheme: string) {
+    if (!tenant) return;
+    const prev = localTheme;
+    setLocalTheme(newTheme); // optimistic
+    try {
+      const res = await fetch(`/api/admin/tenants/${tenant.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ theme: newTheme }),
+      });
+      if (!res.ok) setLocalTheme(prev); // revert on failure
+    } catch {
+      setLocalTheme(prev);
+    }
+  }
+
+  function handleLogoUploaded(url: string) {
+    // LogoUpload component already updates DB via /api/upload/logo
+    // Just update local state for immediate display
+    setLocalLogoUrl(url);
+  }
+
+  async function handleLogoRemoved() {
+    if (!tenant) return;
+    try {
+      await fetch(`/api/admin/tenants/${tenant.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ logo_url: null }),
+      });
+      setLocalLogoUrl(null);
+    } catch { /* silent */ }
+  }
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -871,7 +927,15 @@ export function TenantDetailDrawer({
         ) : (
           <div className="flex-1 overflow-y-auto p-6 space-y-5">
             {/* Task 3: Header */}
-            <DrawerHeader tenant={tenant} onNameSaved={handleNameSaved} />
+            <DrawerHeader
+              tenant={tenant}
+              onNameSaved={handleNameSaved}
+              localTheme={localTheme}
+              onThemeChange={handleThemeChange}
+              localLogoUrl={localLogoUrl}
+              onLogoUploaded={handleLogoUploaded}
+              onLogoRemoved={handleLogoRemoved}
+            />
 
             {/* Task 4: Seat Utilization */}
             <SeatUtilizationCard users={users} />
