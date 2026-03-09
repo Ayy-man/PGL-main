@@ -22,7 +22,7 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "surface-card flex flex-col items-center justify-center text-center py-20 px-6",
+        "surface-card flex flex-col items-center justify-center text-center py-12 px-4 md:py-20 md:px-6",
         variant === "error" && "border-destructive/30",
         className
       )}

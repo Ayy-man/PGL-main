@@ -1,0 +1,152 @@
+"use client";
+
+import { createTenant } from "@/app/actions/admin";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+import { ThemePicker } from "@/components/ui/theme-picker";
+
+export default function NewTenantPage() {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [theme, setTheme] = useState("gold");
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError(null);
+    setSuccess(null);
+
+    const formData = new FormData(e.currentTarget);
+
+    startTransition(async () => {
+      try {
+        const result = await createTenant(formData);
+        const adminEmail = formData.get("admin_email") as string;
+
+        if (result.warning) {
+          // Tenant created but invite had issues
+          setSuccess(result.warning);
+          setTimeout(() => router.push("/admin/tenants"), 3000);
+        } else if (adminEmail) {
+          setSuccess(
+            `Tenant created successfully. Invite sent to ${adminEmail}.`
+          );
+          setTimeout(() => router.push("/admin/tenants"), 2000);
+        } else {
+          router.push("/admin/tenants");
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to create tenant");
+      }
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <Link
+          href="/admin/tenants"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Tenants
+        </Link>
+        <h1 className="font-serif text-3xl font-bold tracking-tight mt-4">
+          Create Tenant
+        </h1>
+        <p className="text-muted-foreground mt-1">
+          Add a new real estate team to the platform
+        </p>
+      </div>
+
+      <div className="surface-card rounded-[14px] border border-[var(--border-default)] p-6 max-w-2xl">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {error && (
+            <div className="rounded-[8px] bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive">
+              {error}
+            </div>
+          )}
+
+          {success && (
+            <div className="rounded-[8px] bg-emerald-500/10 border border-emerald-500/20 p-3 text-sm text-emerald-600 dark:text-emerald-400">
+              {success}
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <label htmlFor="name" className="text-sm font-medium">
+              Tenant Name <span className="text-destructive">*</span>
+            </label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              required
+              placeholder="Acme Real Estate"
+              className="w-full rounded-[8px] border border-[var(--border-default)] bg-[var(--bg-input)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-primary)]/50"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="slug" className="text-sm font-medium">
+              Slug <span className="text-destructive">*</span>
+            </label>
+            <input
+              type="text"
+              id="slug"
+              name="slug"
+              required
+              placeholder="acme-real-estate"
+              pattern="[a-z0-9-]+"
+              className="w-full rounded-[8px] border border-[var(--border-default)] bg-[var(--bg-input)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-primary)]/50"
+            />
+            <p className="text-xs text-muted-foreground">
+              URL-safe identifier (lowercase, numbers, and hyphens only)
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="admin_email" className="text-sm font-medium">
+              Admin Email
+            </label>
+            <input
+              type="email"
+              id="admin_email"
+              name="admin_email"
+              placeholder="admin@acme-realestate.com"
+              className="w-full rounded-[8px] border border-[var(--border-default)] bg-[var(--bg-input)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-primary)]/50"
+            />
+            <p className="text-xs text-muted-foreground">
+              Send an invite to the tenant&apos;s first admin
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Brand Theme</label>
+            <ThemePicker value={theme} onChange={setTheme} />
+            <input type="hidden" name="theme" value={theme} />
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 pt-4">
+            <button
+              type="submit"
+              disabled={isPending}
+              className="inline-flex h-10 items-center justify-center rounded-[8px] border border-[var(--border-gold)] bg-[var(--gold-bg-strong)] px-6 text-sm font-semibold text-[var(--gold-primary)] hover:bg-[var(--gold-bg)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {isPending ? "Creating..." : "Create Tenant"}
+            </button>
+            <Link
+              href="/admin/tenants"
+              className="inline-flex h-10 items-center justify-center rounded-[8px] border border-[var(--border-default)] bg-transparent px-6 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-[var(--border-hover)] transition-colors"
+            >
+              Cancel
+            </Link>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}

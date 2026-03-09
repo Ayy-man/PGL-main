@@ -200,7 +200,7 @@ export default function AdminDashboard() {
   const statusCfg = STATUS_CONFIG[systemStatus];
 
   return (
-    <div className="space-y-8 page-enter">
+    <div className="space-y-4 md:space-y-8 page-enter">
       {/* Header — Global Command Center */}
       <div className="flex items-center justify-between">
         <div>
@@ -236,7 +236,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Section 1: 4-column stat cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
         <PlatformPulse data={pulseData} quotaData={quotaData} />
         <EnrichmentHealthChart data={enrichmentData} />
         <ApiQuotaCard data={quotaData} />
@@ -247,7 +247,7 @@ export default function AdminDashboard() {
       <TenantHeatmap data={heatmapData} />
 
       {/* Section 3: Bottom 2-column — Error Feed + System Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6 pb-6">
         <ErrorFeed data={errorData} onPageChange={handleErrorPageChange} />
         <SystemActions />
       </div>
