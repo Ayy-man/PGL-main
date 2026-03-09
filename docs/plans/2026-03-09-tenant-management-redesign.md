@@ -2,6 +2,7 @@
 
 **Status:** Implemented and deployed (Phase 15, 8 plans)
 **Date:** 2026-03-09
+**Note:** The `primary_color`/`secondary_color` fields referenced here were superseded by Phase 16 (Tenant Branding) which replaced them with a curated `theme` field. See `2026-03-09-tenant-branding.md`.
 
 ## Overview
 

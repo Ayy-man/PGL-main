@@ -6,7 +6,7 @@ status: unknown
 last_updated: "2026-03-09T00:00:00.000Z"
 progress:
   total_phases: 18
-  completed_phases: 15
+  completed_phases: 18
   total_plans: 72
   completed_plans: 72
 ---
@@ -19,16 +19,16 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** Real estate teams can quickly find and qualify wealthy prospects by searching structured lead databases, enriching profiles with personal contact info and wealth signals, and organizing prospects into actionable lists.
 
-**Current focus:** Phase 16 (Tenant Branding — Logo Upload, Curated Themes, Per-Tenant Theming)
+**Current focus:** All v2.0 phases complete (6–16, including 14.1)
 
 ## Current Position
 
 Phase: 16 of 16 (Tenant Branding — Logo Upload, Curated Themes, Per-Tenant Theming)
-Plan: 3 of 8 — IN PROGRESS
-Status: Phase 16 executing — Plan 16-02 (Logo Upload API + LogoUpload Component) complete.
-Last activity: 2026-03-09 — Plan 16-02 complete. Logo upload POST endpoint with auth + validation + Supabase Storage upload, plus LogoUpload drop zone component with drag-and-drop, live preview, and design system styling.
+Plan: 8 of 8 — ALL PLANS COMPLETE
+Status: Phase 16 COMPLETE — All 8 plans executed. Theme map (8 curated themes), logo upload to Supabase Storage, ThemePicker component, per-tenant CSS variable injection, onboarding/admin forms updated, tenant-aware login page, stale reference cleanup.
+Last activity: 2026-03-09 — Phase 16 complete. All v2.0 milestone phases done.
 
-Progress: [███████████████░░░] 83% (15/18 phases complete) — Phase 16 next
+Progress: [██████████████████] 100% (18/18 phases complete)
 
 ## Performance Metrics
 
@@ -350,19 +350,19 @@ A full-codebase code review was conducted on 2026-02-25 with 4 parallel verifica
 
 ## Remaining Work
 
-All phases complete (6–15). The following items remain before production launch:
+All v2.0 phases complete (6–16, including 14.1). The following items remain before production launch:
 
 - **E2E testing with real API keys** — Apollo, ContactOut, Exa, SEC EDGAR, and Anthropic API keys needed for integration testing
-- **Tenant theming wiring** — CSS custom properties are defined but not yet connected to per-tenant theme configuration
 - **Test coverage expansion** — Only 1 test file exists (vitest setup is in place); unit and integration tests needed across modules
 - **Property data integration** — ATTOM API for property/wealth signals deferred to v2
 - **Supabase email templates** — Customize invite email templates for tenant admin and user invites
+- **Supabase Storage bucket** — Create `general` bucket for tenant logo uploads
 
 ## Session Continuity
 
-Last session: 2026-03-09 — Completed 16-02-PLAN.md (Logo Upload API + LogoUpload Component).
-Stopped at: Completed 16-02-PLAN.md.
+Last session: 2026-03-09 — Phase 16 complete. All v2.0 phases done. Docs updated.
+Stopped at: All v2.0 milestone phases complete. Ready for next milestone or production deployment.
 
 ---
 
-*v2.0 milestone: 15 of 18 phases complete (6–15, including 14.1). 80 plans executed. Phase 16 next.*
+*v2.0 milestone: 18/18 phases complete (6–16, including 14.1). ~88 plans executed across 12 phases.*

@@ -2,14 +2,14 @@
 
 **Project:** Phronesis Growth Labs — Full frontend rebuild to match design system + stitch mockups
 **Milestone:** v2.0 — UI Redesign
-**Phases:** 11 (Phase 6–15, including 14.1)
-**Constraint:** Preserve all business logic, API integrations, auth flows. UI layer only (Phases 6–14.1). Phase 15 adds new functionality.
+**Phases:** 12 (Phase 6–16, including 14.1)
+**Constraint:** Preserve all business logic, API integrations, auth flows. UI layer only (Phases 6–14.1). Phases 15–16 add new functionality.
 
 ---
 
 ## Overview
 
-Rebuild every page of the PGL platform to match the design system (design-system/MASTER.md) and stitch mockup UX direction. Six screens redesigned: Tenant Dashboard, Lead Search, Saved Personas, Prospect Profile, Export Log, Admin Dashboard. Foundation → screen builds → polish → admin rebuild → tenant management redesign.
+Rebuild every page of the PGL platform to match the design system (design-system/MASTER.md) and stitch mockup UX direction. Six screens redesigned: Tenant Dashboard, Lead Search, Saved Personas, Prospect Profile, Export Log, Admin Dashboard. Foundation → screen builds → polish → admin rebuild → tenant management redesign → tenant branding.
 
 ---
 
@@ -179,3 +179,39 @@ Plans:
 - [x] 15-06-PLAN.md — Tabbed activity card with 3-level drill-down modal
 - [x] 15-07-PLAN.md — Team management page /[orgId]/team + user invite flow + simple user onboarding
 - [x] 15-08-PLAN.md — Build verification + design system compliance audit
+
+---
+
+### Phase 16: Tenant Branding — Logo Upload, Curated Themes, Per-Tenant Theming
+
+**Goal:** Replace unused free-form hex color inputs with 8 curated pre-paired color themes that override CSS variables at the layout level, enabling per-tenant theming across the entire app. Add logo upload to Supabase Storage (replacing URL text input). Display logos in sidebar, login page, and CSV exports.
+
+**Dependencies:** Phase 15
+
+**Deliverables:**
+- `src/lib/tenant-theme.ts` — Theme map constant (8 themes: Gold, Sapphire, Emerald, Rose, Amber, Slate, Violet, Coral) with CSS variable computation helper
+- DB migration: add `theme` column (text, default `'gold'`), drop `primary_color` + `secondary_color`
+- `src/components/ui/theme-picker.tsx` — Visual theme selection grid (8 color swatches with hover preview + checkmark)
+- `src/components/ui/logo-upload.tsx` — Drop zone upload component (Supabase Storage `general/tenant-logos/{tenantId}.*`, 2MB max, PNG/JPG/SVG/WebP)
+- `src/app/[orgId]/layout.tsx` — Inject `<style>` tag overriding `--gold-primary`, `--gold-bright`, `--gold-text`, `--gold-bg`, `--gold-bg-strong` with tenant theme values
+- Updated onboarding form (`/onboarding/confirm-tenant`) — ThemePicker + LogoUpload replace hex inputs + URL input
+- Updated admin tenant detail drawer — ThemePicker + LogoUpload for admin override
+- Upgraded sidebar logo display (36x36 rounded square, fallback initial tinted with tenant theme)
+- Tenant-aware login page (show tenant logo + themed sign-in button when arriving from tenant context)
+- Admin pages (`/admin/*`) always use Gold theme regardless of tenant
+
+**Requirements:** Per-tenant CSS variable theming, curated palette (no ugly choices), logo upload to Supabase Storage, logo shown in sidebar + login + exports
+
+**Status:** COMPLETE — All 8 plans executed. Theme map, logo upload, theme picker, per-tenant CSS variable injection, onboarding/admin forms updated, tenant-aware login page, stale reference cleanup done.
+
+**Plans:** 8/8 plans complete
+
+Plans:
+- [x] 16-01-PLAN.md — Theme map constant + DB migration (add `theme`, drop color columns) + type updates
+- [x] 16-02-PLAN.md — Logo upload API route (Supabase Storage) + LogoUpload drop zone component
+- [x] 16-03-PLAN.md — ThemePicker component (8 curated color swatches with gradient preview)
+- [x] 16-04-PLAN.md — CSS variable override in org layout (`<style>` tag injection per tenant)
+- [x] 16-05-PLAN.md — Update tenant creation form + onboarding page (ThemePicker + LogoUpload replace hex/URL inputs)
+- [x] 16-06-PLAN.md — Admin tenant detail drawer (ThemePicker + LogoUpload for admin override)
+- [x] 16-07-PLAN.md — Tenant-aware login page + upgraded sidebar logo (rounded square)
+- [x] 16-08-PLAN.md — Build verification + stale reference cleanup + STATE/ROADMAP update
