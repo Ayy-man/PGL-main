@@ -5,7 +5,7 @@ milestone_name: milestone
 status: unknown
 last_updated: "2026-03-09T00:00:00.000Z"
 progress:
-  total_phases: 17
+  total_phases: 18
   completed_phases: 15
   total_plans: 72
   completed_plans: 72
@@ -19,16 +19,16 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** Real estate teams can quickly find and qualify wealthy prospects by searching structured lead databases, enriching profiles with personal contact info and wealth signals, and organizing prospects into actionable lists.
 
-**Current focus:** Phase 15 (Tenant Management Redesign — Invite Flows, Onboarding, Detail Drawer, Team Management)
+**Current focus:** Phase 16 (Tenant Branding — Logo Upload, Curated Themes, Per-Tenant Theming)
 
 ## Current Position
 
-Phase: 15 of 15 (Tenant Management Redesign — Invite Flows, Onboarding, Detail Drawer, Team Management)
-Plan: 8 of 8 — ALL PLANS COMPLETE
-Status: Phase 15 COMPLETE — All 8 plans executed. pnpm build exits 0. Design system audit passed (SVG rgba patterns accepted per Phase 05 decision).
-Last activity: 2026-03-09 — Phase 15 complete. Activity logger, invite flows, onboarding pages, 5 API endpoints, tenant detail drawer, activity card with drill-down modal, team management page all built.
+Phase: 16 of 16 (Tenant Branding — Logo Upload, Curated Themes, Per-Tenant Theming)
+Plan: 3 of 8 — IN PROGRESS
+Status: Phase 16 executing — Plan 16-03 (ThemePicker Component) complete.
+Last activity: 2026-03-09 — Plan 16-03 complete. ThemePicker visual component created with 8 gradient swatches, glow selection, keyboard accessibility.
 
-Progress: [██████████████████] 100% (17/17 phases complete)
+Progress: [███████████████░░░] 83% (15/18 phases complete) — Phase 16 next
 
 ## Performance Metrics
 
@@ -299,6 +299,7 @@ Recent decisions affecting current work:
 - Phase 5 added: UI Revamp — Apply design system (dark luxury aesthetic, gold accents, layered glass surfaces, Cormorant + DM Sans typography, CSS variable token system)
 - Phase 14.1 inserted after Phase 14: Admin Dashboard Rebuild — Match Stitch Mockup (URGENT)
 - Phase 15 added: Tenant Management Redesign — Email-based invite flows, admin onboarding, tenant detail slide-over drawer (health score, usage, activity tabs with 3-level drill-down), team management page
+- Phase 16 added: Tenant Branding — Logo upload to Supabase Storage, 8 curated pre-paired color themes (Gold, Sapphire, Emerald, Rose, Amber, Slate, Violet, Coral), per-tenant CSS variable override at layout level, theme picker for onboarding + admin drawer, logo in sidebar + login + exports
 
 ### Pending Todos
 
@@ -354,9 +355,9 @@ All phases complete (6–15). The following items remain before production launc
 
 ## Session Continuity
 
-Last session: 2026-03-09 — Phase 15 complete. All 8 plans executed. Drawer widened to 680px, text bumped up, background made less transparent per user feedback.
-Stopped at: All v2.0 phases complete (6–15). Ready for next milestone or production deployment.
+Last session: 2026-03-09 — Completed 16-03-PLAN.md (ThemePicker Component).
+Stopped at: Completed 16-03-PLAN.md. Next: 16-04-PLAN.md.
 
 ---
 
-*All v2.0 milestone phases complete (6–15, including 14.1). 80 plans executed across 11 phases.*
+*v2.0 milestone: 15 of 18 phases complete (6–15, including 14.1). 80 plans executed. Phase 16 next.*
