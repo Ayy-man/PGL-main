@@ -11,10 +11,7 @@ interface PersonaCardGridProps {
 
 export function PersonaCardGrid({ personas }: PersonaCardGridProps) {
   return (
-    <div
-      className="grid gap-5 content-start"
-      style={{ gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))" }}
-    >
+    <div className="grid gap-4 md:gap-5 content-start grid-cols-1 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fill,minmax(340px,1fr))]">
       {personas.map((persona) => (
         <PersonaCard key={persona.id} persona={persona} />
       ))}
@@ -24,21 +21,10 @@ export function PersonaCardGrid({ personas }: PersonaCardGridProps) {
         mode="create"
         trigger={
           <button
-            className="rounded-[14px] p-7 w-full cursor-pointer flex flex-col items-center justify-center gap-4 transition-all group"
+            className="rounded-[14px] p-5 md:p-7 w-full cursor-pointer flex flex-col items-center justify-center gap-4 transition-all group card-interactive"
             style={{
               border: "1px dashed var(--border-default)",
-              background: "transparent",
-              minHeight: "200px",
-            }}
-            onMouseEnter={(e) => {
-              const el = e.currentTarget as HTMLButtonElement;
-              el.style.borderColor = "var(--border-gold)";
-              el.style.background = "var(--gold-bg)";
-            }}
-            onMouseLeave={(e) => {
-              const el = e.currentTarget as HTMLButtonElement;
-              el.style.borderColor = "var(--border-default)";
-              el.style.background = "transparent";
+              minHeight: "180px",
             }}
           >
             <div

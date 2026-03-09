@@ -911,7 +911,7 @@ export function TenantDetailDrawer({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="w-[680px] sm:max-w-[680px] p-0 overflow-hidden flex flex-col"
+        className="w-full sm:w-[680px] sm:max-w-[680px] p-0 overflow-hidden flex flex-col"
         style={{
           background: "oklch(0.16 0.01 80)",
           borderColor: "var(--border-subtle)",

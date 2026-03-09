@@ -5,6 +5,7 @@ import type { Persona } from "@/lib/personas/types";
 import { PersonasLibrarySidebar } from "./personas-library-sidebar";
 import { PersonaCardGrid } from "./persona-card-grid";
 import { LiveDataStream } from "./live-data-stream";
+import { cn } from "@/lib/utils";
 
 interface PersonasLayoutProps {
   personas: Persona[];
@@ -39,29 +40,33 @@ export function PersonasLayout({ personas, prospectCount, hasActivity }: Persona
   }, [personas, selectedIndustries, freshness]);
 
   return (
-    <div
-      className="grid gap-5 min-h-0 grid-cols-1"
-      style={{
-        gridTemplateColumns: hasActivity
-          ? "220px 1fr 280px"
-          : "220px 1fr",
-      }}
-    >
-      {/* Left sidebar — Library Stats + filters */}
-      <PersonasLibrarySidebar
-        personas={personas}
-        prospectCount={prospectCount}
-        selectedIndustries={selectedIndustries}
-        onIndustryChange={setSelectedIndustries}
-        freshness={freshness}
-        onFreshnessChange={setFreshness}
-      />
+    <div className={cn(
+      "grid gap-5 min-h-0",
+      hasActivity
+        ? "grid-cols-1 lg:grid-cols-[220px_1fr_280px]"
+        : "grid-cols-1 lg:grid-cols-[220px_1fr]"
+    )}>
+      {/* Left sidebar — Library Stats + filters (desktop only) */}
+      <div className="hidden lg:block">
+        <PersonasLibrarySidebar
+          personas={personas}
+          prospectCount={prospectCount}
+          selectedIndustries={selectedIndustries}
+          onIndustryChange={setSelectedIndustries}
+          freshness={freshness}
+          onFreshnessChange={setFreshness}
+        />
+      </div>
 
       {/* Center — Persona card grid (filtered) */}
       <PersonaCardGrid personas={filteredPersonas} />
 
-      {/* Right sidebar — Live Data Stream (only when there's activity) */}
-      {hasActivity && <LiveDataStream />}
+      {/* Right sidebar — Live Data Stream (only when there's activity, desktop only) */}
+      {hasActivity && (
+        <div className="hidden lg:block">
+          <LiveDataStream />
+        </div>
+      )}
     </div>
   );
 }

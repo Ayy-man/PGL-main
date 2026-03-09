@@ -45,26 +45,11 @@ export function ListGrid({ lists }: ListGridProps) {
       {lists.map((list) => (
         <div
           key={list.id}
-          className="flex items-center justify-between p-6 px-7 rounded-xl transition-colors cursor-pointer group"
-          style={{
-            background: "var(--bg-card-gradient)",
-            border: "1px solid var(--border-default)",
-            boxShadow: "var(--card-shadow)",
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLDivElement).style.background = "var(--bg-card-hover)";
-            (e.currentTarget as HTMLDivElement).style.border = "1px solid var(--border-hover)";
-            (e.currentTarget as HTMLDivElement).style.boxShadow = "var(--card-shadow-hover)";
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLDivElement).style.background = "var(--bg-card-gradient)";
-            (e.currentTarget as HTMLDivElement).style.border = "1px solid var(--border-default)";
-            (e.currentTarget as HTMLDivElement).style.boxShadow = "var(--card-shadow)";
-          }}
+          className="surface-card flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 sm:p-6 sm:px-7 rounded-xl cursor-pointer group"
         >
           {/* Left side */}
           <div className="flex-1 min-w-0 mr-6">
-            <p className="font-serif text-[20px] font-semibold text-foreground truncate">
+            <p className="font-serif text-base sm:text-[20px] font-semibold text-foreground truncate">
               {list.name}
             </p>
             {list.description && (
@@ -75,7 +60,7 @@ export function ListGrid({ lists }: ListGridProps) {
           </div>
 
           {/* Right side */}
-          <div className="flex items-center gap-6 shrink-0">
+          <div className="flex items-center gap-3 sm:gap-6 shrink-0 mt-3 sm:mt-0">
             {/* Member count */}
             <div className="flex flex-col items-center">
               <span
@@ -124,12 +109,6 @@ export function ListGrid({ lists }: ListGridProps) {
             >
               <Link
                 href={`/${orgId}/lists/${list.id}`}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLAnchorElement).style.color = "var(--gold-muted)";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLAnchorElement).style.color = "var(--gold-primary)";
-                }}
               >
                 View →
               </Link>
