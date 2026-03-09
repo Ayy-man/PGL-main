@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound, redirect } from "next/navigation";
 import { Sidebar } from "@/components/layout/sidebar";
 import { TopBar } from "@/components/layout/top-bar";
+import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
 import { getThemeCSSVariables, isValidTheme, DEFAULT_THEME } from "@/lib/tenant-theme";
 
 export default async function TenantLayout({
@@ -70,6 +71,8 @@ export default async function TenantLayout({
           tenantName={tenant.name}
           logoUrl={tenant.logo_url}
           userRole={userRole}
+          userName={userName}
+          userInitials={userInitials}
         />
 
         <div className="flex flex-1 flex-col min-w-0">
@@ -77,11 +80,14 @@ export default async function TenantLayout({
 
           {/* Page content with fade-in animation */}
           <main className="flex-1 overflow-y-auto">
-            <div className="page-enter p-4 md:p-6">
+            <div className="page-enter p-4 md:p-6 pb-20 lg:pb-6">
               {children}
             </div>
           </main>
         </div>
+
+        {/* Mobile bottom navigation — renders only below lg */}
+        <MobileBottomNav orgId={orgId} userRole={userRole} />
       </div>
     </div>
   );

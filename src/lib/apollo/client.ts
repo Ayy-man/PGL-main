@@ -49,7 +49,10 @@ export function translateFiltersToApolloParams(
     params.person_locations = filters.locations;
   }
   if (filters.companySize && filters.companySize.length > 0) {
-    params.organization_num_employees_ranges = filters.companySize;
+    // Normalize: convert legacy dash format "51-200" to Apollo comma format "51,200"
+    params.organization_num_employees_ranges = filters.companySize.map((s) =>
+      s.includes("-") && !s.includes(",") ? s.replace("-", ",") : s
+    );
   }
   if (filters.keywords && filters.keywords.trim().length > 0) {
     params.q_keywords = filters.keywords;
@@ -109,7 +112,13 @@ export async function searchApollo(
 
   // 1. Check rate limit
   const rateLimitResult = await apolloRateLimiter.limit(`tenant:${tenantId}`);
+  console.info(`[searchApollo] Rate limit check:`, {
+    success: rateLimitResult.success,
+    remaining: rateLimitResult.remaining,
+    reset: rateLimitResult.reset,
+  });
   if (!rateLimitResult.success) {
+    console.warn(`[searchApollo] RATE LIMITED — remaining: ${rateLimitResult.remaining}, reset: ${rateLimitResult.reset}`);
     throw new RateLimitError(rateLimitResult.reset);
   }
 
@@ -132,8 +141,10 @@ export async function searchApollo(
   }>(cacheKey);
 
   if (cachedResult) {
+    console.info(`[searchApollo] CACHE HIT — returning ${cachedResult.people.length} cached results (totalResults: ${cachedResult.pagination.totalResults})`);
     return { ...cachedResult, cached: true };
   }
+  console.info(`[searchApollo] Cache miss — calling Apollo API`);
 
   // 3. Build Apollo search params
   const translatedParams = translateFiltersToApolloParams(filters);
@@ -183,11 +194,16 @@ export async function searchApollo(
 
     const result = { people: enrichedPeople, pagination };
 
-    // 7. Cache results (24h TTL)
-    try {
-      await setCachedData(cacheKey, result, 86400);
-    } catch (cacheErr) {
-      console.error("[searchApollo] Failed to cache results (non-fatal):", cacheErr);
+    // 7. Cache results — only cache if we got actual results (don't cache empty)
+    if (enrichedPeople.length > 0) {
+      try {
+        await setCachedData(cacheKey, result, 86400);
+        console.info(`[searchApollo] Cached ${enrichedPeople.length} results (24h TTL)`);
+      } catch (cacheErr) {
+        console.error("[searchApollo] Failed to cache results (non-fatal):", cacheErr);
+      }
+    } else {
+      console.warn("[searchApollo] Skipped caching — 0 results (won't pollute cache with empty results)");
     }
     trackApiUsage("apollo").catch(() => {});
 

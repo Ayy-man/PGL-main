@@ -11,7 +11,7 @@ export default async function PersonasPage({
 }: {
   params: Promise<{ orgId: string }>;
 }) {
-  await params;
+  const { orgId } = await params;
   const supabase = await createClient();
 
   const {
@@ -74,7 +74,7 @@ export default async function PersonasPage({
           description="Create a persona to define your ideal buyer profile and start searching for qualified prospects."
         />
       ) : (
-        <PersonasLayout personas={personas} prospectCount={prospectCount} hasActivity={hasActivity} />
+        <PersonasLayout personas={personas} prospectCount={prospectCount} hasActivity={hasActivity} orgId={orgId} />
       )}
     </div>
   );

@@ -108,10 +108,14 @@ interface PersonaFormDialogProps {
   mode: "create" | "edit";
   persona?: Persona;
   trigger: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function PersonaFormDialog({ mode, persona, trigger }: PersonaFormDialogProps) {
-  const [open, setOpen] = useState(false);
+export function PersonaFormDialog({ mode, persona, trigger, open: controlledOpen, onOpenChange }: PersonaFormDialogProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = onOpenChange || setInternalOpen;
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 

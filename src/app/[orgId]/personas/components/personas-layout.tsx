@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, Suspense } from "react";
 import type { Persona } from "@/lib/personas/types";
 import { PersonasLibrarySidebar } from "./personas-library-sidebar";
 import { PersonaCardGrid } from "./persona-card-grid";
@@ -11,9 +11,10 @@ interface PersonasLayoutProps {
   personas: Persona[];
   prospectCount: number;
   hasActivity: boolean;
+  orgId: string;
 }
 
-export function PersonasLayout({ personas, prospectCount, hasActivity }: PersonasLayoutProps) {
+export function PersonasLayout({ personas, prospectCount, hasActivity, orgId }: PersonasLayoutProps) {
   const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
   const [freshness, setFreshness] = useState<"live" | "past_week">("live");
 
@@ -59,7 +60,9 @@ export function PersonasLayout({ personas, prospectCount, hasActivity }: Persona
       </div>
 
       {/* Center — Persona card grid (filtered) */}
-      <PersonaCardGrid personas={filteredPersonas} />
+      <Suspense fallback={null}>
+        <PersonaCardGrid personas={filteredPersonas} orgId={orgId} />
+      </Suspense>
 
       {/* Right sidebar — Live Data Stream (only when there's activity, desktop only) */}
       {hasActivity && (

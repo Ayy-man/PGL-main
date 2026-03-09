@@ -1,37 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Menu, Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetTitle,
-} from "@/components/ui/sheet";
-import { SidebarContent } from "./sidebar";
-import { usePathname } from "next/navigation";
-import Link from "next/link";
-
-interface MobileSidebarProps {
+interface MobileHeaderProps {
   orgId: string;
   tenantName: string;
   logoUrl: string | null;
-  userRole?: string;
+  userName: string;
+  userInitials: string;
 }
 
-export function MobileSidebar({
+export function MobileHeader({
   orgId,
   tenantName,
   logoUrl,
-  userRole,
-}: MobileSidebarProps) {
-  const [open, setOpen] = useState(false);
-  const pathname = usePathname();
-
-  // Close sidebar on navigation
-  useEffect(() => {
-    setOpen(false);
-  }, [pathname]);
+  userName,
+  userInitials,
+}: MobileHeaderProps) {
+  const initials = tenantName.charAt(0).toUpperCase();
 
   return (
     <div className="lg:hidden">
@@ -41,56 +25,50 @@ export function MobileSidebar({
         style={{
           background: "rgba(8,8,10,0.85)",
           backdropFilter: "blur(12px)",
+          WebkitBackdropFilter: "blur(12px)",
           borderBottom: "1px solid var(--border-subtle)",
         }}
       >
-        <span className="font-serif text-sm font-semibold text-foreground">{tenantName}</span>
-        <div className="flex items-center gap-2">
-          <Link
-            href={`/${orgId}/search`}
-            className="flex items-center justify-center h-10 w-10 rounded-lg transition-colors"
-            style={{ color: "var(--text-secondary-ds)" }}
-            aria-label="Search prospects"
+        {/* Left: Org logo + name */}
+        <div className="flex items-center gap-2.5">
+          <div
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-serif font-bold overflow-hidden"
+            style={{
+              background: "var(--gold-bg-strong)",
+              color: "var(--gold-primary)",
+              border: "1px solid var(--border-gold)",
+            }}
           >
-            <Search className="h-5 w-5" />
-          </Link>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setOpen(true)}
-            aria-label="Open navigation menu"
-            className="h-11 w-11"
+            {logoUrl ? (
+              <img src={logoUrl} alt={`${tenantName} logo`} className="h-full w-full object-cover" />
+            ) : (
+              initials
+            )}
+          </div>
+          <span
+            className="font-serif text-sm font-semibold truncate max-w-[180px]"
+            style={{ color: "var(--text-primary-ds)" }}
           >
-            <Menu className="h-5 w-5" />
-          </Button>
+            {tenantName}
+          </span>
+        </div>
+
+        {/* Right: User avatar */}
+        <div
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-medium"
+          title={userName}
+          style={{
+            background: "linear-gradient(135deg, rgba(212,175,55,0.2), rgba(212,175,55,0.05))",
+            color: "var(--gold-primary)",
+            border: "1px solid var(--border-gold)",
+          }}
+        >
+          {userInitials}
         </div>
       </div>
 
       {/* Spacer to push content below fixed header */}
       <div className="h-14" />
-
-      {/* Sheet drawer with gradient background and gold accent */}
-      <Sheet open={open} onOpenChange={setOpen}>
-        <SheetContent
-          side="left"
-          className="p-0"
-          style={{
-            width: "220px",
-            background: "var(--bg-sidebar)",
-            borderRight: "1px solid var(--border-sidebar)",
-          }}
-        >
-          <SheetTitle className="sr-only">Navigation</SheetTitle>
-          <div className="flex h-full flex-col">
-            <SidebarContent
-              orgId={orgId}
-              tenantName={tenantName}
-              logoUrl={logoUrl}
-              userRole={userRole}
-            />
-          </div>
-        </SheetContent>
-      </Sheet>
     </div>
   );
 }

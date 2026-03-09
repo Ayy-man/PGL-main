@@ -1,11 +1,13 @@
 import { NavItems } from "./nav-items";
-import { MobileSidebar } from "./mobile-sidebar";
+import { MobileHeader } from "./mobile-sidebar";
 
 interface SidebarProps {
   orgId: string;
   tenantName: string;
   logoUrl: string | null;
   userRole?: string;
+  userName: string;
+  userInitials: string;
 }
 
 export function SidebarContent({
@@ -65,7 +67,7 @@ export function SidebarContent({
   );
 }
 
-export function Sidebar({ orgId, tenantName, logoUrl, userRole }: SidebarProps) {
+export function Sidebar({ orgId, tenantName, logoUrl, userRole, userName, userInitials }: SidebarProps) {
   return (
     <>
       {/* Desktop sidebar — hidden below lg */}
@@ -77,11 +79,17 @@ export function Sidebar({ orgId, tenantName, logoUrl, userRole }: SidebarProps) 
           borderRight: "1px solid var(--border-sidebar)",
         }}
       >
-        <SidebarContent orgId={orgId} tenantName={tenantName} logoUrl={logoUrl} userRole={userRole} />
+        <SidebarContent orgId={orgId} tenantName={tenantName} logoUrl={logoUrl} userRole={userRole} userName={userName} userInitials={userInitials} />
       </aside>
 
-      {/* Mobile sidebar — visible below lg */}
-      <MobileSidebar orgId={orgId} tenantName={tenantName} logoUrl={logoUrl} userRole={userRole} />
+      {/* Mobile header — visible below lg */}
+      <MobileHeader
+        orgId={orgId}
+        tenantName={tenantName}
+        logoUrl={logoUrl}
+        userName={userName}
+        userInitials={userInitials}
+      />
     </>
   );
 }
