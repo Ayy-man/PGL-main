@@ -9,8 +9,7 @@ export interface Tenant {
   name: string;
   slug: string;
   logo_url: string | null;
-  primary_color: string; // hex color, default '#d4af37'
-  secondary_color: string; // hex color, default '#f4d47f'
+  theme: string; // theme key, default 'gold' — validated via isValidTheme()
   is_active: boolean;
   created_at: string; // ISO timestamp
   updated_at: string;
