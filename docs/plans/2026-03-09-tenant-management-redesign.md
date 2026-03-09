@@ -1,92 +1,126 @@
-# Tenant Management Redesign
+# Tenant Management Redesign — COMPLETE
+
+**Status:** Implemented and deployed (Phase 15, 8 plans)
+**Date:** 2026-03-09
 
 ## Overview
 
-Redesign the tenant management system with email-based invite flows, admin onboarding, and a rich tenant detail drawer.
+Redesigned the tenant management system with email-based invite flows, admin onboarding, a rich tenant detail slide-over drawer, and tenant-scoped team management.
 
-## Flow 1: Super Admin Invites Tenant Admin
+## Flow 1: Super Admin Creates Tenant + Invites Admin
 
-1. Super admin goes to "Create Tenant" page — fills in tenant name, slug, colors, logo, **plus admin email**
-2. Server action creates tenant, creates user with `tenant_admin` role, calls `supabase.auth.admin.inviteUserByEmail()`
-3. User record gets metadata flag: `onboarding_completed: false`
+1. Super admin goes to `/admin/tenants/new` — fills in tenant name, slug, colors, logo, **plus optional admin email**
+2. `createTenant` server action creates tenant, then if email provided:
+   - Calls `supabase.auth.admin.inviteUserByEmail()` with redirect to `/api/auth/callback`
+   - Sets `app_metadata`: `{ role: 'tenant_admin', tenant_id, onboarding_completed: false }`
+   - Creates `public.users` row
+   - Logs `tenant_created` and `user_invited` activity
+3. If no admin email, tenant is created standalone (existing flow preserved)
 
 ## Flow 2: Tenant Admin Onboarding
 
-1. Invited admin clicks magic link in email → `/auth/callback`
-2. Callback detects `onboarding_completed: false` → redirects to `/onboarding/confirm-tenant`
-3. Onboarding page shows pre-filled tenant info (name, slug, logo, colors) — all editable
-4. Admin confirms or edits, sets password
-5. On submit: tenant updated, flag cleared, activity logged (`tenant_confirmed`), redirect to dashboard
+1. Invited admin clicks magic link in email → `/api/auth/callback`
+2. Auth callback detects `onboarding_completed: false` → redirects to `/onboarding/confirm-tenant`
+3. Middleware also enforces redirect for any route if flag is false (except onboarding/callback paths)
+4. Onboarding page shows pre-filled tenant info (name, slug, logo, colors) — all editable
+5. Admin sets password, confirms or edits settings
+6. On submit: tenant updated, password set, flag cleared to `true`, activity logged (`tenant_confirmed`, `user_invite_accepted`), redirect to `/{slug}/dashboard`
 
 ## Flow 3: Tenant Admin Invites Users
 
-1. Tenant admin goes to "Team" page within their tenant (`/[orgId]/team`)
-2. Enters email + selects role (`agent` or `assistant`)
-3. Supabase `inviteUserByEmail()` sends email
-4. User clicks link → `/auth/callback` → simpler onboarding (just set password, no tenant config)
+1. Tenant admin goes to `/[orgId]/team` (visible in sidebar for `tenant_admin` role only)
+2. Clicks "Invite Team Member" → dialog with email, name, role (`agent` or `assistant` only)
+3. `inviteTeamMember` server action calls `inviteUserByEmail`, sets metadata, creates user row, logs activity
+4. Invited user clicks email link → `/api/auth/callback` → `/onboarding/set-password` (simpler onboarding, password only)
+5. On submit: password set, flag cleared, redirect to dashboard
 
-## Tenant Detail Drawer
+## Tenant Detail Drawer (3-Level Drill-Down)
 
-Triggered by clicking a tenant row in `/admin/tenants` table. Wide slide-over from right.
+**Trigger:** Click any tenant row in `/admin/tenants` table → 680px slide-over drawer from right.
 
-### Header
-- Tenant name (inline editable), logo, status badge, slug, created date, brand color swatches
-- Deactivate/Activate button
+**Level 1 — Table:** Tenant list with Name, Slug, Status, Created, Actions
+**Level 2 — Drawer:** Rich tenant detail with 8 cards (scrollable)
+**Level 3 — Modal:** Full activity log viewer with filtering and pagination
 
-### Seat Utilization Card
-- Visual bar: active vs total users
-- Users list: name, email, role badge, last active
-- "Invite User" button
+### Drawer Cards
 
-### Tenant Health Score Card
-- Score 0-100 with color-coded ring (green/yellow/red)
-- Computed from: activity frequency, user engagement, feature adoption, data freshness
-- Sub-metric breakdown
+| Card | Content |
+|------|---------|
+| **Header** | Logo/initial, inline-editable name (logs `tenant_renamed`), slug, status badge, created date, color swatches, activate/deactivate button |
+| **Seat Utilization** | Active/total progress bar, user list with role badges and last active times, "Invite User" button |
+| **Health Score** | 0-100 score with SVG ring gauge (green/yellow/red), 4 sub-metrics: Activity (/30), Engagement (/25), Adoption (/25), Freshness (/20) |
+| **Usage Stats** | 2x2 grid: Searches, Profile Views, Enrichments, Exports. Each with value, sparkline, and % change vs previous 30 days |
+| **Top Personas** | Top 3 by `last_used_at`, with filter tags. Empty state if none |
+| **Growth Trend** | SVG area chart of daily activity over available data |
+| **Quota & Limits** | Placeholder card ("Coming soon") for future billing integration |
+| **Activity (Tabbed)** | Tabs: All / Admin / User. 5 recent entries each with icon, description, timestamp. Expand button opens Level 3 modal |
 
-### Usage Stats Card
-- Searches, enrichments, profile views, CSV exports — last 30 days
-- Sparklines per metric (reuse `PersonaSparkline`)
-- Comparison vs previous 30 days (arrows with %)
+### Health Score Computation
 
-### Top Personas Card
-- Top 3 most-used personas: name, last used, sparkline
-- "View All" link
+| Component | Max Points | Calculation |
+|-----------|-----------|-------------|
+| Activity Frequency | 30 | Days with activity in last 30 / 30 |
+| User Engagement | 25 | Users who logged in last 7d / total users |
+| Feature Adoption | 25 | Distinct action types used in 30d / 11 |
+| Data Freshness | 20 | 0d=20, 1-3d=15, 4-7d=10, 8-14d=5, 15+=0 |
 
-### Growth Trend Card
-- Mini line chart: user count + activity over last 90 days
+Status: healthy (>=60), warning (>=30), critical (<30)
 
-### Quota / Limits Card
-- API calls, enrichment credits — usage vs allocation bars
-- Placeholder-ready for billing
+## API Endpoints Created
 
-### Activity Card (Tabbed)
-- Tabs: All | Admin Actions | User Activity
-- Each tab: 5 most recent entries with icon, description, user, relative timestamp
-- Expand button → centered modal (3rd level drill-down) with full `ActivityLogViewer`, tenant-scoped
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/admin/tenants/[id]` | GET | Tenant details + users with last_sign_in_at |
+| `/api/admin/tenants/[id]` | PATCH | Update tenant name (logs `tenant_renamed`) |
+| `/api/admin/tenants/[id]/usage` | GET | 30-day usage metrics with sparkline data and % changes |
+| `/api/admin/tenants/[id]/health` | GET | Computed health score with breakdown |
+| `/api/admin/tenants/[id]/personas` | GET | Top 3 personas by last_used_at |
+| `/api/admin/tenants/[id]/activity` | GET | Paginated activity with tab filtering (all/admin/user) |
+| `/api/onboarding/tenant` | GET | Tenant data for onboarding page (requires onboarding_completed: false) |
 
-## Database Changes
+All admin endpoints require `super_admin` role (inline check).
 
-### New action types for `activity_log`
-- `tenant_created`, `tenant_renamed`, `tenant_settings_updated`, `tenant_confirmed`
-- `user_invited`, `user_invite_accepted`
+## Activity Log Action Types Added
 
-### User metadata additions
-- `onboarding_completed: boolean` in `app_metadata`
+| Action Type | When Logged |
+|-------------|-------------|
+| `tenant_created` | Super admin creates a tenant |
+| `tenant_renamed` | Name changed via drawer inline edit |
+| `tenant_settings_updated` | Tenant settings changed |
+| `tenant_confirmed` | Invited admin confirms tenant during onboarding |
+| `user_invited` | Any admin invites a user via email |
+| `user_invite_accepted` | Invited user completes onboarding |
 
-### New API endpoints
-- `GET /api/admin/tenants/[id]/details` — all drawer data in one call
-- `GET /api/admin/tenants/[id]/users` — users for this tenant
-- `GET /api/admin/tenants/[id]/usage` — usage stats with sparkline data
-- `GET /api/admin/tenants/[id]/health` — computed health score
-- `GET /api/admin/tenants/[id]/personas` — top personas
-- `POST /api/[orgId]/team/invite` — tenant admin invites user
+All log entries include before/after metadata where applicable.
 
-## New Pages/Components
-- `/onboarding/confirm-tenant` — onboarding page for invited admins
-- `/[orgId]/team` — tenant-scoped user/team management page
-- `TenantDetailDrawer` — slide-over drawer component
-- `TenantHealthScore` — gauge/ring component
-- `SeatUtilizationBar` — visual bar component
-- `TenantActivityCard` — tabbed activity card with expand-to-modal
-- `TenantUsageStats` — usage sparklines card
-- `TenantGrowthChart` — 90-day trend chart
+## Pages & Components Created
+
+| File | Type | Purpose |
+|------|------|---------|
+| `src/app/onboarding/layout.tsx` | Layout | Minimal centered layout for onboarding (no sidebar) |
+| `src/app/onboarding/confirm-tenant/page.tsx` | Page | Admin onboarding — confirm tenant settings + set password |
+| `src/app/onboarding/set-password/page.tsx` | Page | User onboarding — set password only |
+| `src/app/[orgId]/team/page.tsx` | Page | Team management table |
+| `src/app/[orgId]/team/invite-dialog.tsx` | Component | Email invite dialog (agent/assistant roles) |
+| `src/app/[orgId]/team/user-status-toggle.tsx` | Component | Tenant-scoped user activate/deactivate |
+| `src/app/admin/tenants/tenant-table.tsx` | Component | Client wrapper for clickable tenant rows |
+| `src/components/admin/tenant-detail-drawer.tsx` | Component | 680px slide-over drawer with 8 cards |
+| `src/components/admin/tenant-activity-card.tsx` | Component | Tabbed activity card with expand-to-modal |
+| `src/app/actions/onboarding.ts` | Actions | `confirmTenantOnboarding`, `completeUserOnboarding` |
+| `src/app/actions/team.ts` | Actions | `inviteTeamMember`, `toggleTeamMemberStatus` |
+
+## Files Modified
+
+| File | Change |
+|------|--------|
+| `src/lib/activity-logger.ts` | 6 new action types in ActionType union + ACTION_TYPES array |
+| `src/middleware.ts` | Onboarding redirect for `onboarding_completed: false` |
+| `src/app/api/auth/callback/route.ts` | Onboarding detection on magic link acceptance |
+| `src/app/actions/admin.ts` | `createTenant` now accepts admin_email, invites via Supabase |
+| `src/app/admin/tenants/new/page.tsx` | Admin Email field added to form |
+| `src/app/admin/tenants/page.tsx` | Delegates to TenantTable client component |
+| `src/lib/validations/schemas.ts` | `admin_email` field in createTenantSchema |
+| `src/components/layout/nav-items.tsx` | "Team" nav item (role-gated to tenant_admin) |
+| `src/components/layout/sidebar.tsx` | Passes `userRole` prop through |
+| `src/components/layout/mobile-sidebar.tsx` | Passes `userRole` prop through |
+| `src/app/[orgId]/layout.tsx` | Extracts and passes `userRole` to Sidebar |

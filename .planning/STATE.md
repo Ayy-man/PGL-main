@@ -344,18 +344,19 @@ A full-codebase code review was conducted on 2026-02-25 with 4 parallel verifica
 
 ## Remaining Work
 
-All 4 phases and 27 plans are complete. The following items remain before production launch:
+All phases complete (6–15). The following items remain before production launch:
 
 - **E2E testing with real API keys** — Apollo, ContactOut, Exa, SEC EDGAR, and Anthropic API keys needed for integration testing
 - **Tenant theming wiring** — CSS custom properties are defined but not yet connected to per-tenant theme configuration
 - **Test coverage expansion** — Only 1 test file exists (vitest setup is in place); unit and integration tests needed across modules
 - **Property data integration** — ATTOM API for property/wealth signals deferred to v2
+- **Supabase email templates** — Customize invite email templates for tenant admin and user invites
 
 ## Session Continuity
 
-Last session: 2026-03-09 — Health check and state update
-Stopped at: Phase 15 not yet planned. Ready for /gsd:plan-phase 15 or /gsd:discuss-phase 15.
+Last session: 2026-03-09 — Phase 15 complete. All 8 plans executed. Drawer widened to 680px, text bumped up, background made less transparent per user feedback.
+Stopped at: All v2.0 phases complete (6–15). Ready for next milestone or production deployment.
 
 ---
 
-*Phases 06–13 complete. Phase 14 (Polish + Verification) is the final phase. Run /gsd:plan-phase 14 or /gsd:execute-phase 14 to begin.*
+*All v2.0 milestone phases complete (6–15, including 14.1). 80 plans executed across 11 phases.*
