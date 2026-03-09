@@ -5,12 +5,14 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { ThemePicker } from "@/components/ui/theme-picker";
 
 export default function NewTenantPage() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [theme, setTheme] = useState("gold");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -123,46 +125,9 @@ export default function NewTenantPage() {
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="logo_url" className="text-sm font-medium">
-              Logo URL
-            </label>
-            <input
-              type="url"
-              id="logo_url"
-              name="logo_url"
-              placeholder="https://example.com/logo.png"
-              className="w-full rounded-[8px] border border-[var(--border-default)] bg-[var(--bg-input)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-primary)]/50"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label htmlFor="primary_color" className="text-sm font-medium">
-                Primary Color
-              </label>
-              <input
-                type="text"
-                id="primary_color"
-                name="primary_color"
-                defaultValue="#d4af37"
-                placeholder="#d4af37"
-                className="w-full rounded-[8px] border border-[var(--border-default)] bg-[var(--bg-input)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-primary)]/50"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="secondary_color" className="text-sm font-medium">
-                Secondary Color
-              </label>
-              <input
-                type="text"
-                id="secondary_color"
-                name="secondary_color"
-                defaultValue="#f4d47f"
-                placeholder="#f4d47f"
-                className="w-full rounded-[8px] border border-[var(--border-default)] bg-[var(--bg-input)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-primary)]/50"
-              />
-            </div>
+            <label className="text-sm font-medium">Brand Theme</label>
+            <ThemePicker value={theme} onChange={setTheme} />
+            <input type="hidden" name="theme" value={theme} />
           </div>
 
           <div className="flex gap-3 pt-4">
