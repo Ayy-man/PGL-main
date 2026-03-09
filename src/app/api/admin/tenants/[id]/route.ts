@@ -141,7 +141,7 @@ export async function PATCH(
       await logActivity({
         tenantId: id,
         userId: user.id,
-        actionType: "tenant_theme_changed",
+        actionType: "tenant_settings_updated",
         metadata: { theme: updates.theme },
       });
     }
