@@ -24,9 +24,9 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 ## Current Position
 
 Phase: 17 of 17 (Mobile Optimization — Beautiful Responsive UI)
-Plan: 5 of 7 — IN PROGRESS
-Status: Phase 17 IN PROGRESS — Plans 01-05 complete. 2 remaining plans (06-07).
-Last activity: 2026-03-09 — Plan 17-05 executed: responsive spacing (p-4 md:p-6), chart heights, safe area insets, form button stacking, table cell padding across 15 files.
+Plan: 6 of 7 — IN PROGRESS
+Status: Phase 17 IN PROGRESS — Plans 01-06 complete. 1 remaining plan (07).
+Last activity: 2026-03-09 — Plan 17-06 executed: mobile search access, ambient glow hide, scroll affordance, reduced-motion guard, responsive skeletons, touch targets across 12 files.
 
 Progress: [██████████████████░] 95% (18/19 phases complete)
 
@@ -86,6 +86,7 @@ Progress: [██████████████████░] 95% (18/19
 | Phase 14.1-admin-dashboard-rebuild-match-stitch-mockup P05 | 8 | 2 tasks | 3 files |
 | Phase 16 P02 | 105s | 2 tasks | 2 files |
 | Phase 17 P04 | 395s | 6 tasks | 7 files |
+| Phase 17 P06 | ~6min | 6 tasks | 12 files |
 
 ### Phase 3 Plan Completion
 
@@ -367,8 +368,8 @@ Phase 17 (Mobile Optimization) is next. The following items also remain before p
 
 ## Session Continuity
 
-Last session: 2026-03-09 — Phase 17 Plan 05 (Spacing & Components) executed.
-Stopped at: Completed 17-05-PLAN.md. Next: 17-06-PLAN.md.
+Last session: 2026-03-09 — Phase 17 Plan 06 (Mobile Feature Parity) executed.
+Stopped at: Completed 17-06-PLAN.md. Next: 17-07-PLAN.md.
 
 ---
 
