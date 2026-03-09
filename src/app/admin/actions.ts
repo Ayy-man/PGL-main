@@ -17,8 +17,7 @@ export async function createTenantAction(formData: FormData) {
     const name = formData.get("name") as string;
     const slug = formData.get("slug") as string;
     const logoUrl = formData.get("logo_url") as string | null;
-    const primaryColor = formData.get("primary_color") as string;
-    const secondaryColor = formData.get("secondary_color") as string;
+    const theme = formData.get("theme") as string || "gold";
 
     if (!name || name.trim().length === 0) {
       throw new Error("Tenant name is required");
@@ -36,8 +35,7 @@ export async function createTenantAction(formData: FormData) {
         name: name.trim(),
         slug: slug.trim(),
         logo_url: logoUrl?.trim() || null,
-        primary_color: primaryColor || "#d4af37",
-        secondary_color: secondaryColor || "#f4d47f",
+        theme,
         is_active: true,
       })
       .select()
