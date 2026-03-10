@@ -28,7 +28,7 @@ export function DashboardStatCards({
             TOTAL EXPORTS
           </p>
           <p
-            className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold mt-2 sm:mt-3"
+            className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold mt-2 sm:mt-3 animate-count-fade"
             style={{
               color:
                 totalExports > 0
@@ -61,7 +61,7 @@ export function DashboardStatCards({
             DOWNLOADS READY
           </p>
           <p
-            className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold mt-2 sm:mt-3"
+            className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold mt-2 sm:mt-3 animate-count-fade"
             style={{
               color:
                 downloadsReady > 0
@@ -94,7 +94,7 @@ export function DashboardStatCards({
             ENRICHMENT RATE
           </p>
           <p
-            className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold mt-2 sm:mt-3"
+            className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold mt-2 sm:mt-3 animate-count-fade"
             style={{
               color:
                 enrichmentRate > 0

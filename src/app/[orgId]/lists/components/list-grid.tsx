@@ -42,10 +42,11 @@ export function ListGrid({ lists }: ListGridProps) {
 
   return (
     <div className="flex flex-col gap-3">
-      {lists.map((list) => (
+      {lists.map((list, index) => (
         <div
           key={list.id}
-          className="surface-card flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 sm:p-6 sm:px-7 rounded-xl cursor-pointer group"
+          className="surface-card flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 sm:p-6 sm:px-7 rounded-xl cursor-pointer group animate-stagger-in"
+          style={{ animationDelay: `${index * 50}ms` }}
         >
           {/* Left side */}
           <div className="flex-1 min-w-0 mr-6">

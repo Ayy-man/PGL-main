@@ -47,12 +47,14 @@ export function ProfileTabs({ activeTab, onTabChange }: ProfileTabsProps) {
               onClick={() => onTabChange(tab)}
             >
               {formatTabLabel(tab)}
-              {isActive && (
-                <span
-                  className="absolute bottom-0 left-0 right-0 h-0.5"
-                  style={{ background: "var(--gold-primary)" }}
-                />
-              )}
+              <span
+                className="absolute bottom-0 left-0 right-0 h-0.5 transition-all duration-200"
+                style={{
+                  background: "var(--gold-primary)",
+                  opacity: isActive ? 1 : 0,
+                  transform: isActive ? "scaleX(1)" : "scaleX(0)",
+                }}
+              />
             </button>
           );
         })}

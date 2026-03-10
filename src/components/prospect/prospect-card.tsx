@@ -63,22 +63,12 @@ export function ProspectCard({
 
   return (
     <div
-      className="flex items-start gap-[18px] rounded-[12px] px-7 py-6 transition-all duration-200 cursor-pointer"
+      className="group flex items-start gap-[18px] rounded-[12px] px-7 py-6 transition-all duration-200 cursor-pointer hover:translate-y-[-1px] hover:shadow-[0_4px_16px_rgba(0,0,0,0.4)]"
       style={{
         background: selected ? "var(--gold-bg)" : "var(--bg-card-gradient)",
         border: `1px solid ${selected ? "var(--border-gold)" : "var(--border-subtle)"}`,
-      }}
-      onMouseEnter={(e) => {
-        if (!selected) {
-          (e.currentTarget as HTMLElement).style.background = "var(--bg-card-hover)";
-          (e.currentTarget as HTMLElement).style.borderColor = "var(--border-hover)";
-        }
-      }}
-      onMouseLeave={(e) => {
-        if (!selected) {
-          (e.currentTarget as HTMLElement).style.background = "var(--bg-card-gradient)";
-          (e.currentTarget as HTMLElement).style.borderColor = "var(--border-subtle)";
-        }
+        boxShadow: "var(--card-shadow)",
+        transition: "all 0.25s ease",
       }}
       onClick={() => onClick?.(id)}
     >

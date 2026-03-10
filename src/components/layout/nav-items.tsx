@@ -56,7 +56,9 @@ export function NavItems({ orgId, userRole }: NavItemsProps) {
           <Link
             key={item.href}
             href={fullHref}
-            className="flex items-center gap-3 rounded-[8px] px-3 py-3 text-sm font-medium transition-all duration-200 cursor-pointer"
+            className={`flex items-center gap-3 rounded-[8px] px-3 py-3 text-sm font-medium transition-all duration-200 cursor-pointer${
+              !isActive ? " hover:bg-[rgba(255,255,255,0.02)] hover:text-[var(--text-primary-ds)]" : ""
+            }`}
             style={
               isActive
                 ? {
@@ -67,18 +69,6 @@ export function NavItems({ orgId, userRole }: NavItemsProps) {
                     color: "var(--text-secondary-ds)",
                   }
             }
-            onMouseEnter={(e) => {
-              if (!isActive) {
-                (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.02)";
-                (e.currentTarget as HTMLElement).style.color = "var(--text-primary-ds)";
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!isActive) {
-                (e.currentTarget as HTMLElement).style.background = "";
-                (e.currentTarget as HTMLElement).style.color = "var(--text-secondary-ds)";
-              }
-            }}
           >
             <item.icon className="h-4 w-4 shrink-0" />
             {item.label}

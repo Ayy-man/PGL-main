@@ -62,7 +62,7 @@ export function ProspectResultCard({
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="rounded-[12px] p-6 px-7 flex items-start justify-between transition-all duration-200 cursor-pointer"
+      className="rounded-[12px] p-6 px-7 flex items-start justify-between transition-all duration-[250ms] cursor-pointer hover:translate-y-[-1px]"
       style={{
         background: selected
           ? "var(--gold-bg)"

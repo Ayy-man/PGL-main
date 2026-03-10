@@ -39,7 +39,7 @@
     --destructive-foreground: oklch(1.0000 0 0);
     --border: oklch(0.9080 0.0167 70.5209);
     --input: oklch(0.9491 0.0142 74.4236);
-    --ring: oklch(0.5752 0.0488 63.2507);
+    --ring: oklch(0.84 0.10 85);
     --chart-1: oklch(0.5752 0.0488 63.2507);
     --chart-2: oklch(0.7392 0.0579 66.7290);
     --chart-3: oklch(0.8537 0.0254 65.5325);
@@ -103,7 +103,7 @@
     --destructive-foreground: oklch(1.0000 0 0);
     --border: oklch(0.3382 0.0143 62.9371);
     --input: oklch(0.2838 0.0093 67.4395);
-    --ring: oklch(0.7392 0.0579 66.7290);
+    --ring: oklch(0.84 0.10 85);
     --chart-1: oklch(0.7392 0.0579 66.7290);
     --chart-2: oklch(0.5752 0.0488 63.2507);
     --chart-3: oklch(0.4694 0.0393 62.2413);
@@ -205,12 +205,43 @@
 ::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.15); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(212,175,55,0.25); }
 
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(212,175,55,0.15) transparent;
+}
+
 /* Page fadeIn animation */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 .page-enter { animation: fadeIn 0.4s ease forwards; }
+
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+@keyframes stagger-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-check {
+  0% { transform: scale(0); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes count-up-fade {
+  from { opacity: 0; filter: blur(4px); transform: translateY(4px); }
+  to { opacity: 1; filter: blur(0); transform: translateY(0); }
+}
 
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -228,17 +259,17 @@
     border: 1px solid var(--border-default);
     border-radius: 14px;
     box-shadow: var(--card-shadow);
-    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
   }
   .card-interactive {
     background: var(--bg-card-gradient);
     border: 1px solid var(--border-default);
     border-radius: 14px;
     box-shadow: var(--card-shadow);
-    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
   }
   .ghost-hover {
-    transition: background 0.15s ease, color 0.15s ease;
+    transition: background 0.2s ease, color 0.2s ease;
   }
   .ambient-glow-top {
     position: fixed;
@@ -299,10 +330,10 @@
     border: 1px solid var(--admin-border);
     border-radius: 14px;
     box-shadow: var(--admin-shadow);
-    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
   }
   .admin-thead { background: var(--admin-thead-bg); }
-  .admin-row-hover { transition: background 0.15s ease; }
+  .admin-row-hover { transition: background 0.2s ease; }
 
   /* ── Drill-down hover ───────────────────────────────────────────
    * When a child interactive is hovered, the parent container
@@ -312,12 +343,12 @@
    * ────────────────────────────────────────────────────────────── */
 
   /* Row / entry hover utilities — transitions apply always */
-  .row-hover  { transition: background 0.15s ease; }
-  .entry-hover { transition: background 0.15s ease; }
+  .row-hover  { transition: background 0.2s ease; }
+  .entry-hover { transition: background 0.2s ease; }
 
   /* Gold-tinted row variant (prospect tables) — transitions + selected always */
   .row-hover-gold {
-    transition: background 0.15s ease;
+    transition: background 0.2s ease;
   }
   .row-hover-gold[data-selected] {
     background: rgba(212,175,55,0.05);
@@ -416,6 +447,22 @@
     background: linear-gradient(to right, transparent, var(--bg-root));
     pointer-events: none;
     z-index: 1;
+  }
+
+  /* Micro-animation utilities */
+  .shimmer-skeleton {
+    background: linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 100%);
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite;
+  }
+  .animate-stagger-in {
+    animation: stagger-in 0.3s ease both;
+  }
+  .animate-slide-up {
+    animation: slide-up 0.25s ease-out both;
+  }
+  .animate-count-fade {
+    animation: count-up-fade 0.6s ease-out both;
   }
 }
 

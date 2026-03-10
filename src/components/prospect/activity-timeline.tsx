@@ -98,7 +98,7 @@ export function ActivityTimeline({ events }: ActivityTimelineProps) {
         const detail = getEventDetail(event);
 
         return (
-          <div key={event.id} className="relative">
+          <div key={event.id} className="relative animate-stagger-in" style={{ animationDelay: `${index * 60}ms` }}>
             {/* Dot on the line */}
             <div
               className="absolute rounded-full"

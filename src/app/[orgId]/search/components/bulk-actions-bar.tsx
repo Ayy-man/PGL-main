@@ -23,7 +23,7 @@ export function BulkActionsBar({
 }: BulkActionsBarProps) {
   return (
     <div
-      className="flex items-center justify-between rounded-[10px] px-4 py-3 mb-3"
+      className="flex items-center justify-between rounded-[10px] px-4 py-3 mb-3 animate-slide-up"
       style={{
         background: "var(--bg-elevated)",
         border: "1px solid var(--border-default)",
