@@ -39,19 +39,19 @@ export async function createPersonaAction(formData: FormData) {
   const filters: PersonaFilters = {};
 
   if (titlesStr) {
-    filters.titles = titlesStr.split(",").map(t => t.trim()).filter(Boolean);
+    filters.titles = titlesStr.split("|").map(t => t.trim()).filter(Boolean);
   }
   if (senioritiesStr) {
-    filters.seniorities = senioritiesStr.split(",").map(s => s.trim()).filter(Boolean);
+    filters.seniorities = senioritiesStr.split("|").map(s => s.trim()).filter(Boolean);
   }
   if (industriesStr) {
-    filters.industries = industriesStr.split(",").map(i => i.trim()).filter(Boolean);
+    filters.industries = industriesStr.split("|").map(i => i.trim()).filter(Boolean);
   }
   if (locationsStr) {
-    filters.locations = locationsStr.split(",").map(l => l.trim()).filter(Boolean);
+    filters.locations = locationsStr.split("|").map(l => l.trim()).filter(Boolean);
   }
   if (companySizeStr) {
-    filters.companySize = companySizeStr.split(",").map(c => c.trim()).filter(Boolean);
+    filters.companySize = companySizeStr.split("|").map(c => c.trim()).filter(Boolean);
   }
   if (keywords) {
     filters.keywords = keywords;
@@ -112,19 +112,19 @@ export async function updatePersonaAction(id: string, formData: FormData) {
   const filters: PersonaFilters = {};
 
   if (titlesStr) {
-    filters.titles = titlesStr.split(",").map(t => t.trim()).filter(Boolean);
+    filters.titles = titlesStr.split("|").map(t => t.trim()).filter(Boolean);
   }
   if (senioritiesStr) {
-    filters.seniorities = senioritiesStr.split(",").map(s => s.trim()).filter(Boolean);
+    filters.seniorities = senioritiesStr.split("|").map(s => s.trim()).filter(Boolean);
   }
   if (industriesStr) {
-    filters.industries = industriesStr.split(",").map(i => i.trim()).filter(Boolean);
+    filters.industries = industriesStr.split("|").map(i => i.trim()).filter(Boolean);
   }
   if (locationsStr) {
-    filters.locations = locationsStr.split(",").map(l => l.trim()).filter(Boolean);
+    filters.locations = locationsStr.split("|").map(l => l.trim()).filter(Boolean);
   }
   if (companySizeStr) {
-    filters.companySize = companySizeStr.split(",").map(c => c.trim()).filter(Boolean);
+    filters.companySize = companySizeStr.split("|").map(c => c.trim()).filter(Boolean);
   }
   if (keywords) {
     filters.keywords = keywords;

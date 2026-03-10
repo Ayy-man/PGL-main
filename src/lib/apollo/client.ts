@@ -110,16 +110,30 @@ export async function searchApollo(
   // Cap page size
   const cappedPageSize = Math.min(pageSize, MAX_RESULTS_PER_SEARCH);
 
-  // Normalize filters before cache key so stale entries from pre-fix format are never matched
+  // Normalize companySize before cache key to handle legacy formats:
+  // - Dash format "51-200" → "51,200"
+  // - Split numbers ["51", "200", "201", "500"] → ["51,200", "201,500"] (from broken comma-split)
+  let normalizedCompanySize = filters.companySize;
+  if (normalizedCompanySize && normalizedCompanySize.length > 0) {
+    // Check if values look like orphaned numbers (no comma or dash = likely split artifact)
+    const allPureNumbers = normalizedCompanySize.every((s) => /^\d+$/.test(s));
+    if (allPureNumbers && normalizedCompanySize.length % 2 === 0) {
+      // Re-pair consecutive numbers: ["51","200","201","500"] → ["51,200","201,500"]
+      const paired: string[] = [];
+      for (let i = 0; i < normalizedCompanySize.length; i += 2) {
+        paired.push(`${normalizedCompanySize[i]},${normalizedCompanySize[i + 1]}`);
+      }
+      normalizedCompanySize = paired;
+    } else {
+      // Convert dash format: "51-200" → "51,200"
+      normalizedCompanySize = normalizedCompanySize.map((s) =>
+        s.includes("-") && !s.includes(",") ? s.replace("-", ",") : s
+      );
+    }
+  }
   const normalizedFilters: PersonaFilters = {
     ...filters,
-    ...(filters.companySize && filters.companySize.length > 0
-      ? {
-          companySize: filters.companySize.map((s) =>
-            s.includes("-") && !s.includes(",") ? s.replace("-", ",") : s
-          ),
-        }
-      : {}),
+    ...(normalizedCompanySize ? { companySize: normalizedCompanySize } : {}),
   };
 
   // 1. Check rate limit

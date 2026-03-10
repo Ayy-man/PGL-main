@@ -262,7 +262,7 @@ export function PersonaFormDialog({ mode, persona, trigger, open: controlledOpen
             {/* Seniority Levels — checkbox grid */}
             <div className="space-y-2">
               <Label>Seniority Levels</Label>
-              <input type="hidden" name="seniorities" value={seniorities.join(",")} />
+              <input type="hidden" name="seniorities" value={seniorities.join("|")} />
               <div className="grid grid-cols-3 sm:grid-cols-4 gap-x-4 gap-y-2">
                 {SENIORITY_OPTIONS.map((opt) => (
                   <label
@@ -305,7 +305,7 @@ export function PersonaFormDialog({ mode, persona, trigger, open: controlledOpen
             {/* Company Size — checkbox grid */}
             <div className="space-y-2">
               <Label>Company Size</Label>
-              <input type="hidden" name="companySize" value={companySizes.join(",")} />
+              <input type="hidden" name="companySize" value={companySizes.join("|")} />
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-2">
                 {COMPANY_SIZE_OPTIONS.map((opt) => (
                   <label
