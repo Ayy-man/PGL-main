@@ -52,11 +52,12 @@ export async function GET(request: Request) {
       );
     }
 
-    // 3. Verify user has access to the list (RLS will enforce this)
+    // 3. Verify user has access to the list (explicit tenant check + RLS)
     const { data: list, error: listError } = await supabase
       .from("lists")
       .select("id, name, member_count")
       .eq("id", listId)
+      .eq("tenant_id", tenantId)
       .single();
 
     if (listError || !list) {

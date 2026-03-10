@@ -50,6 +50,17 @@ export async function POST(request: Request) {
       );
     }
 
+    // Verify tenant ownership: non-super-admins can only upload to their own tenant
+    if (role !== "super_admin") {
+      const userTenantId = user.app_metadata?.tenant_id as string | undefined;
+      if (userTenantId !== tenantId) {
+        return NextResponse.json(
+          { error: "Forbidden: cannot modify another tenant" },
+          { status: 403 }
+        );
+      }
+    }
+
     if (!file) {
       return NextResponse.json(
         { error: "file is required" },

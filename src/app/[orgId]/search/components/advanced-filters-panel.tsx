@@ -17,18 +17,18 @@ export function AdvancedFiltersPanel({
   const [isOpen, setIsOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
-  // Initialize from initialFilters (join arrays with ", ")
+  // Initialize from initialFilters (join with " ; " to avoid comma collision in values like "VP, Sales")
   const [titles, setTitles] = useState<string>(
-    initialFilters?.titles?.join(", ") ?? ""
+    initialFilters?.titles?.join("; ") ?? ""
   );
   const [locations, setLocations] = useState<string>(
-    initialFilters?.locations?.join(", ") ?? ""
+    initialFilters?.locations?.join("; ") ?? ""
   );
   const [industries, setIndustries] = useState<string>(
-    initialFilters?.industries?.join(", ") ?? ""
+    initialFilters?.industries?.join("; ") ?? ""
   );
   const [seniorities, setSeniorities] = useState<string>(
-    initialFilters?.seniorities?.join(", ") ?? ""
+    initialFilters?.seniorities?.join("; ") ?? ""
   );
 
   const handleClear = () => {
@@ -41,13 +41,13 @@ export function AdvancedFiltersPanel({
   const handleApply = () => {
     const filters: Partial<PersonaFilters> = {};
     if (titles.trim())
-      filters.titles = titles.split(",").map((s) => s.trim()).filter(Boolean);
+      filters.titles = titles.split(";").map((s) => s.trim()).filter(Boolean);
     if (locations.trim())
-      filters.locations = locations.split(",").map((s) => s.trim()).filter(Boolean);
+      filters.locations = locations.split(";").map((s) => s.trim()).filter(Boolean);
     if (industries.trim())
-      filters.industries = industries.split(",").map((s) => s.trim()).filter(Boolean);
+      filters.industries = industries.split(";").map((s) => s.trim()).filter(Boolean);
     if (seniorities.trim())
-      filters.seniorities = seniorities.split(",").map((s) => s.trim()).filter(Boolean);
+      filters.seniorities = seniorities.split(";").map((s) => s.trim()).filter(Boolean);
     onApplyFilters(filters);
   };
 
@@ -92,25 +92,25 @@ export function AdvancedFiltersPanel({
             label="Job Titles"
             value={titles}
             onChange={setTitles}
-            placeholder="CEO, VP Finance, Director..."
+            placeholder="CEO; VP Finance; Director..."
           />
           <FilterInput
             label="Locations"
             value={locations}
             onChange={setLocations}
-            placeholder="New York, Miami, SF..."
+            placeholder="New York; Miami; SF..."
           />
           <FilterInput
             label="Industries"
             value={industries}
             onChange={setIndustries}
-            placeholder="Finance, Technology, Real Estate..."
+            placeholder="Finance; Technology; Real Estate..."
           />
           <FilterInput
             label="Seniority"
             value={seniorities}
             onChange={setSeniorities}
-            placeholder="C-Suite, VP, Director..."
+            placeholder="C-Suite; VP; Director..."
           />
 
           {/* Bottom action row */}
