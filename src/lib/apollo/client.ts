@@ -43,7 +43,7 @@ export function translateFiltersToApolloParams(
     params.person_seniorities = filters.seniorities;
   }
   if (filters.industries && filters.industries.length > 0) {
-    params.organization_industries = filters.industries;
+    params.q_organization_keyword_tags = filters.industries;
   }
   if (filters.locations && filters.locations.length > 0) {
     params.person_locations = filters.locations;
@@ -151,7 +151,7 @@ export async function searchApollo(
   // 2. Check cache (uses normalized filters so old dash-format keys are invalidated)
   const cacheKey = {
     tenantId,
-    resource: "apollo:search:v2",
+    resource: "apollo:search:v3",
     identifier: { personaId, page, pageSize: cappedPageSize, filters: normalizedFilters },
   };
 

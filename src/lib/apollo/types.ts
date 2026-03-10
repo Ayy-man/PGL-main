@@ -5,7 +5,7 @@
 export interface ApolloSearchParams {
   person_titles?: string[];
   person_seniorities?: string[];
-  organization_industries?: string[];
+  q_organization_keyword_tags?: string[];
   person_locations?: string[];
   organization_num_employees_ranges?: string[];
   q_keywords?: string;
