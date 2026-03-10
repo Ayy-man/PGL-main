@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { translateFiltersToApolloParams } from "@/lib/apollo/client";
 
 export const dynamic = "force-dynamic";
 
 /**
  * GET /api/search/debug-apollo
  *
- * Temporary debug endpoint — sends a minimal Apollo search to verify
- * the API key works and returns results. Remove after debugging.
+ * Runs multiple Apollo test queries to isolate which filter causes 0 results.
+ * Remove after debugging.
  */
 export async function GET() {
-  // Auth check
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -22,52 +22,59 @@ export async function GET() {
     return NextResponse.json({ error: "APOLLO_API_KEY not set" }, { status: 500 });
   }
 
-  // Minimal search — just "CEO" title, should return results for any valid key
-  const testPayload = {
-    person_titles: ["CEO"],
-    per_page: 5,
-    page: 1,
+  // The persona filters from DB
+  const personaFilters = {
+    titles: ["Founder"],
+    industries: ["Biotechnology"],
+    seniorities: ["founder", "c_suite"],
   };
 
-  try {
-    const res = await fetch("https://api.apollo.io/api/v1/mixed_people/api_search", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Api-Key": apiKey,
-      },
-      body: JSON.stringify(testPayload),
-    });
+  // What our code translates them to
+  const translatedParams = translateFiltersToApolloParams(personaFilters);
 
-    const status = res.status;
-    const text = await res.text();
+  // Test cases — progressively add filters to find which one breaks
+  const tests = [
+    { name: "1_titles_only", payload: { person_titles: ["Founder"], per_page: 3, page: 1 } },
+    { name: "2_titles+seniority", payload: { person_titles: ["Founder"], person_seniorities: ["founder", "c_suite"], per_page: 3, page: 1 } },
+    { name: "3_titles+industry", payload: { person_titles: ["Founder"], organization_industries: ["Biotechnology"], per_page: 3, page: 1 } },
+    { name: "4_full_translated", payload: { ...translatedParams, per_page: 3, page: 1 } },
+    { name: "5_industry_only", payload: { organization_industries: ["Biotechnology"], per_page: 3, page: 1 } },
+    { name: "6_seniority_only", payload: { person_seniorities: ["c_suite"], per_page: 3, page: 1 } },
+  ];
 
-    let parsed;
+  const results: Record<string, unknown> = {
+    persona_filters: personaFilters,
+    translated_apollo_params: translatedParams,
+  };
+
+  for (const test of tests) {
     try {
-      parsed = JSON.parse(text);
-    } catch {
-      parsed = null;
-    }
+      const res = await fetch("https://api.apollo.io/api/v1/mixed_people/api_search", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Api-Key": apiKey,
+        },
+        body: JSON.stringify(test.payload),
+      });
 
-    return NextResponse.json({
-      apollo_http_status: status,
-      api_key_prefix: apiKey.slice(0, 8) + "...",
-      request_payload: testPayload,
-      response_summary: parsed ? {
-        people_count: parsed.people?.length ?? 0,
-        total_entries: parsed.total_entries ?? parsed.pagination?.total_entries ?? "N/A",
-        first_person: parsed.people?.[0] ? {
-          name: parsed.people[0].first_name,
-          title: parsed.people[0].title,
-          org: parsed.people[0].organization?.name,
+      const data = await res.json();
+      results[test.name] = {
+        status: res.status,
+        payload_sent: test.payload,
+        total_entries: data.total_entries ?? data.pagination?.total_entries ?? 0,
+        people_returned: data.people?.length ?? 0,
+        first_person: data.people?.[0] ? {
+          name: `${data.people[0].first_name} ${data.people[0].last_name ?? data.people[0].last_name_obfuscated ?? ""}`.trim(),
+          title: data.people[0].title,
+          org: data.people[0].organization?.name,
         } : null,
-        error: parsed.error || parsed.message || null,
-      } : { raw_text: text.slice(0, 500) },
-    });
-  } catch (err) {
-    return NextResponse.json({
-      error: "Fetch failed",
-      message: err instanceof Error ? err.message : String(err),
-    }, { status: 500 });
+        error: data.error || data.message || null,
+      };
+    } catch (err) {
+      results[test.name] = { error: err instanceof Error ? err.message : String(err) };
+    }
   }
+
+  return NextResponse.json(results);
 }
