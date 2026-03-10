@@ -13,13 +13,25 @@ export type ContactOutResult = {
 };
 
 /**
- * ContactOut API response structure
+ * ContactOut API response structure (from /v1/people/enrich with include params)
  */
 type ContactOutApiResponse = {
-  success: boolean;
+  profile?: {
+    personal_emails?: string[];
+    work_emails?: string[];
+    phones?: string[];
+    // Profile fields also returned
+    name?: string;
+    title?: string;
+    company?: string;
+    linkedin_url?: string;
+  };
+  // Some endpoints return this shape instead
+  success?: boolean;
   person?: {
     personal_emails?: string[];
     phone_numbers?: string[];
+    phones?: string[];
   };
 };
 
@@ -50,15 +62,29 @@ async function enrichContactOutInternal(params: {
   }
 
   try {
+    // Validate LinkedIn URL format if provided — ContactOut only accepts /in/ or /pub/ URLs
+    if (params.linkedinUrl) {
+      const url = params.linkedinUrl;
+      if (!url.includes('linkedin.com/in/') && !url.includes('linkedin.com/pub/')) {
+        return {
+          found: false,
+          error: 'LinkedIn URL must contain /in/ or /pub/ path (Sales Navigator/Recruiter URLs not supported)',
+        };
+      }
+    }
+
+    // CRITICAL: must pass `include` to get contact data — API returns profile-only by default
     const response = await fetch('https://api.contactout.com/v1/people/enrich', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
         'token': apiKey,
       },
       body: JSON.stringify({
         email: params.email,
         linkedin_url: params.linkedinUrl,
+        include: ['personal_email', 'phone'],
       }),
     });
 
@@ -78,6 +104,14 @@ async function enrichContactOutInternal(params: {
       };
     }
 
+    // Handle auth errors
+    if (response.status === 400) {
+      return {
+        found: false,
+        error: 'ContactOut API: bad credentials or invalid request',
+      };
+    }
+
     if (!response.ok) {
       return {
         found: false,
@@ -87,14 +121,14 @@ async function enrichContactOutInternal(params: {
 
     const data = await response.json() as ContactOutApiResponse;
 
-    if (!data.success || !data.person) {
-      return {
-        found: false,
-      };
-    }
-
-    const personalEmail = data.person.personal_emails?.[0];
-    const phone = data.person.phone_numbers?.[0];
+    // Handle both possible response shapes
+    const personalEmail =
+      data.profile?.personal_emails?.[0] ??
+      data.person?.personal_emails?.[0];
+    const phone =
+      data.profile?.phones?.[0] ??
+      data.person?.phones?.[0] ??
+      data.person?.phone_numbers?.[0];
 
     trackApiUsage("contactout").catch(() => {});
 
