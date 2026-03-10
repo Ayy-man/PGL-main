@@ -55,7 +55,7 @@ export function TagInput({
   };
 
   return (
-    <div className="relative">
+    <div className={cn("relative", showSuggestions && input && filteredSuggestions.length > 0 && "z-50")}>
       {/* Hidden input to carry the value for FormData */}
       {name && <input type="hidden" name={name} value={value.join(",")} />}
 
