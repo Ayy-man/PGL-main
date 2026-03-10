@@ -62,13 +62,9 @@ export function NavItems({ orgId, userRole }: NavItemsProps) {
                 ? {
                     background: "var(--gold-bg)",
                     color: "var(--gold-primary)",
-                    borderLeft: "3px solid var(--gold-primary)",
-                    paddingLeft: "9px", // px-3 (12px) - 3px border = 9px to preserve alignment
                   }
                 : {
                     color: "var(--text-secondary-ds)",
-                    borderLeft: "3px solid transparent",
-                    paddingLeft: "9px",
                   }
             }
             onMouseEnter={(e) => {

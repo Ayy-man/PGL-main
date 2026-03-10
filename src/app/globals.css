@@ -317,12 +317,10 @@
 
   /* Gold-tinted row variant (prospect tables) — transitions + selected always */
   .row-hover-gold {
-    transition: background 0.15s ease, border-left-color 0.15s ease;
-    border-left: 4px solid transparent;
+    transition: background 0.15s ease;
   }
   .row-hover-gold[data-selected] {
     background: rgba(212,175,55,0.05);
-    border-left-color: var(--gold-primary);
   }
 
   /* ── Hover-only states (guarded for pointer devices) ────────── */
@@ -354,7 +352,6 @@
     .entry-hover:hover { background: rgba(212,175,55,0.05); }
     .row-hover-gold:hover {
       background: rgba(212,175,55,0.03);
-      border-left-color: var(--gold-primary);
     }
 
     /* Level 1 — card suppresses when any child interactive is hovered */
@@ -377,13 +374,9 @@
     .entry-hover:hover:has(button:hover, a:hover) {
       background: transparent;
     }
-    .row-hover-gold:hover:has(button:hover, a:hover, input:hover) {
-      border-left-color: transparent;
-    }
     /* Selected gold rows keep their state even during child drill-down */
     .row-hover-gold[data-selected]:hover:has(button:hover, a:hover, input:hover) {
       background: rgba(212,175,55,0.05);
-      border-left-color: var(--gold-primary);
     }
   }
 

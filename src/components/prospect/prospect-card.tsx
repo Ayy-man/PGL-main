@@ -143,7 +143,6 @@ export function ProspectCard({
           <div
             className="mt-3 rounded-md px-3 py-2"
             style={{
-              borderLeft: "2px solid var(--border-gold)",
               background: "var(--gold-bg)",
             }}
           >
