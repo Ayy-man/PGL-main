@@ -7,6 +7,7 @@ export const dynamic = "force-dynamic";
 interface TenantRow {
   id: string;
   name: string;
+  is_active: boolean;
 }
 
 interface UserRow {
@@ -50,7 +51,7 @@ export async function GET() {
     // 1. Fetch active tenants
     const { data: tenants, error: tenantsError } = await admin
       .from("tenants")
-      .select("id, name")
+      .select("id, name, is_active")
       .eq("is_active", true)
       .order("name");
 
@@ -210,6 +211,7 @@ export async function GET() {
         return {
           id: tenant.id,
           name: tenant.name,
+          isActive: tenant.is_active,
           userCount: tenantUsers.length,
           ...metrics,
           lastActive: lastActiveMap.get(tenant.id) ?? null,

@@ -13,6 +13,7 @@ interface TenantUser {
 interface Tenant {
   id: string;
   name: string;
+  isActive: boolean;
   userCount: number;
   searches7d: number;
   enrichments7d: number;
@@ -83,11 +84,7 @@ function SkeletonRow() {
 }
 
 function TenantRow({ tenant }: { tenant: Tenant }) {
-  const isActive =
-    tenant.searches7d > 0 ||
-    tenant.enrichments7d > 0 ||
-    tenant.exports7d > 0 ||
-    tenant.lastActive !== null;
+  const isActive = tenant.isActive;
 
   return (
     <tr
