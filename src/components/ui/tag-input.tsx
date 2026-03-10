@@ -112,20 +112,27 @@ export function TagInput({
       {/* Suggestions dropdown */}
       {showSuggestions && input && filteredSuggestions.length > 0 && (
         <div
-          className="absolute z-50 mt-1 w-full rounded-md border shadow-md max-h-[200px] overflow-y-auto"
+          className="absolute z-50 mt-1 w-full rounded-md border shadow-lg max-h-[200px] overflow-y-auto"
           style={{
-            background: "var(--surface-primary, hsl(var(--popover)))",
-            borderColor: "var(--border-subtle, hsl(var(--border)))",
+            background: "var(--bg-elevated, #1a1a1a)",
+            borderColor: "var(--border-default, hsl(var(--border)))",
           }}
         >
           {filteredSuggestions.slice(0, 8).map((suggestion) => (
             <button
               key={suggestion}
               type="button"
-              className="w-full text-left px-3 py-2 text-sm hover:bg-accent transition-colors"
+              className="w-full text-left px-3 py-2 text-sm transition-colors"
+              style={{ color: "var(--text-primary-ds, hsl(var(--popover-foreground)))" }}
               onMouseDown={(e) => {
                 e.preventDefault();
                 addTag(suggestion);
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.08)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.background = "transparent";
               }}
             >
               {suggestion}
