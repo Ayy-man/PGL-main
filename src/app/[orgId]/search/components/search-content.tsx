@@ -191,6 +191,7 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
     const selectedProspects = results.filter((r) => selectedIds.has(r.id));
     let successCount = 0;
     let failCount = 0;
+    const upsertedProspectIds: string[] = [];
 
     const promises = selectedProspects.map(async (prospect) => {
       try {
@@ -201,6 +202,10 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
         });
         if (response.ok) {
           successCount++;
+          const data = await response.json();
+          if (data.prospect?.id) {
+            upsertedProspectIds.push(data.prospect.id);
+          }
         } else {
           failCount++;
         }
@@ -218,6 +223,26 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
       description: `Added ${successCount} prospect${successCount !== 1 ? "s" : ""} to ${bulkSelectedListIds.length} list${bulkSelectedListIds.length !== 1 ? "s" : ""}${failCount > 0 ? `. ${failCount} failed.` : ""}`,
       variant: failCount > 0 ? "destructive" : "default",
     });
+
+    // When in enrich mode, fire off enrichment for each successfully upserted prospect
+    if (bulkMode === "enrich" && upsertedProspectIds.length > 0) {
+      toast({
+        title: "Enriching prospects",
+        description: `Enriching ${upsertedProspectIds.length} prospect${upsertedProspectIds.length !== 1 ? "s" : ""}...`,
+      });
+
+      // Fire-and-forget: trigger enrich endpoint for each prospect
+      Promise.allSettled(
+        upsertedProspectIds.map((prospectId) =>
+          fetch(`/api/prospects/${prospectId}/enrich`, {
+            method: "POST",
+          }).catch(() => {
+            // Silently ignore individual enrich failures —
+            // the enrichment system handles retries via Inngest
+          })
+        )
+      );
+    }
 
     if (failCount === 0) setSelectedIds(new Set());
   };

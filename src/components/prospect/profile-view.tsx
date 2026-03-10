@@ -1,18 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import {
   UserSearch,
   Mail,
   Phone,
   CheckCircle2,
   Eye,
+  Loader2,
 } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { ProfileHeader } from "./profile-header";
 import { ActivityTimeline } from "./activity-timeline";
 import { WealthSignals } from "./wealth-signals";
 import { LookalikeDiscovery } from "./lookalike-discovery";
+import { useToast } from "@/hooks/use-toast";
 
 type SourceStatus =
   | "pending"
@@ -72,6 +74,7 @@ interface Prospect {
   } | null;
   ai_summary: string | null;
   enrichment_source_status: Record<string, SourceStatus> | null;
+  notes: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -117,7 +120,40 @@ export function ProfileView({
   activityEntries,
 }: ProfileViewProps) {
   const [showLookalikes, setShowLookalikes] = useState(false);
-  const [noteText, setNoteText] = useState("");
+  const [noteText, setNoteText] = useState(prospect.notes ?? "");
+  const [isSavingNote, setIsSavingNote] = useState(false);
+  const [lastSavedNote, setLastSavedNote] = useState(prospect.notes ?? "");
+  const { toast } = useToast();
+
+  const noteHasChanged = noteText !== lastSavedNote;
+
+  const handleSaveNote = useCallback(async () => {
+    if (isSavingNote) return;
+    setIsSavingNote(true);
+    try {
+      const res = await fetch(`/api/prospects/${prospect.id}/notes`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ notes: noteText.trim() || null }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Failed to save");
+      }
+      const saved = noteText.trim();
+      setNoteText(saved);
+      setLastSavedNote(saved);
+      toast({ title: "Note saved" });
+    } catch (err) {
+      toast({
+        title: "Failed to save note",
+        description: err instanceof Error ? err.message : "Please try again",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSavingNote(false);
+    }
+  }, [noteText, prospect.id, isSavingNote, toast]);
 
   const hasContact =
     prospect.contact_data?.personal_email || prospect.contact_data?.phone;
@@ -344,24 +380,25 @@ export function ProfileView({
             />
             <div className="flex justify-end mt-2">
               <button
-                className="text-xs font-medium cursor-pointer transition-colors"
+                className="text-xs font-medium cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
                 style={{ color: "var(--gold-primary)" }}
+                disabled={!noteHasChanged || isSavingNote}
                 onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.color =
-                    "var(--gold-muted)";
+                  if (!e.currentTarget.disabled) {
+                    (e.currentTarget as HTMLButtonElement).style.color =
+                      "var(--gold-muted)";
+                  }
                 }}
                 onMouseLeave={(e) => {
                   (e.currentTarget as HTMLButtonElement).style.color =
                     "var(--gold-primary)";
                 }}
-                onClick={() => {
-                  if (noteText.trim()) {
-                    console.log("Save note (stub):", noteText.trim());
-                    setNoteText("");
-                  }
-                }}
+                onClick={handleSaveNote}
               >
-                Save Note
+                {isSavingNote && (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                )}
+                {isSavingNote ? "Saving..." : "Save Note"}
               </button>
             </div>
           </div>

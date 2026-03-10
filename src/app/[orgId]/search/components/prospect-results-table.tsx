@@ -1,7 +1,6 @@
 "use client";
 
 import type { ApolloPerson } from "@/lib/apollo/types";
-import { WealthTierBadge } from "@/components/ui/wealth-tier-badge";
 import { MapPin, Eye, Search } from "lucide-react";
 
 function getInitials(name: string): string {
@@ -16,33 +15,6 @@ function getInitials(name: string): string {
 function getAvatarGradient(name: string): string {
   const hue = name.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0) % 360;
   return `linear-gradient(135deg, hsl(${hue}, 40%, 30%), hsl(${hue}, 50%, 20%))`;
-}
-
-function getWealthTier(
-  person: ApolloPerson
-): "$500M+" | "$100M+" | "$50M+" | "$30M+" | null {
-  const title = (person.title || "").toLowerCase();
-  if (
-    title.includes("founder") ||
-    title.includes("chairman") ||
-    title.includes("billionaire")
-  )
-    return "$500M+";
-  if (title.includes("ceo") || title.includes("chief executive"))
-    return "$100M+";
-  if (
-    title.includes("managing director") ||
-    title.includes("president") ||
-    title.includes("partner")
-  )
-    return "$50M+";
-  if (
-    title.includes("vp") ||
-    title.includes("vice president") ||
-    title.includes("director")
-  )
-    return "$30M+";
-  return null;
 }
 
 interface ProspectResultsTableProps {
@@ -140,7 +112,6 @@ export function ProspectResultsTable({
               const location = [prospect.city, prospect.state, prospect.country]
                 .filter(Boolean)
                 .join(", ");
-              const wealthTier = getWealthTier(prospect);
               const isSelected = selectedIds.has(prospect.id);
 
               return (
@@ -197,18 +168,14 @@ export function ProspectResultsTable({
                     </div>
                   </td>
 
-                  {/* Wealth Tier */}
+                  {/* Wealth Tier — shown after enrichment */}
                   <td className="whitespace-nowrap px-3 py-4">
-                    {wealthTier ? (
-                      <WealthTierBadge tier={wealthTier} />
-                    ) : (
-                      <span
-                        className="text-[12px]"
-                        style={{ color: "var(--text-ghost)" }}
-                      >
-                        —
-                      </span>
-                    )}
+                    <span
+                      className="text-[12px]"
+                      style={{ color: "var(--text-ghost)" }}
+                    >
+                      —
+                    </span>
                   </td>
 
                   {/* Title & Company */}
@@ -294,7 +261,6 @@ export function ProspectResultsTable({
             .filter(Boolean)
             .join(", ");
           const isSelected = selectedIds.has(prospect.id);
-          const wealthTier = getWealthTier(prospect);
 
           return (
             <div
@@ -329,7 +295,7 @@ export function ProspectResultsTable({
                     </p>
                   )}
                 </div>
-                {wealthTier && <WealthTierBadge tier={wealthTier} />}
+                <span className="text-[11px] shrink-0" style={{ color: "var(--text-ghost)" }}>—</span>
               </div>
               {/* Action buttons — always visible on mobile */}
               <div

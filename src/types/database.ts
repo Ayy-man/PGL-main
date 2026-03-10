@@ -71,6 +71,7 @@ export interface Prospect {
   // Company public market data
   publicly_traded_symbol: string | null;
   company_cik: string | null;
+  notes: string | null;
   created_at: string;
   updated_at: string;
 }

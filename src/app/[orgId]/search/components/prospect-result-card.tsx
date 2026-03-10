@@ -3,7 +3,6 @@
 import { useState } from "react";
 import type { ApolloPerson } from "@/lib/apollo/types";
 import type { List } from "@/lib/lists/types";
-import { WealthTierBadge } from "@/components/ui/wealth-tier-badge";
 import { AddToListDialog } from "./add-to-list-dialog";
 import { Button } from "@/components/ui/button";
 import { Mail, Phone, Linkedin } from "lucide-react";
@@ -25,38 +24,6 @@ function getAvatarGradient(name: string): string {
 function getLocation(person: ApolloPerson): string {
   const parts = [person.city, person.state, person.country].filter(Boolean);
   return parts.join(", ");
-}
-
-// Derive a rough wealth tier from job title / seniority signals
-function getWealthTier(
-  person: ApolloPerson
-): "$500M+" | "$100M+" | "$50M+" | "$30M+" | null {
-  const title = (person.title || "").toLowerCase();
-  if (
-    title.includes("founder") ||
-    title.includes("chairman") ||
-    title.includes("billionaire")
-  ) {
-    return "$500M+";
-  }
-  if (title.includes("ceo") || title.includes("chief executive")) {
-    return "$100M+";
-  }
-  if (
-    title.includes("managing director") ||
-    title.includes("president") ||
-    title.includes("partner")
-  ) {
-    return "$50M+";
-  }
-  if (
-    title.includes("vp") ||
-    title.includes("vice president") ||
-    title.includes("director")
-  ) {
-    return "$30M+";
-  }
-  return null;
 }
 
 interface ProspectResultCardProps {
@@ -82,7 +49,6 @@ export function ProspectResultCard({
   const initials = getInitials(name);
   const avatarGradient = getAvatarGradient(name);
   const location = getLocation(prospect);
-  const wealthTier = getWealthTier(prospect);
 
   const hasEmail =
     Boolean(prospect.email) ||
@@ -149,7 +115,7 @@ export function ProspectResultCard({
             <span className="font-serif text-base sm:text-[20px] font-semibold text-foreground">
               {name}
             </span>
-            {wealthTier && <WealthTierBadge tier={wealthTier} />}
+            <span className="text-xs text-muted-foreground/50">—</span>
           </div>
 
           {/* Title + Company */}

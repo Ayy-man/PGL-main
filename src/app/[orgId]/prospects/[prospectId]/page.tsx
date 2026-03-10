@@ -71,6 +71,7 @@ export default async function ProspectProfilePage({
       insider_data,
       ai_summary,
       enrichment_source_status,
+      notes,
       created_at,
       updated_at
     `
