@@ -110,6 +110,18 @@ export async function searchApollo(
   // Cap page size
   const cappedPageSize = Math.min(pageSize, MAX_RESULTS_PER_SEARCH);
 
+  // Normalize filters before cache key so stale entries from pre-fix format are never matched
+  const normalizedFilters: PersonaFilters = {
+    ...filters,
+    ...(filters.companySize && filters.companySize.length > 0
+      ? {
+          companySize: filters.companySize.map((s) =>
+            s.includes("-") && !s.includes(",") ? s.replace("-", ",") : s
+          ),
+        }
+      : {}),
+  };
+
   // 1. Check rate limit
   const rateLimitResult = await apolloRateLimiter.limit(`tenant:${tenantId}`);
   console.info(`[searchApollo] Rate limit check:`, {
@@ -122,11 +134,11 @@ export async function searchApollo(
     throw new RateLimitError(rateLimitResult.reset);
   }
 
-  // 2. Check cache (include filters in key so different searches aren't stale)
+  // 2. Check cache (uses normalized filters so old dash-format keys are invalidated)
   const cacheKey = {
     tenantId,
-    resource: "apollo:search",
-    identifier: { personaId, page, pageSize: cappedPageSize, filters },
+    resource: "apollo:search:v2",
+    identifier: { personaId, page, pageSize: cappedPageSize, filters: normalizedFilters },
   };
 
   const cachedResult = await getCachedData<{
@@ -146,8 +158,8 @@ export async function searchApollo(
   }
   console.info(`[searchApollo] Cache miss — calling Apollo API`);
 
-  // 3. Build Apollo search params
-  const translatedParams = translateFiltersToApolloParams(filters);
+  // 3. Build Apollo search params (use normalizedFilters — companySize already in comma format)
+  const translatedParams = translateFiltersToApolloParams(normalizedFilters);
   const apolloParams: ApolloSearchParams = {
     ...translatedParams,
     page,
