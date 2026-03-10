@@ -1,4 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { chatCompletion } from "@/lib/ai/openrouter";
 import { trackApiUsage } from "@/lib/enrichment/track-api-usage";
 
 /**
@@ -23,11 +23,14 @@ export interface ProspectSummaryInput {
   } | null;
 }
 
+const SYSTEM_PROMPT =
+  "You are a luxury real estate prospect analyst. Generate concise 2-3 sentence summaries explaining why a prospect is a qualified UHNWI buyer. Focus on wealth signals, lifestyle indicators, and buying potential. Be specific — reference actual data points.";
+
 /**
  * Generate a 2-3 sentence AI summary explaining why this prospect is a qualified UHNWI buyer
  *
- * Uses Claude Haiku for cost efficiency (high-volume summaries)
- * Returns fallback message if enrichment data is sparse or API fails
+ * Uses OpenRouter (Claude Haiku) for cost efficiency on high-volume summaries.
+ * Returns fallback message if enrichment data is sparse or API fails.
  */
 export async function generateProspectSummary(
   params: ProspectSummaryInput
@@ -72,35 +75,12 @@ export async function generateProspectSummary(
       userMessage += `\n\nSEC Insider Transactions: ${insiderData.transactions.length} transactions, total value: $${totalValue.toLocaleString()}`;
     }
 
-    // Create Anthropic client
-    const client = new Anthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY,
-    });
+    const response = await chatCompletion(SYSTEM_PROMPT, userMessage, 500);
 
-    // Call Claude Haiku for summary
-    const response = await client.messages.create({
-      model: "claude-haiku-4-5-20250514",
-      max_tokens: 500,
-      system:
-        "You are a luxury real estate prospect analyst. Generate concise 2-3 sentence summaries explaining why a prospect is a qualified UHNWI buyer. Focus on wealth signals, lifestyle indicators, and buying potential. Be specific — reference actual data points.",
-      messages: [
-        {
-          role: "user",
-          content: userMessage,
-        },
-      ],
-    });
-
-    // Extract text from response
-    const textContent = response.content[0];
-    if (textContent.type === "text") {
-      trackApiUsage("claude").catch(() => {});
-      return textContent.text;
-    }
-
-    return "AI summary temporarily unavailable.";
+    trackApiUsage("claude").catch(() => {});
+    return response.text;
   } catch (error) {
-    console.error("Claude API error:", error);
+    console.error("AI summary error:", error);
     return "AI summary temporarily unavailable.";
   }
 }

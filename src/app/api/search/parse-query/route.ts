@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import Anthropic from "@anthropic-ai/sdk";
+import { chatCompletion } from "@/lib/ai/openrouter";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +31,7 @@ Rules:
  * POST /api/search/parse-query
  *
  * Takes natural language text and returns structured PersonaFilters
- * using Claude to extract intent.
+ * using AI to extract intent.
  */
 export async function POST(request: NextRequest) {
   const start = Date.now();
@@ -74,39 +74,20 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Call Claude Haiku to parse NL → structured filters
-    console.info("[parse-query] Calling Claude Haiku for NL parsing...");
+    // Call AI to parse NL → structured filters
+    console.info("[parse-query] Calling OpenRouter for NL parsing...");
     const llmStart = Date.now();
 
-    const client = new Anthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY,
-    });
-
-    const response = await client.messages.create({
-      model: "claude-haiku-4-5-20250514",
-      max_tokens: 500,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: "user", content: query.trim() }],
-    });
+    const response = await chatCompletion(SYSTEM_PROMPT, query.trim(), 500);
 
     const llmMs = Date.now() - llmStart;
-    console.info(`[parse-query] Claude response received (${llmMs}ms)`, {
-      inputTokens: response.usage?.input_tokens,
-      outputTokens: response.usage?.output_tokens,
-      stopReason: response.stop_reason,
+    console.info(`[parse-query] AI response received (${llmMs}ms)`, {
+      inputTokens: response.inputTokens,
+      outputTokens: response.outputTokens,
     });
 
-    const content = response.content[0];
-    if (content.type !== "text") {
-      console.warn("[parse-query] Non-text response from Claude, falling back to keywords");
-      return NextResponse.json({
-        filters: { keywords: query.trim() },
-        parsed: false,
-      });
-    }
-
     // Extract JSON from response (handle markdown code blocks)
-    let jsonStr = content.text.trim();
+    let jsonStr = response.text.trim();
     console.info("[parse-query] Raw LLM output:", jsonStr);
 
     const jsonMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);

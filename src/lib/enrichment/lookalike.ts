@@ -1,4 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { chatCompletion } from "@/lib/ai/openrouter";
 import { z } from "zod";
 
 /**
@@ -72,9 +72,23 @@ export interface LookalikeResult {
   apolloFilters: ApolloFilters;
 }
 
+const SYSTEM_PROMPT = `You are a lead research analyst. Extract key professional attributes from a prospect to find similar people. Focus on role seniority, industry, company characteristics, and wealth indicators.
+
+Return ONLY a valid JSON object with this exact structure:
+{
+  "name": "Generated persona name",
+  "jobTitles": ["array", "of", "job", "titles"],
+  "seniorities": ["array of seniority levels from ONLY these values: owner, founder, c_suite, partner, vp, head, director, manager, senior, entry, intern"],
+  "industries": ["array", "of", "industries"],
+  "companySizes": ["array of employee ranges from ONLY these values: 1,10 | 11,50 | 51,200 | 201,500 | 501,1000 | 1001,5000 | 5001,10000 | 10001,"],
+  "locations": ["array", "of", "locations"],
+  "keywords": ["array", "of", "keywords"],
+  "reasoning": "Why these attributes match"
+}`;
+
 /**
  * Generate a lookalike persona by extracting attributes from a prospect
- * using Claude's structured outputs
+ * using AI structured outputs.
  *
  * @param prospect - Prospect data including enrichment results
  * @returns Generated persona and Apollo-compatible search filters
@@ -82,11 +96,6 @@ export interface LookalikeResult {
 export async function generateLookalikePersona(
   prospect: ProspectData
 ): Promise<LookalikeResult> {
-  // Create Anthropic client
-  const client = new Anthropic({
-    apiKey: process.env.ANTHROPIC_API_KEY,
-  });
-
   // Build user message from prospect data
   let userMessage = `Extract professional attributes from this prospect to find similar people:\n\n`;
   userMessage += `Name: ${prospect.name}\n`;
@@ -123,7 +132,7 @@ export async function generateLookalikePersona(
     userMessage += `\nSEC Insider Transactions: ${prospect.insiderData.transactions.length} transactions, total value: $${totalValue.toLocaleString()}\n`;
   }
 
-  // Call Claude for structured persona extraction
+  // Call AI for structured persona extraction
   console.info("[lookalike] ── Generating persona ──", {
     prospect: prospect.name,
     title: prospect.title,
@@ -131,44 +140,25 @@ export async function generateLookalikePersona(
   });
   const llmStart = Date.now();
 
-  const response = await client.messages.create({
-    model: "claude-haiku-4-5-20250514",
-    max_tokens: 2000,
-    system: `You are a lead research analyst. Extract key professional attributes from a prospect to find similar people. Focus on role seniority, industry, company characteristics, and wealth indicators.
-
-Return ONLY a valid JSON object with this exact structure:
-{
-  "name": "Generated persona name",
-  "jobTitles": ["array", "of", "job", "titles"],
-  "seniorities": ["array of seniority levels from ONLY these values: owner, founder, c_suite, partner, vp, head, director, manager, senior, entry, intern"],
-  "industries": ["array", "of", "industries"],
-  "companySizes": ["array of employee ranges from ONLY these values: 1,10 | 11,50 | 51,200 | 201,500 | 501,1000 | 1001,5000 | 5001,10000 | 10001,"],
-  "locations": ["array", "of", "locations"],
-  "keywords": ["array", "of", "keywords"],
-  "reasoning": "Why these attributes match"
-}`,
-    messages: [
-      {
-        role: "user",
-        content: userMessage,
-      },
-    ],
-  });
+  const response = await chatCompletion(SYSTEM_PROMPT, userMessage, 2000);
 
   const llmMs = Date.now() - llmStart;
-  console.info(`[lookalike] Claude response (${llmMs}ms)`, {
-    inputTokens: response.usage?.input_tokens,
-    outputTokens: response.usage?.output_tokens,
+  console.info(`[lookalike] AI response (${llmMs}ms)`, {
+    inputTokens: response.inputTokens,
+    outputTokens: response.outputTokens,
   });
 
   // Parse structured output
-  const content = response.content[0];
-  if (content.type !== "text") {
-    throw new Error("Unexpected response format from Claude");
+  console.info("[lookalike] Raw LLM output:", response.text);
+
+  // Handle markdown code blocks
+  let jsonStr = response.text.trim();
+  const jsonMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (jsonMatch) {
+    jsonStr = jsonMatch[1].trim();
   }
 
-  console.info("[lookalike] Raw LLM output:", content.text);
-  const personaData = JSON.parse(content.text);
+  const personaData = JSON.parse(jsonStr);
   const persona = PersonaSchema.parse(personaData);
 
   console.info("[lookalike] ── Persona generated ──", {
@@ -205,4 +195,3 @@ Return ONLY a valid JSON object with this exact structure:
     apolloFilters,
   };
 }
-
