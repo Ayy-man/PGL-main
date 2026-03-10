@@ -24,6 +24,7 @@ interface HeatmapData {
   tenants: Array<{
     id: string;
     name: string;
+    isActive: boolean;
     userCount: number;
     searches7d: number;
     enrichments7d: number;
