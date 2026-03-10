@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { translateFiltersToApolloParams } from "@/lib/apollo/client";
 
 export const dynamic = "force-dynamic";
 
 /**
  * GET /api/search/debug-apollo
  *
- * Runs multiple Apollo test queries to isolate which filter causes 0 results.
+ * Tests different Apollo industry parameter names to find the correct one.
  * Remove after debugging.
  */
 export async function GET() {
@@ -22,30 +21,20 @@ export async function GET() {
     return NextResponse.json({ error: "APOLLO_API_KEY not set" }, { status: 500 });
   }
 
-  // The persona filters from DB
-  const personaFilters = {
-    titles: ["Founder"],
-    industries: ["Biotechnology"],
-    seniorities: ["founder", "c_suite"],
-  };
-
-  // What our code translates them to
-  const translatedParams = translateFiltersToApolloParams(personaFilters);
-
-  // Test cases — progressively add filters to find which one breaks
+  // Test every possible industry parameter name
   const tests = [
-    { name: "1_titles_only", payload: { person_titles: ["Founder"], per_page: 3, page: 1 } },
-    { name: "2_titles+seniority", payload: { person_titles: ["Founder"], person_seniorities: ["founder", "c_suite"], per_page: 3, page: 1 } },
-    { name: "3_titles+industry", payload: { person_titles: ["Founder"], organization_industries: ["Biotechnology"], per_page: 3, page: 1 } },
-    { name: "4_full_translated", payload: { ...translatedParams, per_page: 3, page: 1 } },
-    { name: "5_industry_only", payload: { organization_industries: ["Biotechnology"], per_page: 3, page: 1 } },
-    { name: "6_seniority_only", payload: { person_seniorities: ["c_suite"], per_page: 3, page: 1 } },
+    { name: "organization_industries", payload: { organization_industries: ["Biotechnology"], per_page: 2, page: 1 } },
+    { name: "organization_industry_tag_ids", payload: { organization_industry_tag_ids: ["Biotechnology"], per_page: 2, page: 1 } },
+    { name: "q_organization_keyword_tags", payload: { q_organization_keyword_tags: ["Biotechnology"], per_page: 2, page: 1 } },
+    { name: "q_organization_keyword_tags_string", payload: { q_organization_keyword_tags: "Biotechnology", per_page: 2, page: 1 } },
+    { name: "industry_tag_ids", payload: { industry_tag_ids: ["Biotechnology"], per_page: 2, page: 1 } },
+    { name: "organization_industry_keywords", payload: { organization_industry_keywords: ["Biotechnology"], per_page: 2, page: 1 } },
+    { name: "q_keywords_biotech", payload: { q_keywords: "Biotechnology", per_page: 2, page: 1 } },
+    { name: "q_organization_industry_tag_ids", payload: { q_organization_industry_tag_ids: ["5567cd4773696439b10b0000"], per_page: 2, page: 1 } },
+    { name: "organization_industry_tag_ids_hex", payload: { organization_industry_tag_ids: ["5567cd4773696439b10b0000"], per_page: 2, page: 1 } },
   ];
 
-  const results: Record<string, unknown> = {
-    persona_filters: personaFilters,
-    translated_apollo_params: translatedParams,
-  };
+  const results: Record<string, unknown> = {};
 
   for (const test of tests) {
     try {
@@ -61,15 +50,9 @@ export async function GET() {
       const data = await res.json();
       results[test.name] = {
         status: res.status,
-        payload_sent: test.payload,
-        total_entries: data.total_entries ?? data.pagination?.total_entries ?? 0,
-        people_returned: data.people?.length ?? 0,
-        first_person: data.people?.[0] ? {
-          name: `${data.people[0].first_name} ${data.people[0].last_name ?? data.people[0].last_name_obfuscated ?? ""}`.trim(),
-          title: data.people[0].title,
-          org: data.people[0].organization?.name,
-        } : null,
-        error: data.error || data.message || null,
+        total: data.total_entries ?? data.pagination?.total_entries ?? 0,
+        people: data.people?.length ?? 0,
+        first: data.people?.[0]?.organization?.name ?? null,
       };
     } catch (err) {
       results[test.name] = { error: err instanceof Error ? err.message : String(err) };
