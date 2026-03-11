@@ -296,15 +296,15 @@ export async function addProspectToList(
     added_at: typedData.created_at,
     updated_at: typedData.updated_at,
     prospect: {
-      id: raw.id,
-      name: raw.full_name,
-      title: raw.title,
-      company: raw.company,
-      location: raw.location,
-      email: raw.work_email,
+      id: raw?.id ?? typedData.prospect_id,
+      name: raw?.full_name ?? "Unknown",
+      title: raw?.title ?? null,
+      company: raw?.company ?? null,
+      location: raw?.location ?? null,
+      email: raw?.work_email ?? null,
       email_status: null,
-      phone: raw.work_phone,
-      linkedin_url: raw.linkedin_url
+      phone: raw?.work_phone ?? null,
+      linkedin_url: raw?.linkedin_url ?? null
     }
   } as ListMember;
 }
