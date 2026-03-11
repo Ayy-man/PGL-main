@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { useParams } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -10,7 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, Trash2 } from "lucide-react";
+import { ExternalLink, Trash2, Loader2, CheckCircle2, XCircle, Clock } from "lucide-react";
 import { MemberStatusSelect } from "./member-status-select";
 import { MemberNotesCell } from "./member-notes-cell";
 import { removeFromListAction } from "../actions";
@@ -21,7 +23,42 @@ interface ListMemberTableProps {
   members: ListMember[];
 }
 
+function EnrichmentBadge({ status }: { status: string | null }) {
+  switch (status) {
+    case "complete":
+      return (
+        <span className="inline-flex items-center gap-1 text-[10px] font-medium" style={{ color: "var(--success, #22c55e)" }}>
+          <CheckCircle2 className="h-3 w-3" /> Enriched
+        </span>
+      );
+    case "in_progress":
+      return (
+        <span className="inline-flex items-center gap-1 text-[10px] font-medium" style={{ color: "var(--gold-primary)" }}>
+          <Loader2 className="h-3 w-3 animate-spin" /> Enriching
+        </span>
+      );
+    case "failed":
+      return (
+        <span className="inline-flex items-center gap-1 text-[10px] font-medium text-destructive">
+          <XCircle className="h-3 w-3" /> Failed
+        </span>
+      );
+    case "pending":
+      return (
+        <span className="inline-flex items-center gap-1 text-[10px] font-medium text-muted-foreground">
+          <Clock className="h-3 w-3" /> Pending
+        </span>
+      );
+    default:
+      return (
+        <span className="text-[10px] text-muted-foreground/50">—</span>
+      );
+  }
+}
+
 export function ListMemberTable({ members }: ListMemberTableProps) {
+  const params = useParams();
+  const orgId = params.orgId as string;
   const [removingId, setRemovingId] = useState<string | null>(null);
 
   const handleRemove = async (memberId: string) => {
@@ -83,6 +120,7 @@ export function ListMemberTable({ members }: ListMemberTableProps) {
               <TableHead>Location</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Phone</TableHead>
+              <TableHead>Enrichment</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Notes</TableHead>
               <TableHead className="w-[80px]">Actions</TableHead>
@@ -93,7 +131,13 @@ export function ListMemberTable({ members }: ListMemberTableProps) {
               <TableRow key={member.id}>
                 <TableCell className="font-medium">
                   <div className="flex items-center gap-2">
-                    {member.prospect.name}
+                    <Link
+                      href={`/${orgId}/prospects/${member.prospect.id}`}
+                      className="hover:underline transition-colors"
+                      style={{ color: "var(--gold-primary)" }}
+                    >
+                      {member.prospect.name}
+                    </Link>
                     {member.prospect.linkedin_url && (
                       <a
                         href={member.prospect.linkedin_url}
@@ -134,6 +178,9 @@ export function ListMemberTable({ members }: ListMemberTableProps) {
                   )}
                 </TableCell>
                 <TableCell>
+                  <EnrichmentBadge status={member.prospect.enrichment_status} />
+                </TableCell>
+                <TableCell>
                   <MemberStatusSelect
                     memberId={member.id}
                     currentStatus={member.status}
@@ -170,9 +217,13 @@ export function ListMemberTable({ members }: ListMemberTableProps) {
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium truncate" style={{ color: "var(--text-primary-ds)" }}>
+                    <Link
+                      href={`/${orgId}/prospects/${member.prospect.id}`}
+                      className="text-sm font-medium truncate hover:underline"
+                      style={{ color: "var(--gold-primary)" }}
+                    >
                       {member.prospect.name}
-                    </p>
+                    </Link>
                     {member.prospect.linkedin_url && (
                       <a
                         href={member.prospect.linkedin_url}
@@ -189,6 +240,9 @@ export function ListMemberTable({ members }: ListMemberTableProps) {
                     {member.prospect.title || "—"}
                     {member.prospect.company && ` at ${member.prospect.company}`}
                   </p>
+                  <div className="mt-1">
+                    <EnrichmentBadge status={member.prospect.enrichment_status} />
+                  </div>
                 </div>
                 <span
                   className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase shrink-0"

@@ -149,7 +149,8 @@ export async function getListMembers(listId: string, tenantId: string): Promise<
         location,
         work_email,
         work_phone,
-        linkedin_url
+        linkedin_url,
+        enrichment_status
       )
     `)
     .eq("list_id", listId)
@@ -170,6 +171,7 @@ export async function getListMembers(listId: string, tenantId: string): Promise<
     work_email: string | null;
     work_phone: string | null;
     linkedin_url: string | null;
+    enrichment_status: string | null;
   };
 
   type RawListMember = {
@@ -205,7 +207,8 @@ export async function getListMembers(listId: string, tenantId: string): Promise<
         email: raw.work_email,
         email_status: null,
         phone: raw.work_phone,
-        linkedin_url: raw.linkedin_url
+        linkedin_url: raw.linkedin_url,
+        enrichment_status: raw.enrichment_status
       }
     });
   }
@@ -245,7 +248,8 @@ export async function addProspectToList(
         location,
         work_email,
         work_phone,
-        linkedin_url
+        linkedin_url,
+        enrichment_status
       )
     `)
     .single();
@@ -268,6 +272,7 @@ export async function addProspectToList(
     work_email: string | null;
     work_phone: string | null;
     linkedin_url: string | null;
+    enrichment_status: string | null;
   };
 
   type RawInsertData = {
@@ -304,7 +309,8 @@ export async function addProspectToList(
       email: raw?.work_email ?? null,
       email_status: null,
       phone: raw?.work_phone ?? null,
-      linkedin_url: raw?.linkedin_url ?? null
+      linkedin_url: raw?.linkedin_url ?? null,
+      enrichment_status: raw?.enrichment_status ?? null
     }
   } as ListMember;
 }

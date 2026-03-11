@@ -28,6 +28,7 @@ export interface ListMember {
     email_status: string | null;
     phone: string | null;
     linkedin_url: string | null;
+    enrichment_status: string | null;
   };
 }
 
