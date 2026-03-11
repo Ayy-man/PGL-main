@@ -16,7 +16,7 @@ export function DashboardStatCards({
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
       {/* Total Exports */}
       <Card className="relative overflow-hidden">
-        <CardContent className="pt-6">
+        <CardContent className="p-6">
           <FileDown
             className="h-12 w-12 absolute top-4 right-4"
             style={{ opacity: 0.1, color: "var(--gold-primary)" }}
@@ -49,7 +49,7 @@ export function DashboardStatCards({
 
       {/* Downloads Ready */}
       <Card className="relative overflow-hidden">
-        <CardContent className="pt-6">
+        <CardContent className="p-6">
           <Download
             className="h-12 w-12 absolute top-4 right-4"
             style={{ opacity: 0.1, color: "var(--gold-primary)" }}
@@ -82,7 +82,7 @@ export function DashboardStatCards({
 
       {/* Enrichment Rate */}
       <Card className="relative overflow-hidden">
-        <CardContent className="pt-6">
+        <CardContent className="p-6">
           <Award
             className="h-12 w-12 absolute top-4 right-4"
             style={{ opacity: 0.1, color: "var(--gold-primary)" }}
