@@ -183,33 +183,33 @@ export async function getListMembers(listId: string, tenantId: string): Promise<
     prospects: RawProspect[] | RawProspect;
   };
 
-  return (data || [])
-    .map((item: RawListMember) => {
-      const raw = Array.isArray(item.prospects) ? item.prospects[0] : item.prospects;
-      // Skip members whose prospect was deleted or is inaccessible
-      if (!raw) return null;
-      return {
-        id: item.id,
-        list_id: item.list_id,
-        prospect_id: item.prospect_id,
-        status: item.status,
-        notes: item.notes,
-        added_at: item.created_at,
-        updated_at: item.updated_at,
-        prospect: {
-          id: raw.id,
-          name: raw.full_name,
-          title: raw.title,
-          company: raw.company,
-          location: raw.location,
-          email: raw.work_email,
-          email_status: null,
-          phone: raw.work_phone,
-          linkedin_url: raw.linkedin_url
-        }
-      };
-    })
-    .filter((item): item is ListMember => item !== null);
+  const members: ListMember[] = [];
+  for (const item of (data || []) as RawListMember[]) {
+    const raw = Array.isArray(item.prospects) ? item.prospects[0] : item.prospects;
+    // Skip members whose prospect was deleted or is inaccessible
+    if (!raw) continue;
+    members.push({
+      id: item.id,
+      list_id: item.list_id,
+      prospect_id: item.prospect_id,
+      status: item.status,
+      notes: item.notes,
+      added_at: item.created_at,
+      updated_at: item.updated_at,
+      prospect: {
+        id: raw.id,
+        name: raw.full_name,
+        title: raw.title,
+        company: raw.company,
+        location: raw.location,
+        email: raw.work_email,
+        email_status: null,
+        phone: raw.work_phone,
+        linkedin_url: raw.linkedin_url
+      }
+    });
+  }
+  return members;
 }
 
 export async function addProspectToList(
