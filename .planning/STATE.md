@@ -19,14 +19,14 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** Real estate teams can quickly find and qualify wealthy prospects by searching structured lead databases, enriching profiles with personal contact info and wealth signals, and organizing prospects into actionable lists.
 
-**Current focus:** Phase 19 complete — Admin Automations Dashboard
+**Current focus:** Phase 20 — Platform Pulse Detail Modal
 
 ## Current Position
 
-Phase: 19 of 19 (Admin Automations Dashboard — Inngest Monitoring)
-Plan: 5 of 5 — COMPLETE
-Status: Phase 19 complete — all 5 plans executed, build verified, design system audit passed.
-Last activity: 2026-03-12 — Phase 19 executed. Data foundation, API endpoints, automations page + stat cards + health cards, runs table + detail drawer, build verification.
+Phase: 20 of 20 (Platform Pulse Detail Modal — Expandable Analytics Overlay)
+Plan: 1 of 3 — IN PROGRESS
+Status: Plan 20-01 complete. sourceStats + topTenants added to dashboard API.
+Last activity: 2026-03-12 — Completed 20-01-PLAN.md
 
 Progress: [███████████████████░] 95% (19/20 phases complete)
 
@@ -375,4 +375,4 @@ Stopped at: Phase 19 complete. Phase 18 still planned (not yet executed).
 
 ---
 
-*v2.0 milestone: 19/20 phases complete (6–19, including 14.1). Phase 18 remains.*
+*v2.0 milestone: 19/20 phases complete (6–19, including 14.1). Phases 18 + 20 remain.*
