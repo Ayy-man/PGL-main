@@ -18,7 +18,14 @@ import {
   TrendingDown,
 } from "lucide-react";
 import Image from "next/image";
-import { toggleTenantStatus } from "@/app/actions/admin";
+import { toggleTenantStatus, inviteUser } from "@/app/actions/admin";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { TenantActivityCard } from "@/components/admin/tenant-activity-card";
 import { ThemePicker } from "@/components/ui/theme-picker";
 import { LogoUpload } from "@/components/ui/logo-upload";
@@ -482,10 +489,55 @@ function DrawerHeader({
 
 // ── Seat Utilization Card (Task 4) ───────────────────────────────
 
-function SeatUtilizationCard({ users }: { users: TenantUser[] }) {
+function SeatUtilizationCard({ users, tenantId, onUserInvited }: { users: TenantUser[]; tenantId: string; onUserInvited?: () => void }) {
   const activeCount = users.filter((u) => u.is_active).length;
   const totalCount = users.length;
   const pct = totalCount > 0 ? (activeCount / totalCount) * 100 : 0;
+
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteName, setInviteName] = useState("");
+  const [inviteRole, setInviteRole] = useState<"tenant_admin" | "agent" | "assistant">("agent");
+  const [inviteSubmitting, setInviteSubmitting] = useState(false);
+  const [inviteError, setInviteError] = useState<string | null>(null);
+  const [inviteSuccess, setInviteSuccess] = useState<string | null>(null);
+
+  function resetInviteForm() {
+    setInviteEmail("");
+    setInviteName("");
+    setInviteRole("agent");
+    setInviteError(null);
+    setInviteSuccess(null);
+  }
+
+  async function handleInviteSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setInviteError(null);
+    setInviteSuccess(null);
+    setInviteSubmitting(true);
+
+    try {
+      const formData = new FormData();
+      formData.set("email", inviteEmail);
+      formData.set("full_name", inviteName);
+      formData.set("role", inviteRole);
+      formData.set("tenant_id", tenantId);
+
+      const result = await inviteUser(formData);
+      setInviteSuccess(`Invited ${result.email}`);
+      setInviteEmail("");
+      setInviteName("");
+      onUserInvited?.();
+      setTimeout(() => {
+        setInviteOpen(false);
+        resetInviteForm();
+      }, 1500);
+    } catch (err) {
+      setInviteError(err instanceof Error ? err.message : "Failed to invite user");
+    } finally {
+      setInviteSubmitting(false);
+    }
+  }
 
   return (
     <div className="surface-admin-card rounded-[14px] p-4">
@@ -540,16 +592,97 @@ function SeatUtilizationCard({ users }: { users: TenantUser[] }) {
         ))}
       </div>
       <button
-        className="w-full mt-3 inline-flex h-9 items-center justify-center gap-2 rounded-[8px] text-sm font-medium transition-colors"
+        onClick={() => setInviteOpen(true)}
+        className="w-full mt-3 inline-flex h-9 items-center justify-center gap-2 rounded-[8px] text-sm font-medium transition-colors hover:opacity-80"
         style={{
           border: "1px solid var(--border-gold)",
           color: "var(--gold-primary)",
         }}
-        disabled
       >
         <Users className="h-3.5 w-3.5" />
         Invite User
       </button>
+
+      <Dialog open={inviteOpen} onOpenChange={(isOpen) => { setInviteOpen(isOpen); if (!isOpen) resetInviteForm(); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Invite User to Tenant</DialogTitle>
+            <DialogDescription>
+              Create a new user account and assign them to this tenant.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleInviteSubmit} className="space-y-4">
+            {inviteError && (
+              <div className="rounded-lg bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
+                {inviteError}
+              </div>
+            )}
+            {inviteSuccess && (
+              <div className="rounded-lg px-4 py-3 text-sm" style={{ background: "var(--gold-bg)", color: "var(--gold-primary)", border: "1px solid var(--border-gold)" }}>
+                {inviteSuccess}
+              </div>
+            )}
+            <div className="space-y-1">
+              <label htmlFor="admin-invite-email" className="block text-sm font-medium" style={{ color: "var(--text-primary-ds)" }}>
+                Email <span className="text-destructive">*</span>
+              </label>
+              <input
+                id="admin-invite-email"
+                type="email"
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+                required
+                disabled={inviteSubmitting}
+                placeholder="user@company.com"
+                className="w-full rounded-[8px] border border-[var(--border-default)] bg-[var(--bg-input)] px-3 py-2 text-sm text-[var(--text-primary-ds)] focus:ring-2 focus:ring-[var(--gold-primary)]/50 focus:border-[var(--gold-primary)] outline-none transition-colors disabled:opacity-50 placeholder:opacity-40"
+              />
+            </div>
+            <div className="space-y-1">
+              <label htmlFor="admin-invite-name" className="block text-sm font-medium" style={{ color: "var(--text-primary-ds)" }}>
+                Full Name <span className="text-destructive">*</span>
+              </label>
+              <input
+                id="admin-invite-name"
+                type="text"
+                value={inviteName}
+                onChange={(e) => setInviteName(e.target.value)}
+                required
+                disabled={inviteSubmitting}
+                placeholder="Jane Doe"
+                className="w-full rounded-[8px] border border-[var(--border-default)] bg-[var(--bg-input)] px-3 py-2 text-sm text-[var(--text-primary-ds)] focus:ring-2 focus:ring-[var(--gold-primary)]/50 focus:border-[var(--gold-primary)] outline-none transition-colors disabled:opacity-50 placeholder:opacity-40"
+              />
+            </div>
+            <div className="space-y-1">
+              <label htmlFor="admin-invite-role" className="block text-sm font-medium" style={{ color: "var(--text-primary-ds)" }}>
+                Role
+              </label>
+              <select
+                id="admin-invite-role"
+                value={inviteRole}
+                onChange={(e) => setInviteRole(e.target.value as "tenant_admin" | "agent" | "assistant")}
+                disabled={inviteSubmitting}
+                className="w-full rounded-[8px] border border-[var(--border-default)] bg-[var(--bg-input)] px-3 py-2 text-sm text-[var(--text-primary-ds)] focus:ring-2 focus:ring-[var(--gold-primary)]/50 focus:border-[var(--gold-primary)] outline-none transition-colors disabled:opacity-50"
+              >
+                <option value="tenant_admin">Tenant Admin</option>
+                <option value="agent">Agent</option>
+                <option value="assistant">Assistant</option>
+              </select>
+            </div>
+            <button
+              type="submit"
+              disabled={inviteSubmitting}
+              className="w-full rounded-[8px] border px-4 py-2.5 text-sm font-semibold transition-opacity disabled:opacity-50 mt-2"
+              style={{
+                backgroundColor: "var(--gold-bg-strong)",
+                borderColor: "var(--border-gold)",
+                color: "var(--gold-primary)",
+              }}
+            >
+              {inviteSubmitting ? "Creating User..." : "Create & Invite User"}
+            </button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -938,7 +1071,7 @@ export function TenantDetailDrawer({
             />
 
             {/* Task 4: Seat Utilization */}
-            <SeatUtilizationCard users={users} />
+            <SeatUtilizationCard users={users} tenantId={tenant.id} onUserInvited={() => fetchData(tenant.id)} />
 
             {/* Task 5: Health Score */}
             {health && <HealthScoreCard health={health} />}
