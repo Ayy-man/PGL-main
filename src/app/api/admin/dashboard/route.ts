@@ -19,7 +19,7 @@ export async function GET() {
     const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
 
     // Run all counts in parallel
-    const [totalRes, coverageRes, failedRes, todayActivityRes, weekActivityRes, prospectDailyRes, userDailyRes] =
+    const [totalRes, coverageRes, failedRes, todayActivityRes, weekActivityRes, prospectDailyRes, userDailyRes, sourceStatsRes, topTenantsRes] =
       await Promise.all([
         // Total prospects
         admin
@@ -64,6 +64,20 @@ export async function GET() {
         admin
           .from("activity_log")
           .select("user_id, created_at")
+          .gte("created_at", fourteenDaysAgo),
+
+        // Source stats: enrichment_source_status from prospects (last 14 days)
+        admin
+          .from("prospects")
+          .select("enrichment_source_status")
+          .not("enrichment_source_status", "is", null)
+          .gte("updated_at", fourteenDaysAgo)
+          .limit(10000),
+
+        // Top tenants by activity (last 14 days)
+        admin
+          .from("activity_log")
+          .select("tenant_id")
           .gte("created_at", fourteenDaysAgo),
       ]);
 
@@ -131,6 +145,82 @@ export async function GET() {
     }
     const usersSparkline = dayLabels.map((d) => usersByDay.get(d)?.size ?? 0);
 
+    // --- Source Stats Aggregation ---
+    const SOURCE_DISPLAY: Record<string, string> = {
+      contactout: "ContactOut",
+      exa: "Exa",
+      sec: "SEC EDGAR",
+      edgar: "SEC EDGAR",
+      claude: "Claude AI",
+    };
+    const SOURCE_KEYS = ["contactout", "exa", "sec", "claude"] as const;
+
+    const sourceCounts: Record<string, { success: number; failed: number }> = {};
+    for (const k of SOURCE_KEYS) {
+      sourceCounts[k] = { success: 0, failed: 0 };
+    }
+
+    for (const row of (sourceStatsRes.data ?? []) as { enrichment_source_status: Record<string, unknown> | string | null }[]) {
+      if (!row.enrichment_source_status || typeof row.enrichment_source_status === "string") continue;
+
+      for (const [source, entry] of Object.entries(row.enrichment_source_status)) {
+        const key = source.toLowerCase();
+        // Merge "edgar" key into "sec" bucket (both represent SEC EDGAR)
+        const normalizedKey = key === "edgar" ? "sec" : key;
+        if (!sourceCounts[normalizedKey]) continue;
+
+        let status = "unknown";
+        if (typeof entry === "string") {
+          status = entry;
+        } else if (typeof entry === "object" && entry !== null) {
+          status = (entry as Record<string, unknown>).status as string ?? "unknown";
+        }
+
+        if (status === "complete" || status === "success") {
+          sourceCounts[normalizedKey].success++;
+        } else if (status === "failed" || status === "error") {
+          sourceCounts[normalizedKey].failed++;
+        }
+      }
+    }
+
+    const sourceStats = SOURCE_KEYS.map((key) => {
+      const { success, failed } = sourceCounts[key];
+      const total = success + failed;
+      return {
+        source: SOURCE_DISPLAY[key],
+        key,
+        success,
+        failed,
+        total,
+        successRate: total > 0 ? Math.round((success / total) * 100) : 0,
+      };
+    });
+
+    // --- Top Tenants Aggregation ---
+    const tenantCounts = new Map<string, number>();
+    for (const row of (topTenantsRes.data ?? []) as { tenant_id: string }[]) {
+      if (!row.tenant_id) continue;
+      tenantCounts.set(row.tenant_id, (tenantCounts.get(row.tenant_id) ?? 0) + 1);
+    }
+
+    const topTenantIds = Array.from(tenantCounts.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([id]) => id);
+
+    const { data: tenantNames } = topTenantIds.length > 0
+      ? await admin.from("tenants").select("id, name").in("id", topTenantIds)
+      : { data: [] as { id: string; name: string }[] };
+
+    const nameMap = new Map((tenantNames ?? []).map((t: { id: string; name: string }) => [t.id, t.name]));
+
+    const topTenants = topTenantIds.map((id) => ({
+      tenantId: id,
+      tenantName: nameMap.get(id) ?? "Unknown",
+      activityCount: tenantCounts.get(id) ?? 0,
+    }));
+
     return NextResponse.json({
       totalProspects,
       enrichmentCoverage,
@@ -142,6 +232,8 @@ export async function GET() {
         prospects: prospectsSparkline,
         users: usersSparkline,
       },
+      sourceStats,
+      topTenants,
     });
   } catch (error) {
     console.error("Dashboard API error:", error);
