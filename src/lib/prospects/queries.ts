@@ -48,7 +48,6 @@ export async function upsertProspect(
     apollo_id: input.apollo_id,
     first_name: input.first_name,
     last_name: input.last_name,
-    full_name: `${input.first_name} ${input.last_name}`.trim(),
     title: input.title,
     company: input.company,
     location: input.location,
