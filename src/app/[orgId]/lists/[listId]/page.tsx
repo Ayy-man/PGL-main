@@ -35,8 +35,8 @@ export default async function ListDetailPage({ params }: PageProps) {
       getListMembers(listId, tenantId)
     ]);
   } catch (error) {
-    console.error("[ListDetailPage] Failed to load list data:", error);
-    notFound();
+    console.error("[ListDetailPage] Failed to load list data:", { listId, tenantId, error });
+    throw error; // Surface real errors to error boundary instead of masking as 404
   }
 
   if (!list) {

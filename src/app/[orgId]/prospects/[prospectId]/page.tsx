@@ -79,18 +79,34 @@ export default async function ProspectProfilePage({
     .eq("id", prospectId)
     .single();
 
-  if (prospectError || !prospect) {
+  if (prospectError) {
+    // PGRST116 = "JSON object requested, multiple (or no) rows returned" → genuine not found
+    if (prospectError.code === "PGRST116") {
+      return notFound();
+    }
+    // Any other error (missing column, RLS, network) — surface it instead of masking as 404
+    console.error("[ProspectProfile] Supabase query error:", {
+      code: prospectError.code,
+      message: prospectError.message,
+      details: prospectError.details,
+      hint: prospectError.hint,
+      prospectId,
+    });
+    throw new Error(`Failed to load prospect: ${prospectError.message}`);
+  }
+
+  if (!prospect) {
     return notFound();
   }
 
-  // Log activity: profile_viewed
-  await logActivity({
+  // Log activity: profile_viewed (fire-and-forget, don't block render)
+  logActivity({
     tenantId,
     userId: user.id,
     actionType: "profile_viewed",
     targetType: "prospect",
     targetId: prospectId,
-  });
+  }).catch((err) => console.error("[ProspectProfile] logActivity failed:", err));
 
   // Check if enrichment needed (missing data or stale >7 days)
   const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
