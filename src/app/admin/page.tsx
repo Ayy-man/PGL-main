@@ -8,6 +8,7 @@ import { ApiQuotaCard } from "@/components/admin/api-quota-card";
 import { ExportActivityChart } from "@/components/admin/export-activity-chart";
 import { ErrorFeed } from "@/components/admin/error-feed";
 import { SystemActions } from "@/components/admin/system-actions";
+import { PlatformPulseModal } from "@/components/admin/platform-pulse-modal";
 import { RefreshCw } from "lucide-react";
 
 // --- Types ---
@@ -120,6 +121,9 @@ export default function AdminDashboard() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [errorPage, setErrorPage] = useState(1);
   const [secondsAgo, setSecondsAgo] = useState(0);
+  const [pulseModalOpen, setPulseModalOpen] = useState(false);
+  const [sourceStats, setSourceStats] = useState<Array<{ source: string; key: string; success: number; failed: number; total: number; successRate: number }>>([]);
+  const [topTenants, setTopTenants] = useState<Array<{ tenantId: string; tenantName: string; activityCount: number }>>([]);
 
   const errorPageRef = useRef(errorPage);
   errorPageRef.current = errorPage;
@@ -150,6 +154,8 @@ export default function AdminDashboard() {
       ]);
 
       if (pulse) setPulseData(pulse);
+      if (pulse?.sourceStats) setSourceStats(pulse.sourceStats);
+      if (pulse?.topTenants) setTopTenants(pulse.topTenants);
       if (heatmap) setHeatmapData(heatmap);
       if (quota) setQuotaData(quota);
       setEnrichmentData(enrichment?.data ?? []);
@@ -238,7 +244,7 @@ export default function AdminDashboard() {
 
       {/* Section 1: 4-column stat cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
-        <PlatformPulse data={pulseData} quotaData={quotaData} />
+        <PlatformPulse data={pulseData} quotaData={quotaData} onOpenDetail={() => setPulseModalOpen(true)} />
         <EnrichmentHealthChart data={enrichmentData} />
         <ApiQuotaCard data={quotaData} />
         <ExportActivityChart data={heatmapData} />
@@ -252,6 +258,15 @@ export default function AdminDashboard() {
         <ErrorFeed data={errorData} onPageChange={handleErrorPageChange} />
         <SystemActions />
       </div>
+
+      {/* Platform Pulse Detail Modal */}
+      <PlatformPulseModal
+        open={pulseModalOpen}
+        onOpenChange={setPulseModalOpen}
+        data={pulseData}
+        sourceStats={sourceStats}
+        topTenants={topTenants}
+      />
     </div>
   );
 }

@@ -18,6 +18,7 @@ interface PlatformPulseProps {
     sparklines?: SparklineData;
   } | null;
   quotaData?: { totals: Record<string, number>; days: number } | null;
+  onOpenDetail?: () => void;
 }
 
 /**
@@ -91,7 +92,7 @@ function Sparkline({
   );
 }
 
-export function PlatformPulse({ data }: PlatformPulseProps) {
+export function PlatformPulse({ data, onOpenDetail }: PlatformPulseProps) {
   if (data === null) {
     return (
       <div className="surface-admin-card rounded-[14px] p-6 animate-pulse">
@@ -156,7 +157,18 @@ export function PlatformPulse({ data }: PlatformPulseProps) {
   ];
 
   return (
-    <div className="surface-admin-card rounded-[14px] p-6 relative overflow-hidden group">
+    <div
+      className="surface-admin-card rounded-[14px] p-6 relative overflow-hidden group cursor-pointer"
+      role="button"
+      tabIndex={0}
+      onClick={onOpenDetail}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onOpenDetail?.();
+        }
+      }}
+    >
       {/* Decorative background icon */}
       <div className="absolute top-0 right-0 p-4 pointer-events-none opacity-[0.05] group-hover:opacity-[0.10] transition-opacity">
         <Activity className="h-20 w-20" style={{ color: "var(--gold-primary)" }} />
