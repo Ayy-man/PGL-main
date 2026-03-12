@@ -212,7 +212,7 @@ export function ProfileView({
         <div className="lg:col-span-3 flex flex-col gap-6">
           {/* Profile Card */}
           <ProfileHeader
-            prospect={prospect}
+            prospect={{ ...prospect, enrichment_status: prospect.enrichment_status ?? "none" }}
             enrichmentSourceStatus={enrichmentSourceStatus}
             isStale={isStale}
             orgId={orgId}
