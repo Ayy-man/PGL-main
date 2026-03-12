@@ -156,12 +156,13 @@ export const aggregateDailyMetrics = inngest.createFunction(
       const durationMs = Date.now() - new Date(startDate).getTime();
 
       // Log to activity_log for automations dashboard
+      // Use nil UUIDs for system-initiated cron (activity_log columns are UUID type)
+      const SYSTEM_UUID = "00000000-0000-0000-0000-000000000000";
       await logActivity({
-        tenantId: "system",
-        userId: "system",
+        tenantId: SYSTEM_UUID,
+        userId: SYSTEM_UUID,
         actionType: "metrics_aggregated",
         targetType: "usage_metrics_daily",
-        targetId: dateString,
         metadata: {
           date: dateString,
           rowsUpserted: result.rowsUpserted,
