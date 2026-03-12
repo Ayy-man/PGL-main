@@ -16,8 +16,10 @@ export async function GET() {
 
     const admin = createAdminClient();
 
+    const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
+
     // Run all counts in parallel
-    const [totalRes, coverageRes, failedRes, todayActivityRes, weekActivityRes] =
+    const [totalRes, coverageRes, failedRes, todayActivityRes, weekActivityRes, prospectDailyRes, userDailyRes] =
       await Promise.all([
         // Total prospects
         admin
@@ -50,6 +52,19 @@ export async function GET() {
             "created_at",
             new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
           ),
+
+        // Prospects created per day (last 14 days) for sparkline
+        admin
+          .from("prospects")
+          .select("created_at")
+          .gte("created_at", fourteenDaysAgo)
+          .order("created_at", { ascending: true }),
+
+        // Active users per day (last 14 days) for sparkline
+        admin
+          .from("activity_log")
+          .select("user_id, created_at")
+          .gte("created_at", fourteenDaysAgo),
       ]);
 
     const totalProspects = totalRes.count ?? 0;
@@ -84,12 +99,49 @@ export async function GET() {
           )
         : 0;
 
+    // Build 14-day sparkline arrays (one value per day)
+    const today = new Date();
+    const dayLabels: string[] = [];
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      dayLabels.push(d.toISOString().slice(0, 10));
+    }
+
+    // Prospects created per day
+    const prospectsByDay = new Map<string, number>();
+    for (const label of dayLabels) prospectsByDay.set(label, 0);
+    for (const row of prospectDailyRes.data ?? []) {
+      const day = (row as { created_at: string }).created_at.slice(0, 10);
+      if (prospectsByDay.has(day)) {
+        prospectsByDay.set(day, (prospectsByDay.get(day) ?? 0) + 1);
+      }
+    }
+    const prospectsSparkline = dayLabels.map((d) => prospectsByDay.get(d) ?? 0);
+
+    // Distinct active users per day
+    const usersByDay = new Map<string, Set<string>>();
+    for (const label of dayLabels) usersByDay.set(label, new Set());
+    for (const row of userDailyRes.data ?? []) {
+      const r = row as { user_id: string; created_at: string };
+      const day = r.created_at.slice(0, 10);
+      if (usersByDay.has(day)) {
+        usersByDay.get(day)!.add(r.user_id);
+      }
+    }
+    const usersSparkline = dayLabels.map((d) => usersByDay.get(d)?.size ?? 0);
+
     return NextResponse.json({
       totalProspects,
       enrichmentCoverage,
       enrichmentFailed,
       activeUsersToday,
       activeUsers7dAvg,
+      sparklines: {
+        days: dayLabels,
+        prospects: prospectsSparkline,
+        users: usersSparkline,
+      },
     });
   } catch (error) {
     console.error("Dashboard API error:", error);
