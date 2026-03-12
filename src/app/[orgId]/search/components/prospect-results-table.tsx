@@ -200,28 +200,41 @@ export function ProspectResultsTable({
 
                   {/* Enrichment status dots */}
                   <td className="whitespace-nowrap px-3 py-4 text-sm">
-                    <div className="flex items-center gap-2">
-                      <div className="flex gap-1">
-                        <span
-                          className="h-2.5 w-2.5 rounded-full"
-                          style={{ background: "rgba(255,255,255,0.15)" }}
-                        />
-                        <span
-                          className="h-2.5 w-2.5 rounded-full"
-                          style={{ background: "rgba(255,255,255,0.15)" }}
-                        />
-                        <span
-                          className="h-2.5 w-2.5 rounded-full"
-                          style={{ background: "rgba(255,255,255,0.15)" }}
-                        />
-                      </div>
+                    {prospect._enriched === false ? (
                       <span
-                        className="text-[11px] ml-1"
-                        style={{ color: "var(--text-ghost)" }}
+                        className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-medium"
+                        style={{
+                          background: "rgba(245,158,11,0.15)",
+                          color: "rgb(245,158,11)",
+                          border: "1px solid rgba(245,158,11,0.3)",
+                        }}
                       >
-                        Not enriched
+                        Preview Only
                       </span>
-                    </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <div className="flex gap-1">
+                          <span
+                            className="h-2.5 w-2.5 rounded-full"
+                            style={{ background: "rgba(255,255,255,0.15)" }}
+                          />
+                          <span
+                            className="h-2.5 w-2.5 rounded-full"
+                            style={{ background: "rgba(255,255,255,0.15)" }}
+                          />
+                          <span
+                            className="h-2.5 w-2.5 rounded-full"
+                            style={{ background: "rgba(255,255,255,0.15)" }}
+                          />
+                        </div>
+                        <span
+                          className="text-[11px] ml-1"
+                          style={{ color: "var(--text-ghost)" }}
+                        >
+                          Not enriched
+                        </span>
+                      </div>
+                    )}
                   </td>
 
                   {/* Actions — visible on hover */}
@@ -293,6 +306,18 @@ export function ProspectResultsTable({
                       <MapPin className="h-3 w-3 shrink-0" />
                       {location}
                     </p>
+                  )}
+                  {prospect._enriched === false && (
+                    <span
+                      className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium mt-1"
+                      style={{
+                        background: "rgba(245,158,11,0.15)",
+                        color: "rgb(245,158,11)",
+                        border: "1px solid rgba(245,158,11,0.3)",
+                      }}
+                    >
+                      Preview Only
+                    </span>
                   )}
                 </div>
                 <span className="text-[11px] shrink-0" style={{ color: "var(--text-ghost)" }}>—</span>

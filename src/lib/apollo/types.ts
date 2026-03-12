@@ -100,6 +100,7 @@ export interface ApolloPerson {
     estimated_num_employees?: number;
     founded_year?: number;
   };
+  _enriched?: boolean;
 }
 
 /**

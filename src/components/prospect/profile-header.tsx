@@ -4,7 +4,6 @@ import {
   Mail,
   Phone,
   Linkedin,
-  Globe,
   Building2,
   Sparkles,
   Plus,
@@ -296,21 +295,6 @@ export function ProfileHeader({
             <Linkedin className="h-5 w-5" />
           </a>
         )}
-        <button
-          className="transition-colors cursor-pointer"
-          style={{ color: "var(--text-tertiary)" }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.color =
-              "var(--gold-primary)";
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.color =
-              "var(--text-tertiary)";
-          }}
-          aria-label="Website"
-        >
-          <Globe className="h-5 w-5" />
-        </button>
       </div>
     </div>
   );

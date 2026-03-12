@@ -130,6 +130,17 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
   // ----------------------------------------------------------------
   const handleBulkAddToList = () => {
     if (selectedIds.size === 0) return;
+    const selected = results.filter((r) => selectedIds.has(r.id));
+    const allUnenriched = selected.every((p) => p._enriched === false);
+    if (allUnenriched) {
+      toast({
+        title: "Enrichment required",
+        description:
+          "All selected prospects are preview-only. Enrichment is required before adding to a list.",
+        variant: "destructive",
+      });
+      return;
+    }
     setBulkMode("add");
     setBulkSelectedListIds([]);
     setBulkListDialogOpen(true);
@@ -188,7 +199,24 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
   const handleBulkListSubmit = async () => {
     if (bulkSelectedListIds.length === 0 || selectedIds.size === 0) return;
     setIsBulkSubmitting(true);
-    const selectedProspects = results.filter((r) => selectedIds.has(r.id));
+    const allSelected = results.filter((r) => selectedIds.has(r.id));
+    const skippedCount = allSelected.filter((p) => p._enriched === false).length;
+    const selectedProspects = allSelected.filter((p) => p._enriched !== false);
+
+    if (skippedCount > 0) {
+      toast({
+        title: "Preview-only prospects skipped",
+        description: `${skippedCount} prospect${skippedCount !== 1 ? "s" : ""} skipped because they need enrichment first.`,
+        variant: "destructive",
+      });
+    }
+
+    if (selectedProspects.length === 0) {
+      setIsBulkSubmitting(false);
+      setBulkListDialogOpen(false);
+      return;
+    }
+
     let successCount = 0;
     let failCount = 0;
     const upsertedProspectIds: string[] = [];

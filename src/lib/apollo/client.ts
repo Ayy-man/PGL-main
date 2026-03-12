@@ -199,6 +199,7 @@ export async function searchApollo(
       const apolloIds = searchPeople.map((p) => p.id);
       try {
         enrichedPeople = await bulkEnrichPeople(apolloIds);
+        enrichedPeople = enrichedPeople.map(p => ({ ...p, _enriched: true }));
         console.info(`[searchApollo] Enriched ${enrichedPeople.length} people`);
       } catch (enrichErr) {
         console.error("[searchApollo] Bulk enrich failed, falling back to search previews:", enrichErr);
@@ -210,6 +211,7 @@ export async function searchApollo(
           name: `${p.first_name} ${p.last_name_obfuscated || ""}`.trim(),
           title: p.title || "",
           organization_name: p.organization?.name,
+          _enriched: false,
         }));
       }
     }

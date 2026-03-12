@@ -68,6 +68,14 @@ export async function POST(request: Request) {
 
     const { prospect, listIds } = parseResult.data;
 
+    // Guard: reject obfuscated/preview-only names (Apollo search previews contain ***)
+    if (prospect.last_name.includes('***') || prospect.name.includes('***')) {
+      return NextResponse.json(
+        { error: "Cannot save preview-only prospect. Enrichment required." },
+        { status: 400 }
+      );
+    }
+
     // 4. Upsert prospect from Apollo data
     const upsertedProspect = await upsertProspectFromApollo(
       tenantId,

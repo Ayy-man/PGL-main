@@ -156,6 +156,12 @@ export default async function ProspectProfilePage({
     .order("created_at", { ascending: false })
     .limit(20);
 
+  // Fetch all available lists for this tenant (for "Add to List" dialog)
+  const { data: allLists } = await supabase
+    .from("lists")
+    .select("id, name, description, member_count")
+    .order("name", { ascending: true });
+
   return (
     <ProfileView
       prospect={prospect}
@@ -164,6 +170,7 @@ export default async function ProspectProfilePage({
       isStale={isStale}
       orgId={orgId}
       activityEntries={activityEntries ?? []}
+      allLists={allLists ?? []}
     />
   );
 }

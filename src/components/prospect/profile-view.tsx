@@ -15,6 +15,7 @@ import { ActivityTimeline } from "./activity-timeline";
 import { WealthSignals } from "./wealth-signals";
 import { LookalikeDiscovery } from "./lookalike-discovery";
 import { useToast } from "@/hooks/use-toast";
+import { AddToListDialogProfile } from "./add-to-list-dialog-profile";
 
 type SourceStatus =
   | "pending"
@@ -99,6 +100,12 @@ interface ProfileViewProps {
     created_at: string;
     metadata?: Record<string, unknown>;
   }>;
+  allLists: Array<{
+    id: string;
+    name: string;
+    description: string | null;
+    member_count: number;
+  }>;
 }
 
 /**
@@ -118,11 +125,13 @@ export function ProfileView({
   isStale,
   orgId,
   activityEntries,
+  allLists,
 }: ProfileViewProps) {
   const [showLookalikes, setShowLookalikes] = useState(false);
   const [noteText, setNoteText] = useState(prospect.notes ?? "");
   const [isSavingNote, setIsSavingNote] = useState(false);
   const [lastSavedNote, setLastSavedNote] = useState(prospect.notes ?? "");
+  const [addToListOpen, setAddToListOpen] = useState(false);
   const { toast } = useToast();
 
   const noteHasChanged = noteText !== lastSavedNote;
@@ -217,9 +226,15 @@ export function ProfileView({
             isStale={isStale}
             orgId={orgId}
             onFindLookalikes={() => setShowLookalikes((prev) => !prev)}
-            onAddToList={() => {
-              console.log("Add to list triggered");
-            }}
+            onAddToList={() => setAddToListOpen(true)}
+          />
+          <AddToListDialogProfile
+            prospectId={prospect.id}
+            prospectName={prospect.full_name}
+            lists={allLists}
+            orgId={orgId}
+            open={addToListOpen}
+            onOpenChange={setAddToListOpen}
           />
 
           {/* Verified Contact */}
