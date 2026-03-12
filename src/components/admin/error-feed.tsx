@@ -1,6 +1,6 @@
 "use client";
 
-import { XCircle } from "lucide-react";
+import { XCircle, AlertTriangle } from "lucide-react";
 
 interface SourceDetail {
   status: string;
@@ -10,11 +10,17 @@ interface SourceDetail {
 
 interface ErrorRecord {
   id: string;
+  type?: "enrichment" | "api";
   fullName: string;
   tenantName: string;
   tenantId: string;
-  enrichmentStatus: string;
-  sourceDetails: Record<string, SourceDetail>;
+  enrichmentStatus?: string;
+  sourceDetails?: Record<string, SourceDetail>;
+  route?: string;
+  method?: string;
+  statusCode?: number;
+  errorMessage?: string;
+  errorCode?: string | null;
   updatedAt: string;
 }
 
@@ -47,8 +53,8 @@ function formatRelativeTime(dateStr: string): string {
   });
 }
 
-function ErrorEntry({ record }: { record: ErrorRecord }) {
-  const failedSources = Object.entries(record.sourceDetails)
+function EnrichmentErrorEntry({ record }: { record: ErrorRecord }) {
+  const failedSources = Object.entries(record.sourceDetails ?? {})
     .filter(([, d]) => d.status === "failed")
     .map(([k]) => k);
 
@@ -57,7 +63,6 @@ function ErrorEntry({ record }: { record: ErrorRecord }) {
       className="entry-hover flex gap-4 p-4 cursor-pointer"
       style={{ borderBottom: "1px solid var(--border-subtle)" }}
     >
-      {/* Severity icon */}
       <div className="mt-0.5 shrink-0">
         <div
           className="p-1.5 rounded"
@@ -66,7 +71,6 @@ function ErrorEntry({ record }: { record: ErrorRecord }) {
           <XCircle className="h-4 w-4" />
         </div>
       </div>
-      {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-start">
           <p className="text-sm font-medium" style={{ color: "var(--text-primary-ds)" }}>
@@ -86,6 +90,63 @@ function ErrorEntry({ record }: { record: ErrorRecord }) {
       </div>
     </div>
   );
+}
+
+function ApiErrorEntry({ record }: { record: ErrorRecord }) {
+  // Truncate long error messages for the feed
+  const shortMsg =
+    record.errorMessage && record.errorMessage.length > 120
+      ? record.errorMessage.slice(0, 120) + "..."
+      : record.errorMessage;
+
+  return (
+    <div
+      className="entry-hover flex gap-4 p-4 cursor-pointer"
+      style={{ borderBottom: "1px solid var(--border-subtle)" }}
+    >
+      <div className="mt-0.5 shrink-0">
+        <div
+          className="p-1.5 rounded"
+          style={{ color: "oklch(0.75 0.15 55)", background: "rgba(245,158,11,0.1)" }}
+        >
+          <AlertTriangle className="h-4 w-4" />
+        </div>
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex justify-between items-start">
+          <p className="text-sm font-medium" style={{ color: "var(--text-primary-ds)" }}>
+            <span
+              className="inline-block text-[10px] font-mono px-1.5 py-0.5 rounded mr-2"
+              style={{ background: "rgba(239,68,68,0.15)", color: "oklch(0.62 0.19 22)" }}
+            >
+              {record.statusCode}
+            </span>
+            {record.method} {record.route}
+          </p>
+          <span
+            className="text-[10px] whitespace-nowrap ml-2"
+            style={{ color: "var(--text-ghost)" }}
+          >
+            {formatRelativeTime(record.updatedAt)}
+          </span>
+        </div>
+        <p
+          className="text-xs mt-0.5 truncate"
+          style={{ color: "var(--admin-text-secondary)" }}
+        >
+          {record.tenantName !== "System" ? `Tenant: ${record.tenantName} · ` : ""}
+          {shortMsg}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function ErrorEntry({ record }: { record: ErrorRecord }) {
+  if (record.type === "api") {
+    return <ApiErrorEntry record={record} />;
+  }
+  return <EnrichmentErrorEntry record={record} />;
 }
 
 function SkeletonEntry() {
@@ -109,7 +170,6 @@ export function ErrorFeed({ data, onPageChange }: ErrorFeedProps) {
   if (data === null) {
     return (
       <div className="surface-admin-card rounded-[14px] overflow-hidden flex flex-col h-full">
-        {/* Header */}
         <div
           className="p-5 flex justify-between items-center"
           style={{ borderBottom: "1px solid var(--border-subtle)" }}
@@ -137,7 +197,6 @@ export function ErrorFeed({ data, onPageChange }: ErrorFeedProps) {
             </span>
           </div>
         </div>
-        {/* Skeleton entries */}
         <div className="flex-1 overflow-y-auto max-h-[300px]">
           {Array.from({ length: 3 }).map((_, i) => (
             <SkeletonEntry key={i} />
@@ -151,7 +210,6 @@ export function ErrorFeed({ data, onPageChange }: ErrorFeedProps) {
 
   return (
     <div className="surface-admin-card rounded-[14px] overflow-hidden flex flex-col h-full">
-      {/* Header */}
       <div
         className="p-5 flex justify-between items-center"
         style={{ borderBottom: "1px solid var(--border-subtle)" }}
@@ -180,12 +238,11 @@ export function ErrorFeed({ data, onPageChange }: ErrorFeedProps) {
         </div>
       </div>
 
-      {/* Error entries — scrollable */}
       <div className="flex-1 overflow-y-auto max-h-[300px]">
         {data.data.length === 0 ? (
           <div className="flex items-center justify-center h-full py-12">
             <p className="text-sm" style={{ color: "var(--admin-text-secondary)" }}>
-              No failed enrichments found.
+              No errors in the last 7 days.
             </p>
           </div>
         ) : (
@@ -195,7 +252,6 @@ export function ErrorFeed({ data, onPageChange }: ErrorFeedProps) {
         )}
       </div>
 
-      {/* Pagination footer */}
       {totalPages > 1 && (
         <div
           className="p-4 flex items-center justify-between text-xs"

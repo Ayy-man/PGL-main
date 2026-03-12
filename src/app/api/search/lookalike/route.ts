@@ -5,6 +5,7 @@ import { generateLookalikePersona } from "@/lib/enrichment/lookalike";
 import type { ApolloFilters } from "@/lib/enrichment/lookalike";
 import { searchApollo } from "@/lib/apollo/client";
 import { logActivity } from "@/lib/activity-logger";
+import { logError } from "@/lib/error-logger";
 import type { PersonaFilters } from "@/lib/personas/types";
 
 export const dynamic = "force-dynamic";
@@ -202,6 +203,12 @@ export async function POST(request: NextRequest) {
     );
   } catch (error) {
     console.error("Error in lookalike search:", error);
+    logError({
+      route: "/api/search/lookalike",
+      method: "POST",
+      statusCode: 500,
+      errorMessage: error instanceof Error ? error.message : String(error),
+    });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { upsertProspectFromApollo } from "@/lib/prospects/queries";
 import { addProspectToList } from "@/lib/lists/queries";
+import { logError } from "@/lib/error-logger";
 import { z } from "zod";
 import type { ApolloPerson } from "@/lib/apollo/types";
 
@@ -34,6 +35,9 @@ const upsertRequestSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  let tenantId: string | undefined;
+  let userId: string | undefined;
+
   try {
     // 1. Authenticate user
     const supabase = await createClient();
@@ -46,8 +50,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    userId = user.id;
+
     // 2. Extract tenant_id from session app_metadata
-    const tenantId = user.app_metadata?.tenant_id as string | undefined;
+    tenantId = user.app_metadata?.tenant_id as string | undefined;
     if (!tenantId) {
       return NextResponse.json(
         { error: "Tenant ID not found in session" },
@@ -70,14 +76,14 @@ export async function POST(request: Request) {
 
     // 4. Upsert prospect from Apollo data
     const upsertedProspect = await upsertProspectFromApollo(
-      tenantId,
+      tenantId!,
       prospect as ApolloPerson
     );
 
     // 5. Add prospect to all selected lists (idempotent)
     const addResults = await Promise.allSettled(
       listIds.map((listId) =>
-        addProspectToList(listId, upsertedProspect.id, tenantId, user.id)
+        addProspectToList(listId, upsertedProspect.id, tenantId!, userId!)
       )
     );
 
@@ -101,6 +107,15 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("Error upserting prospect:", error);
+    logError({
+      route: "/api/prospects/upsert",
+      method: "POST",
+      statusCode: 500,
+      errorMessage: error instanceof Error ? error.message : String(error),
+      errorCode: (error as Record<string, unknown>)?.code as string | undefined,
+      tenantId,
+      userId,
+    });
     return NextResponse.json(
       {
         error: "Internal server error",

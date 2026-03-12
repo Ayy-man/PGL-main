@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { inngest } from "@/inngest/client";
+import { logError } from "@/lib/error-logger";
 
 /**
  * POST /api/prospects/[prospectId]/enrich
@@ -151,6 +152,12 @@ export async function POST(
     );
   } catch (error) {
     console.error("Enrichment trigger error:", error);
+    logError({
+      route: "/api/prospects/[prospectId]/enrich",
+      method: "POST",
+      statusCode: 500,
+      errorMessage: error instanceof Error ? error.message : String(error),
+    });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

@@ -18,9 +18,39 @@ interface ProspectRow {
   tenant_id: string | null;
 }
 
+interface ErrorLogRow {
+  id: string;
+  route: string;
+  method: string;
+  status_code: number;
+  error_message: string;
+  error_code: string | null;
+  tenant_id: string | null;
+  user_id: string | null;
+  metadata: Record<string, unknown> | null;
+  created_at: string;
+}
+
 interface TenantRow {
   id: string;
   name: string;
+}
+
+// Unified error record returned to the frontend
+interface UnifiedError {
+  id: string;
+  type: "enrichment" | "api";
+  fullName: string;
+  tenantName: string;
+  tenantId: string | null;
+  enrichmentStatus?: string | null;
+  sourceDetails?: Record<string, { status: string; error?: string; at?: string }>;
+  route?: string;
+  method?: string;
+  statusCode?: number;
+  errorMessage?: string;
+  errorCode?: string | null;
+  updatedAt: string | null;
 }
 
 function normalizeSourceDetails(
@@ -29,14 +59,12 @@ function normalizeSourceDetails(
   if (!raw) return {};
 
   if (typeof raw === "string") {
-    // Legacy: plain string entry — treat as unknown source status
     return {};
   }
 
   const result: Record<string, { status: string; error?: string; at?: string }> = {};
   for (const [source, entry] of Object.entries(raw)) {
     if (typeof entry === "string") {
-      // Backward compat: "complete" | "failed" as plain string value
       result[source] = { status: entry };
     } else if (typeof entry === "object" && entry !== null) {
       const e = entry as Record<string, unknown>;
@@ -70,81 +98,103 @@ export async function GET(request: NextRequest) {
 
     const cutoff = new Date();
     cutoff.setDate(cutoff.getDate() - ERROR_WINDOW_DAYS);
+    const cutoffISO = cutoff.toISOString();
 
     const admin = createAdminClient();
 
-    // Count total failed prospects in window (for pagination metadata)
-    const { count: totalCount, error: countError } = await admin
-      .from("prospects")
-      .select("*", { count: "exact", head: true })
-      .eq("enrichment_status", "failed")
-      .gte("updated_at", cutoff.toISOString());
+    // Fetch both sources in parallel
+    const [enrichmentResult, apiErrorResult] = await Promise.all([
+      // Source 1: Enrichment failures from prospects table
+      admin
+        .from("prospects")
+        .select(
+          "id, full_name, enrichment_status, enrichment_source_status, updated_at, tenant_id"
+        )
+        .eq("enrichment_status", "failed")
+        .gte("updated_at", cutoffISO)
+        .order("updated_at", { ascending: false })
+        .limit(200),
 
-    if (countError) {
-      throw new Error(`Count query failed: ${countError.message}`);
+      // Source 2: API errors from error_log table
+      admin
+        .from("error_log")
+        .select("*")
+        .gte("created_at", cutoffISO)
+        .order("created_at", { ascending: false })
+        .limit(200),
+    ]);
+
+    if (enrichmentResult.error) {
+      throw new Error(`Enrichment query failed: ${enrichmentResult.error.message}`);
     }
 
-    const total = totalCount ?? 0;
+    // error_log table may not exist yet — gracefully handle
+    const apiErrors: ErrorLogRow[] =
+      apiErrorResult.error ? [] : (apiErrorResult.data as ErrorLogRow[]) ?? [];
+    const prospects = (enrichmentResult.data as ProspectRow[]) ?? [];
 
-    // Paginated query for failed prospects
-    const rangeFrom = (page - 1) * limit;
-    const rangeTo = rangeFrom + limit - 1;
+    // Collect all tenant IDs for name lookup
+    const tenantIds = Array.from(
+      new Set([
+        ...prospects.map((p) => p.tenant_id).filter((id): id is string => id != null),
+        ...apiErrors.map((e) => e.tenant_id).filter((id): id is string => id != null),
+      ])
+    );
 
-    const { data: prospects, error: prospectsError } = await admin
-      .from("prospects")
-      .select(
-        "id, full_name, enrichment_status, enrichment_source_status, updated_at, tenant_id"
-      )
-      .eq("enrichment_status", "failed")
-      .gte("updated_at", cutoff.toISOString())
-      .order("updated_at", { ascending: false })
-      .range(rangeFrom, rangeTo);
-
-    if (prospectsError) {
-      throw new Error(`Prospects query failed: ${prospectsError.message}`);
-    }
-
-    if (!prospects || prospects.length === 0) {
-      return NextResponse.json({ data: [], total, page, limit });
-    }
-
-    // Collect distinct tenant IDs from result set
-    const tenantIds = Array.from(new Set(
-      (prospects as ProspectRow[])
-        .map((p) => p.tenant_id)
-        .filter((id): id is string => id != null)
-    ));
-
-    // Fetch tenant names
-    const { data: tenants, error: tenantsError } =
+    const { data: tenants } =
       tenantIds.length > 0
-        ? await admin
-            .from("tenants")
-            .select("id, name")
-            .in("id", tenantIds)
-        : { data: [], error: null };
+        ? await admin.from("tenants").select("id, name").in("id", tenantIds)
+        : { data: [] };
 
-    if (tenantsError) {
-      throw new Error(`Tenants query failed: ${tenantsError.message}`);
-    }
-
-    // Build lookup maps
     const tenantMap = new Map<string, string>(
       (tenants ?? []).map((t: TenantRow) => [t.id, t.name])
     );
 
-    // Assemble response
-    const data = (prospects as ProspectRow[]).map((p) => ({
-      id: p.id,
-      fullName: p.full_name ?? "Unknown",
-      tenantName: p.tenant_id ? (tenantMap.get(p.tenant_id) ?? "Unknown") : "Unknown",
-      tenantId: p.tenant_id,
-      enrichmentStatus: p.enrichment_status,
-      sourceDetails: normalizeSourceDetails(p.enrichment_source_status),
-      updatedAt: p.updated_at,
-    }));
+    // Merge into unified list sorted by time descending
+    const unified: UnifiedError[] = [];
 
-    return NextResponse.json({ data, total, page, limit });
+    for (const p of prospects) {
+      unified.push({
+        id: p.id,
+        type: "enrichment",
+        fullName: p.full_name ?? "Unknown",
+        tenantName: p.tenant_id ? (tenantMap.get(p.tenant_id) ?? "Unknown") : "Unknown",
+        tenantId: p.tenant_id,
+        enrichmentStatus: p.enrichment_status,
+        sourceDetails: normalizeSourceDetails(p.enrichment_source_status),
+        updatedAt: p.updated_at,
+      });
+    }
+
+    for (const e of apiErrors) {
+      unified.push({
+        id: e.id,
+        type: "api",
+        fullName: `API ${e.status_code}`,
+        tenantName: e.tenant_id ? (tenantMap.get(e.tenant_id) ?? "Unknown") : "System",
+        tenantId: e.tenant_id,
+        route: e.route,
+        method: e.method,
+        statusCode: e.status_code,
+        errorMessage: e.error_message,
+        errorCode: e.error_code,
+        updatedAt: e.created_at,
+      });
+    }
+
+    // Sort by time descending
+    unified.sort((a, b) => {
+      const ta = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
+      const tb = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
+      return tb - ta;
+    });
+
+    // Paginate
+    const total = unified.length;
+    const rangeFrom = (page - 1) * limit;
+    const paged = unified.slice(rangeFrom, rangeFrom + limit);
+
+    return NextResponse.json({ data: paged, total, page, limit });
   } catch (error) {
     console.error("Errors API error:", error);
     return NextResponse.json(

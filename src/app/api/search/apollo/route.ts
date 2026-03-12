@@ -7,6 +7,7 @@ import {
   ApolloApiError,
 } from "@/lib/apollo/client";
 import { getPersonaById, updatePersonaLastUsed } from "@/lib/personas/queries";
+import { logError } from "@/lib/error-logger";
 import type { PersonaFilters } from "@/lib/personas/types";
 
 export const dynamic = "force-dynamic";
@@ -143,6 +144,12 @@ export async function POST(request: NextRequest) {
     }
 
     console.error(`[API /search/apollo] ── Unexpected error (${totalMs}ms) ──`, error);
+    logError({
+      route: "/api/search/apollo",
+      method: "POST",
+      statusCode: 500,
+      errorMessage: error instanceof Error ? error.message : String(error),
+    });
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
