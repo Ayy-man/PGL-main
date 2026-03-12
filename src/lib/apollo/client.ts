@@ -222,16 +222,19 @@ export async function searchApollo(
 
     const result = { people: enrichedPeople, pagination };
 
-    // 7. Cache results — only cache if we got actual results (don't cache empty)
-    if (enrichedPeople.length > 0) {
+    // 7. Cache results — only cache enriched results (never cache fallback/preview data)
+    const hasUnenriched = enrichedPeople.some((p) => p._enriched === false);
+    if (enrichedPeople.length > 0 && !hasUnenriched) {
       try {
         await setCachedData(cacheKey, result, 86400);
         console.info(`[searchApollo] Cached ${enrichedPeople.length} results (24h TTL)`);
       } catch (cacheErr) {
         console.error("[searchApollo] Failed to cache results (non-fatal):", cacheErr);
       }
+    } else if (hasUnenriched) {
+      console.warn("[searchApollo] Skipped caching — contains unenriched fallback data (bulk enrich failed)");
     } else {
-      console.warn("[searchApollo] Skipped caching — 0 results (won't pollute cache with empty results)");
+      console.warn("[searchApollo] Skipped caching — 0 results");
     }
     trackApiUsage("apollo").catch(() => {});
 
