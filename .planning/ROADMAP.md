@@ -2,14 +2,14 @@
 
 **Project:** Phronesis Growth Labs — Full frontend rebuild to match design system + stitch mockups
 **Milestone:** v2.0 — UI Redesign
-**Phases:** 14 (Phase 6–18, including 14.1)
+**Phases:** 15 (Phase 6–19, including 14.1)
 **Constraint:** Preserve all business logic, API integrations, auth flows. UI layer only (Phases 6–14.1). Phases 15–18 add new functionality.
 
 ---
 
 ## Overview
 
-Rebuild every page of the PGL platform to match the design system (design-system/MASTER.md) and stitch mockup UX direction. Six screens redesigned: Tenant Dashboard, Lead Search, Saved Personas, Prospect Profile, Export Log, Admin Dashboard. Foundation → screen builds → polish → admin rebuild → tenant management redesign → tenant branding → mobile optimization → mobile bottom navigation.
+Rebuild every page of the PGL platform to match the design system (design-system/MASTER.md) and stitch mockup UX direction. Six screens redesigned: Tenant Dashboard, Lead Search, Saved Personas, Prospect Profile, Export Log, Admin Dashboard. Foundation → screen builds → polish → admin rebuild → tenant management redesign → tenant branding → mobile optimization → mobile bottom navigation → admin automations dashboard.
 
 ---
 
@@ -274,3 +274,36 @@ Plans:
 - [ ] 18-01-PLAN.md — MobileBottomNav component (tab bar + "More" sheet + "+" sheet)
 - [ ] 18-02-PLAN.md — Mobile header rewrite + layout integration + create persona trigger
 - [ ] 18-03-PLAN.md — Build verification + design system compliance audit
+
+---
+
+### Phase 19: Admin Automations Dashboard — Inngest Monitoring
+
+**Goal:** Add an Automations tab to the admin panel that displays health, invocation history, and per-source status for all Inngest background functions (enrich-prospect, aggregate-daily-metrics). Clicking a run opens a detail sidebar with timing, source breakdown, error messages, and re-enrich action. Built from existing DB data (prospects, activity_log) supplemented by Inngest REST API for run-level details.
+
+**Dependencies:** Phase 14.1
+
+**Deliverables:**
+- `enrichment_started_at` timestamp column on prospects table (enables duration calculation)
+- `metrics_aggregated` activity_log entry from daily-metrics Inngest function (enables cron run history)
+- Store Inngest event ID on prospect when firing enrichment (enables Inngest API drill-down)
+- `GET /api/admin/automations` — summary stats + per-function health aggregation
+- `GET /api/admin/automations/runs` — recent runs list (enrichment from prospects, cron from activity_log)
+- `GET /api/admin/automations/runs/[id]` — single run detail (DB data + lazy Inngest API fetch)
+- `/admin/automations` page — summary stat cards, automation health cards (one per function), recent runs table
+- `AutomationDetailDrawer` — right-side Sheet with status banner, timing grid, source breakdown, prospect context, re-enrich action
+- Admin sidebar nav update — add "Automations" link under Platform Control
+- Design system compliant (CSS variables, surface-card, gold accents, responsive mobile cards)
+
+**Requirements:** No new DB tables. Hybrid data strategy: existing DB columns + Inngest REST API. Mobile responsive.
+
+**Status:** COMPLETE — All 5 plans executed. Build verified (pnpm build exit 0). Design system compliance audit: all structural rules pass.
+
+**Plans:** 5/5 complete
+
+Plans:
+- [x] 19-01-PLAN.md — Data foundation (enrichment_started_at, inngest_event_id, metrics_aggregated activity logging)
+- [x] 19-02-PLAN.md — API endpoints (summary, runs list, run detail with Inngest API)
+- [x] 19-03-PLAN.md — Admin nav + page + stat cards + health cards
+- [x] 19-04-PLAN.md — Recent runs table + detail drawer sidebar
+- [x] 19-05-PLAN.md — Build verification + design system compliance audit

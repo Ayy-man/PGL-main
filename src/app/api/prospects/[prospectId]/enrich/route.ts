@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { inngest } from "@/inngest/client";
 
 /**
@@ -115,7 +116,7 @@ export async function POST(
     }
 
     // Send Inngest event to trigger enrichment workflow
-    await inngest.send({
+    const sendResult = await inngest.send({
       name: "prospect/enrich.requested",
       data: {
         prospectId,
@@ -130,6 +131,16 @@ export async function POST(
         companyCik: prospect.company_cik || undefined,
       },
     });
+
+    // Store event ID for Inngest API drill-down
+    const eventId = sendResult.ids?.[0];
+    if (eventId) {
+      const adminClient = createAdminClient();
+      await adminClient
+        .from("prospects")
+        .update({ inngest_event_id: eventId })
+        .eq("id", prospectId);
+    }
 
     return NextResponse.json(
       {

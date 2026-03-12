@@ -6,6 +6,7 @@ import {
   Building2,
   LayoutDashboard,
   BarChart3,
+  Zap,
   Key,
   Database,
   Shield,
@@ -16,6 +17,7 @@ const ADMIN_NAV_PLATFORM = [
   { label: "Command Center",  href: "/admin",            icon: LayoutDashboard, exact: true  },
   { label: "Tenant Registry", href: "/admin/tenants",    icon: Building2,       exact: false },
   { label: "Usage Metrics",   href: "/admin/analytics",  icon: BarChart3,       exact: false },
+  { label: "Automations",     href: "/admin/automations", icon: Zap,            exact: false },
 ];
 
 const ADMIN_NAV_SYSTEM = [

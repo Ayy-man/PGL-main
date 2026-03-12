@@ -96,6 +96,7 @@ export const enrichProspect = inngest.createFunction(
         .from("prospects")
         .update({
           enrichment_status: "in_progress",
+          enrichment_started_at: new Date().toISOString(),
           enrichment_source_status: {
             contactout: { status: "pending", at: new Date().toISOString() },
             exa: { status: "pending", at: new Date().toISOString() },

@@ -61,8 +61,10 @@ export interface Prospect {
   linkedin_url: string | null;
   enrichment_status: EnrichmentStatus;
   enriched_at: string | null;
+  enrichment_started_at: string | null;
   last_enriched_at: string | null;
   enrichment_source_status: Record<string, unknown> | null;
+  inngest_event_id: string | null;
   // JSONB enrichment fields
   contact_data: ContactData | null;
   web_data: WebData | null;

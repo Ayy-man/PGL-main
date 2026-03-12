@@ -20,7 +20,8 @@ export type ActionType =
   | "tenant_settings_updated"
   | "tenant_confirmed"
   | "user_invited"
-  | "user_invite_accepted";
+  | "user_invite_accepted"
+  | "metrics_aggregated";
 
 /**
  * Array of all valid action types for validation
@@ -43,6 +44,7 @@ export const ACTION_TYPES: ActionType[] = [
   "tenant_confirmed",
   "user_invited",
   "user_invite_accepted",
+  "metrics_aggregated",
 ];
 
 /**

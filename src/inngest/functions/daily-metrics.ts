@@ -1,5 +1,6 @@
 import { inngest } from "../client";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { logActivity } from "@/lib/activity-logger";
 
 /**
  * Inngest function: Aggregate daily usage metrics
@@ -152,6 +153,24 @@ export const aggregateDailyMetrics = inngest.createFunction(
 
     // Step 3: Log completion
     await step.run("log-completion", async () => {
+      const durationMs = Date.now() - new Date(startDate).getTime();
+
+      // Log to activity_log for automations dashboard
+      await logActivity({
+        tenantId: "system",
+        userId: "system",
+        actionType: "metrics_aggregated",
+        targetType: "usage_metrics_daily",
+        targetId: dateString,
+        metadata: {
+          date: dateString,
+          rowsUpserted: result.rowsUpserted,
+          durationMs,
+          startDate,
+          endDate,
+        },
+      });
+
       console.log(
         `[Inngest] Daily metrics aggregated for ${result.date}: ${result.rowsUpserted} rows upserted`
       );

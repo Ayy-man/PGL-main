@@ -19,16 +19,16 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** Real estate teams can quickly find and qualify wealthy prospects by searching structured lead databases, enriching profiles with personal contact info and wealth signals, and organizing prospects into actionable lists.
 
-**Current focus:** Phase 18 — Mobile Bottom Navigation (ClickUp-Style Tab Bar + Quick Actions)
+**Current focus:** Phase 19 complete — Admin Automations Dashboard
 
 ## Current Position
 
-Phase: 18 of 18 (Mobile Bottom Navigation — ClickUp-Style Tab Bar + Quick Actions)
-Plan: 0 of 3 — PLANNED
-Status: Phase 18 planned — 3 plans ready for execution.
-Last activity: 2026-03-10 — Phase 18 planned. 3 plans: MobileBottomNav component, mobile header rewrite + layout integration, build verification.
+Phase: 19 of 19 (Admin Automations Dashboard — Inngest Monitoring)
+Plan: 5 of 5 — COMPLETE
+Status: Phase 19 complete — all 5 plans executed, build verified, design system audit passed.
+Last activity: 2026-03-12 — Phase 19 executed. Data foundation, API endpoints, automations page + stat cards + health cards, runs table + detail drawer, build verification.
 
-Progress: [██████████████████░░] 90% (18/20 phases complete)
+Progress: [███████████████████░] 95% (19/20 phases complete)
 
 ## Performance Metrics
 
@@ -314,6 +314,7 @@ Recent decisions affecting current work:
 - Phase 16 added: Tenant Branding — Logo upload to Supabase Storage, 8 curated pre-paired color themes (Gold, Sapphire, Emerald, Rose, Amber, Slate, Violet, Coral), per-tenant CSS variable override at layout level, theme picker for onboarding + admin drawer, logo in sidebar + login + exports
 - Phase 17 added: Mobile Optimization — Beautiful Responsive UI. 120+ issues across 50+ files: critical layout breaks (personas grid, tenant drawer, dialogs), WCAG touch target failures (44px minimum), hover-only interactions on touch devices, fixed typography, non-responsive tables/cards/spacing. 6-phase internal structure: critical layout → touch targets → typography → table mobile variants → spacing/components → feature parity
 - Phase 18 added: Mobile Bottom Navigation — ClickUp-style bottom tab bar (Home, Search, Personas, More) + "+" quick action button. Replaces hamburger sidebar on mobile. "More" opens bottom sheet grid of secondary nav (Lists, Exports, Activity, Analytics, Team). "+" opens quick action picker (Search, Create Persona, Export). Simplified mobile header (no hamburger, no search icon).
+- Phase 19 added: Admin Automations Dashboard — Inngest monitoring tab in admin panel. Summary stats, per-function health cards, recent runs table, detail sidebar with source breakdown. Hybrid data: existing DB (prospects enrichment_status/source_status, activity_log) + Inngest REST API for run-level details. New: enrichment_started_at column, metrics_aggregated activity_log entry, Inngest event ID storage on prospects.
 
 ### Pending Todos
 
@@ -369,9 +370,9 @@ All 19 phases complete. The following items remain before production launch:
 
 ## Session Continuity
 
-Last session: 2026-03-10 — Phase 18 added to roadmap.
-Stopped at: Phase 18 added, CONTEXT.md written. Ready for /gsd:plan-phase 18.
+Last session: 2026-03-12 — Phase 19 executed.
+Stopped at: Phase 19 complete. Phase 18 still planned (not yet executed).
 
 ---
 
-*v2.0 milestone: 18/20 phases complete (6–18, including 14.1). Phase 18 next.*
+*v2.0 milestone: 19/20 phases complete (6–19, including 14.1). Phase 18 remains.*
