@@ -39,17 +39,17 @@ interface Prospect {
   personal_email: string | null;
   personal_phone: string | null;
   linkedin_url: string | null;
-  publicly_traded_symbol: string | null;
-  company_cik: string | null;
-  enrichment_status: "none" | "pending" | "in_progress" | "complete" | "failed";
-  last_enriched_at: string | null;
-  contact_data: {
+  publicly_traded_symbol?: string | null;
+  company_cik?: string | null;
+  enrichment_status?: "none" | "pending" | "in_progress" | "complete" | "failed";
+  last_enriched_at?: string | null;
+  contact_data?: {
     personal_email?: string;
     phone?: string;
     source?: string;
     enriched_at?: string;
   } | null;
-  web_data: {
+  web_data?: {
     mentions: Array<{
       title: string;
       snippet: string;
@@ -60,7 +60,7 @@ interface Prospect {
     source?: string;
     enriched_at?: string;
   } | null;
-  insider_data: {
+  insider_data?: {
     transactions: Array<{
       date: string;
       transactionType: string;
@@ -72,9 +72,9 @@ interface Prospect {
     source?: string;
     enriched_at?: string;
   } | null;
-  ai_summary: string | null;
-  enrichment_source_status: Record<string, SourceStatus> | null;
-  notes: string | null;
+  ai_summary?: string | null;
+  enrichment_source_status?: Record<string, SourceStatus> | null;
+  notes?: string | null;
   created_at: string;
   updated_at: string;
 }

@@ -44,38 +44,10 @@ export default async function ProspectProfilePage({
   }
 
   // Fetch prospect data from Supabase (with RLS)
+  // Use select('*') to avoid failing on columns that haven't been added yet
   const { data: prospect, error: prospectError } = await supabase
     .from("prospects")
-    .select(
-      `
-      id,
-      tenant_id,
-      apollo_id,
-      first_name,
-      last_name,
-      full_name,
-      title,
-      company,
-      location,
-      work_email,
-      work_phone,
-      personal_email,
-      personal_phone,
-      linkedin_url,
-      publicly_traded_symbol,
-      company_cik,
-      enrichment_status,
-      last_enriched_at,
-      contact_data,
-      web_data,
-      insider_data,
-      ai_summary,
-      enrichment_source_status,
-      notes,
-      created_at,
-      updated_at
-    `
-    )
+    .select("*")
     .eq("id", prospectId)
     .single();
 
