@@ -307,3 +307,27 @@ Plans:
 - [x] 19-03-PLAN.md — Admin nav + page + stat cards + health cards
 - [x] 19-04-PLAN.md — Recent runs table + detail drawer sidebar
 - [x] 19-05-PLAN.md — Build verification + design system compliance audit
+
+### Phase 20: Platform Pulse Detail Modal — Expandable Analytics Overlay
+
+**Goal:** Click the Platform Pulse card on the admin Command Center to open a premium modal with larger interactive charts (14-day Active Users + Prospects Scraped with hover tooltips, average reference lines), enrichment source success rate breakdown table (ContactOut, Exa, SEC EDGAR, Claude AI), and top 5 tenants by activity. Fade+scale animation from card position.
+
+**Scope:**
+- Modal overlay with backdrop blur, fade+scale animation (200ms ease-out), close via X/overlay/Escape
+- Summary stat pills row (Active Users, Prospects Scraped, Success Rate)
+- Two large SVG charts (side-by-side, stacked mobile) with hover tooltip + average dashed line + day labels
+- Enrichment source breakdown table: source name, colored status dot (green/amber/red), success %, total runs
+- Top 5 tenants by activity: ranked list from activity_log grouped by tenant_id
+- Dashboard API extended: add `sourceStats` and `topTenants` fields (parallel queries, no new endpoints)
+- Pure React + SVG + CSS transitions, no charting library
+
+**Requirements:** No new dependencies. No new API endpoints. Mobile responsive (stacked layout). Design system compliant.
+
+**Status:** COMPLETE -- All 3 plans executed. Build verified (pnpm build exit 0). Design system compliance audit: all 12 checks pass.
+
+**Plans:** 3/3 complete
+
+Plans:
+- [x] 20-01-PLAN.md -- Dashboard API: add sourceStats + topTenants queries
+- [x] 20-02-PLAN.md -- PlatformPulseModal component (charts, tables, animation)
+- [x] 20-03-PLAN.md -- Build verification + design system compliance
