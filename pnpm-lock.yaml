@@ -66,8 +66,8 @@ importers:
         specifier: ^6.6.0
         version: 6.6.0
       inngest:
-        specifier: ^3.51.0
-        version: 3.51.0(@opentelemetry/core@2.5.0(@opentelemetry/api@1.9.0))(next@14.2.35(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(typescript@5.9.3)(zod@4.3.6)
+        specifier: ^3.52.6
+        version: 3.52.6(@opentelemetry/core@2.5.0(@opentelemetry/api@1.9.0))(next@14.2.35(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(typescript@5.9.3)(zod@4.3.6)
       jwt-decode:
         specifier: ^4.0.0
         version: 4.0.0
@@ -92,6 +92,9 @@ importers:
       recharts:
         specifier: ^3.7.0
         version: 3.7.0(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react-is@16.13.1)(react@18.3.1)(redux@5.0.1)
+      source-map-js:
+        specifier: ^1.2.1
+        version: 1.2.1
       tailwind-merge:
         specifier: ^3.4.0
         version: 3.4.0
@@ -2709,8 +2712,8 @@ packages:
   inherits@2.0.4:
     resolution: {integrity: sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==}
 
-  inngest@3.51.0:
-    resolution: {integrity: sha512-ITEZNsRd+XzmKGzgeW1GBL4odu9mlRqBriXHZLtZNfInQNYnJMHAuyl7PP9t7Babi+t4L8FPlOXZA9RJwRQR9A==}
+  inngest@3.52.6:
+    resolution: {integrity: sha512-wDxA1I5CIL7anqyX3Vr0T/5kOHkWN8W5oeqbHhFKFbsFrM+M/J3OEFiRRgcdiGyhNHxPvWaRdQb4N2mfgwc7PQ==}
     engines: {node: '>=20'}
     peerDependencies:
       '@sveltejs/kit': '>=1.27.3'
@@ -6780,7 +6783,7 @@ snapshots:
 
   inherits@2.0.4: {}
 
-  inngest@3.51.0(@opentelemetry/core@2.5.0(@opentelemetry/api@1.9.0))(next@14.2.35(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(typescript@5.9.3)(zod@4.3.6):
+  inngest@3.52.6(@opentelemetry/core@2.5.0(@opentelemetry/api@1.9.0))(next@14.2.35(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(typescript@5.9.3)(zod@4.3.6):
     dependencies:
       '@bufbuild/protobuf': 2.11.0
       '@inngest/ai': 0.1.7

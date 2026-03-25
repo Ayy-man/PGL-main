@@ -13,6 +13,7 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { ProfileHeader } from "./profile-header";
 import { ActivityTimeline } from "./activity-timeline";
 import { WealthSignals } from "./wealth-signals";
+import { MarketIntelligenceCard } from "./market-intelligence-card";
 import { LookalikeDiscovery } from "./lookalike-discovery";
 import { useToast } from "@/hooks/use-toast";
 import { AddToListDialogProfile } from "./add-to-list-dialog-profile";
@@ -42,6 +43,8 @@ interface Prospect {
   linkedin_url: string | null;
   publicly_traded_symbol?: string | null;
   company_cik?: string | null;
+  stock_snapshot?: import("@/types/database").StockSnapshot | null;
+  stock_snapshot_at?: string | null;
   enrichment_status?: "none" | "pending" | "in_progress" | "complete" | "failed";
   last_enriched_at?: string | null;
   contact_data?: {
@@ -425,6 +428,15 @@ export function ProfileView({
           <WealthSignals
             webData={prospect.web_data}
             insiderData={prospect.insider_data}
+          />
+
+          {/* Market Intelligence */}
+          <MarketIntelligenceCard
+            prospectId={prospect.id}
+            orgId={orgId}
+            ticker={prospect.publicly_traded_symbol ?? null}
+            initialSnapshot={prospect.stock_snapshot ?? null}
+            snapshotAt={prospect.stock_snapshot_at ?? null}
           />
 
           {/* Company Context */}

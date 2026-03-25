@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import type { Persona } from "@/lib/personas/types";
 import type { List } from "@/lib/lists/types";
 import type { PersonaFiltersType } from "@/lib/apollo/schemas";
@@ -12,7 +11,7 @@ import { AdvancedFiltersPanel } from "./advanced-filters-panel";
 import { BulkActionsBar } from "./bulk-actions-bar";
 import { ProspectResultsTable } from "./prospect-results-table";
 import { ProspectSlideOver } from "@/components/prospect/prospect-slide-over";
-import { Search, AlertCircle, RefreshCw, Loader2, Plus } from "lucide-react";
+import { Search, AlertCircle, RefreshCw, Loader2, Plus, X } from "lucide-react";
 import { PersonaFormDialog } from "../../personas/components/persona-form-dialog";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -26,7 +25,9 @@ import {
 } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { createListAction } from "../../lists/actions";
 
 interface SearchContentProps {
   personas: Persona[];
@@ -70,6 +71,17 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
   const [bulkMode, setBulkMode] = useState<"add" | "enrich">("add");
   const [isBulkSubmitting, setIsBulkSubmitting] = useState(false);
   const [bulkSelectedListIds, setBulkSelectedListIds] = useState<string[]>([]);
+
+  // Inline list creation state
+  const [localLists, setLocalLists] = useState<List[]>(lists);
+  const [showNewListInput, setShowNewListInput] = useState(false);
+  const [newListName, setNewListName] = useState("");
+  const [isCreatingList, setIsCreatingList] = useState(false);
+
+  // Sync local lists with prop
+  useEffect(() => {
+    setLocalLists(lists);
+  }, [lists]);
 
   // Reset selection and filter overrides when persona changes
   useEffect(() => {
@@ -564,16 +576,86 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
-            {lists.length === 0 ? (
+            {/* Inline create new list */}
+            {showNewListInput ? (
+              <div className="flex items-center gap-2 mb-3">
+                <Input
+                  autoFocus
+                  placeholder="New list name"
+                  value={newListName}
+                  onChange={(e) => setNewListName(e.target.value)}
+                  onKeyDown={async (e) => {
+                    if (e.key === "Enter" && newListName.trim()) {
+                      e.preventDefault();
+                      setIsCreatingList(true);
+                      const fd = new FormData();
+                      fd.set("name", newListName.trim());
+                      const res = await createListAction(fd);
+                      if (res.success && res.list) {
+                        setLocalLists((prev) => [res.list!, ...prev]);
+                        setBulkSelectedListIds((prev) => [...prev, res.list!.id]);
+                        setNewListName("");
+                        setShowNewListInput(false);
+                      }
+                      setIsCreatingList(false);
+                    } else if (e.key === "Escape") {
+                      setShowNewListInput(false);
+                      setNewListName("");
+                    }
+                  }}
+                  disabled={isCreatingList}
+                  className="flex-1"
+                />
+                <Button
+                  size="sm"
+                  disabled={!newListName.trim() || isCreatingList}
+                  onClick={async () => {
+                    setIsCreatingList(true);
+                    const fd = new FormData();
+                    fd.set("name", newListName.trim());
+                    const res = await createListAction(fd);
+                    if (res.success && res.list) {
+                      setLocalLists((prev) => [res.list!, ...prev]);
+                      setBulkSelectedListIds((prev) => [...prev, res.list!.id]);
+                      setNewListName("");
+                      setShowNewListInput(false);
+                    }
+                    setIsCreatingList(false);
+                  }}
+                >
+                  {isCreatingList ? <Loader2 className="h-3 w-3 animate-spin" /> : "Create"}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => { setShowNewListInput(false); setNewListName(""); }}
+                  disabled={isCreatingList}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                className="mb-3 w-full"
+                onClick={() => setShowNewListInput(true)}
+              >
+                <Plus className="h-3.5 w-3.5 mr-1.5" />
+                New List
+              </Button>
+            )}
+
+            {localLists.length === 0 && !showNewListInput ? (
               <div className="text-center py-8 border-2 border-dashed rounded-lg">
                 <p className="text-sm text-muted-foreground mb-3">No lists yet</p>
-                <Button size="sm" asChild>
-                  <Link href={`/${orgId}/lists`}>Create your first list</Link>
+                <Button size="sm" onClick={() => setShowNewListInput(true)}>
+                  Create your first list
                 </Button>
               </div>
             ) : (
               <div className="space-y-3 max-h-[300px] overflow-y-auto">
-                {lists.map((list) => (
+                {localLists.map((list) => (
                   <div
                     key={list.id}
                     className="flex items-start space-x-3 p-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
@@ -618,7 +700,7 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
               </div>
             )}
           </div>
-          {lists.length > 0 && (
+          {localLists.length > 0 && (
             <DialogFooter>
               <Button
                 variant="outline"

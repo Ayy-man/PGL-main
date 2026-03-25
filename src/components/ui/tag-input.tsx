@@ -114,7 +114,7 @@ export function TagInput({
         <div
           className="absolute z-50 mt-1 w-full rounded-md border shadow-lg max-h-[200px] overflow-y-auto"
           style={{
-            background: "var(--bg-elevated, #1a1a1a)",
+            background: "#1a1a1a",
             borderColor: "var(--border-default, hsl(var(--border)))",
           }}
         >

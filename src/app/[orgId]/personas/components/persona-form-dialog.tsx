@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect, useRef, useCallback } from "react";
 import type { Persona } from "@/lib/personas/types";
 import {
   Dialog,
@@ -135,6 +135,70 @@ export function PersonaFormDialog({ mode, persona, trigger, open: controlledOpen
   const [locations, setLocations] = useState<string[]>(
     persona?.filters.locations ?? []
   );
+  const [keywords, setKeywords] = useState(persona?.filters.keywords ?? "");
+
+  // Lead count from Apollo
+  const [leadCount, setLeadCount] = useState<number | null>(null);
+  const [countLoading, setCountLoading] = useState(false);
+  const abortRef = useRef<AbortController | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const fetchLeadCount = useCallback(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+
+    debounceRef.current = setTimeout(async () => {
+      const hasFilter =
+        titles.length > 0 ||
+        seniorities.length > 0 ||
+        industries.length > 0 ||
+        locations.length > 0 ||
+        companySizes.length > 0 ||
+        keywords.trim().length > 0;
+
+      if (!hasFilter) {
+        setLeadCount(null);
+        return;
+      }
+
+      abortRef.current?.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
+
+      setCountLoading(true);
+      try {
+        const res = await fetch("/api/search/apollo/count", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            titles: titles.length > 0 ? titles : undefined,
+            seniorities: seniorities.length > 0 ? seniorities : undefined,
+            industries: industries.length > 0 ? industries : undefined,
+            locations: locations.length > 0 ? locations : undefined,
+            companySize: companySizes.length > 0 ? companySizes : undefined,
+            keywords: keywords.trim() || undefined,
+          }),
+          signal: controller.signal,
+        });
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        if (!controller.signal.aborted) {
+          setLeadCount(data.totalResults ?? null);
+        }
+      } catch {
+        if (!controller.signal.aborted) setLeadCount(null);
+      } finally {
+        if (!controller.signal.aborted) setCountLoading(false);
+      }
+    }, 600);
+  }, [titles, seniorities, industries, locations, companySizes, keywords]);
+
+  useEffect(() => {
+    if (open) fetchLeadCount();
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      abortRef.current?.abort();
+    };
+  }, [open, fetchLeadCount]);
 
   const toggleSeniority = (value: string) => {
     setSeniorities((prev) =>
@@ -155,14 +219,17 @@ export function PersonaFormDialog({ mode, persona, trigger, open: controlledOpen
       setTitles(persona.filters.titles ?? []);
       setIndustries(persona.filters.industries ?? []);
       setLocations(persona.filters.locations ?? []);
+      setKeywords(persona.filters.keywords ?? "");
     } else {
       setSeniorities([]);
       setCompanySizes([]);
       setTitles([]);
       setIndustries([]);
       setLocations([]);
+      setKeywords("");
     }
     setError(null);
+    setLeadCount(null);
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -241,7 +308,20 @@ export function PersonaFormDialog({ mode, persona, trigger, open: controlledOpen
           {/* ── Apollo Filters ── */}
           <div className="space-y-5">
             <div className="space-y-1">
-              <h4 className="text-sm font-semibold">Apollo.io Filters</h4>
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-semibold">Apollo.io Filters</h4>
+                {(leadCount !== null || countLoading) && (
+                  <span className="text-xs font-medium text-muted-foreground tabular-nums">
+                    {countLoading ? (
+                      <span className="animate-pulse">Counting...</span>
+                    ) : (
+                      <span className="text-amber-400/90">
+                        {leadCount!.toLocaleString()} leads available
+                      </span>
+                    )}
+                  </span>
+                )}
+              </div>
               <p className="text-xs text-muted-foreground">
                 At least one filter is required
               </p>
@@ -329,7 +409,8 @@ export function PersonaFormDialog({ mode, persona, trigger, open: controlledOpen
                 id="keywords"
                 name="keywords"
                 placeholder="e.g., private equity, venture capital"
-                defaultValue={persona?.filters.keywords ?? ""}
+                value={keywords}
+                onChange={(e) => setKeywords(e.target.value)}
               />
               <p className="text-xs text-muted-foreground">
                 Free-form search keywords

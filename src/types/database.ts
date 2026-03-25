@@ -73,6 +73,9 @@ export interface Prospect {
   // Company public market data
   publicly_traded_symbol: string | null;
   company_cik: string | null;
+  // Stock market snapshot (manual fetch)
+  stock_snapshot: StockSnapshot | null;
+  stock_snapshot_at: string | null;
   notes: string | null;
   created_at: string;
   updated_at: string;
@@ -112,6 +115,26 @@ export interface InsiderData {
   total_value?: number;
   source?: string;
   enriched_at?: string;
+}
+
+// Stock market snapshot (JSONB)
+export interface StockSnapshot {
+  ticker: string;
+  currentPrice: number;
+  currency: string;
+  fetchedAt: string; // ISO timestamp
+  performance: {
+    d7: number;  // 7-day % change
+    d30: number; // 30-day % change
+    d90: number; // 90-day % change
+    y1: number;  // 1-year % change
+  };
+  sparkline: number[]; // last 90 trading days daily close prices
+  equity: {
+    estimatedShares: number;
+    currentValue: number;
+    gain90d: number; // dollar gain over 90 days
+  } | null;
 }
 
 export type EnrichmentStatus = 'none' | 'pending' | 'in_progress' | 'complete' | 'failed';
