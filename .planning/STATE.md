@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 Phase: 20 of 20 (Platform Pulse Detail Modal -- COMPLETE)
 Plan: 3 of 3 -- COMPLETE
 Status: Phase 20 complete. All plans executed and verified. Build passes (pnpm build exit 0). All 12 design system compliance checks pass.
-Last activity: 2026-03-27 — Completed quick task 260327-tzg: Add prospect profile photos (ProspectAvatar component, photo_url/Gravatar/initials cascade)
+Last activity: 2026-03-27 — Completed quick task 260327-usu: Depth and polish — dual shadows, noise overlay, staggered animations, card glow, press effect, sidebar shadow
 
 Progress: [████████████████████] 100% (20/20 phases complete)
 
@@ -315,6 +315,7 @@ Recent decisions affecting current work:
 - Phase 17 added: Mobile Optimization — Beautiful Responsive UI. 120+ issues across 50+ files: critical layout breaks (personas grid, tenant drawer, dialogs), WCAG touch target failures (44px minimum), hover-only interactions on touch devices, fixed typography, non-responsive tables/cards/spacing. 6-phase internal structure: critical layout → touch targets → typography → table mobile variants → spacing/components → feature parity
 - Phase 18 added: Mobile Bottom Navigation — ClickUp-style bottom tab bar (Home, Search, Personas, More) + "+" quick action button. Replaces hamburger sidebar on mobile. "More" opens bottom sheet grid of secondary nav (Lists, Exports, Activity, Analytics, Team). "+" opens quick action picker (Search, Create Persona, Export). Simplified mobile header (no hamburger, no search icon).
 - Phase 19 added: Admin Automations Dashboard — Inngest monitoring tab in admin panel. Summary stats, per-function health cards, recent runs table, detail sidebar with source breakdown. Hybrid data: existing DB (prospects enrichment_status/source_status, activity_log) + Inngest REST API for run-level details. New: enrichment_started_at column, metrics_aggregated activity_log entry, Inngest event ID storage on prospects.
+- Phase 21 added: Depth & Polish — Visual Refinement Pass
 
 ### Pending Todos
 
@@ -333,6 +334,7 @@ Recent decisions affecting current work:
 | 260327-rhx | Fix Exa enrichment: specific search queries, LLM digest step, clean UI rendering | 2026-03-27 | e1897d2 | [260327-rhx-fix-exa-enrichment-specific-search-queri](./quick/260327-rhx-fix-exa-enrichment-specific-search-queri/) |
 | 260327-rqs | Prospect profile UI fixes: collapse enrichment status, clean wealth signals, fix breadcrumbs, hide market intel, conditional company context, decorative activity empty state | 2026-03-27 | 3ce6e7d | [260327-rqs-prospect-profile-ui-fixes-collapse-enric](./quick/260327-rqs-prospect-profile-ui-fixes-collapse-enric/) |
 | 260327-tzg | Add prospect profile photos: ProspectAvatar component with photo_url/Gravatar/initials cascade, wired into profile header (lg) and list table (sm), photo_url persisted from Apollo into contact_data JSONB | 2026-03-27 | 806622b | [260327-tzg-add-prospect-profile-photos-photo-url-gr](./quick/260327-tzg-add-prospect-profile-photos-photo-url-gr/) |
+| 260327-usu | Depth and polish: dual-shadow surface-card, gold crown line, noise grain overlay, staggered row entrance, card glow hover, click press feedback, sidebar shadow | 2026-03-27 | 4211252 | [260327-usu-depth-and-polish-dual-shadows-gradient-b](./quick/260327-usu-depth-and-polish-dual-shadows-gradient-b/) |
 
 ### Blockers/Concerns
 
