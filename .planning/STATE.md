@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 Phase: 20 of 20 (Platform Pulse Detail Modal -- COMPLETE)
 Plan: 3 of 3 -- COMPLETE
 Status: Phase 20 complete. All plans executed and verified. Build passes (pnpm build exit 0). All 12 design system compliance checks pass.
-Last activity: 2026-03-27 — Completed quick task 260327-rqs: Prospect profile UI fixes (collapse enrichment, clean wealth signals, fix breadcrumbs)
+Last activity: 2026-03-27 — Completed quick task 260327-tzg: Add prospect profile photos (ProspectAvatar component, photo_url/Gravatar/initials cascade)
 
 Progress: [████████████████████] 100% (20/20 phases complete)
 
@@ -332,6 +332,7 @@ Recent decisions affecting current work:
 |---|-------------|------|--------|-----------|
 | 260327-rhx | Fix Exa enrichment: specific search queries, LLM digest step, clean UI rendering | 2026-03-27 | e1897d2 | [260327-rhx-fix-exa-enrichment-specific-search-queri](./quick/260327-rhx-fix-exa-enrichment-specific-search-queri/) |
 | 260327-rqs | Prospect profile UI fixes: collapse enrichment status, clean wealth signals, fix breadcrumbs, hide market intel, conditional company context, decorative activity empty state | 2026-03-27 | 3ce6e7d | [260327-rqs-prospect-profile-ui-fixes-collapse-enric](./quick/260327-rqs-prospect-profile-ui-fixes-collapse-enric/) |
+| 260327-tzg | Add prospect profile photos: ProspectAvatar component with photo_url/Gravatar/initials cascade, wired into profile header (lg) and list table (sm), photo_url persisted from Apollo into contact_data JSONB | 2026-03-27 | 806622b | [260327-tzg-add-prospect-profile-photos-photo-url-gr](./quick/260327-tzg-add-prospect-profile-photos-photo-url-gr/) |
 
 ### Blockers/Concerns
 
