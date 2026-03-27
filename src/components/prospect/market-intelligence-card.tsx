@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { TrendingUp, RefreshCw, Loader2, BarChart3 } from "lucide-react";
+
+const STALE_THRESHOLD_MS = 4 * 60 * 60 * 1000; // 4 hours
 import type { StockSnapshot } from "@/types/database";
 
 interface MarketIntelligenceCardProps {
@@ -168,6 +170,28 @@ export function MarketIntelligenceCard({
   const [fetchedAt, setFetchedAt] = useState<string | null>(snapshotAt);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const autoFetchedRef = useRef(false);
+
+  // Auto-refresh on mount if snapshot is stale (>4h) or missing
+  useEffect(() => {
+    if (autoFetchedRef.current || !ticker) return;
+    const isStale =
+      !snapshotAt ||
+      Date.now() - new Date(snapshotAt).getTime() > STALE_THRESHOLD_MS;
+    if (isStale) {
+      autoFetchedRef.current = true;
+      // Silent background fetch — no loading spinner for auto-refresh
+      fetch(`/api/prospects/${prospectId}/market-data`, { method: "POST" })
+        .then((res) => (res.ok ? res.json() : Promise.reject()))
+        .then((data) => {
+          setSnapshot(data);
+          setFetchedAt(data.fetchedAt);
+        })
+        .catch(() => {
+          // Silent fail — user can manually retry
+        });
+    }
+  }, [ticker, snapshotAt, prospectId]);
 
   if (!ticker) {
     return null;
