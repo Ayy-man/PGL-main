@@ -270,7 +270,14 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
           });
 
           if (enrichResp.ok) {
-            const { people: enrichedPeople } = await enrichResp.json();
+            const enrichData = await enrichResp.json();
+            const enrichedPeople = enrichData.people;
+            if (enrichData.mock) {
+              toast({
+                title: "Using mock Apollo data",
+                description: "Apollo credits exhausted — fake names/emails generated for testing. Disable APOLLO_MOCK_ENRICHMENT when credits renew.",
+              });
+            }
             // Merge enriched data back — replace preview entries with full data
             const enrichedMap = new Map<string, (typeof enrichedPeople)[number]>();
             for (const p of enrichedPeople) {

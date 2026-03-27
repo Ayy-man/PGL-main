@@ -6,10 +6,14 @@ import { z } from "zod";
 import type { ApolloPerson } from "@/lib/apollo/types";
 
 /**
- * Toggle: when true, returns fake enrichment data instead of calling Apollo.
- * Flip to false once Apollo credits renew (Mar 30).
+ * When "true", returns fake enrichment data instead of calling Apollo API.
+ * Set via env var so it can be toggled on Vercel without redeploying.
+ *
+ * To disable mock mode (use real Apollo credits):
+ *   - Remove APOLLO_MOCK_ENRICHMENT from Vercel env vars (or set to "false")
+ *   - Remove from .env.local (or set to "false")
  */
-const USE_MOCK_ENRICHMENT = true;
+const USE_MOCK_ENRICHMENT = process.env.APOLLO_MOCK_ENRICHMENT === "true";
 
 const previewSchema = z.object({
   id: z.string(),
