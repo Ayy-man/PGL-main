@@ -4,7 +4,7 @@ import type {
   ApolloPerson,
 } from "@/lib/apollo/types";
 import { apolloRateLimiter } from "@/lib/rate-limit/limiters";
-import { apolloBreaker, bulkEnrichPeople } from "@/lib/circuit-breaker/apollo-breaker";
+import { apolloBreaker } from "@/lib/circuit-breaker/apollo-breaker";
 import { getCachedData, setCachedData } from "@/lib/cache/keys";
 import { trackApiUsage } from "@/lib/enrichment/track-api-usage";
 
