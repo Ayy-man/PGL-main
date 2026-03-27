@@ -170,13 +170,7 @@ export function MarketIntelligenceCard({
   const [error, setError] = useState<string | null>(null);
 
   if (!ticker) {
-    return (
-      <div className="surface-card rounded-[14px] p-5">
-        <p className="text-sm text-muted-foreground">
-          Market intelligence requires a publicly traded symbol.
-        </p>
-      </div>
-    );
+    return null;
   }
 
   const handleFetch = async () => {

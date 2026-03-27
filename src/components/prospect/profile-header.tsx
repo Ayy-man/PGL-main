@@ -1,9 +1,6 @@
 "use client";
 
 import {
-  Mail,
-  Phone,
-  Linkedin,
   Building2,
   Sparkles,
   Plus,
@@ -230,71 +227,6 @@ export function ProfileHeader({
         </button>
       </div>
 
-      {/* Social Links */}
-      <div
-        className="mt-5 w-full pt-4 flex justify-center gap-6"
-        style={{
-          borderTop:
-            "1px solid var(--border-default, rgba(255,255,255,0.06))",
-        }}
-      >
-        {prospect.work_email && (
-          <a
-            href={`mailto:${prospect.work_email}`}
-            className="text-muted-foreground transition-colors cursor-pointer"
-            style={{ color: "var(--text-tertiary)" }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLAnchorElement).style.color =
-                "var(--gold-primary)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLAnchorElement).style.color =
-                "var(--text-tertiary)";
-            }}
-            aria-label="Send email"
-          >
-            <Mail className="h-5 w-5" />
-          </a>
-        )}
-        {prospect.work_phone && (
-          <a
-            href={`tel:${prospect.work_phone}`}
-            className="transition-colors cursor-pointer"
-            style={{ color: "var(--text-tertiary)" }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLAnchorElement).style.color =
-                "var(--gold-primary)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLAnchorElement).style.color =
-                "var(--text-tertiary)";
-            }}
-            aria-label="Call phone"
-          >
-            <Phone className="h-5 w-5" />
-          </a>
-        )}
-        {prospect.linkedin_url && (
-          <a
-            href={prospect.linkedin_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="transition-colors cursor-pointer"
-            style={{ color: "var(--text-tertiary)" }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLAnchorElement).style.color =
-                "var(--gold-primary)";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLAnchorElement).style.color =
-                "var(--text-tertiary)";
-            }}
-            aria-label="LinkedIn profile"
-          >
-            <Linkedin className="h-5 w-5" />
-          </a>
-        )}
-      </div>
     </div>
   );
 }

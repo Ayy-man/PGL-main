@@ -441,93 +441,131 @@ export function ProfileView({
           />
 
           {/* Company Context */}
-          {prospect.company && (
-            <div className="surface-card rounded-[14px] p-4 md:p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-foreground text-lg font-bold font-serif">
-                  Company Context
-                </h3>
-                <span
-                  className="text-xs font-bold px-2 py-1 rounded"
-                  style={{
-                    background: "rgba(255,255,255,0.03)",
-                    border:
-                      "1px solid var(--border-default, rgba(255,255,255,0.06))",
-                    color:
-                      "var(--text-secondary, rgba(232,228,220,0.5))",
-                  }}
-                >
-                  {prospect.company.toUpperCase()}
-                </span>
-              </div>
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  {prospect.publicly_traded_symbol && (
-                    <div>
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
-                        Ticker
-                      </p>
-                      <p className="text-sm font-semibold text-foreground font-mono">
-                        {prospect.publicly_traded_symbol}
-                      </p>
-                    </div>
-                  )}
-                  {prospect.location && (
-                    <div>
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
-                        Headquarters
-                      </p>
-                      <p className="text-sm font-semibold text-foreground">
-                        {prospect.location}
-                      </p>
-                    </div>
+          {(() => {
+            const hasCompanyContext = !!(
+              prospect.company ||
+              prospect.publicly_traded_symbol ||
+              prospect.company_cik ||
+              prospect.location ||
+              prospect.title
+            );
+            const hasDetails = !!(prospect.title || prospect.company_cik);
+            if (!hasCompanyContext) return null;
+            return (
+              <div className="surface-card rounded-[14px] p-4 md:p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-foreground text-lg font-bold font-serif">
+                    Company Context
+                  </h3>
+                  {prospect.company && (
+                    <span
+                      className="text-xs font-bold px-2 py-1 rounded"
+                      style={{
+                        background: "rgba(255,255,255,0.03)",
+                        border:
+                          "1px solid var(--border-default, rgba(255,255,255,0.06))",
+                        color:
+                          "var(--text-secondary, rgba(232,228,220,0.5))",
+                      }}
+                    >
+                      {prospect.company.toUpperCase()}
+                    </span>
                   )}
                 </div>
-                <div>
-                  <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">
-                    Details
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {prospect.title && (
-                      <span
-                        className="px-2 py-1 rounded text-xs font-medium"
-                        style={{
-                          background: "rgba(255,255,255,0.03)",
-                          border:
-                            "1px solid var(--border-default, rgba(255,255,255,0.06))",
-                          color:
-                            "var(--text-primary-ds, var(--text-primary, #e8e4dc))",
-                        }}
-                      >
-                        {prospect.title}
-                      </span>
+                {hasDetails ? (
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      {prospect.publicly_traded_symbol && (
+                        <div>
+                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
+                            Ticker
+                          </p>
+                          <p className="text-sm font-semibold text-foreground font-mono">
+                            {prospect.publicly_traded_symbol}
+                          </p>
+                        </div>
+                      )}
+                      {prospect.location && (
+                        <div>
+                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
+                            Headquarters
+                          </p>
+                          <p className="text-sm font-semibold text-foreground">
+                            {prospect.location}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">
+                        Details
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {prospect.title && (
+                          <span
+                            className="px-2 py-1 rounded text-xs font-medium"
+                            style={{
+                              background: "rgba(255,255,255,0.03)",
+                              border:
+                                "1px solid var(--border-default, rgba(255,255,255,0.06))",
+                              color:
+                                "var(--text-primary-ds, var(--text-primary, #e8e4dc))",
+                            }}
+                          >
+                            {prospect.title}
+                          </span>
+                        )}
+                        {prospect.company_cik && (
+                          <span
+                            className="px-2 py-1 rounded text-xs font-medium"
+                            style={{
+                              background: "rgba(255,255,255,0.03)",
+                              border:
+                                "1px solid var(--border-default, rgba(255,255,255,0.06))",
+                              color:
+                                "var(--text-primary-ds, var(--text-primary, #e8e4dc))",
+                            }}
+                          >
+                            CIK: {prospect.company_cik}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {prospect.publicly_traded_symbol && (
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
+                          Ticker
+                        </p>
+                        <p className="text-sm font-semibold text-foreground font-mono">
+                          {prospect.publicly_traded_symbol}
+                        </p>
+                      </div>
                     )}
-                    {prospect.company_cik && (
-                      <span
-                        className="px-2 py-1 rounded text-xs font-medium"
-                        style={{
-                          background: "rgba(255,255,255,0.03)",
-                          border:
-                            "1px solid var(--border-default, rgba(255,255,255,0.06))",
-                          color:
-                            "var(--text-primary-ds, var(--text-primary, #e8e4dc))",
-                        }}
-                      >
-                        CIK: {prospect.company_cik}
-                      </span>
+                    {prospect.location && (
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
+                          Headquarters
+                        </p>
+                        <p className="text-sm font-semibold text-foreground">
+                          {prospect.location}
+                        </p>
+                      </div>
                     )}
                   </div>
-                </div>
+                )}
               </div>
-            </div>
-          )}
+            );
+          })()}
         </div>
 
         {/* ─── RIGHT COLUMN ─── */}
         <div className="lg:col-span-3 flex flex-col gap-6">
           {/* Enrichment Status Card */}
           <div
-            className="rounded-[14px] p-5 h-full flex flex-col justify-between"
+            className="rounded-[14px] p-5"
             style={{
               background: "var(--bg-card-gradient, rgba(255,255,255,0.03))",
               border: "1px solid var(--border-subtle, rgba(255,255,255,0.06))",
@@ -570,33 +608,41 @@ export function ProfileView({
               </div>
 
               {/* Source status breakdown */}
-              <div className="grid grid-cols-2 gap-2 mt-3">
+              <div className="grid grid-cols-2 gap-1.5 mt-2">
                 {(["contactout", "exa", "sec", "claude"] as const).map(
                   (src) => {
                     const status = enrichmentSourceStatus[src] ?? "pending";
                     const isComplete = status === "complete";
+                    const isFailed = status === "failed";
+                    const isInProgress = status === "in_progress";
+                    const dotColor = isComplete
+                      ? "var(--success, #22c55e)"
+                      : isFailed
+                        ? "var(--destructive, #ef4444)"
+                        : isInProgress
+                          ? "var(--gold-primary)"
+                          : "rgba(255,255,255,0.2)";
+                    const textColor = isComplete
+                      ? "var(--gold-primary)"
+                      : isInProgress
+                        ? "var(--gold-primary)"
+                        : "var(--text-secondary, rgba(232,228,220,0.5))";
                     return (
                       <div
                         key={src}
-                        className="flex items-center justify-center p-2 rounded-[8px] text-xs gap-1 transition-all"
+                        className="flex items-center px-2 py-1 rounded-[8px] text-[11px] gap-1.5 transition-all"
                         style={{
                           border: `1px solid ${isComplete ? "rgba(212,175,55,0.15)" : "var(--border-default, rgba(255,255,255,0.06))"}`,
                           background: isComplete
                             ? "rgba(212,175,55,0.04)"
                             : "transparent",
-                          color: isComplete
-                            ? "var(--gold-primary)"
-                            : "var(--text-secondary, rgba(232,228,220,0.5))",
+                          color: textColor,
                         }}
                       >
-                        {isComplete && (
-                          <span
-                            className="h-1.5 w-1.5 rounded-full inline-block"
-                            style={{
-                              background: "var(--success, #22c55e)",
-                            }}
-                          />
-                        )}
+                        <span
+                          className="h-1.5 w-1.5 rounded-full inline-block shrink-0"
+                          style={{ background: dotColor }}
+                        />
                         {src.charAt(0).toUpperCase() + src.slice(1)}
                       </div>
                     );
@@ -606,7 +652,7 @@ export function ProfileView({
 
               {/* Last enriched timestamp */}
               {prospect.last_enriched_at && (
-                <p className="text-[10px] text-muted-foreground mt-3 text-center">
+                <p className="text-[10px] text-muted-foreground mt-2 text-center">
                   Last enriched{" "}
                   {formatRelative(prospect.last_enriched_at)}
                 </p>
