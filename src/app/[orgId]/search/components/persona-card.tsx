@@ -31,13 +31,15 @@ export function PersonaCard({ persona, onSelect }: PersonaCardProps) {
       onClick={() => onSelect(persona.id)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="rounded-[14px] p-7 text-left transition-all duration-200 cursor-pointer overflow-hidden relative w-full"
+      className="rounded-[14px] p-7 text-left transition-all duration-200 cursor-pointer press-effect overflow-hidden relative w-full"
       style={{
         background: isHovered ? "var(--bg-card-hover)" : "var(--bg-card-gradient)",
         border: isHovered
           ? "1px solid rgba(212,175,55,0.3)"
           : "1px solid var(--border-default)",
-        boxShadow: isHovered ? "var(--card-shadow-hover)" : "var(--card-shadow)",
+        boxShadow: isHovered
+          ? "var(--card-shadow-hover), 0 0 20px rgba(212, 175, 55, 0.06)"
+          : "var(--card-shadow)",
       }}
     >
       {/* Gold corner accent */}

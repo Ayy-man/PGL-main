@@ -137,11 +137,11 @@ export function ActivityFeed() {
         </div>
       ) : (
         <div className="space-y-1">
-          {entries.map((entry) => (
+          {entries.map((entry, index) => (
             <div
               key={entry.id}
-              className="flex items-center gap-3 rounded-[8px] px-3 py-2.5 transition-colors"
-              style={{ background: "transparent" }}
+              className="flex items-center gap-3 rounded-[8px] px-3 py-2.5 transition-colors row-enter"
+              style={{ background: "transparent", animationDelay: `${Math.min(index * 30, 300)}ms` }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = "var(--bg-elevated)";
               }}

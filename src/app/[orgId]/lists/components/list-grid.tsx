@@ -45,7 +45,7 @@ export function ListGrid({ lists }: ListGridProps) {
       {lists.map((list, index) => (
         <div
           key={list.id}
-          className="surface-card flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 sm:p-6 sm:px-7 rounded-xl cursor-pointer group animate-stagger-in"
+          className="surface-card card-glow press-effect flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 sm:p-6 sm:px-7 rounded-xl cursor-pointer group animate-stagger-in"
           style={{ animationDelay: `${index * 50}ms` }}
         >
           {/* Left side */}
