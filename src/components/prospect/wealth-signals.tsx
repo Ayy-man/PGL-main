@@ -117,9 +117,6 @@ export function WealthSignals({ webData, insiderData }: WealthSignalsProps) {
             />
             Wealth Signals &amp; Intelligence
           </h3>
-          <p className="text-xs text-muted-foreground ml-7 mt-0.5">
-            Aggregated from SEC, Real Estate Records, &amp; Exa
-          </p>
         </div>
       </div>
 
