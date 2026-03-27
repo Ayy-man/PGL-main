@@ -292,13 +292,18 @@ Plans:
 
 ### Phase 22: Lead Profile Editing — Inline Edit, Tags, Photo Upload, Lead Owner
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** Add inline editing to prospect profiles: manual_* override columns on prospects table, InlineEditField component (pencil-on-hover, input mode, gold flash save), AvatarUpload for photo, LeadOwnerSelect dropdown, TagInput wired to prospect_tags table, RBAC gating (assistant canEdit=false). Display logic: manual_field ?? enriched_field ?? null.
+
+**Requirements:** EDIT-01, EDIT-02, EDIT-03, EDIT-04, EDIT-05, EDIT-06, EDIT-07, EDIT-08, EDIT-09, EDIT-10
 **Depends on:** Phase 21
-**Plans:** 0 plans
+**Plans:** 5 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 22 to break down)
+- [ ] 22-01-PLAN.md — DB migration (manual_* columns, prospect_tags, prospect_custom_fields) + TypeScript types + activity logger
+- [ ] 22-02-PLAN.md — InlineEditField, AvatarUpload, LeadOwnerSelect components + resolveField helper
+- [ ] 22-03-PLAN.md — API routes: PATCH profile, GET/POST/DELETE tags, POST photo
+- [ ] 22-04-PLAN.md — Wire editing into page.tsx, ProfileView, ProfileHeader (RBAC gate)
+- [ ] 22-05-PLAN.md — Build verification + design system compliance audit
 
 ---
 
