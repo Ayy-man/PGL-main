@@ -77,6 +77,7 @@ export function Sidebar({ orgId, tenantName, logoUrl, userRole, userName, userIn
           width: "220px",
           background: "var(--bg-sidebar)",
           borderRight: "1px solid var(--border-sidebar)",
+          boxShadow: "4px 0 24px rgba(0, 0, 0, 0.3)",
         }}
       >
         <SidebarContent orgId={orgId} tenantName={tenantName} logoUrl={logoUrl} userRole={userRole} userName={userName} userInitials={userInitials} />

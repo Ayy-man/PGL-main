@@ -46,6 +46,7 @@ export default function RootLayout({
       <body
         className={`${dmSans.variable} ${cormorant.variable} ${jetbrainsMono.variable} font-sans antialiased bg-background text-foreground`}
       >
+        <div className="noise-overlay" aria-hidden="true" />
         <NuqsAdapter>
           {children}
         </NuqsAdapter>
