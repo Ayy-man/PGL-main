@@ -1,6 +1,7 @@
 import { inngest } from "../client";
 import { enrichContactOut } from "@/lib/enrichment/contactout";
 import { enrichExa } from "@/lib/enrichment/exa";
+import { digestExaResults, type DigestedSignal } from "@/lib/enrichment/exa-digest";
 import { enrichEdgar } from "@/lib/enrichment/edgar";
 import { generateProspectSummary } from "@/lib/enrichment/claude";
 import { logActivity } from "@/lib/activity-logger";
@@ -213,14 +214,19 @@ export const enrichProspect = inngest.createFunction(
           });
         }
 
-        // Save web data if found
-        if (result.found && (result.mentions.length > 0 || result.wealthSignals.length > 0)) {
+        // Digest raw mentions with LLM to get categorized, validated signals
+        let digestedSignals: DigestedSignal[] = [];
+        if (result.found && result.mentions.length > 0) {
+          digestedSignals = await digestExaResults(name, company, result.mentions);
+        }
+
+        // Save web data if found (using digested signals)
+        if (result.found && digestedSignals.length > 0) {
           await supabase
             .from("prospects")
             .update({
               web_data: {
-                mentions: result.mentions,
-                wealth_signals: result.wealthSignals,
+                signals: digestedSignals,
                 source: "exa",
                 enriched_at: new Date().toISOString(),
               },
@@ -230,8 +236,7 @@ export const enrichProspect = inngest.createFunction(
 
         return {
           found: result.found,
-          mentions: result.mentions,
-          wealthSignals: result.wealthSignals,
+          signals: digestedSignals,
           status: sourceStatus,
         };
       } catch (error) {
@@ -244,7 +249,7 @@ export const enrichProspect = inngest.createFunction(
           at: new Date().toISOString(),
         });
 
-        return { found: false, mentions: [], wealthSignals: [], status: "failed" };
+        return { found: false, signals: [] as DigestedSignal[], status: "failed" };
       }
     });
 
@@ -326,6 +331,20 @@ export const enrichProspect = inngest.createFunction(
     // Step 5: Generate AI summary with Claude
     const aiSummary = await step.run("generate-summary", async () => {
       try {
+        // Map digested signals to the format generateProspectSummary expects
+        const webDataForSummary =
+          exaData.found && exaData.signals.length > 0
+            ? {
+                mentions: exaData.signals.map((s) => ({
+                  title: s.headline,
+                  snippet: s.summary,
+                })),
+                wealthSignals: exaData.signals
+                  .filter((s) => s.category === "wealth_signal" || s.category === "funding")
+                  .map((s) => ({ type: s.category, description: s.summary })),
+              }
+            : null;
+
         const summary = await generateProspectSummary({
           name,
           title,
@@ -333,9 +352,7 @@ export const enrichProspect = inngest.createFunction(
           contactData: contactData.found && ("personalEmail" in contactData || "phone" in contactData)
             ? { personalEmail: contactData.personalEmail, phone: contactData.phone }
             : null,
-          webData: exaData.found && ("mentions" in exaData && "wealthSignals" in exaData)
-            ? { mentions: exaData.mentions, wealthSignals: exaData.wealthSignals }
-            : null,
+          webData: webDataForSummary,
           insiderData: edgarData.found && "transactions" in edgarData
             ? { transactions: edgarData.transactions }
             : null,
