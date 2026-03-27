@@ -8,7 +8,7 @@
 export type Events = {
   /**
    * Triggered when a prospect needs enrichment from external APIs
-   * (ContactOut, Exa, SEC EDGAR, Claude AI).
+   * (ContactOut, Exa, SEC EDGAR, Market Data, Claude AI).
    */
   "prospect/enrich.requested": {
     data: {
@@ -22,6 +22,7 @@ export type Events = {
       title: string;
       isPublicCompany: boolean;
       companyCik?: string;
+      ticker?: string;
     };
   };
 

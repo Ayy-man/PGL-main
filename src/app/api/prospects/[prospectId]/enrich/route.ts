@@ -130,6 +130,7 @@ export async function POST(
         title: prospect.title || "",
         isPublicCompany: !!prospect.publicly_traded_symbol,
         companyCik: prospect.company_cik || undefined,
+        ticker: prospect.publicly_traded_symbol || undefined,
       },
     });
 
