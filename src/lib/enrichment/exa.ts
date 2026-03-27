@@ -110,8 +110,8 @@ async function enrichExaInternal(params: {
   }
 
   try {
-    // Build search query with person context
-    const query = `"${params.name}" "${params.company}" executive OR founder OR investor`;
+    // Build search query with exact-match quoted name and company
+    const query = `"${params.name}" "${params.company}"`;
 
     const response = await fetch('https://api.exa.ai/search', {
       method: 'POST',
@@ -122,7 +122,7 @@ async function enrichExaInternal(params: {
       body: JSON.stringify({
         query,
         type: 'auto',
-        numResults: 5,
+        numResults: 10,
         contents: {
           text: {
             maxCharacters: 500,
@@ -159,8 +159,24 @@ async function enrichExaInternal(params: {
       };
     }
 
+    // Post-filter: only keep results that mention the person's name or company
+    const nameLower = params.name.toLowerCase();
+    const companyLower = params.company.toLowerCase();
+    const filtered = data.results.filter((r) => {
+      const text = ((r.title || '') + ' ' + (r.text || '')).toLowerCase();
+      return text.includes(nameLower) || text.includes(companyLower);
+    });
+
+    if (filtered.length === 0) {
+      return {
+        found: false,
+        mentions: [],
+        wealthSignals: [],
+      };
+    }
+
     // Extract mentions
-    const mentions = data.results.map((result) => ({
+    const mentions = filtered.map((result) => ({
       title: result.title,
       url: result.url,
       snippet: result.text || '',
@@ -168,7 +184,7 @@ async function enrichExaInternal(params: {
     }));
 
     // Extract wealth signals from snippets
-    const snippetsForSignals = data.results
+    const snippetsForSignals = filtered
       .filter((r) => r.text)
       .map((r) => ({ text: r.text!, url: r.url }));
 
