@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 Phase: 20 of 20 (Platform Pulse Detail Modal -- COMPLETE)
 Plan: 3 of 3 -- COMPLETE
 Status: Phase 20 complete. All plans executed and verified. Build passes (pnpm build exit 0). All 12 design system compliance checks pass.
-Last activity: 2026-03-27 — Completed quick task 260327-rhx: Fix Exa enrichment
+Last activity: 2026-03-27 — Completed quick task 260327-rqs: Prospect profile UI fixes (collapse enrichment, clean wealth signals, fix breadcrumbs)
 
 Progress: [████████████████████] 100% (20/20 phases complete)
 
@@ -331,6 +331,7 @@ Recent decisions affecting current work:
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260327-rhx | Fix Exa enrichment: specific search queries, LLM digest step, clean UI rendering | 2026-03-27 | e1897d2 | [260327-rhx-fix-exa-enrichment-specific-search-queri](./quick/260327-rhx-fix-exa-enrichment-specific-search-queri/) |
+| 260327-rqs | Prospect profile UI fixes: collapse enrichment status, clean wealth signals, fix breadcrumbs, hide market intel, conditional company context, decorative activity empty state | 2026-03-27 | 3ce6e7d | [260327-rqs-prospect-profile-ui-fixes-collapse-enric](./quick/260327-rqs-prospect-profile-ui-fixes-collapse-enric/) |
 
 ### Blockers/Concerns
 
