@@ -19,49 +19,42 @@ function StatCard({
 }) {
   return (
     <div
-      className="rounded-[14px] p-[1px] relative overflow-hidden"
+      className="rounded-[14px] px-6 py-5 text-center"
       style={{
-        background:
-          "linear-gradient(135deg, rgba(212,175,55,0.15), transparent 60%, rgba(212,175,55,0.06))",
+        background: "var(--bg-card-gradient, rgba(255,255,255,0.03))",
+        border: "1px solid var(--border-subtle, rgba(255,255,255,0.06))",
       }}
     >
       <div
-        className="rounded-[13px] px-6 py-5 text-center relative z-10"
+        className="inline-flex items-center justify-center h-9 w-9 rounded-[8px] mb-3"
         style={{
-          background: "var(--bg-card, rgba(255,255,255,0.03))",
+          background: "rgba(212,175,55,0.08)",
+          border: "1px solid rgba(212,175,55,0.12)",
         }}
       >
-        <div
-          className="inline-flex items-center justify-center h-9 w-9 rounded-[8px] mb-3"
-          style={{
-            background: "rgba(212,175,55,0.08)",
-            border: "1px solid rgba(212,175,55,0.12)",
-          }}
-        >
-          <Icon
-            className="h-4 w-4"
-            style={{ color: "var(--gold-primary)" }}
-          />
-        </div>
-        <p
-          className="text-[10px] font-semibold uppercase tracking-[1.5px] mb-2"
-          style={{ color: "var(--text-tertiary)" }}
-        >
-          {label}
-        </p>
-        <p
-          className="font-serif text-3xl font-bold leading-none"
-          style={{ color: "var(--text-primary-ds, var(--text-primary))" }}
-        >
-          {value}
-        </p>
-        <p
-          className="text-[11px] mt-2"
-          style={{ color: "var(--text-tertiary)" }}
-        >
-          {subtitle}
-        </p>
+        <Icon
+          className="h-4 w-4"
+          style={{ color: "var(--gold-primary)" }}
+        />
       </div>
+      <p
+        className="text-[10px] font-semibold uppercase tracking-[1.5px] mb-2"
+        style={{ color: "var(--text-tertiary)" }}
+      >
+        {label}
+      </p>
+      <p
+        className="font-serif text-3xl font-bold leading-none"
+        style={{ color: "var(--text-primary-ds, var(--text-primary))" }}
+      >
+        {value}
+      </p>
+      <p
+        className="text-[11px] mt-2"
+        style={{ color: "var(--text-tertiary)" }}
+      >
+        {subtitle}
+      </p>
     </div>
   );
 }

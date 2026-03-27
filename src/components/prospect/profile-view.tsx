@@ -526,18 +526,12 @@ export function ProfileView({
         <div className="lg:col-span-3 flex flex-col gap-6">
           {/* Enrichment Status Card */}
           <div
-            className="rounded-[14px] p-[1px] relative overflow-hidden"
+            className="rounded-[14px] p-5 h-full flex flex-col justify-between"
             style={{
-              background:
-                "linear-gradient(135deg, rgba(212,175,55,0.2), transparent, rgba(212,175,55,0.08))",
+              background: "var(--bg-card-gradient, rgba(255,255,255,0.03))",
+              border: "1px solid var(--border-subtle, rgba(255,255,255,0.06))",
             }}
           >
-            <div
-              className="rounded-[13px] p-5 relative z-10 h-full flex flex-col justify-between"
-              style={{
-                background: "var(--bg-card, rgba(255,255,255,0.03))",
-              }}
-            >
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   Enrichment Status
@@ -616,7 +610,6 @@ export function ProfileView({
                   {formatRelative(prospect.last_enriched_at)}
                 </p>
               )}
-            </div>
           </div>
 
           {/* Activity Log */}

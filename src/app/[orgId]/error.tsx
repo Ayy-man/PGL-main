@@ -27,7 +27,7 @@ export default function Error({
         onClick={reset}
         className="inline-flex h-10 items-center justify-center rounded-[8px] px-6 text-sm font-semibold transition-all duration-200 cursor-pointer"
         style={{
-          background: "linear-gradient(135deg, rgba(212,175,55,0.15), rgba(212,175,55,0.08))",
+          background: "var(--gold-bg, rgba(212,175,55,0.08))",
           border: "1px solid var(--border-gold)",
           color: "var(--gold-primary)",
         }}

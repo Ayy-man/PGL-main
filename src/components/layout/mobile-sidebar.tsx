@@ -58,7 +58,7 @@ export function MobileHeader({
           className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-medium"
           title={userName}
           style={{
-            background: "linear-gradient(135deg, rgba(212,175,55,0.2), rgba(212,175,55,0.05))",
+            background: "var(--gold-bg, rgba(212,175,55,0.08))",
             color: "var(--gold-primary)",
             border: "1px solid var(--border-gold)",
           }}

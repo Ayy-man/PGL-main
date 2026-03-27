@@ -82,12 +82,11 @@ export function ProfileHeader({
 
   return (
     <div className="surface-card rounded-[14px] p-6 flex flex-col items-center text-center relative overflow-hidden">
-      {/* Gold gradient header wash */}
+      {/* Subtle top accent */}
       <div
-        className="absolute top-0 left-0 w-full h-24 pointer-events-none"
+        className="absolute top-0 left-0 w-full h-[1px] pointer-events-none"
         style={{
-          background:
-            "linear-gradient(180deg, rgba(212,175,55,0.08) 0%, transparent 100%)",
+          background: "rgba(212,175,55,0.12)",
         }}
       />
 

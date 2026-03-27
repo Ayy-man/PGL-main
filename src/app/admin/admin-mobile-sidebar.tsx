@@ -73,7 +73,7 @@ export function AdminMobileSidebar({ userEmail, userName: _userName, userInitial
                 <div
                   className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full font-serif font-bold text-sm"
                   style={{
-                    background: "linear-gradient(135deg, rgba(212,175,55,0.2), rgba(212,175,55,0.05))",
+                    background: "var(--gold-bg, rgba(212,175,55,0.08))",
                     color: "var(--gold-primary)",
                     border: "1px solid var(--border-gold)",
                   }}
