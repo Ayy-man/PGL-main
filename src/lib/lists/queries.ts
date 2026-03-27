@@ -150,7 +150,8 @@ export async function getListMembers(listId: string, tenantId: string): Promise<
         work_email,
         work_phone,
         linkedin_url,
-        enrichment_status
+        enrichment_status,
+        contact_data
       )
     `)
     .eq("list_id", listId)
@@ -172,6 +173,7 @@ export async function getListMembers(listId: string, tenantId: string): Promise<
     work_phone: string | null;
     linkedin_url: string | null;
     enrichment_status: string | null;
+    contact_data: { photo_url?: string } | null;
   };
 
   type RawListMember = {
@@ -208,7 +210,8 @@ export async function getListMembers(listId: string, tenantId: string): Promise<
         email_status: null,
         phone: raw.work_phone,
         linkedin_url: raw.linkedin_url,
-        enrichment_status: raw.enrichment_status
+        enrichment_status: raw.enrichment_status,
+        photo_url: (raw.contact_data as { photo_url?: string } | null)?.photo_url ?? null,
       }
     });
   }
@@ -249,7 +252,8 @@ export async function addProspectToList(
         work_email,
         work_phone,
         linkedin_url,
-        enrichment_status
+        enrichment_status,
+        contact_data
       )
     `)
     .single();
@@ -273,6 +277,7 @@ export async function addProspectToList(
     work_phone: string | null;
     linkedin_url: string | null;
     enrichment_status: string | null;
+    contact_data: { photo_url?: string } | null;
   };
 
   type RawInsertData = {
@@ -310,7 +315,8 @@ export async function addProspectToList(
       email_status: null,
       phone: raw?.work_phone ?? null,
       linkedin_url: raw?.linkedin_url ?? null,
-      enrichment_status: raw?.enrichment_status ?? null
+      enrichment_status: raw?.enrichment_status ?? null,
+      photo_url: (raw?.contact_data as { photo_url?: string } | null)?.photo_url ?? null,
     }
   } as ListMember;
 }

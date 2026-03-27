@@ -70,7 +70,7 @@ function generateMockPerson(
     email_status: "verified",
     phone_numbers: [{ raw_number: phoneNum, sanitized_number: phoneNum, type: "mobile" }],
     linkedin_url: `https://www.linkedin.com/in/${linkedinSlug}`,
-    photo_url: undefined,
+    photo_url: `https://ui-avatars.com/api/?name=${encodeURIComponent(firstName)}+${encodeURIComponent(lastName)}&background=1a1a1a&color=d4af37&size=96`,
     employment_history: [
       { organization_name: orgName, title, current: true },
     ],

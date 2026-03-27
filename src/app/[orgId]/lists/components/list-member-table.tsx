@@ -24,6 +24,7 @@ import { MemberNotesCell } from "./member-notes-cell";
 import { removeFromListAction } from "../actions";
 import type { ListMember } from "@/lib/lists/types";
 import { useState } from "react";
+import { ProspectAvatar } from "@/components/prospect/prospect-avatar";
 
 interface ListMemberTableProps {
   members: ListMember[];
@@ -176,6 +177,12 @@ export function ListMemberTable({ members }: ListMemberTableProps) {
                 {/* Prospect: Name + Title at Company */}
                 <TableCell>
                   <div className="flex items-center gap-2 min-w-0">
+                    <ProspectAvatar
+                      name={member.prospect.name}
+                      photoUrl={member.prospect.photo_url}
+                      email={member.prospect.email}
+                      size="sm"
+                    />
                     <EnrichmentDot status={member.prospect.enrichment_status} />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
@@ -286,6 +293,12 @@ export function ListMemberTable({ members }: ListMemberTableProps) {
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
+                  <ProspectAvatar
+                    name={member.prospect.name}
+                    photoUrl={member.prospect.photo_url}
+                    email={member.prospect.email}
+                    size="sm"
+                  />
                   <EnrichmentDot status={member.prospect.enrichment_status} />
                   <Link
                     href={`/${orgId}/prospects/${member.prospect.id}`}

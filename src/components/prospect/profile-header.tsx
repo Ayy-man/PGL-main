@@ -9,6 +9,7 @@ import {
   Landmark,
   UserCheck,
 } from "lucide-react";
+import { ProspectAvatar } from "./prospect-avatar";
 
 type SourceStatus =
   | "pending"
@@ -30,6 +31,11 @@ interface Prospect {
   work_phone: string | null;
   linkedin_url: string | null;
   enrichment_status: string;
+  contact_data?: {
+    photo_url?: string;
+    personal_email?: string;
+    phone?: string;
+  } | null;
 }
 
 interface ProfileHeaderProps {
@@ -39,16 +45,6 @@ interface ProfileHeaderProps {
   orgId: string;
   onFindLookalikes: () => void;
   onAddToList: () => void;
-}
-
-function getInitials(first: string, last: string): string {
-  return `${first?.[0] ?? ""}${last?.[0] ?? ""}`.toUpperCase();
-}
-
-function getAvatarGradient(name: string): string {
-  const hue =
-    name.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0) % 360;
-  return `linear-gradient(135deg, hsl(${hue}, 30%, 25%), hsl(${hue}, 20%, 15%))`;
 }
 
 const ENRICHMENT_SOURCES = [
@@ -74,9 +70,6 @@ export function ProfileHeader({
   enrichmentSourceStatus,
   onAddToList,
 }: ProfileHeaderProps) {
-  const initials = getInitials(prospect.first_name, prospect.last_name);
-  const avatarGradient = getAvatarGradient(prospect.full_name);
-
   return (
     <div className="surface-card rounded-[14px] p-6 flex flex-col items-center text-center relative overflow-hidden">
       {/* Subtle top accent */}
@@ -89,16 +82,12 @@ export function ProfileHeader({
 
       {/* Avatar */}
       <div className="relative z-10 mb-4">
-        <div
-          className="h-28 w-28 rounded-full flex items-center justify-center mx-auto font-serif text-3xl font-semibold"
-          style={{
-            border: "3px solid var(--border-default)",
-            background: avatarGradient,
-            color: "var(--text-primary-ds, var(--text-primary, #e8e4dc))",
-          }}
-        >
-          {initials}
-        </div>
+        <ProspectAvatar
+          name={prospect.full_name}
+          photoUrl={prospect.contact_data?.photo_url}
+          email={prospect.work_email || prospect.contact_data?.personal_email}
+          size="lg"
+        />
       </div>
 
       {/* Name */}

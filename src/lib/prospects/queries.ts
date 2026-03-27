@@ -179,7 +179,27 @@ export async function upsertProspectFromApollo(
     linkedin_url: person.linkedin_url || null,
   };
 
-  return upsertProspect(tenantId, input);
+  const result = await upsertProspect(tenantId, input);
+
+  // Persist Apollo photo_url into contact_data JSONB if available
+  if (person.photo_url) {
+    const adminClient = createAdminClient();
+    const { data: existing } = await adminClient
+      .from("prospects")
+      .select("contact_data")
+      .eq("id", result.id)
+      .single();
+    const existingData =
+      (existing?.contact_data as Record<string, unknown>) || {};
+    await adminClient
+      .from("prospects")
+      .update({
+        contact_data: { ...existingData, photo_url: person.photo_url },
+      })
+      .eq("id", result.id);
+  }
+
+  return result;
 }
 
 /**
