@@ -62,7 +62,7 @@ export function ProspectResultCard({
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="rounded-[12px] p-6 px-7 flex items-start justify-between transition-all duration-[250ms] cursor-pointer hover:translate-y-[-1px]"
+      className="rounded-[12px] p-6 px-7 flex items-start justify-between transition-all duration-[250ms] cursor-pointer press-effect hover:translate-y-[-1px]"
       style={{
         background: selected
           ? "var(--gold-bg)"
@@ -74,7 +74,9 @@ export function ProspectResultCard({
           : isHovered
           ? "1px solid var(--border-hover)"
           : "1px solid var(--border-default)",
-        boxShadow: isHovered ? "var(--card-shadow-hover)" : "var(--card-shadow)",
+        boxShadow: isHovered
+          ? "var(--card-shadow-hover), 0 0 20px rgba(212, 175, 55, 0.06)"
+          : "var(--card-shadow)",
       }}
     >
       {/* Left section */}
