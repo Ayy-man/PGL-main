@@ -59,8 +59,6 @@ export async function POST(
         linkedin_url,
         title,
         company,
-        publicly_traded_symbol,
-        company_cik,
         enrichment_status,
         last_enriched_at
       `
@@ -128,8 +126,8 @@ export async function POST(
         name: prospect.full_name,
         company: prospect.company || "",
         title: prospect.title || "",
-        isPublicCompany: !!prospect.publicly_traded_symbol,
-        companyCik: prospect.company_cik || undefined,
+        isPublicCompany: false, // TODO: add publicly_traded_symbol column to prospects table
+        companyCik: undefined, // TODO: add company_cik column to prospects table
       },
     });
 

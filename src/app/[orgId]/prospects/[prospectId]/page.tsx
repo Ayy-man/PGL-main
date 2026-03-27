@@ -127,16 +127,28 @@ export default async function ProspectProfilePage({
     .eq("prospect_id", prospectId)
     .order("added_at", { ascending: false });
 
-  // Parse enrichment source status
-  const enrichmentSourceStatus = (prospect.enrichment_source_status as Record<
+  // Parse enrichment source status — DB stores {source: {status, at, error?}} objects,
+  // but ProfileView expects Record<string, SourceStatus> (flat strings)
+  const rawSourceStatus = (prospect.enrichment_source_status as Record<
     string,
-    "pending" | "in_progress" | "complete" | "failed" | "skipped"
-  >) || {
+    string | { status: string; at?: string; error?: string }
+  >) || {};
+  const enrichmentSourceStatus: Record<
+    string,
+    "pending" | "in_progress" | "complete" | "failed" | "skipped" | "circuit_open"
+  > = {
     contactout: "pending",
     exa: "pending",
     sec: "pending",
     claude: "pending",
   };
+  for (const [key, val] of Object.entries(rawSourceStatus)) {
+    if (typeof val === "string") {
+      enrichmentSourceStatus[key] = val as typeof enrichmentSourceStatus[string];
+    } else if (val && typeof val === "object" && "status" in val) {
+      enrichmentSourceStatus[key] = val.status as typeof enrichmentSourceStatus[string];
+    }
+  }
 
   // Format list memberships
   const formattedListMemberships =

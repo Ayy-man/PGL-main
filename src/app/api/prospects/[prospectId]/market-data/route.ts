@@ -25,22 +25,26 @@ interface FinnhubQuote {
   t: number; // timestamp
 }
 
-interface FinnhubCandle {
-  c: number[]; // close prices
-  h: number[]; // highs
-  l: number[]; // lows
-  o: number[]; // opens
-  s: string; // "ok" | "no_data"
-  t: number[]; // timestamps
-  v: number[]; // volumes
+/** Yahoo Finance chart API response (v8, free, no key required) */
+interface YahooChartResponse {
+  chart: {
+    result?: Array<{
+      indicators: {
+        quote: Array<{
+          close: (number | null)[];
+        }>;
+      };
+    }>;
+    error?: { code: string; description: string };
+  };
 }
 
 /**
  * POST /api/prospects/[prospectId]/market-data
  *
- * Fetches current stock quote and 1-year candle data from Finnhub,
- * computes performance metrics, and optionally estimates equity position
- * from existing SEC insider data.
+ * Fetches current stock quote from Finnhub (free) and 1-year daily
+ * closes from Yahoo Finance (free, no key). Computes performance
+ * metrics and optionally estimates equity position from SEC insider data.
  *
  * Returns:
  * - 200: Snapshot built and saved
@@ -115,13 +119,14 @@ export async function POST(
       );
     }
 
-    // Fetch quote and 1-year candles in parallel
-    const now = Math.floor(Date.now() / 1000);
-    const oneYearAgo = now - 365 * 24 * 60 * 60;
+    // Fetch Finnhub quote + Yahoo Finance 1-year daily closes in parallel
+    const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(ticker)}?range=1y&interval=1d&includePrePost=false`;
 
-    const [quoteRes, candleRes] = await Promise.all([
+    const [quoteRes, yahooRes] = await Promise.all([
       fetch(`${FINNHUB_BASE}/quote?symbol=${encodeURIComponent(ticker)}&token=${apiKey}`),
-      fetch(`${FINNHUB_BASE}/stock/candle?symbol=${encodeURIComponent(ticker)}&resolution=D&from=${oneYearAgo}&to=${now}&token=${apiKey}`),
+      fetch(yahooUrl, {
+        headers: { "User-Agent": "Mozilla/5.0" },
+      }),
     ]);
 
     if (!quoteRes.ok) {
@@ -139,16 +144,20 @@ export async function POST(
       );
     }
 
-    let candle: FinnhubCandle | null = null;
-    if (candleRes.ok) {
-      const parsed = await candleRes.json();
-      if (parsed.s === "ok" && parsed.c?.length > 0) {
-        candle = parsed;
+    // Parse Yahoo Finance daily closes (free, no API key)
+    let closes: number[] = [];
+    if (yahooRes.ok) {
+      try {
+        const yahoo: YahooChartResponse = await yahooRes.json();
+        const rawCloses = yahoo.chart.result?.[0]?.indicators?.quote?.[0]?.close;
+        if (rawCloses) {
+          closes = rawCloses.filter((v): v is number => v !== null && v !== undefined);
+        }
+      } catch {
+        // Yahoo parse failed — proceed with empty closes
+        console.warn("[market-data] Yahoo Finance parse failed, continuing without historical data");
       }
     }
-
-    // Compute performance from candle data
-    const closes = candle?.c ?? [];
     const len = closes.length;
     const lastClose = len > 0 ? closes[len - 1] : quote.c;
 
