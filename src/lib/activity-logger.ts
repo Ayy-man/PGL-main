@@ -21,7 +21,12 @@ export type ActionType =
   | "tenant_confirmed"
   | "user_invited"
   | "user_invite_accepted"
-  | "metrics_aggregated";
+  | "metrics_aggregated"
+  | "profile_edited"
+  | "tag_added"
+  | "tag_removed"
+  | "photo_uploaded"
+  | "lead_owner_assigned";
 
 /**
  * Array of all valid action types for validation
@@ -45,6 +50,11 @@ export const ACTION_TYPES: ActionType[] = [
   "user_invited",
   "user_invite_accepted",
   "metrics_aggregated",
+  "profile_edited",
+  "tag_added",
+  "tag_removed",
+  "photo_uploaded",
+  "lead_owner_assigned",
 ];
 
 /**
