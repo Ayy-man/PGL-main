@@ -296,11 +296,11 @@ Plans:
 
 **Requirements:** EDIT-01, EDIT-02, EDIT-03, EDIT-04, EDIT-05, EDIT-06, EDIT-07, EDIT-08, EDIT-09, EDIT-10
 **Depends on:** Phase 21
-**Plans:** 5 plans
+**Plans:** 1/5 plans executed
 
 Plans:
 - [ ] 22-01-PLAN.md — DB migration (manual_* columns, prospect_tags, prospect_custom_fields) + TypeScript types + activity logger
-- [ ] 22-02-PLAN.md — InlineEditField, AvatarUpload, LeadOwnerSelect components + resolveField helper
+- [x] 22-02-PLAN.md — InlineEditField, AvatarUpload, LeadOwnerSelect components + resolveField helper
 - [ ] 22-03-PLAN.md — API routes: PATCH profile, GET/POST/DELETE tags, POST photo
 - [ ] 22-04-PLAN.md — Wire editing into page.tsx, ProfileView, ProfileHeader (RBAC gate)
 - [ ] 22-05-PLAN.md — Build verification + design system compliance audit
