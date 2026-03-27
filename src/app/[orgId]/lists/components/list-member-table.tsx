@@ -170,9 +170,8 @@ export function ListMemberTable({ members }: ListMemberTableProps) {
             {members.map((member, i) => (
               <TableRow
                 key={member.id}
-                style={{
-                  background: i % 2 === 1 ? "rgba(255,255,255,0.015)" : "transparent",
-                }}
+                className="row-hover-lift press-effect row-enter"
+                style={{ animationDelay: `${i * 30}ms`, background: i % 2 === 1 ? "rgba(255,255,255,0.015)" : "transparent" }}
               >
                 {/* Prospect: Name + Title at Company */}
                 <TableCell>

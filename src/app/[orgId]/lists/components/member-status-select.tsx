@@ -53,7 +53,7 @@ export function MemberStatusSelect({ memberId, currentStatus }: MemberStatusSele
     >
       <SelectTrigger className="w-[150px]">
         <SelectValue>
-          <Badge variant={STATUS_CONFIG[status].variant}>
+          <Badge variant={STATUS_CONFIG[status].variant} className={status === "new" ? "badge-pulse" : ""}>
             {STATUS_CONFIG[status].label}
           </Badge>
         </SelectValue>

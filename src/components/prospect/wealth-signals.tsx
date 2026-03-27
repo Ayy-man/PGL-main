@@ -140,11 +140,11 @@ export function WealthSignals({ webData, insiderData }: WealthSignalsProps) {
             return (
               <div
                 key={index}
-                className={`rounded-[8px] p-4 flex flex-col max-h-[160px] overflow-hidden relative transition-all${isWide ? " md:col-span-2" : ""}`}
+                className={`card-glow press-effect row-enter rounded-[8px] p-4 flex flex-col max-h-[160px] overflow-hidden relative transition-all${isWide ? " md:col-span-2" : ""}`}
                 style={{
+                  animationDelay: `${index * 60}ms`,
                   background: "rgba(255,255,255,0.02)",
-                  border:
-                    "1px solid var(--border-default, rgba(255,255,255,0.06))",
+                  border: "1px solid var(--border-default, rgba(255,255,255,0.06))",
                 }}
                 onMouseEnter={(e) => {
                   (e.currentTarget as HTMLDivElement).style.borderColor =
