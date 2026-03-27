@@ -232,7 +232,7 @@ export function ExportLogClient({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {exports.map((entry) => {
+                {exports.map((entry, index) => {
                   const meta =
                     (entry.metadata as Record<string, unknown> | null) ?? {};
                   const listName =
@@ -244,7 +244,7 @@ export function ExportLogClient({
                   const initials = displayName.charAt(0).toUpperCase();
 
                   return (
-                    <TableRow key={entry.id}>
+                    <TableRow key={entry.id} className="row-hover-lift press-effect row-enter" style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}>
                       {/* Timestamp */}
                       <TableCell>
                         <span
@@ -363,7 +363,7 @@ export function ExportLogClient({
 
           {/* Mobile card list */}
           <div className="md:hidden divide-y" style={{ borderColor: "var(--border-subtle)" }}>
-            {exports.map((entry) => {
+            {exports.map((entry, index) => {
               const meta =
                 (entry.metadata as Record<string, unknown> | null) ?? {};
               const listName =
@@ -374,7 +374,7 @@ export function ExportLogClient({
                 `${entry.user_id.slice(0, 8)}...`;
 
               return (
-                <div key={entry.id} className="p-4 space-y-1.5">
+                <div key={entry.id} className="p-4 space-y-1.5 row-enter" style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}>
                   <div className="flex items-center justify-between gap-3">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">

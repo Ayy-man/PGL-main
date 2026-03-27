@@ -52,13 +52,14 @@ const METRICS: {
 export function MetricsCards({ totals }: MetricsCardsProps) {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      {METRICS.map(({ key, label, icon }) => {
+      {METRICS.map(({ key, label, icon }, index) => {
         const value = totals[key];
         const isNonZero = value > 0;
         return (
           <div
             key={key}
-            className="surface-card rounded-[14px] p-5"
+            className="surface-card surface-card-featured rounded-[14px] p-5 row-enter"
+            style={{ animationDelay: `${index * 60}ms` }}
           >
             <div className="flex items-center justify-between mb-3">
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
