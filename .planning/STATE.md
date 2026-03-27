@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 Phase: 20 of 20 (Platform Pulse Detail Modal -- COMPLETE)
 Plan: 3 of 3 -- COMPLETE
 Status: Phase 20 complete. All plans executed and verified. Build passes (pnpm build exit 0). All 12 design system compliance checks pass.
-Last activity: 2026-03-13 — Completed 20-03-PLAN.md
+Last activity: 2026-03-27 — Completed quick task 260327-rhx: Fix Exa enrichment
 
 Progress: [████████████████████] 100% (20/20 phases complete)
 
@@ -325,6 +325,12 @@ Recent decisions affecting current work:
 - ContactOut: Add CONTACTOUT_API_KEY to .env.local for personal contact enrichment
 - Exa.ai: Add EXA_API_KEY to .env.local for web presence and wealth signal enrichment
 - SEC EDGAR: Add SEC_EDGAR_USER_AGENT to .env.local (format: "AppName admin@email.com")
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260327-rhx | Fix Exa enrichment: specific search queries, LLM digest step, clean UI rendering | 2026-03-27 | e1897d2 | [260327-rhx-fix-exa-enrichment-specific-search-queri](./quick/260327-rhx-fix-exa-enrichment-specific-search-queri/) |
 
 ### Blockers/Concerns
 
