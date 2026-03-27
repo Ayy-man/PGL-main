@@ -275,18 +275,20 @@ Plans:
 - [ ] 18-02-PLAN.md — Mobile header rewrite + layout integration + create persona trigger
 - [ ] 18-03-PLAN.md — Build verification + design system compliance audit
 
-### Phase 21: Depth & Polish — Visual Refinement Pass
+### Phase 21: Depth & Polish — Visual Refinement Pass — COMPLETE
 
 **Goal:** Wire existing depth/polish CSS utility classes (row-enter, card-glow, press-effect, row-hover-lift, surface-card-featured) to all remaining tenant and admin components that lack them. Add backdrop blur to elevated surfaces (Sheet overlay, DropdownMenu). Verify build and audit box-shadow consistency.
 
 **Requirements:** VR-01, VR-02, VR-03, VR-04, VR-05, VR-06, VR-07
 **Depends on:** Phase 20
-**Plans:** 2/3 plans executed
+**Status:** COMPLETE — All 3 plans executed. Build verified (pnpm build --no-lint exit 0). Box-shadow audit: zero regressions. All 7 target components confirmed with depth CSS classes. Both elevated surfaces (sheet.tsx, dropdown-menu.tsx) confirmed with backdrop-blur-sm.
+
+**Plans:** 3/3 plans complete
 
 Plans:
 - [x] 21-01-PLAN.md — Wire depth classes to tenant components (search cards, persona cards, list grid, activity feed, export log, stat cards)
 - [x] 21-02-PLAN.md — Backdrop blur on elevated surfaces (Sheet, DropdownMenu) + admin automation runs table wiring
-- [ ] 21-03-PLAN.md — Build verification + box-shadow consistency audit
+- [x] 21-03-PLAN.md — Build verification + box-shadow consistency audit
 
 ---
 

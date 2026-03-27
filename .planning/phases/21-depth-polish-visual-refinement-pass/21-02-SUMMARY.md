@@ -111,3 +111,12 @@ None - no external service configuration required.
 ---
 *Phase: 21-depth-polish-visual-refinement-pass*
 *Completed: 2026-03-27*
+
+## Self-Check: PASSED
+
+- FOUND: src/components/ui/sheet.tsx
+- FOUND: src/components/ui/dropdown-menu.tsx
+- FOUND: src/components/admin/automation-runs-table.tsx
+- FOUND: 715e3f2 (feat: backdrop blur on Sheet/DropdownMenu)
+- FOUND: 5d2dbb9 (feat: depth classes on automation runs table)
+- FOUND: 6069d2a (docs: plan metadata commit)
