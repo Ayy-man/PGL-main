@@ -36,6 +36,9 @@ interface Prospect {
   title: string | null;
   company: string | null;
   location: string | null;
+  city?: string | null;
+  state?: string | null;
+  country?: string | null;
   work_email: string | null;
   work_phone: string | null;
   personal_email: string | null;
@@ -81,6 +84,20 @@ interface Prospect {
   ai_summary?: string | null;
   enrichment_source_status?: Record<string, SourceStatus> | null;
   notes?: string | null;
+  // Manual override fields (Plan 01)
+  manual_display_name?: string | null;
+  manual_title?: string | null;
+  manual_company?: string | null;
+  manual_email?: string | null;
+  manual_phone?: string | null;
+  manual_linkedin_url?: string | null;
+  manual_city?: string | null;
+  manual_state?: string | null;
+  manual_country?: string | null;
+  manual_photo_url?: string | null;
+  pinned_note?: string | null;
+  lead_owner_id?: string | null;
+  updated_by?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -111,6 +128,10 @@ interface ProfileViewProps {
     description: string | null;
     member_count: number;
   }>;
+  canEdit?: boolean;
+  teamMembers?: Array<{ id: string; full_name: string; email: string }>;
+  tags?: string[];
+  tagSuggestions?: string[];
 }
 
 /**
@@ -131,6 +152,10 @@ export function ProfileView({
   orgId,
   activityEntries,
   allLists,
+  canEdit,
+  teamMembers,
+  tags,
+  tagSuggestions,
 }: ProfileViewProps) {
   const [showLookalikes, setShowLookalikes] = useState(false);
   const [noteText, setNoteText] = useState(prospect.notes ?? "");
@@ -138,6 +163,65 @@ export function ProfileView({
   const [lastSavedNote, setLastSavedNote] = useState(prospect.notes ?? "");
   const [addToListOpen, setAddToListOpen] = useState(false);
   const { toast } = useToast();
+
+  // Photo URL state (controlled so AvatarUpload updates propagate)
+  const [currentPhotoUrl, setCurrentPhotoUrl] = useState<string | null>(
+    prospect.manual_photo_url ?? prospect.contact_data?.photo_url ?? null
+  );
+
+  const handlePhotoUpdated = useCallback((url: string | null) => {
+    setCurrentPhotoUrl(url);
+  }, []);
+
+  // Tags state (optimistic)
+  const [currentTags, setCurrentTags] = useState<string[]>(tags ?? []);
+
+  // Field save handler — PATCH /api/prospects/[id]/profile
+  const handleFieldSave = useCallback(async (field: string, value: string | null) => {
+    const res = await fetch(`/api/prospects/${prospect.id}/profile`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ [field]: value }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error((err as { error?: string }).error || "Failed to save");
+    }
+  }, [prospect.id]);
+
+  // Lead owner handler
+  const handleOwnerChange = useCallback(async (ownerId: string | null) => {
+    await handleFieldSave("lead_owner_id", ownerId);
+  }, [handleFieldSave]);
+
+  // Tags change handler — POST/DELETE per tag
+  const handleTagsChange = useCallback(async (newTags: string[]) => {
+    const added = newTags.filter((t) => !currentTags.includes(t));
+    const removed = currentTags.filter((t) => !newTags.includes(t));
+
+    setCurrentTags(newTags); // optimistic
+
+    for (const tag of added) {
+      const res = await fetch(`/api/prospects/${prospect.id}/tags`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tag }),
+      });
+      if (!res.ok) {
+        setCurrentTags((prev) => prev.filter((t) => t !== tag)); // revert
+      }
+    }
+    for (const tag of removed) {
+      const res = await fetch(`/api/prospects/${prospect.id}/tags`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tag }),
+      });
+      if (!res.ok) {
+        setCurrentTags((prev) => [...prev, tag]); // revert
+      }
+    }
+  }, [currentTags, prospect.id]);
 
   const noteHasChanged = noteText !== lastSavedNote;
 
@@ -232,6 +316,15 @@ export function ProfileView({
             orgId={orgId}
             onFindLookalikes={() => setShowLookalikes((prev) => !prev)}
             onAddToList={() => setAddToListOpen(true)}
+            canEdit={canEdit}
+            onFieldSave={handleFieldSave}
+            currentPhotoUrl={currentPhotoUrl}
+            onPhotoUpdated={handlePhotoUpdated}
+            teamMembers={teamMembers}
+            onOwnerChange={handleOwnerChange}
+            currentTags={currentTags}
+            tagSuggestions={tagSuggestions}
+            onTagsChange={handleTagsChange}
           />
           <AddToListDialogProfile
             prospectId={prospect.id}

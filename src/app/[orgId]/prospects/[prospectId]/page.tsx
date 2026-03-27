@@ -208,7 +208,7 @@ export default async function ProspectProfilePage({
         .eq("tenant_id", tenantId),
     ]);
     teamMembers = membersResult.data ?? [];
-    tagSuggestions = [...new Set(allTagsResult.data?.map((t) => t.tag) ?? [])];
+    tagSuggestions = Array.from(new Set(allTagsResult.data?.map((t) => t.tag) ?? []));
   }
 
   return (

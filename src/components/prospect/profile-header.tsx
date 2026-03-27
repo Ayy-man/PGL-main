@@ -6,6 +6,11 @@ import {
   Plus,
 } from "lucide-react";
 import { ProspectAvatar } from "./prospect-avatar";
+import { InlineEditField } from "./inline-edit-field";
+import { AvatarUpload } from "./avatar-upload";
+import { LeadOwnerSelect } from "./lead-owner-select";
+import { TagInput } from "@/components/ui/tag-input";
+import { resolveField, isOverridden } from "@/lib/prospects/resolve-fields";
 
 type SourceStatus =
   | "pending"
@@ -23,6 +28,9 @@ interface Prospect {
   title: string | null;
   company: string | null;
   location: string | null;
+  city?: string | null;
+  state?: string | null;
+  country?: string | null;
   work_email: string | null;
   work_phone: string | null;
   linkedin_url: string | null;
@@ -32,6 +40,19 @@ interface Prospect {
     personal_email?: string;
     phone?: string;
   } | null;
+  // Manual override fields
+  manual_display_name?: string | null;
+  manual_title?: string | null;
+  manual_company?: string | null;
+  manual_email?: string | null;
+  manual_phone?: string | null;
+  manual_linkedin_url?: string | null;
+  manual_city?: string | null;
+  manual_state?: string | null;
+  manual_country?: string | null;
+  manual_photo_url?: string | null;
+  pinned_note?: string | null;
+  lead_owner_id?: string | null;
 }
 
 interface ProfileHeaderProps {
@@ -41,6 +62,15 @@ interface ProfileHeaderProps {
   orgId: string;
   onFindLookalikes: () => void;
   onAddToList: () => void;
+  canEdit?: boolean;
+  onFieldSave?: (field: string, value: string | null) => Promise<void>;
+  currentPhotoUrl?: string | null;
+  onPhotoUpdated?: (url: string | null) => void;
+  teamMembers?: Array<{ id: string; full_name: string; email: string }>;
+  onOwnerChange?: (ownerId: string | null) => Promise<void>;
+  currentTags?: string[];
+  tagSuggestions?: string[];
+  onTagsChange?: (tags: string[]) => void;
 }
 
 /**
@@ -58,59 +88,86 @@ export function ProfileHeader({
   prospect,
   enrichmentSourceStatus: _enrichmentSourceStatus,
   onAddToList,
+  canEdit,
+  onFieldSave,
+  currentPhotoUrl,
+  onPhotoUpdated,
+  teamMembers,
+  onOwnerChange,
+  currentTags,
+  tagSuggestions,
+  onTagsChange,
 }: ProfileHeaderProps) {
   return (
     <div className="surface-card surface-card-featured rounded-[14px] p-6 flex flex-col items-center text-center relative overflow-hidden">
 
       {/* Avatar */}
       <div className="relative z-10 mb-4">
-        <ProspectAvatar
-          name={prospect.full_name}
-          photoUrl={prospect.contact_data?.photo_url}
-          email={prospect.work_email || prospect.contact_data?.personal_email}
-          size="lg"
-        />
+        {canEdit ? (
+          <AvatarUpload
+            currentPhotoUrl={currentPhotoUrl ?? null}
+            prospectName={prospect.full_name}
+            prospectId={prospect.id}
+            isEditable={canEdit}
+            onPhotoUpdated={onPhotoUpdated ?? (() => {})}
+          />
+        ) : (
+          <ProspectAvatar
+            name={prospect.full_name}
+            photoUrl={currentPhotoUrl ?? prospect.contact_data?.photo_url}
+            email={prospect.work_email || prospect.contact_data?.personal_email}
+            size="lg"
+          />
+        )}
       </div>
 
       {/* Name */}
       <h1 className="font-serif text-2xl font-bold text-foreground mb-1">
-        {prospect.full_name}
+        <InlineEditField
+          value={resolveField(prospect.manual_display_name, prospect.full_name)}
+          originalValue={prospect.full_name}
+          onSave={async (v) => { await onFieldSave?.("manual_display_name", v); }}
+          isEditable={canEdit}
+          isOverridden={isOverridden(prospect.manual_display_name)}
+          label="Display name"
+          displayClassName="text-xl font-semibold text-[var(--text-primary)]"
+        />
       </h1>
 
-      {/* Title in gold */}
-      {prospect.title && (
-        <p
-          className="text-sm font-medium mb-3"
-          style={{ color: "var(--gold-primary)" }}
-        >
-          {prospect.title}
-        </p>
-      )}
+      {/* Title */}
+      <div
+        className="text-sm font-medium mb-3"
+        style={{ color: "var(--gold-primary)" }}
+      >
+        <InlineEditField
+          value={resolveField(prospect.manual_title, prospect.title)}
+          originalValue={prospect.title}
+          onSave={async (v) => { await onFieldSave?.("manual_title", v); }}
+          isEditable={canEdit}
+          isOverridden={isOverridden(prospect.manual_title)}
+          label="Title"
+          placeholder="Add title..."
+          displayClassName="text-sm text-muted-foreground"
+        />
+      </div>
 
       {/* Company */}
-      {prospect.company && (
-        <p className="text-sm text-muted-foreground mb-4 flex items-center gap-1.5 justify-center">
-          <Building2 className="h-3.5 w-3.5 shrink-0" />
-          {prospect.company}
-        </p>
-      )}
+      <div className="text-sm text-muted-foreground mb-4 flex items-center gap-1.5 justify-center">
+        <Building2 className="h-3.5 w-3.5 shrink-0" />
+        <InlineEditField
+          value={resolveField(prospect.manual_company, prospect.company)}
+          originalValue={prospect.company}
+          onSave={async (v) => { await onFieldSave?.("manual_company", v); }}
+          isEditable={canEdit}
+          isOverridden={isOverridden(prospect.manual_company)}
+          label="Company"
+          placeholder="Add company..."
+          displayClassName="text-sm text-muted-foreground"
+        />
+      </div>
 
-      {/* Location / Enrichment grid */}
-      <div className="w-full grid grid-cols-2 gap-3 mb-5">
-        <div
-          className="rounded-[8px] p-3"
-          style={{
-            background: "rgba(255,255,255,0.02)",
-            border: "1px solid var(--border-default, rgba(255,255,255,0.06))",
-          }}
-        >
-          <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
-            Location
-          </p>
-          <p className="text-sm font-semibold text-foreground truncate">
-            {prospect.location || "\u2014"}
-          </p>
-        </div>
+      {/* Enrichment status grid */}
+      <div className="w-full grid grid-cols-1 gap-3 mb-5">
         <div
           className="rounded-[8px] p-3"
           style={{
@@ -131,8 +188,129 @@ export function ProfileHeader({
         </div>
       </div>
 
+      {/* Contact info inline edits */}
+      <div className="w-full text-left space-y-2 mb-4">
+        <div className="flex flex-col gap-1">
+          <InlineEditField
+            value={resolveField(prospect.manual_email, prospect.work_email)}
+            originalValue={prospect.work_email}
+            onSave={async (v) => { await onFieldSave?.("manual_email", v); }}
+            isEditable={canEdit}
+            isOverridden={isOverridden(prospect.manual_email)}
+            label="Email"
+            type="email"
+            placeholder="Add email..."
+            displayClassName="text-sm text-muted-foreground"
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <InlineEditField
+            value={resolveField(prospect.manual_phone, prospect.work_phone)}
+            originalValue={prospect.work_phone}
+            onSave={async (v) => { await onFieldSave?.("manual_phone", v); }}
+            isEditable={canEdit}
+            isOverridden={isOverridden(prospect.manual_phone)}
+            label="Phone"
+            type="tel"
+            placeholder="Add phone..."
+            displayClassName="text-sm text-muted-foreground"
+          />
+        </div>
+      </div>
+
+      {/* Location inline edits */}
+      <div className="w-full mt-3 pt-3 border-t border-[var(--border-default)] text-left">
+        <p className="text-xs text-muted-foreground mb-1">Location</p>
+        <div className="space-y-1">
+          <InlineEditField
+            value={resolveField(prospect.manual_city, prospect.city)}
+            originalValue={prospect.city}
+            onSave={async (v) => { await onFieldSave?.("manual_city", v); }}
+            isEditable={canEdit}
+            isOverridden={isOverridden(prospect.manual_city)}
+            label="City"
+            placeholder="Add city..."
+            displayClassName="text-sm text-muted-foreground"
+          />
+          <InlineEditField
+            value={resolveField(prospect.manual_state, prospect.state)}
+            originalValue={prospect.state}
+            onSave={async (v) => { await onFieldSave?.("manual_state", v); }}
+            isEditable={canEdit}
+            isOverridden={isOverridden(prospect.manual_state)}
+            label="State"
+            placeholder="Add state..."
+            displayClassName="text-sm text-muted-foreground"
+          />
+          <InlineEditField
+            value={resolveField(prospect.manual_country, prospect.country)}
+            originalValue={prospect.country}
+            onSave={async (v) => { await onFieldSave?.("manual_country", v); }}
+            isEditable={canEdit}
+            isOverridden={isOverridden(prospect.manual_country)}
+            label="Country"
+            placeholder="Add country..."
+            displayClassName="text-sm text-muted-foreground"
+          />
+        </div>
+      </div>
+
+      {/* Pinned note */}
+      {(prospect.pinned_note || canEdit) && (
+        <div className="w-full mt-3 pt-3 border-t border-[var(--border-default)] text-left">
+          <InlineEditField
+            value={prospect.pinned_note ?? null}
+            onSave={async (v) => { await onFieldSave?.("pinned_note", v); }}
+            isEditable={canEdit}
+            label="Pinned note"
+            placeholder="Add a pinned note..."
+            displayClassName="text-xs text-muted-foreground italic"
+          />
+        </div>
+      )}
+
+      {/* Lead owner */}
+      {teamMembers && teamMembers.length > 0 && (
+        <div className="w-full mt-3 pt-3 border-t border-[var(--border-default)] text-left">
+          <p className="text-xs text-muted-foreground mb-1">Assigned to</p>
+          <LeadOwnerSelect
+            currentOwnerId={prospect.lead_owner_id ?? null}
+            teamMembers={teamMembers}
+            isEditable={canEdit}
+            onOwnerChange={onOwnerChange ?? (async () => {})}
+          />
+        </div>
+      )}
+
+      {/* Tags */}
+      <div className="w-full mt-3 pt-3 border-t border-[var(--border-default)] text-left">
+        <p className="text-xs text-muted-foreground mb-1">Tags</p>
+        {canEdit ? (
+          <TagInput
+            value={currentTags ?? []}
+            onChange={onTagsChange ?? (() => {})}
+            suggestions={tagSuggestions}
+            placeholder="Add tags..."
+          />
+        ) : (
+          <div className="flex flex-wrap gap-1">
+            {(currentTags ?? []).map((tag) => (
+              <span
+                key={tag}
+                className="px-2 py-0.5 rounded-full text-xs bg-[var(--gold-bg)] text-[var(--gold-text)]"
+              >
+                {tag}
+              </span>
+            ))}
+            {(!currentTags || currentTags.length === 0) && (
+              <span className="text-xs text-muted-foreground">No tags</span>
+            )}
+          </div>
+        )}
+      </div>
+
       {/* CTA Buttons */}
-      <div className="w-full flex flex-col gap-2">
+      <div className="w-full flex flex-col gap-2 mt-4">
         <button
           className="w-full h-10 rounded-[8px] text-sm font-semibold flex items-center justify-center gap-2 transition-all opacity-50 cursor-not-allowed"
           style={{
