@@ -41,11 +41,14 @@ async function updateSourceStatus(
 /**
  * Inngest function: Multi-step prospect enrichment workflow
  *
- * Orchestrates data collection from 4 sources:
- * 1. ContactOut - personal contact info
- * 2. Exa.ai - web presence and wealth signals
- * 3. SEC EDGAR - insider transactions (if public company)
- * 4. Claude AI - 2-3 sentence prospect summary
+ * Orchestrates data collection from 5 sources:
+ * 1. mark-in-progress - initialize enrichment status
+ * 2. ContactOut - personal contact info
+ * 3. Exa.ai - web presence and wealth signals
+ * 4. SEC EDGAR - insider transactions (if public company)
+ * 4.5. Market Data (Finnhub + Yahoo Finance) - stock snapshot (if public company with ticker)
+ * 5. Claude AI - 2-3 sentence prospect summary
+ * 6. Finalize - mark complete, log activity
  *
  * Each step runs independently with its own error handling.
  * Partial enrichment is saved even if later steps fail.
@@ -87,23 +90,29 @@ export const enrichProspect = inngest.createFunction(
       title,
       isPublicCompany,
       companyCik,
+      ticker,
     } = event.data;
 
     const supabase = createAdminClient();
 
     // Step 1: Mark enrichment as in progress
     await step.run("mark-in-progress", async () => {
+      const initialSourceStatus: Record<string, { status: string; at: string }> = {
+        contactout: { status: "pending", at: new Date().toISOString() },
+        exa: { status: "pending", at: new Date().toISOString() },
+        sec: { status: "pending", at: new Date().toISOString() },
+        market: isPublicCompany && ticker
+          ? { status: "pending", at: new Date().toISOString() }
+          : { status: "skipped", at: new Date().toISOString() },
+        claude: { status: "pending", at: new Date().toISOString() },
+      };
+
       const { error } = await supabase
         .from("prospects")
         .update({
           enrichment_status: "in_progress",
           enrichment_started_at: new Date().toISOString(),
-          enrichment_source_status: {
-            contactout: { status: "pending", at: new Date().toISOString() },
-            exa: { status: "pending", at: new Date().toISOString() },
-            sec: { status: "pending", at: new Date().toISOString() },
-            claude: { status: "pending", at: new Date().toISOString() },
-          },
+          enrichment_source_status: initialSourceStatus,
         })
         .eq("id", prospectId);
 
@@ -328,6 +337,52 @@ export const enrichProspect = inngest.createFunction(
       }
     });
 
+    // Step 4.5: Fetch market data (only for public companies with a ticker)
+    const marketData = await step.run("fetch-market-data", async () => {
+      if (!isPublicCompany || !ticker) {
+        // Already marked as skipped in mark-in-progress
+        return { found: false, status: "skipped" };
+      }
+
+      try {
+        const { fetchMarketSnapshot } = await import("@/lib/enrichment/market-data");
+
+        // Use insider data from the EDGAR step if available
+        const insiderDataForMarket = edgarData.found && edgarData.transactions.length > 0
+          ? { transactions: edgarData.transactions }
+          : null;
+
+        const snapshot = await fetchMarketSnapshot(ticker, insiderDataForMarket);
+
+        // Save snapshot to DB
+        await supabase
+          .from("prospects")
+          .update({
+            stock_snapshot: snapshot as unknown as Record<string, unknown>,
+            stock_snapshot_at: snapshot.fetchedAt,
+          })
+          .eq("id", prospectId);
+
+        // Mark source complete
+        await updateSourceStatus(prospectId, "market", {
+          status: "complete",
+          at: new Date().toISOString(),
+        });
+
+        return { found: true, status: "complete" };
+      } catch (error) {
+        console.error("[Inngest] Market data enrichment failed:", error);
+
+        await updateSourceStatus(prospectId, "market", {
+          status: "failed",
+          error: error instanceof Error ? error.message : String(error),
+          at: new Date().toISOString(),
+        });
+
+        return { found: false, status: "failed" };
+      }
+    });
+
     // Step 5: Generate AI summary with Claude
     const aiSummary = await step.run("generate-summary", async () => {
       try {
@@ -409,6 +464,7 @@ export const enrichProspect = inngest.createFunction(
           contactout: contactData.status,
           exa: exaData.status,
           sec: edgarData.status,
+          market: marketData.status,
           claude: aiSummary.status,
         },
       });
@@ -423,6 +479,7 @@ export const enrichProspect = inngest.createFunction(
         contactout: contactData.status,
         exa: exaData.status,
         sec: edgarData.status,
+        market: marketData.status,
         claude: aiSummary.status,
       },
     };
