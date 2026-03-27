@@ -151,7 +151,7 @@ export function ListMemberTable({ members }: ListMemberTableProps) {
   };
 
   return (
-    <div className="border rounded-lg" style={{ borderColor: "var(--border-subtle)" }}>
+    <div>
       {/* Desktop table */}
       <div className="hidden md:block">
         <Table>
