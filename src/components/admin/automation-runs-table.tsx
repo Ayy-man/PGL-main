@@ -183,7 +183,6 @@ export function AutomationRunsTable({ onRunClick }: AutomationRunsTableProps) {
   const [runs, setRuns] = useState<Run[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [hoveredRow, setHoveredRow] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -270,21 +269,16 @@ export function AutomationRunsTable({ onRunClick }: AutomationRunsTableProps) {
                   </tr>
                 </thead>
                 <tbody>
-                  {runs.map((run) => (
+                  {runs.map((run, index) => (
                     <tr
                       key={`${run.functionId}-${run.id}`}
                       className={cn(
-                        "cursor-pointer transition-colors border-b last:border-b-0"
+                        "cursor-pointer border-b last:border-b-0 row-hover-lift press-effect row-enter"
                       )}
                       style={{
                         borderColor: "var(--border-subtle)",
-                        background:
-                          hoveredRow === run.id
-                            ? "rgba(255,255,255,0.02)"
-                            : "transparent",
+                        animationDelay: `${Math.min(index * 30, 300)}ms`,
                       }}
-                      onMouseEnter={() => setHoveredRow(run.id)}
-                      onMouseLeave={() => setHoveredRow(null)}
                       onClick={() => onRunClick(run.id, run.functionId)}
                     >
                       <td className="px-4 py-3">
@@ -338,10 +332,11 @@ export function AutomationRunsTable({ onRunClick }: AutomationRunsTableProps) {
               className="md:hidden divide-y"
               style={{ borderColor: "var(--border-subtle)" }}
             >
-              {runs.map((run) => (
+              {runs.map((run, index) => (
                 <div
                   key={`mobile-${run.functionId}-${run.id}`}
-                  className="p-4 space-y-2 cursor-pointer"
+                  className="p-4 space-y-2 cursor-pointer press-effect row-enter"
+                  style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
                   onClick={() => onRunClick(run.id, run.functionId)}
                 >
                   <div className="flex items-center justify-between">
