@@ -199,12 +199,10 @@ export async function searchApollo(
     const previewPeople: ApolloPerson[] = searchPeople.map((p) => ({
       id: p.id,
       first_name: p.first_name,
-      last_name: p.last_name || p.last_name_obfuscated || "",
-      name: p.name || `${p.first_name} ${p.last_name || p.last_name_obfuscated || ""}`.trim(),
+      last_name: p.last_name_obfuscated || "",
+      name: `${p.first_name} ${p.last_name_obfuscated || ""}`.trim(),
       title: p.title || "",
       organization_name: p.organization?.name,
-      email: p.email,
-      linkedin_url: p.linkedin_url,
       _enriched: false,
     }));
 
