@@ -2,6 +2,16 @@
 
 import { useState, useEffect, useRef } from "react";
 import { TrendingUp, RefreshCw, Loader2, BarChart3 } from "lucide-react";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  Brush,
+  CartesianGrid,
+} from "recharts";
 
 const STALE_THRESHOLD_MS = 4 * 60 * 60 * 1000; // 4 hours
 import type { StockSnapshot } from "@/types/database";
@@ -51,108 +61,48 @@ function formatRelative(dateStr: string): string {
   });
 }
 
-function Sparkline({ data }: { data: number[] }) {
-  if (data.length < 2) return null;
-
-  const width = 200;
-  const height = 40;
-  const padding = 2;
-
-  const min = Math.min(...data);
-  const max = Math.max(...data);
-  const range = max - min || 1;
-
-  const points = data.map((v, i) => {
-    const x = padding + (i / (data.length - 1)) * (width - padding * 2);
-    const y = padding + (1 - (v - min) / range) * (height - padding * 2);
-    return `${x},${y}`;
-  });
-
-  const isUp = data[data.length - 1] >= data[0];
-  const strokeColor = isUp
-    ? "var(--success, #22c55e)"
-    : "var(--destructive, #ef4444)";
-
-  // Build gradient fill path
-  const fillPoints = [
-    `${padding},${height - padding}`,
-    ...points,
-    `${width - padding},${height - padding}`,
-  ].join(" ");
-
-  return (
-    <svg
-      viewBox={`0 0 ${width} ${height}`}
-      className="w-full"
-      style={{ height: 40 }}
-      preserveAspectRatio="none"
-    >
-      <defs>
-        <linearGradient id="sparkFill" x1="0" y1="0" x2="0" y2="1">
-          <stop
-            offset="0%"
-            stopColor={strokeColor}
-            stopOpacity="0.15"
-          />
-          <stop
-            offset="100%"
-            stopColor={strokeColor}
-            stopOpacity="0"
-          />
-        </linearGradient>
-      </defs>
-      <polygon
-        points={fillPoints}
-        fill="url(#sparkFill)"
-      />
-      <polyline
-        points={points.join(" ")}
-        fill="none"
-        stroke={strokeColor}
-        strokeWidth="1.5"
-        strokeLinejoin="round"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function PerfChip({
+function CustomTooltip({
+  active,
+  payload,
   label,
-  value,
+  periodStartPrice,
 }: {
-  label: string;
-  value: number;
+  active?: boolean;
+  payload?: Array<{ value: number }>;
+  label?: string;
+  periodStartPrice: number;
 }) {
-  const isPositive = value >= 0;
-  const color = isPositive
-    ? "var(--success, #22c55e)"
-    : "var(--destructive, #ef4444)";
-  const bgColor = isPositive
-    ? "rgba(34,197,94,0.1)"
-    : "rgba(239,68,68,0.1)";
-  const borderColor = isPositive
-    ? "rgba(34,197,94,0.2)"
-    : "rgba(239,68,68,0.2)";
+  if (!active || !payload?.length) return null;
+  const price = payload[0].value;
+  const changeFromStart =
+    periodStartPrice !== 0
+      ? ((price - periodStartPrice) / periodStartPrice) * 100
+      : 0;
+  const isUp = changeFromStart >= 0;
 
   return (
     <div
-      className="flex flex-col items-center rounded-[8px] px-3 py-2"
+      className="rounded-[8px] px-3 py-2.5 shadow-lg"
       style={{
-        background: bgColor,
-        border: `1px solid ${borderColor}`,
+        background: "rgba(8, 8, 10, 0.9)",
+        backdropFilter: "blur(8px)",
+        border: "1px solid rgba(255,255,255,0.08)",
       }}
     >
-      <span className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">
-        {label}
-      </span>
-      <span
-        className="text-xs font-bold font-mono"
-        style={{ color }}
+      <p className="text-[10px] text-muted-foreground mb-1">{label}</p>
+      <p
+        className="text-base font-bold font-mono"
+        style={{ color: "var(--gold-primary)" }}
       >
-        {isPositive ? "+" : ""}
-        {value.toFixed(1)}%
-      </span>
+        {formatPrice(price)}
+      </p>
+      <p
+        className="text-xs font-mono mt-0.5"
+        style={{ color: isUp ? "#22c55e" : "#ef4444" }}
+      >
+        {isUp ? "+" : ""}
+        {changeFromStart.toFixed(2)}% from period start
+      </p>
     </div>
   );
 }
@@ -170,6 +120,7 @@ export function MarketIntelligenceCard({
   const [fetchedAt, setFetchedAt] = useState<string | null>(snapshotAt);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [activePeriod, setActivePeriod] = useState<"7D" | "30D" | "90D" | "1Y">("90D");
   const autoFetchedRef = useRef(false);
 
   // Auto-refresh on mount if snapshot is stale (>4h) or missing
@@ -278,6 +229,51 @@ export function MarketIntelligenceCard({
   const significantGain =
     snapshot.equity && Math.abs(snapshot.equity.gain90d) > 100_000;
 
+  // Transform sparkline number[] -> {date: string, price: number}[]
+  const fullData = snapshot.sparkline.map((price, i) => ({
+    date: new Date(
+      Date.now() - (snapshot.sparkline.length - 1 - i) * 86400000
+    ).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+    price,
+  }));
+
+  // Filter by active period
+  const periodDays: Record<string, number> = {
+    "7D": 7,
+    "30D": 30,
+    "90D": 90,
+    "1Y": 365,
+  };
+  const daysToShow = periodDays[activePeriod];
+  const chartData = fullData.slice(Math.max(0, fullData.length - daysToShow));
+
+  // Determine chart color based on period price direction
+  const periodUp =
+    chartData.length >= 2 &&
+    chartData[chartData.length - 1].price >= chartData[0].price;
+  const chartColor = periodUp ? "#d4af37" : "#ef4444"; // gold vs red
+
+  // Compute daily change for the enhanced price header
+  const prevClose =
+    snapshot.sparkline.length >= 2
+      ? snapshot.sparkline[snapshot.sparkline.length - 2]
+      : null;
+  const dailyChange =
+    prevClose != null ? snapshot.currentPrice - prevClose : null;
+  const dailyChangePct =
+    prevClose != null && prevClose !== 0
+      ? ((snapshot.currentPrice - prevClose) / prevClose) * 100
+      : null;
+
+  // Format fetchedAt as "Mar 27, 2026"
+  const fetchedAtFormatted = fetchedAt
+    ? new Date(fetchedAt).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
+    : null;
+
   return (
     <div className="surface-card rounded-[14px] p-6">
       {/* Header */}
@@ -329,35 +325,165 @@ export function MarketIntelligenceCard({
         </p>
       )}
 
-      {/* Current Price */}
+      {/* Enhanced Current Price Header */}
       <div className="mb-4">
         <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
           Current Price
         </p>
-        <p
-          className="text-2xl font-bold font-mono"
-          style={{ color: "var(--gold-primary)" }}
-        >
-          {formatPrice(snapshot.currentPrice)}
-        </p>
+        <div className="flex items-baseline gap-2">
+          <p
+            className="text-2xl font-bold font-mono"
+            style={{ color: "var(--gold-primary)" }}
+          >
+            {formatPrice(snapshot.currentPrice)}
+          </p>
+          {dailyChange != null && dailyChangePct != null && (
+            <span
+              className="text-sm font-mono font-medium"
+              style={{ color: dailyChange >= 0 ? "#22c55e" : "#ef4444" }}
+            >
+              {dailyChange >= 0 ? "+" : ""}
+              {formatPrice(dailyChange)} ({dailyChange >= 0 ? "+" : ""}
+              {dailyChangePct.toFixed(1)}%)
+            </span>
+          )}
+        </div>
+        {fetchedAtFormatted && (
+          <p className="text-[10px] text-muted-foreground mt-0.5">
+            As of {fetchedAtFormatted}
+          </p>
+        )}
       </div>
 
-      {/* Sparkline */}
-      {snapshot.sparkline.length > 1 && (
-        <div className="mb-4">
-          <Sparkline data={snapshot.sparkline} />
-          <p className="text-[10px] text-muted-foreground mt-1 text-right">
-            90-day price history
-          </p>
+      {/* Interactive Recharts AreaChart */}
+      {chartData.length > 1 && (
+        <div className="mb-4" style={{ width: "100%", height: 200 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart
+              data={chartData}
+              margin={{ top: 5, right: 5, left: 5, bottom: 0 }}
+            >
+              <defs>
+                <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop
+                    offset="0%"
+                    stopColor={chartColor}
+                    stopOpacity={0.2}
+                  />
+                  <stop
+                    offset="100%"
+                    stopColor={chartColor}
+                    stopOpacity={0}
+                  />
+                </linearGradient>
+              </defs>
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="rgba(255,255,255,0.03)"
+                vertical={false}
+              />
+              <XAxis
+                dataKey="date"
+                tick={{
+                  fontSize: 10,
+                  fontFamily: "var(--font-mono)",
+                  fill: "var(--text-tertiary, rgba(232,228,220,0.35))",
+                }}
+                tickLine={false}
+                axisLine={false}
+                interval="preserveStartEnd"
+                minTickGap={40}
+              />
+              <YAxis
+                orientation="right"
+                tick={{
+                  fontSize: 10,
+                  fontFamily: "var(--font-mono)",
+                  fill: "var(--text-tertiary, rgba(232,228,220,0.35))",
+                }}
+                tickLine={false}
+                axisLine={false}
+                tickFormatter={(v: number) => `$${v.toFixed(0)}`}
+                domain={["auto", "auto"]}
+                width={50}
+              />
+              <Tooltip
+                content={
+                  <CustomTooltip
+                    periodStartPrice={chartData[0]?.price ?? 0}
+                  />
+                }
+                cursor={{
+                  stroke: "rgba(255,255,255,0.2)",
+                  strokeDasharray: "4 4",
+                }}
+              />
+              <Area
+                type="monotone"
+                dataKey="price"
+                stroke={chartColor}
+                strokeWidth={2}
+                fill="url(#priceGradient)"
+                animationDuration={500}
+              />
+              <Brush
+                dataKey="date"
+                height={30}
+                stroke={chartColor}
+                fill="rgba(255,255,255,0.02)"
+                travellerWidth={8}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
       )}
 
-      {/* Performance chips */}
-      <div className="grid grid-cols-4 gap-2 mb-4">
-        <PerfChip label="7D" value={perf.d7} />
-        <PerfChip label="30D" value={perf.d30} />
-        <PerfChip label="90D" value={perf.d90} />
-        <PerfChip label="1Y" value={perf.y1} />
+      {/* Interactive Period Buttons */}
+      <div className="flex gap-2 mb-4">
+        {(
+          [
+            { key: "7D" as const, label: "7D", value: perf.d7 },
+            { key: "30D" as const, label: "30D", value: perf.d30 },
+            { key: "90D" as const, label: "90D", value: perf.d90 },
+            { key: "1Y" as const, label: "1Y", value: perf.y1 },
+          ] as const
+        ).map(({ key, label, value }) => {
+          const isActive = activePeriod === key;
+          const isPositive = value >= 0;
+          return (
+            <button
+              key={key}
+              onClick={() => setActivePeriod(key)}
+              className="flex-1 flex flex-col items-center rounded-[8px] px-3 py-2 transition-all cursor-pointer"
+              style={{
+                background: isActive
+                  ? "rgba(212,175,55,0.15)"
+                  : "rgba(255,255,255,0.02)",
+                border: isActive
+                  ? "1px solid rgba(212,175,55,0.4)"
+                  : "1px solid rgba(255,255,255,0.06)",
+              }}
+            >
+              <span
+                className="text-[10px] uppercase tracking-wider mb-0.5"
+                style={{
+                  color: isActive
+                    ? "var(--gold-primary)"
+                    : "var(--text-secondary, rgba(232,228,220,0.5))",
+                }}
+              >
+                {label}
+              </span>
+              <span
+                className="text-xs font-bold font-mono"
+                style={{ color: isPositive ? "#22c55e" : "#ef4444" }}
+              >
+                {isPositive ? "+" : ""}
+                {value.toFixed(1)}%
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Equity position */}
