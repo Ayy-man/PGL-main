@@ -4,10 +4,6 @@ import {
   Building2,
   Sparkles,
   Plus,
-  Brain,
-  Search,
-  Landmark,
-  UserCheck,
 } from "lucide-react";
 import { ProspectAvatar } from "./prospect-avatar";
 
@@ -40,19 +36,12 @@ interface Prospect {
 
 interface ProfileHeaderProps {
   prospect: Prospect;
-  enrichmentSourceStatus: Record<string, SourceStatus>;
+  enrichmentSourceStatus?: Record<string, SourceStatus>;
   isStale: boolean;
   orgId: string;
   onFindLookalikes: () => void;
   onAddToList: () => void;
 }
-
-const ENRICHMENT_SOURCES = [
-  { key: "contactout", Icon: UserCheck, label: "ContactOut" },
-  { key: "exa", Icon: Search, label: "Exa" },
-  { key: "sec", Icon: Landmark, label: "SEC" },
-  { key: "claude", Icon: Brain, label: "Claude" },
-] as const;
 
 /**
  * ProfileHeader — Left-column profile card for the prospect dossier.
@@ -113,44 +102,7 @@ export function ProfileHeader({
         </p>
       )}
 
-      {/* Enrichment Source Icons */}
-      <div className="flex items-center justify-center gap-2 mb-5 w-full">
-        {ENRICHMENT_SOURCES.map(({ key, Icon, label }) => {
-          const status = enrichmentSourceStatus[key] ?? "pending";
-          const isComplete = status === "complete";
-          return (
-            <div
-              key={key}
-              className="relative flex items-center justify-center h-8 w-8 rounded-full transition-colors cursor-pointer"
-              style={{
-                background: "rgba(255,255,255,0.03)",
-                border: `1px solid ${isComplete ? "var(--border-gold)" : "var(--border-default, rgba(255,255,255,0.06))"}`,
-              }}
-              title={`${label}: ${status}`}
-            >
-              <Icon
-                className="h-4 w-4 shrink-0"
-                style={{
-                  color: isComplete
-                    ? "var(--gold-primary)"
-                    : "var(--text-muted, rgba(255,255,255,0.25))",
-                }}
-              />
-              {isComplete && (
-                <div
-                  className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full"
-                  style={{
-                    background: "var(--success, #22c55e)",
-                    border: "2px solid var(--bg-root, #08080a)",
-                  }}
-                />
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Location / Wealth Tier grid */}
+      {/* Location / Enrichment grid */}
       <div className="w-full grid grid-cols-2 gap-3 mb-5">
         <div
           className="rounded-[8px] p-3"
