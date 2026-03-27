@@ -3,6 +3,8 @@ import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { logActivity } from "@/lib/activity-logger";
 import { ProfileView } from "@/components/prospect/profile-view";
+import { ROLE_PERMISSIONS } from "@/types/auth";
+import type { UserRole } from "@/types/auth";
 
 /**
  * Prospect Profile Page
@@ -42,6 +44,10 @@ export default async function ProspectProfilePage({
   if (!tenantId) {
     return notFound();
   }
+
+  // Determine canEdit from user role
+  const role = (user.app_metadata?.role as UserRole) || "assistant";
+  const canEdit = ROLE_PERMISSIONS[role]?.canEdit ?? false;
 
   // Fetch prospect data from Supabase (with RLS)
   // Use select('*') to avoid failing on columns that haven't been added yet
@@ -174,6 +180,37 @@ export default async function ProspectProfilePage({
     .select("id, name, description, member_count")
     .order("name", { ascending: true });
 
+  // Fetch prospect tags
+  const { data: prospectTags } = await supabase
+    .from("prospect_tags")
+    .select("id, tag, created_at")
+    .eq("prospect_id", prospectId)
+    .eq("tenant_id", tenantId)
+    .order("created_at");
+
+  const tags = prospectTags?.map((t) => t.tag) ?? [];
+
+  // Fetch team members and tag suggestions in parallel — only if canEdit
+  let teamMembers: Array<{ id: string; full_name: string; email: string }> = [];
+  let tagSuggestions: string[] = [];
+
+  if (canEdit) {
+    const [membersResult, allTagsResult] = await Promise.all([
+      supabase
+        .from("users")
+        .select("id, full_name, email")
+        .eq("tenant_id", tenantId)
+        .eq("is_active", true)
+        .order("full_name"),
+      supabase
+        .from("prospect_tags")
+        .select("tag")
+        .eq("tenant_id", tenantId),
+    ]);
+    teamMembers = membersResult.data ?? [];
+    tagSuggestions = [...new Set(allTagsResult.data?.map((t) => t.tag) ?? [])];
+  }
+
   return (
     <ProfileView
       prospect={prospect}
@@ -183,6 +220,10 @@ export default async function ProspectProfilePage({
       orgId={orgId}
       activityEntries={activityEntries ?? []}
       allLists={allLists ?? []}
+      canEdit={canEdit}
+      teamMembers={teamMembers}
+      tags={tags}
+      tagSuggestions={tagSuggestions}
     />
   );
 }
