@@ -22,6 +22,7 @@ const SOURCE_LABELS: Record<string, string> = {
   contactout: "Verified Contact",
   exa: "Web Presence",
   sec: "Public Filings",
+  market: "Market Data",
   claude: "AI Analysis",
 };
 
@@ -145,7 +146,7 @@ export function EnrichmentStatus({
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+      <div className="flex flex-wrap gap-4">
         {Object.entries(SOURCE_LABELS).map(([key, label]) => {
           const status = sourceStatus[key] || "pending";
           return (

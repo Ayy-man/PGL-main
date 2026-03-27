@@ -78,6 +78,7 @@ const SOURCE_LABELS: Record<string, string> = {
   contactout: "Verified Contact",
   exa: "Web Presence",
   sec: "Public Filings",
+  market: "Market Data",
   claude: "AI Analysis",
 };
 

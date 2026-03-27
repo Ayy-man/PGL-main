@@ -609,47 +609,63 @@ export function ProfileView({
               </div>
 
               {/* Source status breakdown */}
-              <div className="grid grid-cols-2 gap-1.5 mt-2">
-                {(["contactout", "exa", "sec", "claude"] as const).map(
-                  (src) => {
-                    const status = enrichmentSourceStatus[src] ?? "pending";
-                    const isComplete = status === "complete";
-                    const isFailed = status === "failed";
-                    const isInProgress = status === "in_progress";
-                    const dotColor = isComplete
-                      ? "var(--success, #22c55e)"
-                      : isFailed
-                        ? "var(--destructive, #ef4444)"
+              {(() => {
+                const enrichmentSources = [
+                  "contactout",
+                  "exa",
+                  "sec",
+                  ...(prospect.publicly_traded_symbol ? ["market"] : []),
+                  "claude",
+                ] as string[];
+                const shortLabels: Record<string, string> = {
+                  contactout: "Contact",
+                  exa: "Web",
+                  sec: "Filings",
+                  market: "Market",
+                  claude: "AI",
+                };
+                return (
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {enrichmentSources.map((src) => {
+                      const status = enrichmentSourceStatus[src] ?? "pending";
+                      const isComplete = status === "complete";
+                      const isFailed = status === "failed";
+                      const isInProgress = status === "in_progress";
+                      const dotColor = isComplete
+                        ? "var(--success, #22c55e)"
+                        : isFailed
+                          ? "var(--destructive, #ef4444)"
+                          : isInProgress
+                            ? "var(--gold-primary)"
+                            : "rgba(255,255,255,0.2)";
+                      const textColor = isComplete
+                        ? "var(--gold-primary)"
                         : isInProgress
                           ? "var(--gold-primary)"
-                          : "rgba(255,255,255,0.2)";
-                    const textColor = isComplete
-                      ? "var(--gold-primary)"
-                      : isInProgress
-                        ? "var(--gold-primary)"
-                        : "var(--text-secondary, rgba(232,228,220,0.5))";
-                    return (
-                      <div
-                        key={src}
-                        className="flex items-center px-2 py-1 rounded-[8px] text-[11px] gap-1.5 transition-all"
-                        style={{
-                          border: `1px solid ${isComplete ? "rgba(212,175,55,0.15)" : "var(--border-default, rgba(255,255,255,0.06))"}`,
-                          background: isComplete
-                            ? "rgba(212,175,55,0.04)"
-                            : "transparent",
-                          color: textColor,
-                        }}
-                      >
-                        <span
-                          className="h-1.5 w-1.5 rounded-full inline-block shrink-0"
-                          style={{ background: dotColor }}
-                        />
-                        {{ contactout: "Contact", exa: "Web", sec: "Filings", claude: "AI" }[src]}
-                      </div>
-                    );
-                  }
-                )}
-              </div>
+                          : "var(--text-secondary, rgba(232,228,220,0.5))";
+                      return (
+                        <div
+                          key={src}
+                          className="flex items-center px-2 py-1 rounded-[8px] text-[11px] gap-1.5 transition-all flex-1 min-w-[calc(50%-3px)]"
+                          style={{
+                            border: `1px solid ${isComplete ? "rgba(212,175,55,0.15)" : "var(--border-default, rgba(255,255,255,0.06))"}`,
+                            background: isComplete
+                              ? "rgba(212,175,55,0.04)"
+                              : "transparent",
+                            color: textColor,
+                          }}
+                        >
+                          <span
+                            className="h-1.5 w-1.5 rounded-full inline-block shrink-0"
+                            style={{ background: dotColor }}
+                          />
+                          {shortLabels[src] ?? src}
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
 
               {/* Last enriched timestamp */}
               {prospect.last_enriched_at && (
