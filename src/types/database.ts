@@ -77,6 +77,23 @@ export interface Prospect {
   stock_snapshot: StockSnapshot | null;
   stock_snapshot_at: string | null;
   notes: string | null;
+  // Manual override fields (display logic: manual_* ?? enriched_* ?? null)
+  manual_display_name: string | null;
+  manual_title: string | null;
+  manual_company: string | null;
+  manual_email: string | null;
+  manual_email_secondary: string | null;
+  manual_phone: string | null;
+  manual_phone_label: string | null;
+  manual_linkedin_url: string | null;
+  manual_city: string | null;
+  manual_state: string | null;
+  manual_country: string | null;
+  manual_wealth_tier: string | null;
+  manual_photo_url: string | null;
+  pinned_note: string | null;
+  lead_owner_id: string | null;
+  updated_by: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -217,7 +234,12 @@ export type ActivityActionType =
   | 'note_added'
   | 'csv_exported'
   | 'persona_created'
-  | 'lookalike_search';
+  | 'lookalike_search'
+  | 'profile_edited'
+  | 'tag_added'
+  | 'tag_removed'
+  | 'photo_uploaded'
+  | 'lead_owner_assigned';
 
 // Usage Metrics Daily table
 export interface UsageMetricsDaily {

@@ -25,6 +25,23 @@ export interface Prospect {
   enriched_at: string | null;
   created_at: string;
   updated_at: string;
+  // Manual override fields
+  manual_display_name?: string | null;
+  manual_title?: string | null;
+  manual_company?: string | null;
+  manual_email?: string | null;
+  manual_email_secondary?: string | null;
+  manual_phone?: string | null;
+  manual_phone_label?: string | null;
+  manual_linkedin_url?: string | null;
+  manual_city?: string | null;
+  manual_state?: string | null;
+  manual_country?: string | null;
+  manual_wealth_tier?: string | null;
+  manual_photo_url?: string | null;
+  pinned_note?: string | null;
+  lead_owner_id?: string | null;
+  updated_by?: string | null;
 }
 
 /**
