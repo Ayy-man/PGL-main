@@ -72,7 +72,6 @@ export function ProspectAvatar({
   }, [photoUrl, email]);
 
   const currentUrl = urls[urlIndex];
-  const hasImage = currentUrl && !loaded ? true : loaded;
 
   const handleLoad = () => setLoaded(true);
   const handleError = () => {
