@@ -212,15 +212,24 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
     if (bulkSelectedListIds.length === 0 || selectedIds.size === 0) return;
     setIsBulkSubmitting(true);
     const allSelected = results.filter((r) => selectedIds.has(r.id));
-    const skippedCount = allSelected.filter((p) => p._enriched === false).length;
-    const selectedProspects = allSelected.filter((p) => p._enriched !== false);
 
-    if (skippedCount > 0) {
-      toast({
-        title: "Preview-only prospects skipped",
-        description: `${skippedCount} prospect${skippedCount !== 1 ? "s" : ""} skipped because they need enrichment first.`,
-        variant: "destructive",
-      });
+    // In enrich mode, process ALL prospects (including previews) —
+    // upsert saves them to DB, then enrichment pipeline fills in data.
+    // In add-to-list mode, skip preview-only prospects.
+    let selectedProspects: typeof allSelected;
+    if (bulkMode === "enrich") {
+      selectedProspects = allSelected;
+    } else {
+      const skippedCount = allSelected.filter((p) => p._enriched === false).length;
+      selectedProspects = allSelected.filter((p) => p._enriched !== false);
+
+      if (skippedCount > 0) {
+        toast({
+          title: "Preview-only prospects skipped",
+          description: `${skippedCount} prospect${skippedCount !== 1 ? "s" : ""} skipped because they need enrichment first.`,
+          variant: "destructive",
+        });
+      }
     }
 
     if (selectedProspects.length === 0) {
