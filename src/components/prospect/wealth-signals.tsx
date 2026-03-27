@@ -2,6 +2,18 @@
 
 import { Briefcase, DollarSign, Mic2, Gem, Building2, Trophy, ExternalLink, Diamond, Landmark } from "lucide-react";
 
+function cleanText(text: string): string {
+  return text
+    .replace(/^#{1,3}\s+/gm, "")
+    .replace(/&amp;/g, "&")
+    .replace(/&#x27;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/^(Summary:|Key Points:)\s*/i, "")
+    .trim();
+}
+
 interface DigestedSignal {
   relevant: boolean;
   category: "career_move" | "funding" | "media" | "wealth_signal" | "company_intel" | "recognition";
@@ -128,7 +140,7 @@ export function WealthSignals({ webData, insiderData }: WealthSignalsProps) {
             return (
               <div
                 key={index}
-                className={`rounded-[8px] p-4 flex flex-col h-full transition-all${isWide ? " md:col-span-2" : ""}`}
+                className={`rounded-[8px] p-4 flex flex-col max-h-[160px] overflow-hidden relative transition-all${isWide ? " md:col-span-2" : ""}`}
                 style={{
                   background: "rgba(255,255,255,0.02)",
                   border:
@@ -143,7 +155,7 @@ export function WealthSignals({ webData, insiderData }: WealthSignalsProps) {
                     "var(--border-default, rgba(255,255,255,0.06))";
                 }}
               >
-                {/* Category icon + pill */}
+                {/* Category icon + pill + timestamp */}
                 <div className="flex items-center gap-2 mb-3">
                   <CategoryIcon
                     className="h-4 w-4 shrink-0"
@@ -159,21 +171,33 @@ export function WealthSignals({ webData, insiderData }: WealthSignalsProps) {
                   >
                     {getCategoryLabel(signal.category)}
                   </span>
+                  <span className="flex-1" />
+                  {webData?.enriched_at && (
+                    <span
+                      className="text-[11px] shrink-0"
+                      style={{ color: "var(--text-tertiary, rgba(232,228,220,0.4))" }}
+                    >
+                      {new Date(webData.enriched_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                    </span>
+                  )}
                 </div>
                 {/* Headline */}
-                <h4 className="text-sm font-bold text-foreground mb-2 font-serif">
-                  {signal.headline}
+                <h4 className="text-[16px] font-semibold font-serif text-foreground mb-2">
+                  {cleanText(signal.headline)}
                 </h4>
                 {/* Summary */}
-                <p className="text-xs text-muted-foreground mb-4 flex-1 leading-relaxed">
-                  {signal.summary}
+                <p
+                  className="text-[13px] font-sans leading-relaxed line-clamp-3 mb-3"
+                  style={{ color: "var(--text-secondary, rgba(232,228,220,0.5))" }}
+                >
+                  {cleanText(signal.summary)}
                 </p>
                 {/* Source link */}
                 <a
                   href={signal.source_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-[10px] flex items-center gap-1 mt-auto transition-colors cursor-pointer"
+                  className="text-[12px] flex items-center gap-1 mt-auto transition-colors cursor-pointer"
                   style={{ color: "var(--gold-primary)" }}
                   onMouseEnter={(e) => {
                     (e.currentTarget as HTMLAnchorElement).style.color =

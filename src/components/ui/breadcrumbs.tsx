@@ -35,8 +35,16 @@ export function Breadcrumbs({ items, rightContent }: BreadcrumbsProps) {
               ) : item.href ? (
                 <Link
                   href={item.href}
-                  className="transition-colors duration-150 cursor-pointer hover:text-[var(--text-primary-ds)]"
+                  className="transition-colors duration-150 cursor-pointer"
                   style={{ color: "var(--text-secondary-ds)" }}
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLAnchorElement).style.color =
+                      "var(--gold-primary)";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLAnchorElement).style.color =
+                      "var(--text-secondary-ds)";
+                  }}
                 >
                   {item.label}
                 </Link>

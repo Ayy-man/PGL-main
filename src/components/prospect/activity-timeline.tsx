@@ -1,5 +1,7 @@
 "use client";
 
+import { Activity } from "lucide-react";
+
 interface ActivityEvent {
   id: string;
   action_type: string;
@@ -76,8 +78,26 @@ export function ActivityTimeline({ events }: ActivityTimelineProps) {
   if (!events || events.length === 0) {
     return (
       <div className="py-8 text-center">
-        <p className="text-sm text-muted-foreground">
-          No activity recorded yet.
+        <div
+          className="h-12 w-12 rounded-full flex items-center justify-center mx-auto mb-3"
+          style={{
+            background: "rgba(212,175,55,0.08)",
+            border: "1px solid rgba(212,175,55,0.15)",
+          }}
+        >
+          <Activity
+            className="h-5 w-5"
+            style={{ color: "var(--gold-primary)" }}
+          />
+        </div>
+        <p className="font-serif text-base font-semibold text-foreground">
+          No team activity yet
+        </p>
+        <p
+          className="text-[13px] mt-1"
+          style={{ color: "var(--text-secondary, rgba(232,228,220,0.5))" }}
+        >
+          Profile views, outreach, and notes from your team will appear here.
         </p>
       </div>
     );
