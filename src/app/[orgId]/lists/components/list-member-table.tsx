@@ -141,16 +141,13 @@ export function ListMemberTable({ members }: ListMemberTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[280px]">Prospect</TableHead>
-              <TableHead className="w-[140px]">Location</TableHead>
-              <TableHead className="w-[60px] text-center">Contact</TableHead>
-              <TableHead className="w-[40px] text-center" title="Enrichment">
-                <CheckCircle2 className="h-3.5 w-3.5 mx-auto text-muted-foreground" />
-              </TableHead>
-              <TableHead className="w-[110px]">Status</TableHead>
-              <TableHead className="w-[100px]">Added</TableHead>
-              <TableHead>Notes</TableHead>
-              <TableHead className="w-[50px]" />
+              <TableHead className="w-[240px]">Prospect</TableHead>
+              <TableHead className="w-[110px]">Location</TableHead>
+              <TableHead className="w-[50px] text-center">Contact</TableHead>
+              <TableHead className="w-[100px]">Status</TableHead>
+              <TableHead className="w-[70px]">Added</TableHead>
+              <TableHead className="w-[180px]">Notes</TableHead>
+              <TableHead className="w-[40px]" />
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -216,11 +213,6 @@ export function ListMemberTable({ members }: ListMemberTableProps) {
                       <Phone className="h-3 w-3" style={{ color: "rgba(255,255,255,0.08)" }} />
                     )}
                   </div>
-                </TableCell>
-
-                {/* Enrichment dot */}
-                <TableCell className="text-center">
-                  <EnrichmentDot status={member.prospect.enrichment_status} />
                 </TableCell>
 
                 {/* Status */}

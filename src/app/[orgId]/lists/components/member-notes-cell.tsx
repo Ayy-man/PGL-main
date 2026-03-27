@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Textarea } from "@/components/ui/textarea";
 import { updateMemberNotesAction } from "../actions";
 
 interface MemberNotesCellProps {
@@ -15,47 +14,41 @@ export function MemberNotesCell({ memberId, initialNotes }: MemberNotesCellProps
   const timeoutRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
-    // Debounce notes updates
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
     if (notes !== initialNotes) {
       timeoutRef.current = setTimeout(async () => {
         setIsSaving(true);
         const result = await updateMemberNotesAction(memberId, notes);
-
         if (!result.success) {
-          alert(result.error || "Failed to save notes");
           setNotes(initialNotes);
         }
-
         setIsSaving(false);
       }, 1000);
     }
 
     return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, [notes, initialNotes, memberId]);
 
   return (
-    <div className="relative">
-      <Textarea
-        value={notes}
-        onChange={(e) => setNotes(e.target.value)}
-        placeholder="Add notes..."
-        className="min-w-[200px] resize-none"
-        rows={2}
-        disabled={isSaving}
-      />
-      {isSaving && (
-        <div className="absolute bottom-2 right-2 text-xs text-muted-foreground">
-          Saving...
-        </div>
-      )}
-    </div>
+    <input
+      type="text"
+      value={notes}
+      onChange={(e) => setNotes(e.target.value)}
+      placeholder="Add notes..."
+      disabled={isSaving}
+      className="w-full bg-transparent text-xs text-foreground placeholder:text-muted-foreground/40 border-0 outline-none focus:ring-0 py-0.5 px-0 truncate"
+      style={{
+        borderBottom: "1px solid transparent",
+      }}
+      onFocus={(e) => {
+        (e.target as HTMLInputElement).style.borderBottomColor = "rgba(212,175,55,0.3)";
+      }}
+      onBlur={(e) => {
+        (e.target as HTMLInputElement).style.borderBottomColor = "transparent";
+      }}
+    />
   );
 }
