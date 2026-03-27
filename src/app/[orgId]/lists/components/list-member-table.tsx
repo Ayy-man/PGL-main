@@ -108,14 +108,29 @@ function CopyButton({ text, icon: Icon }: { text: string; icon: typeof Mail }) {
   return (
     <button
       onClick={handleCopy}
-      className="inline-flex items-center gap-1 text-xs transition-colors cursor-pointer"
-      style={{ color: copied ? "var(--success, #22c55e)" : "var(--text-tertiary, rgba(232,228,220,0.4))" }}
+      className="inline-flex items-center justify-center h-7 w-7 rounded-md transition-all cursor-pointer"
+      style={{
+        color: copied ? "var(--success, #22c55e)" : "var(--text-secondary, rgba(232,228,220,0.55))",
+        background: copied ? "rgba(34,197,94,0.1)" : "transparent",
+      }}
       title={copied ? "Copied!" : `Copy ${text}`}
+      onMouseEnter={(e) => {
+        if (!copied) {
+          (e.currentTarget as HTMLButtonElement).style.color = "var(--gold-primary)";
+          (e.currentTarget as HTMLButtonElement).style.background = "rgba(212,175,55,0.08)";
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!copied) {
+          (e.currentTarget as HTMLButtonElement).style.color = "var(--text-secondary, rgba(232,228,220,0.55))";
+          (e.currentTarget as HTMLButtonElement).style.background = "transparent";
+        }
+      }}
     >
       {copied ? (
-        <CheckCircle2 className="h-3 w-3" />
+        <CheckCircle2 className="h-3.5 w-3.5" />
       ) : (
-        <Icon className="h-3 w-3" />
+        <Icon className="h-3.5 w-3.5" />
       )}
     </button>
   );
@@ -205,12 +220,16 @@ export function ListMemberTable({ members }: ListMemberTableProps) {
                     {member.prospect.email ? (
                       <CopyButton text={member.prospect.email} icon={Mail} />
                     ) : (
-                      <Mail className="h-3 w-3" style={{ color: "rgba(255,255,255,0.08)" }} />
+                      <span className="inline-flex items-center justify-center h-7 w-7">
+                        <Mail className="h-3.5 w-3.5" style={{ color: "rgba(255,255,255,0.06)" }} />
+                      </span>
                     )}
                     {member.prospect.phone ? (
                       <CopyButton text={member.prospect.phone} icon={Phone} />
                     ) : (
-                      <Phone className="h-3 w-3" style={{ color: "rgba(255,255,255,0.08)" }} />
+                      <span className="inline-flex items-center justify-center h-7 w-7">
+                        <Phone className="h-3.5 w-3.5" style={{ color: "rgba(255,255,255,0.06)" }} />
+                      </span>
                     )}
                   </div>
                 </TableCell>
