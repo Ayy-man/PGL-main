@@ -29,17 +29,12 @@ function getAvatarGradient(name: string): string {
   return `linear-gradient(135deg, hsl(${hue}, 30%, 25%), hsl(${hue}, 20%, 15%))`;
 }
 
-type Stage = "photo" | "gravatar" | "initials";
-
-function getInitialStage(
-  photoUrl?: string | null,
-  email?: string | null
-): Stage {
-  if (photoUrl && photoUrl.trim() !== "") return "photo";
-  if (email && email.trim() !== "") return "gravatar";
-  return "initials";
-}
-
+/**
+ * ProspectAvatar — always renders initials as base, overlays loaded image on top.
+ * No broken image flash — img is invisible until onLoad confirms it's ready.
+ *
+ * Cascade: photo_url → Gravatar (via email) → initials (always visible underneath)
+ */
 export function ProspectAvatar({
   name,
   photoUrl,
@@ -47,22 +42,47 @@ export function ProspectAvatar({
   size = "md",
   className,
 }: ProspectAvatarProps) {
-  const [stage, setStage] = useState<Stage>(() =>
-    getInitialStage(photoUrl, email)
-  );
+  const px = SIZE_PX[size];
+  const initials = getInitials(name);
+  const gradient = getAvatarGradient(name);
+  const borderWidth = size === "lg" ? "3px" : "2px";
 
-  // Reset stage when photoUrl/email change (e.g. after enrichment)
+  // Build list of image URLs to try in order
+  const urls: string[] = [];
+  const photoSrc = getAvatarUrl({ photoUrl, size: px });
+  if (photoSrc) urls.push(photoSrc);
+  if (email && email.trim() !== "" && !photoUrl) {
+    // If photoUrl exists, getAvatarUrl already returned it — gravatar is the fallback
+    const gravatarSrc = getAvatarUrl({ email, size: px });
+    if (gravatarSrc && gravatarSrc !== photoSrc) urls.push(gravatarSrc);
+  }
+  // If photoUrl is set, also try gravatar as fallback
+  if (photoUrl && email && email.trim() !== "") {
+    const gravatarSrc = getAvatarUrl({ email, size: px });
+    if (gravatarSrc) urls.push(gravatarSrc);
+  }
+
+  const [urlIndex, setUrlIndex] = useState(0);
+  const [loaded, setLoaded] = useState(false);
+
+  // Reset when props change
   useEffect(() => {
-    setStage(getInitialStage(photoUrl, email));
+    setUrlIndex(0);
+    setLoaded(false);
   }, [photoUrl, email]);
 
-  const px = SIZE_PX[size];
-  const avatarGradient = getAvatarGradient(name);
-  const initials = getInitials(name);
+  const currentUrl = urls[urlIndex];
+  const hasImage = currentUrl && !loaded ? true : loaded;
 
-  const borderWidth = size === "lg" ? "3px" : "2px";
-  const fontSize =
-    size === "lg" ? undefined : size === "sm" ? "10px" : undefined;
+  const handleLoad = () => setLoaded(true);
+  const handleError = () => {
+    setLoaded(false);
+    if (urlIndex < urls.length - 1) {
+      setUrlIndex(urlIndex + 1);
+    }
+    // If no more URLs, initials stay visible (img is hidden)
+  };
+
   const fontClass =
     size === "lg"
       ? "font-serif text-3xl font-semibold"
@@ -70,58 +90,44 @@ export function ProspectAvatar({
         ? "text-[10px] font-semibold"
         : "text-sm font-semibold";
 
-  if (stage === "initials") {
-    return (
+  return (
+    <div
+      className={`relative rounded-full shrink-0 ${fontClass}${className ? ` ${className}` : ""}`}
+      style={{ width: px, height: px }}
+      aria-label={name}
+    >
+      {/* Base layer: always-visible initials */}
       <div
-        className={`rounded-full flex items-center justify-center shrink-0 ${fontClass}${className ? ` ${className}` : ""}`}
+        className="absolute inset-0 rounded-full flex items-center justify-center"
         style={{
-          width: px,
-          height: px,
+          background: gradient,
           border: `${borderWidth} solid var(--border-default)`,
-          background: avatarGradient,
           color: "var(--text-primary-ds, var(--text-primary, #e8e4dc))",
-          fontSize: size === "sm" ? fontSize : undefined,
         }}
-        aria-label={name}
       >
         {initials}
       </div>
-    );
-  }
 
-  const src =
-    stage === "photo"
-      ? (getAvatarUrl({ photoUrl, size: px }) ?? "")
-      : (getAvatarUrl({ email, size: px }) ?? "");
-
-  const handleError = () => {
-    if (stage === "photo") {
-      // Try Gravatar next if email exists, else fall to initials
-      if (email && email.trim() !== "") {
-        setStage("gravatar");
-      } else {
-        setStage("initials");
-      }
-    } else {
-      // Gravatar returned 404 — fall back to initials
-      setStage("initials");
-    }
-  };
-
-  return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={src}
-      alt={name}
-      width={px}
-      height={px}
-      onError={handleError}
-      className={`rounded-full object-cover shrink-0${className ? ` ${className}` : ""}`}
-      style={{
-        width: px,
-        height: px,
-        border: `${borderWidth} solid var(--border-default)`,
-      }}
-    />
+      {/* Image layer: invisible until loaded */}
+      {currentUrl && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          key={currentUrl}
+          src={currentUrl}
+          alt=""
+          width={px}
+          height={px}
+          onLoad={handleLoad}
+          onError={handleError}
+          className="absolute inset-0 rounded-full object-cover transition-opacity duration-200"
+          style={{
+            width: px,
+            height: px,
+            border: `${borderWidth} solid var(--border-default)`,
+            opacity: loaded ? 1 : 0,
+          }}
+        />
+      )}
+    </div>
   );
 }
