@@ -27,10 +27,11 @@ const SOURCE_LABELS: Record<string, string> = {
   contactout: "Verified Contact",
   exa: "Web Presence",
   sec: "Public Filings",
+  market: "Market Data",
   claude: "AI Analysis",
 };
 
-const SOURCE_KEYS = ["contactout", "exa", "sec", "claude"];
+const SOURCE_KEYS = ["contactout", "exa", "sec", "market", "claude"];
 
 const STATUS_CONFIG: Record<
   SourceStatus,
@@ -80,7 +81,7 @@ async function handleRefresh(prospectId: string, source: string): Promise<void> 
 }
 
 export function EnrichmentTab({ sourceStatus, prospectId }: EnrichmentTabProps) {
-  // Ensure all 4 canonical sources are shown even if not present in sourceStatus
+  // Ensure all 5 canonical sources are shown even if not present in sourceStatus
   const sources = SOURCE_KEYS.map((key) => ({
     key,
     label: SOURCE_LABELS[key] ?? key,
@@ -88,12 +89,12 @@ export function EnrichmentTab({ sourceStatus, prospectId }: EnrichmentTabProps) 
   }));
 
   return (
-    <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+    <div className="flex flex-wrap gap-4">
       {sources.map(({ key, label, status }) => {
         const config = STATUS_CONFIG[status] ?? STATUS_CONFIG.pending;
 
         return (
-          <div key={key} className="surface-card p-4 space-y-3">
+          <div key={key} className="surface-card p-4 space-y-3 flex-1 min-w-[140px]">
             {/* Source name */}
             <p className="text-sm font-semibold text-foreground">{label}</p>
 

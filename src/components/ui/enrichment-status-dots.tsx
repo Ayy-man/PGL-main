@@ -7,12 +7,13 @@ interface EnrichmentStatusDotsProps {
   className?: string;
 }
 
-const SOURCE_ORDER = ["contactout", "exa", "sec", "claude"];
+const SOURCE_ORDER = ["contactout", "exa", "sec", "market", "claude"];
 
 const SOURCE_LABELS: Record<string, string> = {
   contactout: "Verified Contact",
   exa: "Web Presence",
   sec: "Public Filings",
+  market: "Market Data",
   claude: "AI Analysis",
 };
 
