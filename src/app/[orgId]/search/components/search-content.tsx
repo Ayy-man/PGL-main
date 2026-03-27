@@ -250,11 +250,23 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
           description: `Revealing full data for ${previewIds.length} prospect${previewIds.length !== 1 ? "s" : ""}...`,
         });
 
+        // Send preview data so mock mode can use real first names / org names
+        const previews = selectedProspects
+          .filter((p) => p._enriched === false)
+          .map((p) => ({
+            id: p.id,
+            first_name: p.first_name,
+            last_name: p.last_name,
+            name: p.name,
+            title: p.title,
+            organization_name: p.organization_name,
+          }));
+
         try {
           const enrichResp = await fetch("/api/apollo/bulk-enrich", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ apolloIds: previewIds }),
+            body: JSON.stringify({ apolloIds: previewIds, previews }),
           });
 
           if (enrichResp.ok) {
