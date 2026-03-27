@@ -122,7 +122,7 @@ export function ActivityFeed() {
         </div>
       ) : entries.length === 0 ? (
         <div
-          className="surface-card flex flex-col items-center justify-center py-8 text-center rounded-[14px]"
+          className="flex flex-col items-center justify-center py-8 text-center"
         >
           <Activity
             className="h-8 w-8 mb-2"

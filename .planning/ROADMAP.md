@@ -290,6 +290,16 @@ Plans:
 - [x] 21-02-PLAN.md — Backdrop blur on elevated surfaces (Sheet, DropdownMenu) + admin automation runs table wiring
 - [x] 21-03-PLAN.md — Build verification + box-shadow consistency audit
 
+### Phase 22: Lead Profile Editing — Inline Edit, Tags, Photo Upload, Lead Owner
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 21
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 22 to break down)
+
 ---
 
 ### Phase 19: Admin Automations Dashboard — Inngest Monitoring

@@ -23,7 +23,7 @@ export function SidebarContent({
       {/* Team header */}
       <div className="flex items-center gap-3 px-5 py-5">
         <div
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg font-serif font-bold text-sm overflow-hidden"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg font-serif font-bold text-base overflow-hidden"
           style={{
             background: "var(--gold-bg-strong)",
             color: "var(--gold-primary)",

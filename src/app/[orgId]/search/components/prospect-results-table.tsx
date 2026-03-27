@@ -1,7 +1,7 @@
 "use client";
 
 import type { ApolloPerson } from "@/lib/apollo/types";
-import { MapPin, Eye, Search } from "lucide-react";
+import { MapPin } from "lucide-react";
 
 function getInitials(name: string): string {
   return name
@@ -91,13 +91,6 @@ export function ProspectResultsTable({
                 scope="col"
               >
                 Enrichment
-              </th>
-              <th
-                className="px-3 py-3.5 text-right text-[11px] font-semibold uppercase tracking-wider"
-                style={{ color: "var(--text-tertiary)" }}
-                scope="col"
-              >
-                Actions
               </th>
             </tr>
           </thead>
@@ -237,26 +230,6 @@ export function ProspectResultsTable({
                     )}
                   </td>
 
-                  {/* Actions — visible on hover */}
-                  <td className="relative whitespace-nowrap py-4 pl-3 pr-5 text-right">
-                    <div
-                      className="flex items-center justify-end gap-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-150"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <button
-                        className="p-1.5 rounded transition-colors duration-150 cursor-pointer text-[var(--text-tertiary)] hover:text-[var(--gold-primary)] hover:bg-[rgba(212,175,55,0.1)]"
-                        title="Find Lookalikes"
-                      >
-                        <Search className="h-[18px] w-[18px]" />
-                      </button>
-                      <button
-                        className="p-1.5 rounded transition-colors duration-150 cursor-pointer text-[var(--text-tertiary)] hover:text-[var(--gold-primary)] hover:bg-[rgba(212,175,55,0.1)]"
-                        title="View Profile"
-                      >
-                        <Eye className="h-[18px] w-[18px]" />
-                      </button>
-                    </div>
-                  </td>
                 </tr>
               );
             })}
@@ -321,28 +294,6 @@ export function ProspectResultsTable({
                   )}
                 </div>
                 <span className="text-[11px] shrink-0" style={{ color: "var(--text-ghost)" }}>—</span>
-              </div>
-              {/* Action buttons — always visible on mobile */}
-              <div
-                className="flex items-center gap-2 pl-8"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <button
-                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium transition-colors cursor-pointer"
-                  style={{ color: "var(--text-tertiary)", border: "1px solid var(--border-subtle)" }}
-                  title="Find Lookalikes"
-                >
-                  <Search className="h-3.5 w-3.5" />
-                  Lookalikes
-                </button>
-                <button
-                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded text-xs font-medium transition-colors cursor-pointer"
-                  style={{ color: "var(--text-tertiary)", border: "1px solid var(--border-subtle)" }}
-                  title="View Profile"
-                >
-                  <Eye className="h-3.5 w-3.5" />
-                  Profile
-                </button>
               </div>
             </div>
           );
