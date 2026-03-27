@@ -88,6 +88,7 @@ export interface ContactData {
   work_phone?: string;
   source?: string;
   enriched_at?: string;
+  photo_url?: string;
 }
 
 // Web presence and wealth signals (JSONB)

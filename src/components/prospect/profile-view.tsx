@@ -52,6 +52,7 @@ interface Prospect {
     phone?: string;
     source?: string;
     enriched_at?: string;
+    photo_url?: string;
   } | null;
   web_data?: {
     signals: Array<{
