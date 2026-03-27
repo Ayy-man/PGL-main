@@ -2,13 +2,16 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
-status: complete
-last_updated: "2026-03-13T00:00:00.000Z"
+status: executing
+stopped_at: Completed 21-02-PLAN.md
+last_updated: "2026-03-27T17:28:18.296Z"
+last_activity: 2026-03-27
 progress:
-  total_phases: 20
-  completed_phases: 20
-  total_plans: 75
-  completed_plans: 75
+  total_phases: 18
+  completed_phases: 0
+  total_plans: 8
+  completed_plans: 9
+  percent: 100
 ---
 
 # Project State
@@ -19,20 +22,21 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** Real estate teams can quickly find and qualify wealthy prospects by searching structured lead databases, enriching profiles with personal contact info and wealth signals, and organizing prospects into actionable lists.
 
-**Current focus:** Phase 20 complete. All phases done.
+**Current focus:** Phase 21 — depth-polish-visual-refinement-pass
 
 ## Current Position
 
-Phase: 20 of 20 (Platform Pulse Detail Modal -- COMPLETE)
-Plan: 3 of 3 -- COMPLETE
-Status: Phase 20 complete. All plans executed and verified. Build passes (pnpm build exit 0). All 12 design system compliance checks pass.
-Last activity: 2026-03-27 — Completed quick task 260327-usu: Depth and polish — dual shadows, noise overlay, staggered animations, card glow, press effect, sidebar shadow
+Phase: 21 (depth-polish-visual-refinement-pass) — EXECUTING
+Plan: 3 of 3
+Status: Ready to execute
+Last activity: 2026-03-27
 
 Progress: [████████████████████] 100% (20/20 phases complete)
 
 ## Performance Metrics
 
 **Velocity:**
+
 - Total plans completed: 23
 - Average duration: ~7 min
 - Total execution time: ~2.9 hours (~175 min)
@@ -87,6 +91,8 @@ Progress: [████████████████████] 100% (2
 | Phase 16 P02 | 105s | 2 tasks | 2 files |
 | Phase 17 P04 | 395s | 6 tasks | 7 files |
 | Phase 17 P06 | ~6min | 6 tasks | 12 files |
+| Phase 21-depth-polish-visual-refinement-pass P01 | 2 | 2 tasks | 6 files |
+| Phase 21-02 P02 | 8 | 2 tasks | 3 files |
 
 ### Phase 3 Plan Completion
 
@@ -127,6 +133,7 @@ Recent decisions affecting current work:
 - Expanded activity logging to 11 action types
 
 **From Phase 1 (Foundation):**
+
 - OKLCH color space throughout (better perceptual uniformity)
 - Lazy env validation for dev builds without all secrets
 - @supabase/ssr for SSR clients, separate admin client with service role key
@@ -138,6 +145,7 @@ Recent decisions affecting current work:
 - createAdminClient() bypasses RLS for admin operations
 
 **From Phase 2 (Persona + Search + Lists):**
+
 - Upstash Redis REST API for Edge compatibility
 - buildCacheKey enforces tenant prefix on all cache keys
 - 100 Apollo API calls per hour per tenant (sliding window)
@@ -154,6 +162,7 @@ Recent decisions affecting current work:
 - All routes consolidated under src/app/[orgId]/ (no route groups)
 
 **From Phase 3 (Enrich + Ship):**
+
 - Activity logger uses service role client for writes (bypasses RLS, called from validated server actions)
 - Activity query API uses session client for reads (automatic RLS tenant scoping)
 - Activity logging never throws - fire-and-forget pattern returns null on failure
@@ -304,6 +313,9 @@ Recent decisions affecting current work:
 - [Phase 17-04]: Mobile prospect cards show labeled action buttons ("Lookalikes", "Profile") not icon-only — touch clarity
 - [Phase 17-04]: List member mobile cards added getStatusColor helper for consistent status badge coloring across mobile/desktop
 - [Phase 17-04]: Export log mobile cards use same filtered `exports` array as desktop table — filter state shared via parent component
+- [Phase 21-01]: prospect-result-card and persona-card retain inline style hover approach; gold glow appended to existing boxShadow string
+- [Phase 21-01]: list-grid uses card-glow press-effect added alongside animate-stagger-in; row-enter not added to avoid animation conflict
+- [Phase 21-02]: SheetOverlay opacity reduced bg-black/80->bg-black/60 + backdrop-blur-sm so blur is perceptible; hoveredRow React state removed from automation-runs-table in favor of row-hover-lift CSS class
 
 ### Roadmap Evolution
 
@@ -339,12 +351,14 @@ Recent decisions affecting current work:
 ### Blockers/Concerns
 
 **External Services Not Configured:**
+
 - Supabase project not set up (required for all database operations)
 - Upstash Redis not set up (required for caching and rate limiting)
 - Apollo.io API key not configured (required for search)
 - These don't block code development but are needed for E2E testing and production
 
 **Build Verification Environment Issue (RESOLVED):**
+
 - pnpm node_modules corruption resolved during code review (2026-02-25)
 - Build compiles clean, all tests pass
 - No remaining build issues
@@ -354,6 +368,7 @@ Recent decisions affecting current work:
 A full-codebase code review was conducted on 2026-02-25 with 4 parallel verification agents. Results:
 
 **18 issues identified and fixed:**
+
 - 5 Critical: RLS policy alignment (tenant_id column naming mismatch), enrichment trigger authentication (missing service role client), middleware slug resolution (orgId param routing), persona creation (column name migration to match schema), security headers (missing CSP and security response headers)
 - 8 Important: API route fixes, type safety improvements, missing error handling, middleware enhancements
 - 5 Suggestions: Code cleanup, consistency improvements, minor optimizations
@@ -361,6 +376,7 @@ A full-codebase code review was conducted on 2026-02-25 with 4 parallel verifica
 **Verification:** All fixes verified by 4 parallel verification agents. Build compiles clean (`next build` succeeds), all tests pass (`vitest run` green), no TypeScript errors.
 
 **Key fixes:**
+
 - RLS policy alignment — ensured all policies reference correct `tenant_id` column names
 - Enrichment trigger auth — switched to service role client for background enrichment writes
 - Middleware slug resolution — fixed orgId parameter routing through Next.js middleware
@@ -381,8 +397,8 @@ All 20 phases complete (6-20, including 14.1). The following items remain before
 
 ## Session Continuity
 
-Last session: 2026-03-13 — Phase 20 complete.
-Stopped at: Phase 20 complete. All 3 plans executed and verified.
+Last session: 2026-03-27T17:28:18.293Z
+Stopped at: Completed 21-02-PLAN.md
 
 ---
 

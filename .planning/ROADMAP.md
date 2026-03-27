@@ -281,11 +281,11 @@ Plans:
 
 **Requirements:** VR-01, VR-02, VR-03, VR-04, VR-05, VR-06, VR-07
 **Depends on:** Phase 20
-**Plans:** 3 plans
+**Plans:** 2/3 plans executed
 
 Plans:
-- [ ] 21-01-PLAN.md — Wire depth classes to tenant components (search cards, persona cards, list grid, activity feed, export log, stat cards)
-- [ ] 21-02-PLAN.md — Backdrop blur on elevated surfaces (Sheet, DropdownMenu) + admin automation runs table wiring
+- [x] 21-01-PLAN.md — Wire depth classes to tenant components (search cards, persona cards, list grid, activity feed, export log, stat cards)
+- [x] 21-02-PLAN.md — Backdrop blur on elevated surfaces (Sheet, DropdownMenu) + admin automation runs table wiring
 - [ ] 21-03-PLAN.md — Build verification + box-shadow consistency audit
 
 ---
