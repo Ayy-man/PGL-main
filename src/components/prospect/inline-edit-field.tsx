@@ -12,7 +12,8 @@ interface InlineEditFieldProps {
   isEditable?: boolean; // gated by RBAC canEdit
   label?: string; // for aria-label
   isOverridden?: boolean; // shows "edited" indicator
-  type?: "text" | "email" | "url" | "tel";
+  type?: "text" | "email" | "url" | "tel" | "select";
+  options?: Array<{ label: string; value: string }>;
 }
 
 type EditState = "idle" | "editing" | "saving";
@@ -27,6 +28,7 @@ export function InlineEditField({
   label,
   isOverridden = false,
   type = "text",
+  options,
 }: InlineEditFieldProps) {
   const [editState, setEditState] = useState<EditState>("idle");
   const [inputValue, setInputValue] = useState<string>(value ?? "");
@@ -111,23 +113,48 @@ export function InlineEditField({
   if (editState === "editing" || editState === "saving") {
     return (
       <span className="relative inline-flex items-center gap-1">
-        <input
-          ref={inputRef}
-          type={type}
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          onKeyDown={handleKeyDown}
-          disabled={editState === "saving"}
-          aria-label={label}
-          className={[
-            "rounded border px-2 py-0.5 text-sm bg-transparent transition-all duration-200",
-            "border-[var(--border-default)] focus:outline-none focus:ring-1 focus:ring-[var(--gold-primary)]",
-            displayClassName,
-          ]
-            .filter(Boolean)
-            .join(" ")}
-          placeholder={placeholder}
-        />
+        {type === "select" && options ? (
+          <select
+            value={inputValue}
+            onChange={(e) => {
+              setInputValue(e.target.value);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") { e.preventDefault(); handleCancel(); }
+            }}
+            disabled={editState === "saving"}
+            aria-label={label}
+            className={[
+              "rounded border px-2 py-0.5 text-sm bg-transparent transition-all duration-200 cursor-pointer",
+              "border-[var(--border-default)] focus:outline-none focus:ring-1 focus:ring-[var(--gold-primary)]",
+              displayClassName,
+            ].filter(Boolean).join(" ")}
+            style={{ background: "var(--bg-input, rgba(255,255,255,0.03))" }}
+          >
+            <option value="">{placeholder ?? "Select..."}</option>
+            {options.map((opt) => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+        ) : (
+          <input
+            ref={inputRef}
+            type={type}
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            disabled={editState === "saving"}
+            aria-label={label}
+            className={[
+              "rounded border px-2 py-0.5 text-sm bg-transparent transition-all duration-200",
+              "border-[var(--border-default)] focus:outline-none focus:ring-1 focus:ring-[var(--gold-primary)]",
+              displayClassName,
+            ]
+              .filter(Boolean)
+              .join(" ")}
+            placeholder={placeholder}
+          />
+        )}
         <button
           type="button"
           onClick={handleSave}
@@ -161,7 +188,9 @@ export function InlineEditField({
         title={isOverridden && originalValue ? `Original: ${originalValue}` : undefined}
         style={{ color: displayValue ? undefined : "var(--text-muted, #6b7280)" }}
       >
-        {displayValue ?? placeholder}
+        {type === "select" && options && displayValue
+          ? (options.find((o) => o.value === displayValue)?.label ?? displayValue)
+          : (displayValue ?? placeholder)}
       </span>
       {isOverridden && (
         <span

@@ -51,6 +51,7 @@ interface Prospect {
   manual_state?: string | null;
   manual_country?: string | null;
   manual_photo_url?: string | null;
+  manual_wealth_tier?: string | null;
   pinned_note?: string | null;
   lead_owner_id?: string | null;
 }
@@ -216,6 +217,42 @@ export function ProfileHeader({
             displayClassName="text-sm text-muted-foreground"
           />
         </div>
+      </div>
+
+      {/* LinkedIn URL */}
+      <div className="w-full text-left mb-2">
+        <InlineEditField
+          value={resolveField(prospect.manual_linkedin_url, prospect.linkedin_url)}
+          originalValue={prospect.linkedin_url}
+          onSave={async (v) => { await onFieldSave?.("manual_linkedin_url", v); }}
+          isEditable={canEdit}
+          isOverridden={isOverridden(prospect.manual_linkedin_url)}
+          label="LinkedIn"
+          type="url"
+          placeholder="Add LinkedIn URL..."
+          displayClassName="text-sm text-muted-foreground"
+        />
+      </div>
+
+      {/* Wealth Tier */}
+      <div className="w-full text-left mb-2">
+        <InlineEditField
+          value={resolveField(prospect.manual_wealth_tier, null)}
+          onSave={async (v) => { await onFieldSave?.("manual_wealth_tier", v); }}
+          isEditable={canEdit}
+          isOverridden={isOverridden(prospect.manual_wealth_tier)}
+          label="Wealth Tier"
+          type="select"
+          options={[
+            { label: "Ultra-High ($50M+)", value: "ultra_high" },
+            { label: "Very High ($10-50M)", value: "very_high" },
+            { label: "High ($5-10M)", value: "high" },
+            { label: "Emerging ($1-5M)", value: "emerging" },
+            { label: "Unknown", value: "unknown" },
+          ]}
+          placeholder="Set wealth tier..."
+          displayClassName="text-sm text-muted-foreground"
+        />
       </div>
 
       {/* Location inline edits */}
