@@ -16,11 +16,8 @@ import {
   Trash2,
   Loader2,
   CheckCircle2,
-  XCircle,
-  Clock,
   Mail,
   Phone,
-  Copy,
 } from "lucide-react";
 import { MemberStatusSelect } from "./member-status-select";
 import { MemberNotesCell } from "./member-notes-cell";
@@ -30,17 +27,6 @@ import { useState } from "react";
 
 interface ListMemberTableProps {
   members: ListMember[];
-}
-
-/** Format phone: +13978699380 → (397) 869-9380 */
-function formatPhone(raw: string): string {
-  const digits = raw.replace(/\D/g, "");
-  // US numbers: strip leading 1
-  const num = digits.startsWith("1") && digits.length === 11 ? digits.slice(1) : digits;
-  if (num.length === 10) {
-    return `(${num.slice(0, 3)}) ${num.slice(3, 6)}-${num.slice(6)}`;
-  }
-  return raw; // fallback for non-US
 }
 
 /** Shorten location: "Boston, MA, United States" → "Boston, MA" */
