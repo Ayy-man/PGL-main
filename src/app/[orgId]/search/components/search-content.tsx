@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import type { Persona } from "@/lib/personas/types";
 import type { List } from "@/lib/lists/types";
 import type { PersonaFiltersType } from "@/lib/apollo/schemas";
@@ -49,6 +50,7 @@ function SkeletonRow() {
 }
 
 export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
+  const router = useRouter();
   const { toast } = useToast();
   const {
     searchState,
@@ -359,6 +361,10 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
           })
         )
       );
+
+      // Navigate to the first selected list so user can watch enrichment progress
+      router.push(`/${orgId}/lists/${bulkSelectedListIds[0]}`);
+      return;
     }
 
     if (failCount === 0) setSelectedIds(new Set());
