@@ -54,13 +54,14 @@ interface Prospect {
     enriched_at?: string;
   } | null;
   web_data?: {
-    mentions: Array<{
-      title: string;
-      snippet: string;
-      url: string;
-      publishedDate?: string;
+    signals: Array<{
+      relevant: boolean;
+      category: "career_move" | "funding" | "media" | "wealth_signal" | "company_intel" | "recognition";
+      headline: string;
+      summary: string;
+      source_url: string;
+      raw_text: string;
     }>;
-    wealth_signals?: string[];
     source?: string;
     enriched_at?: string;
   } | null;

@@ -1,12 +1,14 @@
 "use client";
 
-import { ExternalLink, Diamond, Landmark } from "lucide-react";
+import { Briefcase, DollarSign, Mic2, Gem, Building2, Trophy, ExternalLink, Diamond, Landmark } from "lucide-react";
 
-interface ExaMention {
-  title: string;
-  snippet: string;
-  url: string;
-  publishedDate?: string;
+interface DigestedSignal {
+  relevant: boolean;
+  category: "career_move" | "funding" | "media" | "wealth_signal" | "company_intel" | "recognition";
+  headline: string;
+  summary: string;
+  source_url: string;
+  raw_text: string;
 }
 
 interface InsiderTransaction {
@@ -17,19 +19,42 @@ interface InsiderTransaction {
   totalValue: number;
 }
 
-interface ExaResult {
-  mentions: ExaMention[];
-  wealth_signals?: string[];
-}
-
 interface EdgarResult {
   transactions: InsiderTransaction[];
   total_value?: number;
 }
 
 interface WealthSignalsProps {
-  webData?: ExaResult | null;
+  webData?: {
+    signals: DigestedSignal[];
+    source?: string;
+    enriched_at?: string;
+  } | null;
   insiderData?: EdgarResult | null;
+}
+
+function getCategoryIcon(category: DigestedSignal["category"]) {
+  switch (category) {
+    case "career_move": return Briefcase;
+    case "funding": return DollarSign;
+    case "media": return Mic2;
+    case "wealth_signal": return Gem;
+    case "company_intel": return Building2;
+    case "recognition": return Trophy;
+    default: return Diamond;
+  }
+}
+
+function getCategoryLabel(category: DigestedSignal["category"]): string {
+  switch (category) {
+    case "career_move": return "Career Move";
+    case "funding": return "Funding";
+    case "media": return "Media";
+    case "wealth_signal": return "Wealth Signal";
+    case "company_intel": return "Company Intel";
+    case "recognition": return "Recognition";
+    default: return "Signal";
+  }
 }
 
 function formatCurrency(value: number) {
@@ -43,19 +68,6 @@ function formatCurrency(value: number) {
 
 function formatNumber(value: number) {
   return new Intl.NumberFormat("en-US").format(value);
-}
-
-function formatRelativeDate(dateStr: string): string {
-  const date = new Date(dateStr);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffHr = Math.floor(diffMs / (1000 * 60 * 60));
-  const diffDay = Math.floor(diffHr / 24);
-  if (diffHr < 1) return "just now";
-  if (diffHr < 24) return `${diffHr}h ago`;
-  if (diffDay < 7) return `${diffDay}d ago`;
-  if (diffDay < 30) return `${Math.floor(diffDay / 7)}w ago`;
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
 function getTransactionColor(type: string): string {
@@ -72,14 +84,14 @@ function getTransactionColor(type: string): string {
  *
  * Matches the stitch mockup "Wealth Signals & Intelligence" section:
  * - Diamond icon + header + subtitle
- * - 2-col grid of web mention cards (icon, timestamp, title, snippet, source link)
+ * - 2-col grid of digested signal cards (category icon, category pill, bold headline, summary, source link)
  * - SEC Filings table below with transaction types colored
  */
 export function WealthSignals({ webData, insiderData }: WealthSignalsProps) {
-  const hasMentions = webData?.mentions && webData.mentions.length > 0;
+  const hasSignals = webData?.signals && webData.signals.length > 0;
   const hasTransactions =
     insiderData?.transactions && insiderData.transactions.length > 0;
-  const hasSignals = hasMentions || hasTransactions;
+  const hasAny = hasSignals || hasTransactions;
 
   return (
     <div className="surface-card rounded-[14px] p-6 flex-1">
@@ -99,19 +111,20 @@ export function WealthSignals({ webData, insiderData }: WealthSignalsProps) {
         </div>
       </div>
 
-      {!hasSignals && (
+      {!hasAny && (
         <p className="text-sm text-muted-foreground">
           No wealth signals found. Data will appear after enrichment.
         </p>
       )}
 
-      {/* Web Mention Cards — 2-col grid */}
-      {hasMentions && (
+      {/* Digested Signal Cards — 2-col grid */}
+      {hasSignals && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          {webData!.mentions.map((mention, index) => {
+          {webData!.signals.map((signal, index) => {
             const isWide =
-              webData!.mentions.length % 2 !== 0 &&
-              index === webData!.mentions.length - 1;
+              webData!.signals.length % 2 !== 0 &&
+              index === webData!.signals.length - 1;
+            const CategoryIcon = getCategoryIcon(signal.category);
             return (
               <div
                 key={index}
@@ -130,25 +143,34 @@ export function WealthSignals({ webData, insiderData }: WealthSignalsProps) {
                     "var(--border-default, rgba(255,255,255,0.06))";
                 }}
               >
-                <div className="flex justify-between items-start mb-2">
-                  <Diamond
+                {/* Category icon + pill */}
+                <div className="flex items-center gap-2 mb-3">
+                  <CategoryIcon
                     className="h-4 w-4 shrink-0"
                     style={{ color: "var(--gold-muted)" }}
                   />
-                  {mention.publishedDate && (
-                    <span className="text-[10px] text-muted-foreground">
-                      {formatRelativeDate(mention.publishedDate)}
-                    </span>
-                  )}
+                  <span
+                    className="text-[10px] font-semibold uppercase tracking-wide px-1.5 py-0.5 rounded"
+                    style={{
+                      background: "rgba(212,175,55,0.08)",
+                      color: "var(--gold-primary)",
+                      border: "1px solid rgba(212,175,55,0.15)",
+                    }}
+                  >
+                    {getCategoryLabel(signal.category)}
+                  </span>
                 </div>
+                {/* Headline */}
                 <h4 className="text-sm font-bold text-foreground mb-2 font-serif">
-                  {mention.title}
+                  {signal.headline}
                 </h4>
+                {/* Summary */}
                 <p className="text-xs text-muted-foreground mb-4 flex-1 leading-relaxed">
-                  {mention.snippet}
+                  {signal.summary}
                 </p>
+                {/* Source link */}
                 <a
-                  href={mention.url}
+                  href={signal.source_url}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-[10px] flex items-center gap-1 mt-auto transition-colors cursor-pointer"
@@ -176,7 +198,7 @@ export function WealthSignals({ webData, insiderData }: WealthSignalsProps) {
         <div
           className="pt-6"
           style={{
-            borderTop: hasMentions
+            borderTop: hasSignals
               ? "1px solid var(--border-default, rgba(255,255,255,0.06))"
               : "none",
           }}
