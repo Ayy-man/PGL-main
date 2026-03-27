@@ -213,9 +213,8 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
     setIsBulkSubmitting(true);
     const allSelected = results.filter((r) => selectedIds.has(r.id));
 
-    // In enrich mode, process ALL prospects (including previews) —
-    // upsert saves them to DB, then enrichment pipeline fills in data.
     // In add-to-list mode, skip preview-only prospects.
+    // In enrich mode, process ALL prospects — Apollo bulk enrich first, then upsert.
     let selectedProspects: typeof allSelected;
     if (bulkMode === "enrich") {
       selectedProspects = allSelected;
@@ -238,11 +237,61 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
       return;
     }
 
+    // In enrich mode, call Apollo bulk enrich first to get real names/emails/LinkedIn
+    let prospectsToUpsert = selectedProspects;
+    if (bulkMode === "enrich") {
+      const previewIds = selectedProspects
+        .filter((p) => p._enriched === false)
+        .map((p) => p.id);
+
+      if (previewIds.length > 0) {
+        toast({
+          title: "Enriching via Apollo",
+          description: `Revealing full data for ${previewIds.length} prospect${previewIds.length !== 1 ? "s" : ""}...`,
+        });
+
+        try {
+          const enrichResp = await fetch("/api/apollo/bulk-enrich", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ apolloIds: previewIds }),
+          });
+
+          if (enrichResp.ok) {
+            const { people: enrichedPeople } = await enrichResp.json();
+            // Merge enriched data back — replace preview entries with full data
+            const enrichedMap = new Map<string, (typeof enrichedPeople)[number]>();
+            for (const p of enrichedPeople) {
+              if (p.id) enrichedMap.set(p.id, p);
+            }
+            prospectsToUpsert = selectedProspects.map((p) => {
+              const enriched = enrichedMap.get(p.id);
+              return enriched ? { ...enriched, _enriched: true } : p;
+            });
+          } else {
+            const err = await enrichResp.json().catch(() => ({}));
+            toast({
+              title: "Apollo enrichment failed",
+              description: err.error || "Proceeding with preview data",
+              variant: "destructive",
+            });
+            // Continue with preview data — Exa/Claude can still try
+          }
+        } catch {
+          toast({
+            title: "Apollo enrichment failed",
+            description: "Proceeding with preview data",
+            variant: "destructive",
+          });
+        }
+      }
+    }
+
     let successCount = 0;
     let failCount = 0;
     const upsertedProspectIds: string[] = [];
 
-    const promises = selectedProspects.map(async (prospect) => {
+    const promises = prospectsToUpsert.map(async (prospect) => {
       try {
         const response = await fetch("/api/prospects/upsert", {
           method: "POST",

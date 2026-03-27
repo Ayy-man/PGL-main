@@ -193,48 +193,35 @@ export async function searchApollo(
     const searchPeople = searchResponse.people || [];
     console.info(`[searchApollo] Search returned ${searchPeople.length} people`);
 
-    // 5. Bulk enrich all results to get full contact data (costs ~1 credit each)
-    let enrichedPeople: ApolloPerson[] = [];
-    if (searchPeople.length > 0) {
-      const apolloIds = searchPeople.map((p) => p.id);
-      try {
-        enrichedPeople = await bulkEnrichPeople(apolloIds);
-        enrichedPeople = enrichedPeople.map(p => ({ ...p, _enriched: true }));
-        console.info(`[searchApollo] Enriched ${enrichedPeople.length} people`);
-      } catch (enrichErr) {
-        console.error("[searchApollo] Bulk enrich failed, falling back to search previews:", enrichErr);
-        // Fall back to search data with what we have
-        enrichedPeople = searchPeople.map((p) => ({
-          id: p.id,
-          first_name: p.first_name,
-          last_name: p.last_name_obfuscated || "",
-          name: `${p.first_name} ${p.last_name_obfuscated || ""}`.trim(),
-          title: p.title || "",
-          organization_name: p.organization?.name,
-          _enriched: false,
-        }));
-      }
-    }
+    // 5. Return search previews only — NO auto bulk-enrich.
+    //    Enrichment is triggered explicitly via "Enrich Selection" button,
+    //    which calls bulkEnrichPeople → upsert → Inngest pipeline.
+    const previewPeople: ApolloPerson[] = searchPeople.map((p) => ({
+      id: p.id,
+      first_name: p.first_name,
+      last_name: p.last_name || p.last_name_obfuscated || "",
+      name: p.name || `${p.first_name} ${p.last_name || p.last_name_obfuscated || ""}`.trim(),
+      title: p.title || "",
+      organization_name: p.organization?.name,
+      email: p.email,
+      linkedin_url: p.linkedin_url,
+      _enriched: false,
+    }));
 
     // 6. Calculate pagination (total_entries can be top-level or nested)
     const totalEntries = searchResponse.total_entries ?? searchResponse.pagination?.total_entries ?? searchPeople.length;
     const pagination = calculatePagination(totalEntries, page, cappedPageSize);
 
-    const result = { people: enrichedPeople, pagination };
+    const result = { people: previewPeople, pagination };
 
-    // 7. Cache results — only cache enriched results (never cache fallback/preview data)
-    const hasUnenriched = enrichedPeople.some((p) => p._enriched === false);
-    if (enrichedPeople.length > 0 && !hasUnenriched) {
+    // 7. Cache search results (previews are safe to cache)
+    if (previewPeople.length > 0) {
       try {
         await setCachedData(cacheKey, result, 86400);
-        console.info(`[searchApollo] Cached ${enrichedPeople.length} results (24h TTL)`);
+        console.info(`[searchApollo] Cached ${previewPeople.length} preview results (24h TTL)`);
       } catch (cacheErr) {
         console.error("[searchApollo] Failed to cache results (non-fatal):", cacheErr);
       }
-    } else if (hasUnenriched) {
-      console.warn("[searchApollo] Skipped caching — contains unenriched fallback data (bulk enrich failed)");
-    } else {
-      console.warn("[searchApollo] Skipped caching — 0 results");
     }
     trackApiUsage("apollo").catch(() => {});
 
