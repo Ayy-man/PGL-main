@@ -644,7 +644,7 @@ export function ProfileView({
                           className="h-1.5 w-1.5 rounded-full inline-block shrink-0"
                           style={{ background: dotColor }}
                         />
-                        {src.charAt(0).toUpperCase() + src.slice(1)}
+                        {{ contactout: "Contact", exa: "Web", sec: "Filings", claude: "AI" }[src]}
                       </div>
                     );
                   }

@@ -10,10 +10,10 @@ interface EnrichmentStatusDotsProps {
 const SOURCE_ORDER = ["contactout", "exa", "sec", "claude"];
 
 const SOURCE_LABELS: Record<string, string> = {
-  contactout: "ContactOut",
-  exa: "Exa",
-  sec: "SEC",
-  claude: "AI",
+  contactout: "Verified Contact",
+  exa: "Web Presence",
+  sec: "Public Filings",
+  claude: "AI Analysis",
 };
 
 function getDotStyle(status: SourceStatus): { background: string; boxShadow: string } {

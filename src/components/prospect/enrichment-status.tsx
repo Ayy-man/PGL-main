@@ -19,10 +19,10 @@ interface EnrichmentStatusProps {
 }
 
 const SOURCE_LABELS: Record<string, string> = {
-  contactout: "ContactOut",
-  exa: "Exa",
-  sec: "SEC EDGAR",
-  claude: "Claude AI",
+  contactout: "Verified Contact",
+  exa: "Web Presence",
+  sec: "Public Filings",
+  claude: "AI Analysis",
 };
 
 /**
