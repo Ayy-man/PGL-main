@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 23-05-PLAN.md (checkpoint Task 3 pending human verify)
-last_updated: "2026-03-28T23:26:32.425Z"
-last_activity: 2026-03-28 -- Phase 25 execution started
+stopped_at: Completed 25-03-PLAN.md
+last_updated: "2026-03-28T23:43:53.035Z"
+last_activity: 2026-03-28
 progress:
-  total_phases: 23
+  total_phases: 22
   completed_phases: 4
   total_plans: 34
-  completed_plans: 25
+  completed_plans: 28
   percent: 100
 ---
 
@@ -22,14 +22,14 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** Real estate teams can quickly find and qualify wealthy prospects by searching structured lead databases, enriching profiles with personal contact info and wealth signals, and organizing prospects into actionable lists.
 
-**Current focus:** Phase 25 — exa-research-scrapbook
+**Current focus:** Phase 24 — Activity Log Full Build
 
 ## Current Position
 
-Phase: 25 (exa-research-scrapbook) — EXECUTING
-Plan: 1 of 6
-Status: Executing Phase 25
-Last activity: 2026-03-28 -- Phase 25 execution started
+Phase: 24
+Plan: Not started
+Status: Ready to execute
+Last activity: 2026-03-28
 
 Progress: [████████████████████] 100% (20/20 phases complete)
 
@@ -101,6 +101,8 @@ Progress: [████████████████████] 100% (2
 | Phase 23 P04 | 17 | 3 tasks | 5 files |
 | Phase 23 P03 | 25 | 1 tasks | 1 files |
 | Phase 23 P05 | 4 | 2 tasks | 3 files |
+| Phase 25-exa-research-scrapbook P02 | 8 | 2 tasks | 3 files |
+| Phase 25-exa-research-scrapbook P03 | 253s | 2 tasks | 5 files |
 
 ### Phase 3 Plan Completion
 
@@ -338,6 +340,9 @@ Recent decisions affecting current work:
 - [Phase 23]: Dual-write pattern: prospect_signals written alongside web_data/insider_data JSONB for backward compat
 - [Phase 23]: Dossier generation (Step 5.5) never throws — failure returns status:failed, enrichment continues
 - [Phase 23]: Removed duplicate type definitions (IntelligenceDossierData, SignalCategory, ProspectSignal, SignalView) from database.ts that were added by both Plan 01 and Plan 04
+- [Phase 25-exa-research-scrapbook]: chatCompletion returns {text: string} object, not raw string
+- [Phase 25-exa-research-scrapbook]: Neural search type used for research scrapbook (not 'auto') for better semantic matching
+- [Phase 25-exa-research-scrapbook]: Used DataUIMessageChunk (data-{NAME}) stream types in AI SDK v6 instead of plan pseudocode generic types (type:reasoning/data/tool-call are invalid)
 
 ### Roadmap Evolution
 
@@ -424,8 +429,8 @@ All 20 phases complete (6-20, including 14.1). The following items remain before
 
 ## Session Continuity
 
-Last session: 2026-03-28T03:42:47.129Z
-Stopped at: Completed 23-05-PLAN.md (checkpoint Task 3 pending human verify)
+Last session: 2026-03-28T23:43:53.032Z
+Stopped at: Completed 25-03-PLAN.md
 
 ---
 
