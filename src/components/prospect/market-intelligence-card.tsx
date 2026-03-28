@@ -365,7 +365,7 @@ export function MarketIntelligenceCard({
             <AreaChart
               key={activePeriod}
               data={chartData}
-              margin={{ top: 10, right: 55, left: 5, bottom: 5 }}
+              margin={{ top: 10, right: 60, left: 0, bottom: 5 }}
             >
               <defs>
                 <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
@@ -408,8 +408,9 @@ export function MarketIntelligenceCard({
                 tickLine={false}
                 axisLine={false}
                 tickFormatter={(v: number) => `$${v.toFixed(0)}`}
-                domain={["auto", "auto"]}
-                width={50}
+                domain={["dataMin - 1", "dataMax + 1"]}
+                width={55}
+                padding={{ top: 10, bottom: 10 }}
               />
               <Tooltip
                 content={
