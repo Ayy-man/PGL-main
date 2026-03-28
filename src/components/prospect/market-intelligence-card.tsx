@@ -360,11 +360,12 @@ export function MarketIntelligenceCard({
 
       {/* Interactive Recharts AreaChart */}
       {chartData.length > 1 && (
-        <div className="mb-4" style={{ width: "100%", height: 200 }}>
+        <div className="mb-4 rounded-lg overflow-hidden" style={{ width: "100%", height: 220 }}>
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart
+              key={activePeriod}
               data={chartData}
-              margin={{ top: 5, right: 5, left: 5, bottom: 0 }}
+              margin={{ top: 10, right: 55, left: 5, bottom: 5 }}
             >
               <defs>
                 <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
