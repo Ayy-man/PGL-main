@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 23-03-PLAN.md
-last_updated: "2026-03-28T03:38:27.762Z"
+stopped_at: Completed 23-05-PLAN.md (checkpoint Task 3 pending human verify)
+last_updated: "2026-03-28T03:42:47.133Z"
 last_activity: 2026-03-28
 progress:
   total_phases: 21
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 23
-  completed_plans: 24
+  completed_plans: 25
   percent: 100
 ---
 
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 ## Current Position
 
 Phase: 24 (Activity Log Full Build) — EXECUTING
-Plan: 4 of 5
+Plan: 5 of 5
 Status: Ready to execute
 Last activity: 2026-03-28
 
@@ -100,6 +100,7 @@ Progress: [████████████████████] 100% (2
 | Phase 24-activity-log P05 | 7 | 2 tasks | 1 files |
 | Phase 23 P04 | 17 | 3 tasks | 5 files |
 | Phase 23 P03 | 25 | 1 tasks | 1 files |
+| Phase 23 P05 | 4 | 2 tasks | 3 files |
 
 ### Phase 3 Plan Completion
 
@@ -336,6 +337,7 @@ Recent decisions affecting current work:
 - [Phase 23]: mark-seen is fire-and-forget — POST failures are non-critical for UX
 - [Phase 23]: Dual-write pattern: prospect_signals written alongside web_data/insider_data JSONB for backward compat
 - [Phase 23]: Dossier generation (Step 5.5) never throws — failure returns status:failed, enrichment continues
+- [Phase 23]: Removed duplicate type definitions (IntelligenceDossierData, SignalCategory, ProspectSignal, SignalView) from database.ts that were added by both Plan 01 and Plan 04
 
 ### Roadmap Evolution
 
@@ -420,8 +422,8 @@ All 20 phases complete (6-20, including 14.1). The following items remain before
 
 ## Session Continuity
 
-Last session: 2026-03-28T03:38:27.758Z
-Stopped at: Completed 23-03-PLAN.md
+Last session: 2026-03-28T03:42:47.129Z
+Stopped at: Completed 23-05-PLAN.md (checkpoint Task 3 pending human verify)
 
 ---
 

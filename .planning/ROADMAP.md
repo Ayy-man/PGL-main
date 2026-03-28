@@ -310,14 +310,14 @@ Plans:
 **Goal:** Split the existing "Wealth Signals & Intelligence" section into two distinct features: (1) Intelligence Dossier — a structured, AI-generated prose brief stored as JSONB on prospects, generated at end of enrichment pipeline; (2) Wealth Signal Timeline — a vertical event feed backed by a new prospect_signals table with per-user seen tracking via signal_views. New Inngest step 5.5 generates dossier, dual-write signals to prospect_signals alongside existing JSONB blobs.
 **Requirements:** DOSS-01, DOSS-02, DOSS-03, DOSS-04, DOSS-05, SIG-01, SIG-02, SIG-03, SIG-04, SIG-05, SIG-06, SIG-07, SIG-08, SIG-09, SIG-10, SIG-11, SIG-12
 **Depends on:** Phase 22
-**Plans:** 4/5 plans executed
+**Plans:** 5/5 plans complete
 
 Plans:
 - [x] 23-01-PLAN.md — DB migration (prospect_signals, signal_views tables, prospects dossier columns) + TypeScript types
 - [x] 23-02-PLAN.md — generateIntelligenceDossier() function + exa-digest event_date propagation
 - [x] 23-03-PLAN.md — Enrichment pipeline update (signal writes in fetch-exa/fetch-edgar + dossier Step 5.5)
 - [x] 23-04-PLAN.md — IntelligenceDossier + SignalTimeline components + signals/mark-seen API routes
-- [ ] 23-05-PLAN.md — Wire into profile-view.tsx + page.tsx (replace WealthSignals) + build verification
+- [x] 23-05-PLAN.md — Wire into profile-view.tsx + page.tsx (replace WealthSignals) + build verification
 
 ### Phase 24: Activity Log — Full Build: prospect_activity table, quick action bar, timeline feed, filter bar, system event triggers, auto-status upgrade, note tooltips
 
