@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: executing
-stopped_at: "Checkpoint: 25-05 Task 3 human-verify"
-last_updated: "2026-03-28T23:48:10.111Z"
-last_activity: 2026-03-28
+stopped_at: Completed 26-01-PLAN.md
+last_updated: "2026-03-28T23:54:20.536Z"
+last_activity: 2026-03-29
 progress:
   total_phases: 23
   completed_phases: 4
   total_plans: 34
-  completed_plans: 30
+  completed_plans: 31
   percent: 100
 ---
 
@@ -22,14 +22,14 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** Real estate teams can quickly find and qualify wealthy prospects by searching structured lead databases, enriching profiles with personal contact info and wealth signals, and organizing prospects into actionable lists.
 
-**Current focus:** Phase 24 — Activity Log Full Build
+**Current focus:** Phase 26 — Targeted Multi-Source Search (Intent-Routed Channels)
 
 ## Current Position
 
-Phase: 24
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-03-28
+Phase: 26
+Plan: 01 complete — ready for 26-02
+Status: Executing
+Last activity: 2026-03-29
 
 Progress: [████████████████████] 100% (20/20 phases complete)
 
@@ -103,6 +103,7 @@ Progress: [████████████████████] 100% (2
 | Phase 23 P05 | 4 | 2 tasks | 3 files |
 | Phase 25-exa-research-scrapbook P04 | 4 | 2 tasks | 5 files |
 | Phase 25 P05 | 2 | 2 tasks | 3 files |
+| Phase 26-targeted-multi-source-search P01 | 2min | 2 tasks | 4 files |
 
 ### Phase 3 Plan Completion
 
@@ -343,6 +344,11 @@ Recent decisions affecting current work:
 - [Phase 25-exa-research-scrapbook]: SSE over useChat: fetch+ReadableStream for research streaming — avoids AI SDK message format coupling
 - [Phase 25-exa-research-scrapbook]: research.ts types created in Plan 04 (not 01 as planned) — ScrapbookCard, PinTarget, SessionListItem
 - [Phase 25-05]: profile_viewed event_type with metadata.section=research used for tab logging (TeamEventType has no 'viewed' value)
+- [Phase 26-01]: ChannelId is a string literal union (not enum) for JSON-serialization compatibility with LLM output
+- [Phase 26-01]: CHANNEL_REGISTRY uses a mutable Map with self-registration pattern to avoid circular imports
+- [Phase 26-01]: classifyIntent filters channels by API key presence at runtime — channels with unconfigured keys silently excluded; exa always guaranteed present
+- [Phase 26-01]: Cache TTL for attom set to 7 days (604800s); news/exa at 1 hour reflecting data volatility differences
+- [Phase 26-01]: Intent classifier JSON parse fallback returns exa-only classification on malformed LLM output — never throws
 
 ### Roadmap Evolution
 
@@ -429,8 +435,8 @@ All 20 phases complete (6-20, including 14.1). The following items remain before
 
 ## Session Continuity
 
-Last session: 2026-03-28T23:48:10.108Z
-Stopped at: Checkpoint: 25-05 Task 3 human-verify
+Last session: 2026-03-28T23:54:20.531Z
+Stopped at: Completed 26-01-PLAN.md
 
 ---
 
