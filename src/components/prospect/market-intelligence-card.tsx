@@ -9,7 +9,6 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
-  Brush,
   CartesianGrid,
 } from "recharts";
 
@@ -429,13 +428,6 @@ export function MarketIntelligenceCard({
                 strokeWidth={2}
                 fill="url(#priceGradient)"
                 animationDuration={500}
-              />
-              <Brush
-                dataKey="date"
-                height={30}
-                stroke={chartColor}
-                fill="rgba(255,255,255,0.02)"
-                travellerWidth={8}
               />
             </AreaChart>
           </ResponsiveContainer>
