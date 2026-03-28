@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 25-01-PLAN.md
-last_updated: "2026-03-28T23:32:25.526Z"
+stopped_at: Completed 25-02-PLAN.md
+last_updated: "2026-03-28T23:29:52.082Z"
 last_activity: 2026-03-28
 progress:
   total_phases: 22
@@ -101,7 +101,7 @@ Progress: [████████████████████] 100% (2
 | Phase 23 P04 | 17 | 3 tasks | 5 files |
 | Phase 23 P03 | 25 | 1 tasks | 1 files |
 | Phase 23 P05 | 4 | 2 tasks | 3 files |
-| Phase 25-exa-research-scrapbook P01 | 251s | 2 tasks | 17 files |
+| Phase 25-exa-research-scrapbook P02 | 8 | 2 tasks | 3 files |
 
 ### Phase 3 Plan Completion
 
@@ -339,7 +339,8 @@ Recent decisions affecting current work:
 - [Phase 23]: Dual-write pattern: prospect_signals written alongside web_data/insider_data JSONB for backward compat
 - [Phase 23]: Dossier generation (Step 5.5) never throws — failure returns status:failed, enrichment continues
 - [Phase 23]: Removed duplicate type definitions (IntelligenceDossierData, SignalCategory, ProspectSignal, SignalView) from database.ts that were added by both Plan 01 and Plan 04
-- [Phase 25-exa-research-scrapbook]: Implemented shadcn AI components manually because registry requires paid token; built equivalent dark-theme/gold-accent components following shadcn forwardRef patterns
+- [Phase 25-exa-research-scrapbook]: chatCompletion returns {text: string} object, not raw string
+- [Phase 25-exa-research-scrapbook]: Neural search type used for research scrapbook (not 'auto') for better semantic matching
 
 ### Roadmap Evolution
 
@@ -426,8 +427,8 @@ All 20 phases complete (6-20, including 14.1). The following items remain before
 
 ## Session Continuity
 
-Last session: 2026-03-28T23:32:25.523Z
-Stopped at: Completed 25-01-PLAN.md
+Last session: 2026-03-28T23:29:52.078Z
+Stopped at: Completed 25-02-PLAN.md
 
 ---
 
