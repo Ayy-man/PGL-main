@@ -155,6 +155,19 @@ export interface StockSnapshot {
   } | null;
 }
 
+// Intelligence Dossier — structured AI-generated profile brief (JSONB)
+export interface IntelligenceDossierData {
+  summary: string;              // 2-3 sentences — why this person is a UHNWI buyer
+  career_narrative: string;     // 2-3 sentences — career arc, current role context
+  wealth_assessment: string;    // 2-3 sentences — signals indicating wealth level
+  company_context: string;      // 2-3 sentences — company health, industry position
+  outreach_hooks: string[];     // 3-5 bullet strings — specific conversation starters
+  quick_facts: Array<{          // 4-6 key facts for fast scanning
+    label: string;
+    value: string;
+  }>;
+}
+
 export type EnrichmentStatus = 'none' | 'pending' | 'in_progress' | 'complete' | 'failed';
 
 // SEC Transaction table
