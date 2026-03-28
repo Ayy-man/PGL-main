@@ -352,12 +352,12 @@ Plans:
 **Depends on:** Phase 25
 **Status:** EXECUTING — Plan 01 complete
 
-**Plans:** 1/5 complete
+**Plans:** 2/5 plans executed
 
 Plans:
 - [x] 26-01-PLAN.md — Type contracts + channel registry + intent classifier + rate limiters + channel cache
 - [ ] 26-02-PLAN.md — Exa adapter + EDGAR EFTS + GNews channel implementations
-- [ ] 26-03-PLAN.md — OpenCorporates + Crunchbase + ATTOM channel implementations
+- [x] 26-03-PLAN.md — OpenCorporates + Crunchbase + ATTOM channel implementations
 - [ ] 26-04-PLAN.md — Orchestrator (executeResearch) + merge/dedup + channel registration barrel
 - [ ] 26-05-PLAN.md — API route + UI components (channel status bar, filter chips, result card) + build verification
 
