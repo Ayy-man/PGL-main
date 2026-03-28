@@ -25,7 +25,7 @@ const createSchema = z.object({
   eventType: z.string().min(1).max(100),
   title: z.string().min(1).max(500),
   note: z.string().max(5000).optional().nullable(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
   eventAt: z.string().datetime().optional(),
   triggersStatusChange: z.boolean().optional(),
 });
