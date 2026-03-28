@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 23-04-PLAN.md
-last_updated: "2026-03-28T03:38:15.047Z"
+stopped_at: Completed 23-03-PLAN.md
+last_updated: "2026-03-28T03:38:27.762Z"
 last_activity: 2026-03-28
 progress:
   total_phases: 21
@@ -99,6 +99,7 @@ Progress: [████████████████████] 100% (2
 | Phase 22 P04 | 12 | 2 tasks | 3 files |
 | Phase 24-activity-log P05 | 7 | 2 tasks | 1 files |
 | Phase 23 P04 | 17 | 3 tasks | 5 files |
+| Phase 23 P03 | 25 | 1 tasks | 1 files |
 
 ### Phase 3 Plan Completion
 
@@ -333,6 +334,8 @@ Recent decisions affecting current work:
 - [Phase 24-activity-log]: Icon hides entirely (returns null) after fetch if no outreach notes — no ghost icons
 - [Phase 23]: Client-side filter for initial signals; server-side for load-more pagination
 - [Phase 23]: mark-seen is fire-and-forget — POST failures are non-critical for UX
+- [Phase 23]: Dual-write pattern: prospect_signals written alongside web_data/insider_data JSONB for backward compat
+- [Phase 23]: Dossier generation (Step 5.5) never throws — failure returns status:failed, enrichment continues
 
 ### Roadmap Evolution
 
@@ -417,8 +420,8 @@ All 20 phases complete (6-20, including 14.1). The following items remain before
 
 ## Session Continuity
 
-Last session: 2026-03-28T03:38:02.401Z
-Stopped at: Completed 23-04-PLAN.md
+Last session: 2026-03-28T03:38:27.758Z
+Stopped at: Completed 23-03-PLAN.md
 
 ---
 
