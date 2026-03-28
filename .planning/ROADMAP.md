@@ -336,13 +336,20 @@ Plans:
 
 ### Phase 25: Exa Research Scrapbook
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** Build a first-class research workbench in every prospect profile. Agent types freeform questions, Exa searches the web, LLM digests results into rich cards the agent can edit and pin to the prospect's Intelligence Dossier or Signal Timeline. Includes streaming multi-phase UX, session history, smart suggestions, rate limiting, and activity logging.
+**Requirements:** RES-01, RES-02, RES-03, RES-04, RES-05, RES-06, RES-07, RES-08, RES-09, RES-10, RES-11, RES-12, RES-13, RES-14, RES-15, RES-16, RES-17, RES-18, RES-19
 **Depends on:** Phase 24
-**Plans:** 0 plans
+**Status:** PLANNED -- 6 plans ready for execution
+
+**Plans:** 0/6 complete
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 25 to break down)
+- [ ] 25-01-PLAN.md -- Foundation: packages, shadcn AI components, DB migration, TypeScript types
+- [ ] 25-02-PLAN.md -- Lib functions: exa-search, research-digest, rate-limit
+- [ ] 25-03-PLAN.md -- API routes: streaming research, pin, sessions, suggestions
+- [ ] 25-04-PLAN.md -- UI components: toggle, research panel, result card, pin dropdown
+- [ ] 25-05-PLAN.md -- Profile integration: wire into profile-view, signal timeline updates
+- [ ] 25-06-PLAN.md -- Build verification + design system compliance audit
 
 ### Phase 26: Targeted Multi-Source Search — Intent-Routed Channels (SEC, ATTOM, News, OpenCorporates, Crunchbase)
 
