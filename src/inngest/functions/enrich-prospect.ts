@@ -276,10 +276,14 @@ export const enrichProspect = inngest.createFunction(
             raw_source: "exa" as const,
             is_new: true,
           }));
-          await supabase.from("prospect_signals").upsert(signalRows, {
-            onConflict: "prospect_id,source_url",
-            ignoreDuplicates: true,
-          });
+          // Insert signals — ignore duplicates (partial unique index on source_url)
+          for (const row of signalRows) {
+            await supabase.from("prospect_signals").insert(row).then(({ error: insertErr }) => {
+              if (insertErr && !insertErr.message.includes("duplicate")) {
+                console.error("[enrich] signal insert error:", insertErr.message);
+              }
+            });
+          }
 
           logProspectActivity({
             prospectId, tenantId, userId: null,
@@ -410,10 +414,13 @@ export const enrichProspect = inngest.createFunction(
             is_new: true,
           }));
           if (secSignalRows.length > 0) {
-            await supabase.from("prospect_signals").upsert(secSignalRows, {
-              onConflict: "prospect_id,source_url",
-              ignoreDuplicates: true,
-            });
+            for (const row of secSignalRows) {
+              await supabase.from("prospect_signals").insert(row).then(({ error: insertErr }) => {
+                if (insertErr && !insertErr.message.includes("duplicate")) {
+                  console.error("[enrich] SEC signal insert error:", insertErr.message);
+                }
+              });
+            }
           }
 
           logProspectActivity({
