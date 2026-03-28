@@ -22,6 +22,7 @@ export type DigestedSignal = {
   summary: string;    // 1-2 sentences, no markdown/HTML/boilerplate
   source_url: string;
   raw_text: string;   // Kept for debugging, never displayed in UI
+  event_date?: string | null;  // ISO date from Exa publishDate — nullable
 };
 
 interface LLMDigestItem {
@@ -109,6 +110,7 @@ export async function digestExaResults(
         summary: item.summary,
         source_url: mention.url,
         raw_text: mention.snippet,
+        event_date: mention.publishDate || null,
       });
     }
 

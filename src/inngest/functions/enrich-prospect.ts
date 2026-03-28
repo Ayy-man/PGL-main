@@ -3,7 +3,7 @@ import { enrichContactOut } from "@/lib/enrichment/contactout";
 import { enrichExa } from "@/lib/enrichment/exa";
 import { digestExaResults, type DigestedSignal } from "@/lib/enrichment/exa-digest";
 import { enrichEdgar, lookupCompanyCik } from "@/lib/enrichment/edgar";
-import { generateProspectSummary } from "@/lib/enrichment/claude";
+import { generateProspectSummary, generateIntelligenceDossier } from "@/lib/enrichment/claude";
 import { logActivity } from "@/lib/activity-logger";
 import { logProspectActivity } from "@/lib/activity";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -113,6 +113,7 @@ export const enrichProspect = inngest.createFunction(
         sec: { status: "pending", at: new Date().toISOString() },
         market: { status: "pending", at: new Date().toISOString() },
         claude: { status: "pending", at: new Date().toISOString() },
+        dossier: { status: "pending", at: new Date().toISOString() },
       };
 
       const { error } = await supabase
@@ -263,6 +264,23 @@ export const enrichProspect = inngest.createFunction(
             })
             .eq("id", prospectId);
 
+          // Write digested signals to prospect_signals table (dual-write — web_data kept for backward compat)
+          const signalRows = digestedSignals.map((s) => ({
+            prospect_id: prospectId,
+            tenant_id: tenantId,
+            category: s.category,
+            headline: s.headline,
+            summary: s.summary,
+            source_url: s.source_url,
+            event_date: s.event_date || null,
+            raw_source: "exa" as const,
+            is_new: true,
+          }));
+          await supabase.from("prospect_signals").upsert(signalRows, {
+            onConflict: "prospect_id,source_url",
+            ignoreDuplicates: true,
+          });
+
           logProspectActivity({
             prospectId, tenantId, userId: null,
             category: 'data', eventType: 'exa_updated',
@@ -378,6 +396,25 @@ export const enrichProspect = inngest.createFunction(
               },
             })
             .eq("id", prospectId);
+
+          // Write SEC transactions to prospect_signals table (dual-write — insider_data kept)
+          const secSignalRows = result.transactions.map((tx) => ({
+            prospect_id: prospectId,
+            tenant_id: tenantId,
+            category: "sec_filing" as const,
+            headline: `${tx.transactionType} ${tx.shares.toLocaleString()} shares ($${tx.totalValue.toLocaleString()})`,
+            summary: `SEC Form 4: ${tx.transactionType} of ${tx.shares.toLocaleString()} shares at $${tx.pricePerShare.toFixed(2)}/share, total value $${tx.totalValue.toLocaleString()}. Filed ${tx.filingDate}.`,
+            source_url: null,
+            event_date: tx.filingDate || null,
+            raw_source: "sec-edgar" as const,
+            is_new: true,
+          }));
+          if (secSignalRows.length > 0) {
+            await supabase.from("prospect_signals").upsert(secSignalRows, {
+              onConflict: "prospect_id,source_url",
+              ignoreDuplicates: true,
+            });
+          }
 
           logProspectActivity({
             prospectId, tenantId, userId: null,
@@ -526,6 +563,54 @@ export const enrichProspect = inngest.createFunction(
       }
     });
 
+    // Step 5.5: Generate Intelligence Dossier
+    const dossierResult = await step.run("generate-dossier", async () => {
+      try {
+        const dossier = await generateIntelligenceDossier({
+          name,
+          title,
+          company,
+          contactData: contactData.found
+            ? { personalEmail: contactData.personalEmail, phone: contactData.phone }
+            : null,
+          webSignals: exaData.found && exaData.signals.length > 0
+            ? exaData.signals.map((s) => ({
+                category: s.category,
+                headline: s.headline,
+                summary: s.summary,
+              }))
+            : null,
+          insiderTransactions: edgarData.found && edgarData.transactions.length > 0
+            ? edgarData.transactions
+            : null,
+          stockSnapshot: effectiveTicker ? { ticker: effectiveTicker } : null,
+        });
+
+        if (dossier) {
+          await supabase.from("prospects").update({
+            intelligence_dossier: dossier,
+            dossier_generated_at: new Date().toISOString(),
+            dossier_model: "anthropic/claude-3.5-haiku",
+          }).eq("id", prospectId);
+        }
+
+        await updateSourceStatus(prospectId, "dossier", {
+          status: dossier ? "complete" : "failed",
+          at: new Date().toISOString(),
+        });
+
+        return { hasDossier: !!dossier, status: dossier ? "complete" : "failed" };
+      } catch (error) {
+        console.error("[Inngest] Dossier generation failed:", error);
+        await updateSourceStatus(prospectId, "dossier", {
+          status: "failed",
+          error: error instanceof Error ? error.message : String(error),
+          at: new Date().toISOString(),
+        });
+        return { hasDossier: false, status: "failed" };
+      }
+    });
+
     // Step 6: Finalize enrichment
     await step.run("finalize", async () => {
       // Update prospect enrichment status to complete
@@ -550,6 +635,7 @@ export const enrichProspect = inngest.createFunction(
           sec: edgarData.status,
           market: marketData.status,
           claude: aiSummary.status,
+          dossier: dossierResult.status,
         },
       });
 
@@ -558,7 +644,7 @@ export const enrichProspect = inngest.createFunction(
         prospectId, tenantId, userId,
         category: 'data', eventType: 'enrichment_complete',
         title: 'Enrichment completed',
-        metadata: { contactout: contactData.status, exa: exaData.status, sec: edgarData.status, market: marketData.status, claude: aiSummary.status },
+        metadata: { contactout: contactData.status, exa: exaData.status, sec: edgarData.status, market: marketData.status, claude: aiSummary.status, dossier: dossierResult.status },
       });
 
       return { status: "complete", timestamp: new Date().toISOString() };
@@ -573,6 +659,7 @@ export const enrichProspect = inngest.createFunction(
         sec: edgarData.status,
         market: marketData.status,
         claude: aiSummary.status,
+        dossier: dossierResult.status,
       },
     };
   }
