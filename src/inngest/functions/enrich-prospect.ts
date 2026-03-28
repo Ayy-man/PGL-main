@@ -2,7 +2,7 @@ import { inngest } from "../client";
 import { enrichContactOut } from "@/lib/enrichment/contactout";
 import { enrichExa } from "@/lib/enrichment/exa";
 import { digestExaResults, type DigestedSignal } from "@/lib/enrichment/exa-digest";
-import { enrichEdgar } from "@/lib/enrichment/edgar";
+import { enrichEdgar, lookupCompanyCik } from "@/lib/enrichment/edgar";
 import { generateProspectSummary } from "@/lib/enrichment/claude";
 import { logActivity } from "@/lib/activity-logger";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -101,9 +101,7 @@ export const enrichProspect = inngest.createFunction(
         contactout: { status: "pending", at: new Date().toISOString() },
         exa: { status: "pending", at: new Date().toISOString() },
         sec: { status: "pending", at: new Date().toISOString() },
-        market: isPublicCompany && ticker
-          ? { status: "pending", at: new Date().toISOString() }
-          : { status: "skipped", at: new Date().toISOString() },
+        market: { status: "pending", at: new Date().toISOString() },
         claude: { status: "pending", at: new Date().toISOString() },
       };
 
@@ -262,10 +260,44 @@ export const enrichProspect = inngest.createFunction(
       }
     });
 
+    // Step 3.5: Resolve CIK from company name if not already known
+    const resolvedCompany = await step.run("resolve-cik", async () => {
+      if (companyCik) {
+        return { cik: companyCik, ticker: ticker || null, resolved: false };
+      }
+
+      if (!company) {
+        return { cik: null, ticker: null, resolved: false };
+      }
+
+      try {
+        const result = await lookupCompanyCik(company);
+        if (result) {
+          await supabase
+            .from("prospects")
+            .update({
+              company_cik: result.cik,
+              publicly_traded_symbol: result.ticker,
+            })
+            .eq("id", prospectId);
+
+          return { cik: result.cik, ticker: result.ticker, resolved: true };
+        }
+        return { cik: null, ticker: null, resolved: false };
+      } catch (error) {
+        console.error("[Inngest] CIK lookup failed:", error);
+        return { cik: null, ticker: null, resolved: false };
+      }
+    });
+
+    const effectiveCik = resolvedCompany.cik || companyCik;
+    const effectiveTicker = resolvedCompany.ticker || ticker;
+    const effectiveIsPublic = !!(effectiveCik || effectiveTicker);
+
     // Step 4: Fetch SEC EDGAR data (only for public companies)
     const edgarData = await step.run("fetch-edgar", async () => {
       // Skip if not public company
-      if (!isPublicCompany || !companyCik) {
+      if (!effectiveIsPublic || !effectiveCik) {
         await updateSourceStatus(prospectId, "sec", {
           status: "skipped",
           at: new Date().toISOString(),
@@ -274,7 +306,7 @@ export const enrichProspect = inngest.createFunction(
       }
 
       try {
-        const result = await enrichEdgar({ cik: companyCik, name });
+        const result = await enrichEdgar({ cik: effectiveCik, name });
 
         // Determine source status
         let sourceStatus = "complete";
@@ -339,8 +371,11 @@ export const enrichProspect = inngest.createFunction(
 
     // Step 4.5: Fetch market data (only for public companies with a ticker)
     const marketData = await step.run("fetch-market-data", async () => {
-      if (!isPublicCompany || !ticker) {
-        // Already marked as skipped in mark-in-progress
+      if (!effectiveIsPublic || !effectiveTicker) {
+        await updateSourceStatus(prospectId, "market", {
+          status: "skipped",
+          at: new Date().toISOString(),
+        });
         return { found: false, status: "skipped" };
       }
 
@@ -352,7 +387,7 @@ export const enrichProspect = inngest.createFunction(
           ? { transactions: edgarData.transactions }
           : null;
 
-        const snapshot = await fetchMarketSnapshot(ticker, insiderDataForMarket);
+        const snapshot = await fetchMarketSnapshot(effectiveTicker, insiderDataForMarket);
 
         // Save snapshot to DB
         await supabase

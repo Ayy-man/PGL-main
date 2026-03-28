@@ -46,6 +46,78 @@ async function waitForRateLimit(): Promise<void> {
   }
 }
 
+type CompanyTickerEntry = {
+  cik_str: number;
+  ticker: string;
+  title: string;
+};
+
+function normalizeCompanyName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[,.]/g, '')
+    .replace(/\b(inc|incorporated|corp|corporation|company|co|ltd|limited|llc|lp|plc|group|holdings|the|&)\b/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Look up a company's CIK and ticker from SEC EDGAR's company tickers registry.
+ * Uses fuzzy company name matching against SEC's public tickers JSON.
+ */
+export async function lookupCompanyCik(companyName: string): Promise<{
+  cik: string;
+  ticker: string;
+  companyName: string;
+} | null> {
+  if (!companyName) return null;
+
+  const userAgent = process.env.SEC_EDGAR_USER_AGENT;
+  if (!userAgent) return null;
+
+  await waitForRateLimit();
+
+  const response = await fetch('https://www.sec.gov/files/company_tickers.json', {
+    headers: {
+      'User-Agent': userAgent,
+      'Accept': 'application/json',
+    },
+  });
+
+  if (!response.ok) return null;
+
+  const data = await response.json() as Record<string, CompanyTickerEntry>;
+  const entries = Object.values(data);
+
+  const normalized = normalizeCompanyName(companyName);
+  const compact = normalized.replace(/\s+/g, '');
+
+  // Pass 1: exact normalized match
+  for (const entry of entries) {
+    if (normalizeCompanyName(entry.title) === normalized) {
+      return { cik: String(entry.cik_str), ticker: entry.ticker, companyName: entry.title };
+    }
+  }
+
+  // Pass 2: starts-with match (either direction)
+  for (const entry of entries) {
+    const entryNorm = normalizeCompanyName(entry.title);
+    if (entryNorm.startsWith(normalized) || normalized.startsWith(entryNorm)) {
+      return { cik: String(entry.cik_str), ticker: entry.ticker, companyName: entry.title };
+    }
+  }
+
+  // Pass 3: compact match (removes spaces — handles "JP Morgan" vs "JPMORGAN")
+  for (const entry of entries) {
+    const entryCompact = normalizeCompanyName(entry.title).replace(/\s+/g, '');
+    if (entryCompact.startsWith(compact) || compact.startsWith(entryCompact)) {
+      return { cik: String(entry.cik_str), ticker: entry.ticker, companyName: entry.title };
+    }
+  }
+
+  return null;
+}
+
 /**
  * Parse Form 4 XML for transaction details
  * Simplified version - extracts key fields using regex
