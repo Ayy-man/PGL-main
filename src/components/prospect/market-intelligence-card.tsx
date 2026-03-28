@@ -228,33 +228,35 @@ export function MarketIntelligenceCard({
   const significantGain =
     snapshot.equity && Math.abs(snapshot.equity.gain90d) > 100_000;
 
-  // Transform sparkline number[] -> {date: string, price: number}[]
+  // Transform sparkline number[] -> {date: Date, label: string, price: number}[]
   // Sparkline has ~251 trading days spanning ~365 calendar days.
-  // Space dates evenly across the actual calendar range.
-  const totalCalendarDays = 365;
+  // Map each data point to an actual calendar date by spacing proportionally.
+  const now = new Date();
   const sparkLen = snapshot.sparkline.length;
   const fullData = snapshot.sparkline.map((price, i) => {
+    // Spread trading days across 365 calendar days proportionally
     const calendarDaysAgo = Math.round(
-      ((sparkLen - 1 - i) / (sparkLen - 1)) * totalCalendarDays
+      ((sparkLen - 1 - i) / Math.max(sparkLen - 1, 1)) * 365
     );
+    const d = new Date(now.getTime() - calendarDaysAgo * 86400000);
     return {
-      date: new Date(Date.now() - calendarDaysAgo * 86400000).toLocaleDateString(
-        "en-US",
-        { month: "short", day: "numeric" }
-      ),
+      dateObj: d,
+      date: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
       price,
     };
   });
 
-  // Filter by active period
-  const periodDays: Record<string, number> = {
+  // Filter by active period using actual calendar dates
+  const periodCalendarDays: Record<string, number> = {
     "7D": 7,
     "30D": 30,
     "90D": 90,
     "1Y": 365,
   };
-  const daysToShow = periodDays[activePeriod];
-  const chartData = fullData.slice(Math.max(0, fullData.length - daysToShow));
+  const cutoffDate = new Date(
+    now.getTime() - periodCalendarDays[activePeriod] * 86400000
+  );
+  const chartData = fullData.filter((d) => d.dateObj >= cutoffDate);
 
   // Determine chart color from the actual performance metric for this period
   const perfMap: Record<string, number> = {
