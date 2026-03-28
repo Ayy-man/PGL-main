@@ -76,6 +76,10 @@ export interface Prospect {
   // Stock market snapshot (manual fetch)
   stock_snapshot: StockSnapshot | null;
   stock_snapshot_at: string | null;
+  // Intelligence dossier (Phase 23)
+  intelligence_dossier: IntelligenceDossierData | null;
+  dossier_generated_at: string | null;
+  dossier_model: string | null;
   notes: string | null;
   // Manual override fields (display logic: manual_* ?? enriched_* ?? null)
   manual_display_name: string | null;
@@ -166,6 +170,41 @@ export interface IntelligenceDossierData {
     label: string;
     value: string;
   }>;
+}
+
+// Signal categories for prospect_signals table
+export type SignalCategory =
+  | "career_move"
+  | "funding"
+  | "media"
+  | "wealth_signal"
+  | "company_intel"
+  | "recognition"
+  | "sec_filing"
+  | "market_event";
+
+// prospect_signals table row
+export interface ProspectSignal {
+  id: string;
+  prospect_id: string;
+  tenant_id: string;
+  category: SignalCategory;
+  headline: string;
+  summary: string;
+  source_url: string | null;
+  event_date: string | null;   // ISO date string
+  raw_source: "exa" | "sec-edgar" | "market";
+  is_new: boolean;
+  created_at: string;
+}
+
+// signal_views table row — per-user seen tracking
+export interface SignalView {
+  id: string;
+  signal_id: string;
+  user_id: string;
+  tenant_id: string;
+  viewed_at: string;
 }
 
 export type EnrichmentStatus = 'none' | 'pending' | 'in_progress' | 'complete' | 'failed';
