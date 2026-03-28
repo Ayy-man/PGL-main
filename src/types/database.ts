@@ -193,7 +193,7 @@ export interface ProspectSignal {
   summary: string;
   source_url: string | null;
   event_date: string | null;   // ISO date string
-  raw_source: "exa" | "sec-edgar" | "market";
+  raw_source: "exa" | "sec-edgar" | "market" | "research";
   is_new: boolean;
   created_at: string;
 }
