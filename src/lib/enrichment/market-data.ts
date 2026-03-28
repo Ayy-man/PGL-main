@@ -98,8 +98,8 @@ export async function fetchMarketSnapshot(
     y1: len >= 2 ? Number((((lastClose - closes[0]) / closes[0]) * 100).toFixed(2)) : 0,
   };
 
-  // Build sparkline from last 90 candle closes
-  const sparkline = closes.slice(Math.max(0, len - 90));
+  // Keep full 1-year sparkline (Yahoo returns ~251 trading days)
+  const sparkline = closes;
 
   // Estimate equity position from insiderData if available
   let equity: StockSnapshot["equity"] = null;
