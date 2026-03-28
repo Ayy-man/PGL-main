@@ -305,6 +305,16 @@ Plans:
 - [x] 22-04-PLAN.md — Wire editing into page.tsx, ProfileView, ProfileHeader (RBAC gate)
 - [x] 22-05-PLAN.md — Build verification + design system compliance audit
 
+### Phase 23: Intelligence Dossier & Wealth Signal Timeline — Split Enrichment Display
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 22
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 23 to break down)
+
 ---
 
 ### Phase 19: Admin Automations Dashboard — Inngest Monitoring

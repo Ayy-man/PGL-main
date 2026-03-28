@@ -340,6 +340,7 @@ Recent decisions affecting current work:
 - Phase 19 added: Admin Automations Dashboard — Inngest monitoring tab in admin panel. Summary stats, per-function health cards, recent runs table, detail sidebar with source breakdown. Hybrid data: existing DB (prospects enrichment_status/source_status, activity_log) + Inngest REST API for run-level details. New: enrichment_started_at column, metrics_aggregated activity_log entry, Inngest event ID storage on prospects.
 - Phase 21 added: Depth & Polish — Visual Refinement Pass
 - Phase 22 added: Lead Profile Editing — Inline Edit, Tags, Photo Upload, Lead Owner
+- Phase 23 added: Intelligence Dossier & Wealth Signal Timeline — Split Enrichment Display
 
 ### Pending Todos
 
