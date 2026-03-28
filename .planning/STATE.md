@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 23-01-PLAN.md
-last_updated: "2026-03-28T03:17:48.575Z"
+stopped_at: Completed 24-03-PLAN.md
+last_updated: "2026-03-28T03:20:36.214Z"
 last_activity: 2026-03-28
 progress:
   total_phases: 20
@@ -97,7 +97,7 @@ Progress: [████████████████████] 100% (2
 | Phase 21-depth-polish-visual-refinement-pass P03 | 3 | 1 tasks | 2 files |
 | Phase 22 P03 | 3 | 2 tasks | 3 files |
 | Phase 22 P04 | 12 | 2 tasks | 3 files |
-| Phase 23-intelligence-dossier-wealth-signal-timeline-split-enrichment-display P01 | 8 | 2 tasks | 2 files |
+| Phase 24-activity-log P03 | 4 min | 2 tasks | 3 files |
 
 ### Phase 3 Plan Completion
 
@@ -328,9 +328,8 @@ Recent decisions affecting current work:
 - [Phase 22]: SVG excluded from photo uploads — security risk (can contain scripts)
 - [Phase 22]: Team members and tag suggestions fetched only when canEdit=true to avoid unnecessary DB queries for read-only users
 - [Phase 22]: Array.from(new Set(...)) used instead of Set spread for TypeScript downlevel iteration compatibility
-- [Phase 23-01]: source_url is nullable in prospect_signals to support SEC filings that may not have a direct URL
-- [Phase 23-01]: RLS enabled on prospect_signals and signal_views, policies configured in Supabase dashboard per project convention
-- [Phase 23-01]: Dedup index via partial unique index (prospect_id, source_url) WHERE source_url IS NOT NULL to avoid conflicts on null values
+- [Phase 24-activity-log]: Used refreshTrigger number prop for TimelineFeed reload instead of forwardRef/imperative handle for simpler parent-child sync
+- [Phase 24-activity-log]: Built custom checkbox UI in ActivityFilter to support per-category color accents instead of standard Radix checkbox
 
 ### Roadmap Evolution
 
@@ -415,8 +414,8 @@ All 20 phases complete (6-20, including 14.1). The following items remain before
 
 ## Session Continuity
 
-Last session: 2026-03-28T03:17:48.571Z
-Stopped at: Completed 23-01-PLAN.md
+Last session: 2026-03-28T03:20:36.210Z
+Stopped at: Completed 24-03-PLAN.md
 
 ---
 
