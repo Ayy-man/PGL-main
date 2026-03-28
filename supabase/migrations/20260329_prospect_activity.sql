@@ -45,7 +45,7 @@ INSERT INTO prospect_activity (
   triggers_status_change
 )
 SELECT
-  al.target_id::uuid AS prospect_id,
+  al.target_id AS prospect_id,
   al.tenant_id,
   al.user_id,
   CASE al.action_type
@@ -90,8 +90,6 @@ FROM activity_log al
 WHERE
   al.target_type = 'prospect'
   AND al.target_id IS NOT NULL
-  -- Only migrate rows where target_id is a valid UUID (prevents cast errors)
-  AND al.target_id ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
   -- Only migrate known prospect action types
   AND al.action_type IN (
     'profile_viewed', 'profile_enriched', 'note_added',
@@ -103,7 +101,7 @@ WHERE
   AND NOT EXISTS (
     SELECT 1
     FROM prospect_activity pa
-    WHERE pa.prospect_id = al.target_id::uuid
+    WHERE pa.prospect_id = al.target_id
       AND pa.tenant_id = al.tenant_id
       AND pa.event_at = al.created_at
       AND pa.event_type = CASE al.action_type
