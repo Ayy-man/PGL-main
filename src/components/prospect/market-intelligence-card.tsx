@@ -268,18 +268,6 @@ export function MarketIntelligenceCard({
   const periodPerf = perfMap[activePeriod] ?? 0;
   const chartColor = periodPerf >= 0 ? "#d4af37" : "#ef4444"; // gold vs red
 
-  // Compute daily change for the enhanced price header
-  const prevClose =
-    snapshot.sparkline.length >= 2
-      ? snapshot.sparkline[snapshot.sparkline.length - 2]
-      : null;
-  const dailyChange =
-    prevClose != null ? snapshot.currentPrice - prevClose : null;
-  const dailyChangePct =
-    prevClose != null && prevClose !== 0
-      ? ((snapshot.currentPrice - prevClose) / prevClose) * 100
-      : null;
-
   // Format fetchedAt as "Mar 27, 2026"
   const fetchedAtFormatted = fetchedAt
     ? new Date(fetchedAt).toLocaleDateString("en-US", {
