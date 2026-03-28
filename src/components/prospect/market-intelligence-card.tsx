@@ -247,11 +247,15 @@ export function MarketIntelligenceCard({
   const daysToShow = periodDays[activePeriod];
   const chartData = fullData.slice(Math.max(0, fullData.length - daysToShow));
 
-  // Determine chart color based on period price direction
-  const periodUp =
-    chartData.length >= 2 &&
-    chartData[chartData.length - 1].price >= chartData[0].price;
-  const chartColor = periodUp ? "#d4af37" : "#ef4444"; // gold vs red
+  // Determine chart color from the actual performance metric for this period
+  const perfMap: Record<string, number> = {
+    "7D": perf.d7,
+    "30D": perf.d30,
+    "90D": perf.d90,
+    "1Y": perf.y1,
+  };
+  const periodPerf = perfMap[activePeriod] ?? 0;
+  const chartColor = periodPerf >= 0 ? "#d4af37" : "#ef4444"; // gold vs red
 
   // Compute daily change for the enhanced price header
   const prevClose =
