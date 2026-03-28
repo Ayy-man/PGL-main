@@ -36,9 +36,19 @@ interface EdgarResult {
   total_value?: number;
 }
 
+interface LegacyMention {
+  title: string;
+  snippet: string;
+  url: string;
+  publishDate?: string;
+  publishedDate?: string;
+}
+
 interface WealthSignalsProps {
   webData?: {
-    signals: DigestedSignal[];
+    signals?: DigestedSignal[];
+    mentions?: LegacyMention[];
+    wealth_signals?: Array<{ type: string; description: string; source?: string }>;
     source?: string;
     enriched_at?: string;
   } | null;
@@ -99,8 +109,37 @@ function getTransactionColor(type: string): string {
  * - 2-col grid of digested signal cards (category icon, category pill, bold headline, summary, source link)
  * - SEC Filings table below with transaction types colored
  */
+/** Convert legacy mentions to display-compatible signals */
+function legacyToSignals(mentions: LegacyMention[]): DigestedSignal[] {
+  return mentions.map((m) => {
+    const text = (m.title + " " + m.snippet).toLowerCase();
+    let category: DigestedSignal["category"] = "wealth_signal";
+    if (/fund|invest|series|raised|ipo/i.test(text)) category = "funding";
+    else if (/promot|appointed|hired|joined|ceo|cto/i.test(text)) category = "career_move";
+    else if (/podcast|interview|spoke|panel|keynote/i.test(text)) category = "media";
+    else if (/acqui|merger|m&a|deal/i.test(text)) category = "company_intel";
+    else if (/award|ranking|named|top\s/i.test(text)) category = "recognition";
+
+    return {
+      relevant: true,
+      category,
+      headline: cleanText(m.title).slice(0, 80),
+      summary: cleanText(m.snippet).slice(0, 200),
+      source_url: m.url,
+      raw_text: m.snippet,
+    };
+  });
+}
+
 export function WealthSignals({ webData, insiderData }: WealthSignalsProps) {
-  const hasSignals = webData?.signals && webData.signals.length > 0;
+  // Support both new digested signals and legacy mentions format
+  const signals: DigestedSignal[] =
+    webData?.signals && webData.signals.length > 0
+      ? webData.signals
+      : webData?.mentions && webData.mentions.length > 0
+        ? legacyToSignals(webData.mentions)
+        : [];
+  const hasSignals = signals.length > 0;
   const hasTransactions =
     insiderData?.transactions && insiderData.transactions.length > 0;
   const hasAny = hasSignals || hasTransactions;
@@ -129,10 +168,10 @@ export function WealthSignals({ webData, insiderData }: WealthSignalsProps) {
       {/* Digested Signal Cards — 2-col grid */}
       {hasSignals && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          {webData!.signals.map((signal, index) => {
+          {signals.map((signal, index) => {
             const isWide =
-              webData!.signals.length % 2 !== 0 &&
-              index === webData!.signals.length - 1;
+              signals.length % 2 !== 0 &&
+              index === signals.length - 1;
             const CategoryIcon = getCategoryIcon(signal.category);
             return (
               <div
