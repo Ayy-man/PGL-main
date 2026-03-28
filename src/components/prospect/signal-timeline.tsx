@@ -12,6 +12,7 @@ import {
   Landmark,
   TrendingUp,
   ExternalLink,
+  Search,
 } from "lucide-react";
 import type { ProspectSignal, SignalCategory } from "@/types/database";
 
@@ -149,6 +150,14 @@ export function SignalTimeline({
 
   return (
     <div className="surface-card rounded-[14px] p-4 md:p-6">
+      {/* Gold highlight animation for research-pinned signals */}
+      <style>{`
+        @keyframes goldHighlight {
+          0% { background-color: rgba(212,175,55,0.15); }
+          100% { background-color: transparent; }
+        }
+      `}</style>
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
         <h3 className="text-foreground text-xl font-bold font-serif flex items-center gap-2">
@@ -200,8 +209,17 @@ export function SignalTimeline({
           {filteredSignals.map((signal) => {
             const color = getCategoryColor(signal.category);
             const CategoryIcon = getCategoryIcon(signal.category);
+            const isResearchPin = signal.raw_source === "research";
             return (
-              <div key={signal.id} className="relative pl-8 pb-6 last:pb-0">
+              <div
+                key={signal.id}
+                className="relative pl-8 pb-6 last:pb-0"
+                style={
+                  isResearchPin && signal.is_new
+                    ? { animation: "goldHighlight 1s ease forwards" }
+                    : undefined
+                }
+              >
                 {/* Dot on rail */}
                 <div
                   className="absolute left-1.5 top-1 w-3 h-3 rounded-full border-2"
@@ -218,8 +236,24 @@ export function SignalTimeline({
                     {getCategoryLabel(signal.category)}
                   </span>
 
-                  {/* NEW badge */}
-                  {!signal.is_seen && (
+                  {/* Research-pinned signal: Search icon + NEW badge */}
+                  {isResearchPin && signal.is_new && (
+                    <div className="flex items-center gap-1.5">
+                      <Search className="w-3 h-3" style={{ color: "var(--gold-primary)" }} />
+                      <span
+                        className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
+                        style={{
+                          color: "var(--gold-primary)",
+                          background: "rgba(212,175,55,0.1)",
+                        }}
+                      >
+                        NEW
+                      </span>
+                    </div>
+                  )}
+
+                  {/* NEW badge for non-research unseen signals */}
+                  {!signal.is_seen && !isResearchPin && (
                     <span
                       className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded animate-pulse"
                       style={{

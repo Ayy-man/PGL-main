@@ -52,7 +52,11 @@ export function IntelligenceDossier({ dossier, generatedAt }: IntelligenceDossie
         <DossierSection title="Company Context" text={dossier.company_context} />
       </div>
 
-      {/* Outreach Hooks */}
+      {/* Outreach Hooks
+          Reactive update note: hooks pinned from the Research tab via ResearchPanel
+          are appended to dossier.outreach_hooks server-side. The component receives
+          the updated list on page refresh or when the parent re-fetches prospect data.
+          For MVP, newly pinned hooks appear after page refresh (no real-time push). */}
       {dossier.outreach_hooks && dossier.outreach_hooks.length > 0 && (
         <div className="mb-5">
           <h4 className="text-sm font-semibold text-foreground flex items-center gap-1.5 mb-2">
@@ -61,7 +65,11 @@ export function IntelligenceDossier({ dossier, generatedAt }: IntelligenceDossie
           </h4>
           <ul className="space-y-1.5">
             {dossier.outreach_hooks.map((hook, i) => (
-              <li key={i} className="text-sm pl-4 relative" style={{ color: "var(--text-secondary, rgba(232,228,220,0.7))" }}>
+              <li
+                key={i}
+                className="text-sm pl-4 relative"
+                style={{ color: "var(--text-secondary, rgba(232,228,220,0.7))" }}
+              >
                 <span className="absolute left-0" style={{ color: "var(--gold-muted)" }}>-</span>
                 {hook}
               </li>
