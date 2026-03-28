@@ -5,6 +5,7 @@ import { digestExaResults, type DigestedSignal } from "@/lib/enrichment/exa-dige
 import { enrichEdgar, lookupCompanyCik } from "@/lib/enrichment/edgar";
 import { generateProspectSummary } from "@/lib/enrichment/claude";
 import { logActivity } from "@/lib/activity-logger";
+import { logProspectActivity } from "@/lib/activity";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 type SourceStatusPayload = { status: string; error?: string; at: string };
@@ -74,6 +75,15 @@ export const enrichProspect = inngest.createFunction(
             enrichment_status: "failed",
           })
           .eq("id", eventData.prospectId);
+
+        logProspectActivity({
+          prospectId: eventData.prospectId,
+          tenantId: (event.data as Record<string, unknown>).tenantId as string ?? "",
+          userId: null,
+          category: 'data', eventType: 'enrichment_failed',
+          title: 'Enrichment failed',
+          metadata: { error: error?.message },
+        }).catch(() => {});
       }
     },
   },
@@ -118,6 +128,12 @@ export const enrichProspect = inngest.createFunction(
         console.error("[Inngest] Failed to mark enrichment in progress:", error);
         throw error;
       }
+
+      await logProspectActivity({
+        prospectId, tenantId, userId,
+        category: 'data', eventType: 'enrichment_started',
+        title: 'Enrichment started',
+      });
 
       return { status: "in_progress" };
     });
@@ -167,6 +183,13 @@ export const enrichProspect = inngest.createFunction(
               },
             })
             .eq("id", prospectId);
+
+          logProspectActivity({
+            prospectId, tenantId, userId: null,
+            category: 'data', eventType: 'contactout_updated',
+            title: 'ContactOut data updated',
+            metadata: { found: result.found, hasEmail: !!result.personalEmail, hasPhone: !!result.phone },
+          }).catch(() => {});
         }
 
         return {
@@ -239,6 +262,13 @@ export const enrichProspect = inngest.createFunction(
               },
             })
             .eq("id", prospectId);
+
+          logProspectActivity({
+            prospectId, tenantId, userId: null,
+            category: 'data', eventType: 'exa_updated',
+            title: 'Web intelligence updated',
+            metadata: { signalCount: digestedSignals.length },
+          }).catch(() => {});
         }
 
         return {
@@ -348,6 +378,13 @@ export const enrichProspect = inngest.createFunction(
               },
             })
             .eq("id", prospectId);
+
+          logProspectActivity({
+            prospectId, tenantId, userId: null,
+            category: 'data', eventType: 'sec_updated',
+            title: 'SEC filings updated',
+            metadata: { transactionCount: result.transactions.length },
+          }).catch(() => {});
         }
 
         return {
@@ -403,6 +440,12 @@ export const enrichProspect = inngest.createFunction(
           status: "complete",
           at: new Date().toISOString(),
         });
+
+        logProspectActivity({
+          prospectId, tenantId, userId: null,
+          category: 'data', eventType: 'market_data_updated',
+          title: 'Market data refreshed',
+        }).catch(() => {});
 
         return { found: true, status: "complete" };
       } catch (error) {
@@ -462,6 +505,12 @@ export const enrichProspect = inngest.createFunction(
           })
           .eq("id", prospectId);
 
+        logProspectActivity({
+          prospectId, tenantId, userId: null,
+          category: 'data', eventType: 'ai_summary_updated',
+          title: 'AI summary generated',
+        }).catch(() => {});
+
         return { summary, status: "complete" };
       } catch (error) {
         console.error("[Inngest] Claude AI summary generation failed:", error);
@@ -488,7 +537,7 @@ export const enrichProspect = inngest.createFunction(
         })
         .eq("id", prospectId);
 
-      // Log activity
+      // Log activity (backward compat)
       await logActivity({
         tenantId,
         userId,
@@ -502,6 +551,14 @@ export const enrichProspect = inngest.createFunction(
           market: marketData.status,
           claude: aiSummary.status,
         },
+      });
+
+      // Log to new prospect_activity table
+      await logProspectActivity({
+        prospectId, tenantId, userId,
+        category: 'data', eventType: 'enrichment_complete',
+        title: 'Enrichment completed',
+        metadata: { contactout: contactData.status, exa: exaData.status, sec: edgarData.status, market: marketData.status, claude: aiSummary.status },
       });
 
       return { status: "complete", timestamp: new Date().toISOString() };

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { logActivity } from "@/lib/activity-logger";
+import { logProspectActivity } from "@/lib/activity";
 import { stringify } from "csv-stringify";
 import { CSV_COLUMNS, formatProspectRow } from "@/lib/csv-export";
 import type { Prospect, ListMember } from "@/types/database";
@@ -78,6 +79,7 @@ export async function GET(request: Request) {
     const BATCH_SIZE = 100;
     let offset = 0;
     let hasMore = true;
+    let firstProspectId: string | null = null;
 
     const stream = new ReadableStream({
       async start(controller) {
@@ -147,6 +149,10 @@ export async function GET(request: Request) {
               const listMember = member as unknown as ListMember;
               const row = formatProspectRow(prospect, listMember);
               stringifier.write(row);
+              // Track first prospect ID for activity logging
+              if (!firstProspectId) {
+                firstProspectId = prospect.id;
+              }
             }
           }
 
@@ -171,6 +177,17 @@ export async function GET(request: Request) {
         }).catch((err) => {
           console.error("Failed to log csv_exported activity:", err);
         });
+
+        // Log to prospect_activity on first prospect (once per export batch)
+        if (firstProspectId) {
+          logProspectActivity({
+            prospectId: firstProspectId,
+            tenantId, userId,
+            category: 'team', eventType: 'exported_csv',
+            title: 'Exported to CSV',
+            metadata: { totalProspects: list.member_count, listName: list.name, listId },
+          }).catch(() => {});
+        }
       },
     });
 
