@@ -334,6 +334,26 @@ Plans:
 - [ ] 24-04-PLAN.md — Profile page integration + system event triggers + auto-status upgrade
 - [x] 24-05-PLAN.md — List view note tooltip + build verification
 
+### Phase 25: Exa Research Scrapbook
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 24
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 25 to break down)
+
+### Phase 26: Targeted Multi-Source Search — Intent-Routed Channels (SEC, ATTOM, News, Proxycurl, FAA, Crunchbase)
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 25
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 26 to break down)
+
 ---
 
 ### Phase 19: Admin Automations Dashboard — Inngest Monitoring

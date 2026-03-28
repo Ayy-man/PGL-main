@@ -353,6 +353,8 @@ Recent decisions affecting current work:
 - Phase 22 added: Lead Profile Editing — Inline Edit, Tags, Photo Upload, Lead Owner
 - Phase 23 added: Intelligence Dossier & Wealth Signal Timeline — Split Enrichment Display
 - Phase 24 added: Activity Log — Full Build: prospect_activity table, quick action bar, timeline feed, filter bar, system event triggers, auto-status upgrade, note tooltips
+- Phase 25 added: Exa Research Scrapbook — First-class research workbench in prospect profiles. Freeform questions → Exa search → LLM digest → rich result cards → pin to Dossier/Signals. shadcn AI components, streaming UX, session history.
+- Phase 26 added: Targeted Multi-Source Search — Intent-routed channels (SEC EDGAR, ATTOM property, NewsAPI, Proxycurl, FAA Registry, Crunchbase) alongside Exa. LLM classifies query intent → fires specialized APIs in parallel → merges/deduplicates/ranks results into unified scrapbook feed.
 
 ### Pending Todos
 
