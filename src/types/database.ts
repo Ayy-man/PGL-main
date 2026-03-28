@@ -241,6 +241,49 @@ export type ActivityActionType =
   | 'photo_uploaded'
   | 'lead_owner_assigned';
 
+// ─── Intelligence Dossier & Signal Timeline (Phase 23) ────────────────────────
+
+export interface IntelligenceDossierData {
+  summary: string;
+  career_narrative: string;
+  wealth_assessment: string;
+  company_context: string;
+  outreach_hooks: string[];
+  quick_facts: Array<{ label: string; value: string }>;
+}
+
+export type SignalCategory =
+  | "career_move"
+  | "funding"
+  | "media"
+  | "wealth_signal"
+  | "company_intel"
+  | "recognition"
+  | "sec_filing"
+  | "market_event";
+
+export interface ProspectSignal {
+  id: string;
+  prospect_id: string;
+  tenant_id: string;
+  category: SignalCategory;
+  headline: string;
+  summary: string;
+  source_url: string | null;
+  event_date: string | null;
+  raw_source: "exa" | "sec-edgar" | "market";
+  is_new: boolean;
+  created_at: string;
+}
+
+export interface SignalView {
+  id: string;
+  signal_id: string;
+  user_id: string;
+  tenant_id: string;
+  viewed_at: string;
+}
+
 // Usage Metrics Daily table
 export interface UsageMetricsDaily {
   id: string;
