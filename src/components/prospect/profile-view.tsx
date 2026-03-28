@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import {
   UserSearch,
   Mail,
@@ -16,6 +16,8 @@ import { ActivityFilter } from "./activity-filter";
 import { TimelineFeed } from "./timeline-feed";
 import { IntelligenceDossier } from "./intelligence-dossier";
 import { SignalTimeline } from "./signal-timeline";
+import { DossierResearchToggle } from "./dossier-research-toggle";
+import { ResearchPanel } from "./research-panel";
 import { MarketIntelligenceCard } from "./market-intelligence-card";
 import { LookalikeDiscovery } from "./lookalike-discovery";
 import { useToast } from "@/hooks/use-toast";
@@ -170,6 +172,31 @@ export function ProfileView({
   const [lastSavedNote, setLastSavedNote] = useState(prospect.notes ?? "");
   const [addToListOpen, setAddToListOpen] = useState(false);
   const { toast } = useToast();
+
+  // Dossier/Research tab toggle
+  const [activePanel, setActivePanel] = useState<"dossier" | "research">("dossier");
+  const lastResearchLogRef = useRef<number>(0);
+
+  const handlePanelChange = useCallback((tab: "dossier" | "research") => {
+    setActivePanel(tab);
+    if (tab === "research") {
+      const now = Date.now();
+      // Deduplicate: only log once per hour
+      if (now - lastResearchLogRef.current > 3600000) {
+        lastResearchLogRef.current = now;
+        fetch(`/api/prospects/${prospect.id}/activity`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            category: "team",
+            event_type: "profile_viewed",
+            title: "Viewed research tab",
+            metadata: { section: "research" },
+          }),
+        }).catch(() => {}); // fire-and-forget
+      }
+    }
+  }, [prospect.id]);
 
   // Activity Log state
   const [activeCategories, setActiveCategories] = useState<ActivityCategory[]>(['outreach', 'data', 'team', 'custom']);
@@ -536,11 +563,48 @@ export function ProfileView({
 
         {/* ─── CENTER COLUMN ─── */}
         <div className="lg:col-span-6 flex flex-col gap-6">
-          {/* Intelligence Dossier */}
-          <IntelligenceDossier
-            dossier={prospect.intelligence_dossier ?? null}
-            generatedAt={prospect.dossier_generated_at ?? null}
+          {/* Dossier/Research Toggle */}
+          <DossierResearchToggle
+            active={activePanel}
+            onChange={handlePanelChange}
           />
+
+          {/* Crossfade: Dossier vs Research */}
+          <div className="relative">
+            {activePanel === "dossier" ? (
+              <div
+                key="dossier"
+                className="animate-in fade-in slide-in-from-bottom-1 duration-250"
+              >
+                <IntelligenceDossier
+                  dossier={prospect.intelligence_dossier ?? null}
+                  generatedAt={prospect.dossier_generated_at ?? null}
+                />
+              </div>
+            ) : (
+              <div
+                key="research"
+                className="animate-in fade-in slide-in-from-bottom-1 duration-250"
+              >
+                <ResearchPanel
+                  prospectId={prospect.id}
+                  prospect={{
+                    id: prospect.id,
+                    first_name: prospect.first_name,
+                    last_name: prospect.last_name,
+                    full_name: prospect.full_name,
+                    title: prospect.title ?? null,
+                    company: prospect.company ?? null,
+                    location: prospect.location ?? null,
+                    manual_photo_url: prospect.manual_photo_url ?? null,
+                    contact_data: prospect.contact_data ?? null,
+                    intelligence_dossier: prospect.intelligence_dossier ?? null,
+                  }}
+                  orgId={orgId}
+                />
+              </div>
+            )}
+          </div>
 
           {/* Wealth Signal Timeline */}
           <SignalTimeline
