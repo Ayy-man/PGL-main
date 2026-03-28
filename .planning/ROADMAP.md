@@ -344,15 +344,23 @@ Plans:
 Plans:
 - [ ] TBD (run /gsd:plan-phase 25 to break down)
 
-### Phase 26: Targeted Multi-Source Search — Intent-Routed Channels (SEC, ATTOM, News, Proxycurl, FAA, Crunchbase)
+### Phase 26: Targeted Multi-Source Search — Intent-Routed Channels (SEC, ATTOM, News, OpenCorporates, Crunchbase)
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** Add intent-routed multi-source search channels alongside Exa. LLM classifies query intent, fires specialized APIs in parallel (SEC EDGAR EFTS, GNews, OpenCorporates, Crunchbase, ATTOM), merges/deduplicates/ranks into unified feed. Each channel is isolated with circuit breaker, rate limiter, and per-channel TTL caching. Graceful degradation when API keys are missing. UI shows channel source badges, status indicators, and filter chips.
+
+**Requirements:** MSS-01, MSS-02, MSS-03, MSS-04, MSS-05, MSS-06, MSS-07, MSS-08, MSS-09, MSS-10, MSS-11, MSS-12, MSS-13, MSS-14, MSS-15
 **Depends on:** Phase 25
-**Plans:** 0 plans
+**Status:** PLANNED — 5 plans ready for execution
+
+**Plans:** 0/5 complete
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 26 to break down)
+- [ ] 26-01-PLAN.md — Type contracts + channel registry + intent classifier + rate limiters + channel cache
+- [ ] 26-02-PLAN.md — Exa adapter + EDGAR EFTS + GNews channel implementations
+- [ ] 26-03-PLAN.md — OpenCorporates + Crunchbase + ATTOM channel implementations
+- [ ] 26-04-PLAN.md — Orchestrator (executeResearch) + merge/dedup + channel registration barrel
+- [ ] 26-05-PLAN.md — API route + UI components (channel status bar, filter chips, result card) + build verification
+
 
 ---
 
