@@ -321,13 +321,18 @@ Plans:
 
 ### Phase 24: Activity Log — Full Build: prospect_activity table, quick action bar, timeline feed, filter bar, system event triggers, auto-status upgrade, note tooltips
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** Create a dedicated prospect_activity table with CRUD API, build Quick Action Bar (6 outreach/note/custom buttons with inline inputs), Timeline Feed (color-coded by category, date-grouped, collapsible), Filter Bar (category checkboxes, system events toggle), wire system event triggers across enrichment pipeline and all existing flows, implement auto-status upgrade on outreach events, and add note tooltips to list member table rows.
+
+**Requirements:** ACT-01, ACT-02, ACT-03, ACT-04, ACT-05, ACT-06, ACT-07, ACT-08, ACT-09, ACT-10
 **Depends on:** Phase 23
-**Plans:** 0 plans
+**Plans:** 5 plans
 
 Plans:
-- [ ] TBD (run /gsd:plan-phase 24 to break down)
+- [ ] 24-01-PLAN.md — prospect_activity table DDL + data migration + TypeScript types + logProspectActivity utility
+- [ ] 24-02-PLAN.md — CRUD API routes (GET/POST/PATCH/DELETE) for prospect activity
+- [ ] 24-03-PLAN.md — QuickActionBar + ActivityFilter + TimelineFeed components
+- [ ] 24-04-PLAN.md — Profile page integration + system event triggers + auto-status upgrade
+- [ ] 24-05-PLAN.md — List view note tooltip + build verification
 
 ---
 
