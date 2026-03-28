@@ -224,6 +224,32 @@ export default async function ProspectProfilePage({
 
   const tags = prospectTags?.map((t) => t.tag) ?? [];
 
+  // Fetch initial signals for timeline (first 10, with seen status for this user)
+  const { data: initialSignals, count: signalCount } = await supabase
+    .from("prospect_signals")
+    .select("*", { count: "exact" })
+    .eq("prospect_id", prospectId)
+    .eq("tenant_id", tenantId)
+    .order("created_at", { ascending: false })
+    .limit(10);
+
+  // Fetch signal_views for this user to compute is_seen
+  const signalIds = (initialSignals || []).map((s: { id: string }) => s.id);
+  let viewedSignalIds: Set<string> = new Set();
+  if (signalIds.length > 0) {
+    const { data: views } = await supabase
+      .from("signal_views")
+      .select("signal_id")
+      .eq("user_id", user.id)
+      .in("signal_id", signalIds);
+    viewedSignalIds = new Set((views || []).map((v: { signal_id: string }) => v.signal_id));
+  }
+
+  const signalsWithSeen = (initialSignals || []).map((s) => ({
+    ...s,
+    is_seen: viewedSignalIds.has(s.id),
+  }));
+
   // Fetch team members and tag suggestions in parallel — only if canEdit
   let teamMembers: Array<{ id: string; full_name: string; email: string }> = [];
   let tagSuggestions: string[] = [];
@@ -259,6 +285,8 @@ export default async function ProspectProfilePage({
       teamMembers={teamMembers}
       tags={tags}
       tagSuggestions={tagSuggestions}
+      initialSignals={signalsWithSeen}
+      signalCount={signalCount || 0}
     />
   );
 }
