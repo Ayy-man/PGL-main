@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { logActivity } from "@/lib/activity-logger";
+import { logProspectActivity, isDuplicateActivity } from "@/lib/activity";
 import { ProfileView } from "@/components/prospect/profile-view";
 import { ROLE_PERMISSIONS } from "@/types/auth";
 import type { UserRole } from "@/types/auth";
@@ -78,6 +79,7 @@ export default async function ProspectProfilePage({
   }
 
   // Log activity: profile_viewed (fire-and-forget, don't block render)
+  // Keep backward-compat logActivity call AND add new logProspectActivity with deduplication
   logActivity({
     tenantId,
     userId: user.id,
@@ -85,6 +87,22 @@ export default async function ProspectProfilePage({
     targetType: "prospect",
     targetId: prospectId,
   }).catch((err) => console.error("[ProspectProfile] logActivity failed:", err));
+
+  // Log to prospect_activity with 1-per-hour deduplication per user
+  isDuplicateActivity(prospectId, user.id, "profile_viewed", 60)
+    .then((isDup) => {
+      if (!isDup) {
+        return logProspectActivity({
+          prospectId,
+          tenantId,
+          userId: user.id,
+          category: "team",
+          eventType: "profile_viewed",
+          title: "Viewed profile",
+        });
+      }
+    })
+    .catch(() => {});
 
   // Check if enrichment needed (missing data or stale >7 days)
   const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
@@ -165,14 +183,30 @@ export default async function ProspectProfilePage({
       addedAt: m.added_at,
     })) || [];
 
-  // Fetch activity logs for this prospect
+  // Fetch activity events from prospect_activity table
   const { data: activityEntries } = await supabase
-    .from("activity_logs")
-    .select("id, action_type, user_id, created_at, metadata")
-    .eq("target_id", prospectId)
-    .eq("target_type", "prospect")
-    .order("created_at", { ascending: false })
-    .limit(20);
+    .from("prospect_activity")
+    .select("id, prospect_id, tenant_id, user_id, category, event_type, title, note, metadata, event_at, created_at, triggers_status_change")
+    .eq("prospect_id", prospectId)
+    .order("event_at", { ascending: false })
+    .limit(50);
+
+  // Build user display name map from unique user_ids in activity entries
+  const activityUserIds = Array.from(
+    new Set((activityEntries ?? []).map((e) => e.user_id).filter(Boolean) as string[])
+  );
+  let activityUsers: Record<string, { full_name: string }> = {};
+  if (activityUserIds.length > 0) {
+    const { data: userProfiles } = await supabase
+      .from("users")
+      .select("id, full_name")
+      .in("id", activityUserIds);
+    if (userProfiles) {
+      activityUsers = Object.fromEntries(
+        userProfiles.map((u) => [u.id, { full_name: u.full_name ?? "" }])
+      );
+    }
+  }
 
   // Fetch all available lists for this tenant (for "Add to List" dialog)
   const { data: allLists } = await supabase
@@ -219,6 +253,7 @@ export default async function ProspectProfilePage({
       isStale={isStale}
       orgId={orgId}
       activityEntries={activityEntries ?? []}
+      activityUsers={activityUsers}
       allLists={allLists ?? []}
       canEdit={canEdit}
       teamMembers={teamMembers}

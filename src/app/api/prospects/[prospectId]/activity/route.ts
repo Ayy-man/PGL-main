@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { logProspectActivity } from "@/lib/activity";
 import { z } from "zod";
 
@@ -206,6 +207,67 @@ export async function POST(
         { error: "Failed to create activity event" },
         { status: 500 }
       );
+    }
+
+    // Auto-status upgrade for outreach events (fire-and-forget)
+    if (category === "outreach") {
+      (async () => {
+        try {
+          const admin = createAdminClient();
+
+          // Fetch current prospect status
+          const { data: prospect } = await admin
+            .from("prospects")
+            .select("status")
+            .eq("id", prospectId)
+            .single();
+
+          if (!prospect) return;
+
+          const currentStatus = (prospect as { status?: string }).status;
+          let newStatus: string | null = null;
+
+          // Upgrade rules: new -> contacted, contacted -> responded (only on 'met')
+          if (currentStatus === "new") {
+            newStatus = "contacted";
+          } else if (currentStatus === "contacted" && eventType === "met") {
+            newStatus = "responded";
+          }
+
+          // Never downgrade — only upgrade if newStatus is set
+          if (newStatus) {
+            // Update prospect status
+            await admin
+              .from("prospects")
+              .update({ status: newStatus, updated_at: new Date().toISOString() })
+              .eq("id", prospectId);
+
+            // Update the activity event to mark it triggers_status_change
+            await admin
+              .from("prospect_activity")
+              .update({ triggers_status_change: true })
+              .eq("id", created.id);
+
+            // Log status_changed event
+            await logProspectActivity({
+              prospectId,
+              tenantId,
+              userId: user.id,
+              category: "data",
+              eventType: "status_changed",
+              title: "Status changed",
+              metadata: {
+                auto: true,
+                triggered_by: created.id,
+                old_status: currentStatus,
+                new_status: newStatus,
+              },
+            });
+          }
+        } catch (err) {
+          console.error("[activity POST] Auto-status upgrade failed:", err);
+        }
+      })();
     }
 
     return NextResponse.json({ event: created }, { status: 201 });
