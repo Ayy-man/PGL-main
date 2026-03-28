@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 25-04-PLAN.md
-last_updated: "2026-03-28T23:40:01.688Z"
+stopped_at: "Checkpoint: 25-05 Task 3 human-verify"
+last_updated: "2026-03-28T23:48:10.111Z"
 last_activity: 2026-03-28
 progress:
-  total_phases: 22
+  total_phases: 23
   completed_phases: 4
   total_plans: 34
-  completed_plans: 26
+  completed_plans: 30
   percent: 100
 ---
 
@@ -102,6 +102,7 @@ Progress: [████████████████████] 100% (2
 | Phase 23 P03 | 25 | 1 tasks | 1 files |
 | Phase 23 P05 | 4 | 2 tasks | 3 files |
 | Phase 25-exa-research-scrapbook P04 | 4 | 2 tasks | 5 files |
+| Phase 25 P05 | 2 | 2 tasks | 3 files |
 
 ### Phase 3 Plan Completion
 
@@ -341,6 +342,7 @@ Recent decisions affecting current work:
 - [Phase 23]: Removed duplicate type definitions (IntelligenceDossierData, SignalCategory, ProspectSignal, SignalView) from database.ts that were added by both Plan 01 and Plan 04
 - [Phase 25-exa-research-scrapbook]: SSE over useChat: fetch+ReadableStream for research streaming — avoids AI SDK message format coupling
 - [Phase 25-exa-research-scrapbook]: research.ts types created in Plan 04 (not 01 as planned) — ScrapbookCard, PinTarget, SessionListItem
+- [Phase 25-05]: profile_viewed event_type with metadata.section=research used for tab logging (TeamEventType has no 'viewed' value)
 
 ### Roadmap Evolution
 
@@ -427,8 +429,8 @@ All 20 phases complete (6-20, including 14.1). The following items remain before
 
 ## Session Continuity
 
-Last session: 2026-03-28T23:40:01.686Z
-Stopped at: Completed 25-04-PLAN.md
+Last session: 2026-03-28T23:48:10.108Z
+Stopped at: Checkpoint: 25-05 Task 3 human-verify
 
 ---
 
