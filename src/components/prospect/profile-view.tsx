@@ -14,7 +14,8 @@ import { ProfileHeader } from "./profile-header";
 import { QuickActionBar } from "./quick-action-bar";
 import { ActivityFilter } from "./activity-filter";
 import { TimelineFeed } from "./timeline-feed";
-import { WealthSignals } from "./wealth-signals";
+import { IntelligenceDossier } from "./intelligence-dossier";
+import { SignalTimeline } from "./signal-timeline";
 import { MarketIntelligenceCard } from "./market-intelligence-card";
 import { LookalikeDiscovery } from "./lookalike-discovery";
 import { useToast } from "@/hooks/use-toast";
@@ -103,6 +104,9 @@ interface Prospect {
   updated_by?: string | null;
   created_at: string;
   updated_at: string;
+  intelligence_dossier?: import("@/types/database").IntelligenceDossierData | null;
+  dossier_generated_at?: string | null;
+  dossier_model?: string | null;
 }
 
 interface ListMembership {
@@ -130,6 +134,8 @@ interface ProfileViewProps {
   teamMembers?: Array<{ id: string; full_name: string; email: string }>;
   tags?: string[];
   tagSuggestions?: string[];
+  initialSignals?: Array<import("@/types/database").ProspectSignal & { is_seen: boolean }>;
+  signalCount?: number;
 }
 
 /**
@@ -155,6 +161,8 @@ export function ProfileView({
   teamMembers,
   tags,
   tagSuggestions,
+  initialSignals,
+  signalCount,
 }: ProfileViewProps) {
   const [showLookalikes, setShowLookalikes] = useState(false);
   const [noteText, setNoteText] = useState(prospect.notes ?? "");
@@ -528,10 +536,18 @@ export function ProfileView({
 
         {/* ─── CENTER COLUMN ─── */}
         <div className="lg:col-span-6 flex flex-col gap-6">
-          {/* Wealth Signals & Intelligence */}
-          <WealthSignals
-            webData={prospect.web_data}
-            insiderData={prospect.insider_data}
+          {/* Intelligence Dossier */}
+          <IntelligenceDossier
+            dossier={prospect.intelligence_dossier ?? null}
+            generatedAt={prospect.dossier_generated_at ?? null}
+          />
+
+          {/* Wealth Signal Timeline */}
+          <SignalTimeline
+            prospectId={prospect.id}
+            orgId={orgId}
+            initialSignals={initialSignals ?? []}
+            totalCount={signalCount ?? 0}
           />
 
           {/* Market Intelligence */}
