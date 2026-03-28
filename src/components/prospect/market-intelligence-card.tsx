@@ -352,16 +352,21 @@ export function MarketIntelligenceCard({
           >
             {formatPrice(snapshot.currentPrice)}
           </p>
-          {dailyChange != null && dailyChangePct != null && (
-            <span
-              className="text-sm font-mono font-medium"
-              style={{ color: dailyChange >= 0 ? "#22c55e" : "#ef4444" }}
-            >
-              {dailyChange >= 0 ? "+" : ""}
-              {formatPrice(dailyChange)} ({dailyChange >= 0 ? "+" : ""}
-              {dailyChangePct.toFixed(1)}%)
-            </span>
-          )}
+          {chartData.length >= 2 && (() => {
+            const startPrice = chartData[0].price;
+            const pctChange = ((snapshot.currentPrice - startPrice) / startPrice) * 100;
+            const dollarChange = snapshot.currentPrice - startPrice;
+            return (
+              <span
+                className="text-sm font-mono font-medium"
+                style={{ color: dollarChange >= 0 ? "#22c55e" : "#ef4444" }}
+              >
+                {dollarChange >= 0 ? "+" : ""}
+                {formatPrice(dollarChange)} ({dollarChange >= 0 ? "+" : ""}
+                {pctChange.toFixed(1)}%)
+              </span>
+            );
+          })()}
         </div>
         {fetchedAtFormatted && (
           <p className="text-[10px] text-muted-foreground mt-0.5">
