@@ -390,3 +390,21 @@ Plans:
 - [x] 20-01-PLAN.md -- Dashboard API: add sourceStats + topTenants queries
 - [x] 20-02-PLAN.md -- PlatformPulseModal component (charts, tables, animation)
 - [x] 20-03-PLAN.md -- Build verification + design system compliance
+
+### Phase 24: Activity Log Full Build — Prospect Activity Table, Quick Action Bar, Timeline Feed, Filter Bar, System Event Triggers, Auto Status Upgrade, Note Tooltips
+
+**Goal:** Build a complete per-prospect activity log system: prospect_activity DB table with category/event_type hierarchy, TypeScript types, shared logging utility, Timeline Feed UI component, Quick Action Bar for manual activity entry, Filter Bar by category, system event triggers wired to existing enrichment/editing flows, auto status upgrade logic, and note tooltips.
+
+**Requirements:** ACT-01, ACT-02
+**Depends on:** Phase 22
+
+**Status:** EXECUTING — Plan 1 of N complete
+
+**Plans:** 1/N complete
+
+Plans:
+- [x] 24-01-PLAN.md -- prospect_activity table DDL + data migration from activity_log + TypeScript types + logProspectActivity utility
+- [ ] 24-02-PLAN.md -- (pending)
+- [ ] 24-03-PLAN.md -- (pending)
+- [ ] 24-04-PLAN.md -- (pending)
+- [ ] 24-05-PLAN.md -- (pending)
