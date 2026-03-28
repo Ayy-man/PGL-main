@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { logActivity } from "@/lib/activity-logger";
+import { logProspectActivity } from "@/lib/activity";
 import { z } from "zod";
 
 /**
@@ -122,6 +123,13 @@ export async function PATCH(
       actionType,
       targetType: "prospect",
       targetId: prospectId,
+      metadata: { fields: Object.keys(validated) },
+    }).catch(() => {});
+
+    logProspectActivity({
+      prospectId, tenantId, userId: user.id,
+      category: 'team', eventType: 'profile_edited',
+      title: 'Profile edited',
       metadata: { fields: Object.keys(validated) },
     }).catch(() => {});
 

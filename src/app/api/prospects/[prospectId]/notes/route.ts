@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { logActivity } from "@/lib/activity-logger";
+import { logProspectActivity } from "@/lib/activity";
 
 /**
  * PATCH /api/prospects/[prospectId]/notes
@@ -68,6 +69,12 @@ export async function PATCH(
       actionType: "note_added",
       targetType: "prospect",
       targetId: prospectId,
+    }).catch(() => {});
+
+    logProspectActivity({
+      prospectId, tenantId, userId: user.id,
+      category: 'team', eventType: 'note_added',
+      title: 'Note updated',
     }).catch(() => {});
 
     return NextResponse.json({ notes: data.notes });

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logActivity } from "@/lib/activity-logger";
+import { logProspectActivity } from "@/lib/activity";
 
 /**
  * POST /api/prospects/[prospectId]/photo
@@ -149,6 +150,12 @@ export async function POST(
       actionType: "photo_uploaded",
       targetType: "prospect",
       targetId: prospectId,
+    }).catch(() => {});
+
+    logProspectActivity({
+      prospectId, tenantId, userId: user.id,
+      category: 'team', eventType: 'photo_uploaded',
+      title: 'Photo uploaded',
     }).catch(() => {});
 
     return NextResponse.json({ url: publicUrl });

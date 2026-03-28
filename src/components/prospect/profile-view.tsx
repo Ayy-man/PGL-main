@@ -11,12 +11,15 @@ import {
 } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { ProfileHeader } from "./profile-header";
-import { ActivityTimeline } from "./activity-timeline";
+import { QuickActionBar } from "./quick-action-bar";
+import { ActivityFilter } from "./activity-filter";
+import { TimelineFeed } from "./timeline-feed";
 import { WealthSignals } from "./wealth-signals";
 import { MarketIntelligenceCard } from "./market-intelligence-card";
 import { LookalikeDiscovery } from "./lookalike-discovery";
 import { useToast } from "@/hooks/use-toast";
 import { AddToListDialogProfile } from "./add-to-list-dialog-profile";
+import type { ProspectActivity, ActivityCategory } from "@/types/activity";
 
 type SourceStatus =
   | "pending"
@@ -115,13 +118,8 @@ interface ProfileViewProps {
   listMemberships: ListMembership[];
   isStale: boolean;
   orgId: string;
-  activityEntries: Array<{
-    id: string;
-    action_type: string;
-    user_id: string;
-    created_at: string;
-    metadata?: Record<string, unknown>;
-  }>;
+  activityEntries: ProspectActivity[];
+  activityUsers: Record<string, { full_name: string }>;
   allLists: Array<{
     id: string;
     name: string;
@@ -151,6 +149,7 @@ export function ProfileView({
   isStale,
   orgId,
   activityEntries,
+  activityUsers,
   allLists,
   canEdit,
   teamMembers,
@@ -163,6 +162,16 @@ export function ProfileView({
   const [lastSavedNote, setLastSavedNote] = useState(prospect.notes ?? "");
   const [addToListOpen, setAddToListOpen] = useState(false);
   const { toast } = useToast();
+
+  // Activity Log state
+  const [activeCategories, setActiveCategories] = useState<ActivityCategory[]>(['outreach', 'data', 'team', 'custom']);
+  const [showSystemEvents, setShowSystemEvents] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const handleActivityCreated = useCallback(async (_event: ProspectActivity) => {
+    setRefreshTrigger(prev => prev + 1);
+    // Auto-status upgrade is handled server-side in the POST activity route
+  }, []);
 
   // Photo URL state (controlled so AvatarUpload updates propagate)
   const [currentPhotoUrl, setCurrentPhotoUrl] = useState<string | null>(
@@ -771,22 +780,34 @@ export function ProfileView({
 
           {/* Activity Log */}
           <div className="surface-card rounded-[14px] flex flex-col flex-1 overflow-hidden">
-            <div
-              className="p-5"
-              style={{
-                borderBottom:
-                  "1px solid var(--border-default, rgba(255,255,255,0.06))",
-              }}
-            >
-              <h3 className="text-foreground text-lg font-bold font-serif">
-                Activity Log
-              </h3>
-              <p className="text-xs text-muted-foreground mt-1">
-                Recent team touchpoints
-              </p>
+            <div className="p-5" style={{ borderBottom: "1px solid var(--border-default, rgba(255,255,255,0.06))" }}>
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <h3 className="text-foreground text-lg font-bold font-serif">Activity Log</h3>
+                  <p className="text-xs text-muted-foreground mt-1">Recent team touchpoints</p>
+                </div>
+                <ActivityFilter
+                  activeCategories={activeCategories}
+                  showSystemEvents={showSystemEvents}
+                  eventCount={activityEntries.length}
+                  onCategoriesChange={setActiveCategories}
+                  onShowSystemEventsChange={setShowSystemEvents}
+                />
+              </div>
+              <QuickActionBar
+                prospectId={prospect.id}
+                onActivityCreated={handleActivityCreated}
+              />
             </div>
             <div className="flex-1 overflow-y-auto p-3">
-              <ActivityTimeline events={activityEntries} />
+              <TimelineFeed
+                prospectId={prospect.id}
+                initialEvents={activityEntries}
+                initialUsers={activityUsers}
+                activeCategories={activeCategories}
+                showSystemEvents={showSystemEvents}
+                refreshTrigger={refreshTrigger}
+              />
             </div>
           </div>
         </div>
