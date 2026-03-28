@@ -229,12 +229,22 @@ export function MarketIntelligenceCard({
     snapshot.equity && Math.abs(snapshot.equity.gain90d) > 100_000;
 
   // Transform sparkline number[] -> {date: string, price: number}[]
-  const fullData = snapshot.sparkline.map((price, i) => ({
-    date: new Date(
-      Date.now() - (snapshot.sparkline.length - 1 - i) * 86400000
-    ).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
-    price,
-  }));
+  // Sparkline has ~251 trading days spanning ~365 calendar days.
+  // Space dates evenly across the actual calendar range.
+  const totalCalendarDays = 365;
+  const sparkLen = snapshot.sparkline.length;
+  const fullData = snapshot.sparkline.map((price, i) => {
+    const calendarDaysAgo = Math.round(
+      ((sparkLen - 1 - i) / (sparkLen - 1)) * totalCalendarDays
+    );
+    return {
+      date: new Date(Date.now() - calendarDaysAgo * 86400000).toLocaleDateString(
+        "en-US",
+        { month: "short", day: "numeric" }
+      ),
+      price,
+    };
+  });
 
   // Filter by active period
   const periodDays: Record<string, number> = {
@@ -365,7 +375,7 @@ export function MarketIntelligenceCard({
             <AreaChart
               key={activePeriod}
               data={chartData}
-              margin={{ top: 10, right: 60, left: 0, bottom: 5 }}
+              margin={{ top: 10, right: 60, left: 10, bottom: 5 }}
             >
               <defs>
                 <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
