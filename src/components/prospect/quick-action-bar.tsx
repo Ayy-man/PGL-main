@@ -132,14 +132,26 @@ export function QuickActionBar({ prospectId, onActivityCreated }: QuickActionBar
       {!activeMode ? (
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-[8px] transition-all duration-150 border cursor-pointer"
+          className="flex items-center justify-center gap-2 w-full py-2.5 text-sm font-semibold rounded-[8px] transition-all duration-150 border cursor-pointer"
           style={{
-            background: menuOpen ? "rgba(212,175,55,0.1)" : "rgba(255,255,255,0.03)",
-            borderColor: menuOpen ? "var(--gold-primary)" : "var(--border-default, rgba(255,255,255,0.06))",
-            color: menuOpen ? "var(--gold-primary)" : "var(--text-secondary, rgba(232,228,220,0.7))",
+            background: menuOpen ? "rgba(212,175,55,0.15)" : "rgba(212,175,55,0.06)",
+            borderColor: menuOpen ? "var(--gold-primary)" : "rgba(212,175,55,0.2)",
+            color: "var(--gold-primary)",
+          }}
+          onMouseEnter={(e) => {
+            if (!menuOpen) {
+              (e.currentTarget as HTMLButtonElement).style.background = "rgba(212,175,55,0.12)";
+              (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(212,175,55,0.4)";
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!menuOpen) {
+              (e.currentTarget as HTMLButtonElement).style.background = "rgba(212,175,55,0.06)";
+              (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(212,175,55,0.2)";
+            }
           }}
         >
-          <PenLine className="h-3.5 w-3.5" />
+          <PenLine className="h-4 w-4" />
           Log Activity
         </button>
       ) : (

@@ -795,27 +795,32 @@ export function ProfileView({
           </div>
 
           {/* Activity Log */}
-          <div className="surface-card rounded-[14px] flex flex-col flex-1 overflow-hidden">
-            <div className="p-5" style={{ borderBottom: "1px solid var(--border-default, rgba(255,255,255,0.06))" }}>
+          <div className="surface-card rounded-[14px] flex flex-col overflow-hidden">
+            <div className="p-5" style={{ borderBottom: activityEntries.length > 0 ? "1px solid var(--border-default, rgba(255,255,255,0.06))" : "none" }}>
               <div className="flex items-center justify-between mb-3">
                 <div>
                   <h3 className="text-foreground text-lg font-bold font-serif">Activity Log</h3>
                   <p className="text-xs text-muted-foreground mt-1">Recent team touchpoints</p>
                 </div>
-                <ActivityFilter
-                  activeCategories={activeCategories}
-                  showSystemEvents={showSystemEvents}
-                  eventCount={activityEntries.length}
-                  onCategoriesChange={setActiveCategories}
-                  onShowSystemEventsChange={setShowSystemEvents}
-                />
+                {activityEntries.length > 0 && (
+                  <ActivityFilter
+                    activeCategories={activeCategories}
+                    showSystemEvents={showSystemEvents}
+                    eventCount={activityEntries.length}
+                    onCategoriesChange={setActiveCategories}
+                    onShowSystemEventsChange={setShowSystemEvents}
+                  />
+                )}
               </div>
               <QuickActionBar
                 prospectId={prospect.id}
                 onActivityCreated={handleActivityCreated}
               />
             </div>
-            <div className="flex-1 overflow-y-auto p-3">
+            <div
+              className="overflow-y-auto p-3"
+              style={{ maxHeight: activityEntries.length > 0 ? "400px" : "auto" }}
+            >
               <TimelineFeed
                 prospectId={prospect.id}
                 initialEvents={activityEntries}
