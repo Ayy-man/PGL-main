@@ -88,7 +88,7 @@ export const enrichProspect = inngest.createFunction(
       name,
       company,
       title,
-      isPublicCompany,
+      isPublicCompany: _isPublicCompany,
       companyCik,
       ticker,
     } = event.data;
