@@ -110,3 +110,8 @@ None - no external service configuration required.
 ---
 *Phase: 24-activity-log*
 *Completed: 2026-03-28*
+
+## Self-Check: PASSED
+- FOUND: src/app/[orgId]/lists/components/list-member-table.tsx
+- FOUND: .planning/phases/.../24-05-SUMMARY.md
+- FOUND: commit ea19f87 (Task 1: NoteTooltip implementation)
