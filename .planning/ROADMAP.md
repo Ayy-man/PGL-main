@@ -325,11 +325,11 @@ Plans:
 
 **Requirements:** ACT-01, ACT-02, ACT-03, ACT-04, ACT-05, ACT-06, ACT-07, ACT-08, ACT-09, ACT-10
 **Depends on:** Phase 23
-**Plans:** 5 plans
+**Plans:** 2/5 plans executed
 
 Plans:
-- [ ] 24-01-PLAN.md — prospect_activity table DDL + data migration + TypeScript types + logProspectActivity utility
-- [ ] 24-02-PLAN.md — CRUD API routes (GET/POST/PATCH/DELETE) for prospect activity
+- [x] 24-01-PLAN.md — prospect_activity table DDL + data migration + TypeScript types + logProspectActivity utility
+- [x] 24-02-PLAN.md — CRUD API routes (GET/POST/PATCH/DELETE) for prospect activity
 - [ ] 24-03-PLAN.md — QuickActionBar + ActivityFilter + TimelineFeed components
 - [ ] 24-04-PLAN.md — Profile page integration + system event triggers + auto-status upgrade
 - [ ] 24-05-PLAN.md — List view note tooltip + build verification
