@@ -18,7 +18,6 @@ import {
   CheckCircle2,
   Mail,
   Phone,
-  MessageSquare,
 } from "lucide-react";
 import { MemberStatusSelect } from "./member-status-select";
 import { MemberNotesCell } from "./member-notes-cell";
@@ -138,78 +137,6 @@ function CopyButton({ text, icon: Icon }: { text: string; icon: typeof Mail }) {
   );
 }
 
-function NoteTooltip({ prospectId }: { prospectId: string }) {
-  const [note, setNote] = useState<string | null>(null);
-  const [userName, setUserName] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [fetched, setFetched] = useState(false);
-  const [showTooltip, setShowTooltip] = useState(false);
-
-  const fetchNote = async () => {
-    if (fetched) return;
-    setIsLoading(true);
-    try {
-      const res = await fetch(`/api/prospects/${prospectId}/activity?category=outreach&limit=1`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.events?.length > 0 && data.events[0].note) {
-          setNote(data.events[0].note);
-          const userId = data.events[0].user_id;
-          if (userId && data.users?.[userId]) {
-            setUserName(data.users[userId].full_name);
-          }
-        }
-      }
-    } catch { /* ignore */ }
-    setIsLoading(false);
-    setFetched(true);
-  };
-
-  if (fetched && !note) return null; // No outreach notes — hide icon entirely
-
-  return (
-    <div
-      className="relative inline-flex items-center"
-      onMouseEnter={() => { fetchNote(); setShowTooltip(true); }}
-      onMouseLeave={() => setShowTooltip(false)}
-    >
-      <MessageSquare
-        className="h-3.5 w-3.5 shrink-0"
-        style={{ color: "var(--gold-primary, #d4af37)", opacity: fetched && !note ? 0 : 0.7 }}
-      />
-      {showTooltip && note && (
-        <div
-          className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 max-w-[240px] rounded-[8px] px-3 py-2 text-xs pointer-events-none"
-          style={{
-            background: "var(--bg-elevated, #1a1a1a)",
-            border: "1px solid var(--border-default, rgba(255,255,255,0.06))",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
-            color: "var(--text-primary-ds, #e8e4dc)",
-          }}
-        >
-          {userName && (
-            <p className="font-semibold mb-1" style={{ color: "var(--gold-primary)" }}>
-              {userName}
-            </p>
-          )}
-          <p className="italic line-clamp-3">&ldquo;{note}&rdquo;</p>
-        </div>
-      )}
-      {showTooltip && isLoading && (
-        <div
-          className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 rounded-[8px] px-3 py-2 text-xs pointer-events-none"
-          style={{
-            background: "var(--bg-elevated, #1a1a1a)",
-            border: "1px solid var(--border-default, rgba(255,255,255,0.06))",
-          }}
-        >
-          Loading...
-        </div>
-      )}
-    </div>
-  );
-}
-
 export function ListMemberTable({ members }: ListMemberTableProps) {
   const params = useParams();
   const orgId = params.orgId as string;
@@ -276,9 +203,6 @@ export function ListMemberTable({ members }: ListMemberTableProps) {
                             <ExternalLink className="h-3 w-3" />
                           </a>
                         )}
-                        <span className="inline-flex">
-                          <NoteTooltip prospectId={member.prospect.id} />
-                        </span>
                       </div>
                       <p className="text-xs truncate" style={{ color: "var(--text-tertiary, rgba(232,228,220,0.4))" }}>
                         {member.prospect.title || ""}
@@ -382,9 +306,6 @@ export function ListMemberTable({ members }: ListMemberTableProps) {
                   >
                     {member.prospect.name}
                   </Link>
-                  <span className="inline-flex">
-                    <NoteTooltip prospectId={member.prospect.id} />
-                  </span>
                 </div>
                 <p className="text-xs mt-0.5 truncate" style={{ color: "var(--text-tertiary)" }}>
                   {member.prospect.title || ""}
