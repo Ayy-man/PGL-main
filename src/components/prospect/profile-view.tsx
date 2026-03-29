@@ -755,7 +755,6 @@ export function ProfileView({
                   <ActivityFilter
                     activeCategories={activeCategories}
                     showSystemEvents={showSystemEvents}
-                    eventCount={activityEntries.length}
                     onCategoriesChange={setActiveCategories}
                     onShowSystemEventsChange={setShowSystemEvents}
                   />
