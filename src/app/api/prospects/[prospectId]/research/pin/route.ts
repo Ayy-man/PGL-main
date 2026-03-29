@@ -3,7 +3,7 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logProspectActivity } from "@/lib/activity";
-import type { PinRequest } from "@/types/research";
+import type { PinRequest as _PinRequest } from "@/types/research";
 
 const scrapbookCardSchema = z.object({
   index: z.number(),

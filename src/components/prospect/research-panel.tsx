@@ -57,11 +57,11 @@ function generateId(): string {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
-export function ResearchPanel({ prospectId, prospect, orgId }: ResearchPanelProps) {
+export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchPanelProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [streamPhase, setStreamPhase] = useState<StreamPhase>("idle");
-  const [currentCards, setCurrentCards] = useState<ScrapbookCard[]>([]);
+  const [_currentCards, setCurrentCards] = useState<ScrapbookCard[]>([]);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [inputValue, setInputValue] = useState("");
@@ -69,7 +69,7 @@ export function ResearchPanel({ prospectId, prospect, orgId }: ResearchPanelProp
   const [sessions, setSessions] = useState<SessionListItem[]>([]);
   const [loadingSessions, setLoadingSessions] = useState(false);
   const [streamingReasoning, setStreamingReasoning] = useState<string>("");
-  const [reasoningCollapsed, setReasoningCollapsed] = useState(false);
+  const [_reasoningCollapsed, setReasoningCollapsed] = useState(false);
   const [toolStatus, setToolStatus] = useState<string>("");
   const [lowRelevanceCollapsed, setLowRelevanceCollapsed] = useState(true);
   const [streamingCards, setStreamingCards] = useState<ScrapbookCard[]>([]);
@@ -177,7 +177,7 @@ export function ResearchPanel({ prospectId, prospect, orgId }: ResearchPanelProp
         const cards: ScrapbookCard[] = [];
         const sources: Array<{ url: string; title: string }> = [];
         let buffer = "";
-        let newSessionId = sessionId;
+        let _newSessionId = sessionId;
         let reasoningText = "";
         let assistantContent = "";
 
@@ -199,7 +199,7 @@ export function ResearchPanel({ prospectId, prospect, orgId }: ResearchPanelProp
               const { type } = event;
 
               if (type === "session") {
-                newSessionId = event.session_id;
+                _newSessionId = event.session_id;
                 setSessionId(event.session_id);
               } else if (type === "reasoning") {
                 reasoningText += event.content ?? "";
@@ -334,7 +334,7 @@ export function ResearchPanel({ prospectId, prospect, orgId }: ResearchPanelProp
     prospect.manual_photo_url || prospect.contact_data?.photo_url || null;
 
   // Group messages: find the last assistant message's cards for low-relevance grouping
-  const getCardGroups = (cards: ScrapbookCard[]) => {
+  const _getCardGroups = (cards: ScrapbookCard[]) => {
     const high = cards.filter(
       (c) => c.relevance !== "low" && c.answer_relevance !== "background"
     );

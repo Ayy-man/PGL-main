@@ -69,12 +69,9 @@ Public ticker: ${prospect.publicly_traded_symbol || "None"}`;
     const rawChannels: string[] = Array.isArray(parsed.channels)
       ? parsed.channels
       : [];
-    let channels = rawChannels.filter((c): c is ChannelId =>
+    const channels = rawChannels.filter((c): c is ChannelId =>
       ALL_CHANNEL_IDS.includes(c as ChannelId)
     );
-
-    // Filter out channels whose API keys are not configured
-    // All remaining channels (exa, edgar-efts) are free — no key filtering needed
 
     // Ensure exa is always present
     if (!channels.includes("exa")) {

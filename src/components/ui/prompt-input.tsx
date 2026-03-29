@@ -33,8 +33,7 @@ PromptInput.displayName = "PromptInput";
 
 // --- PromptInputTextarea ---
 
-interface PromptInputTextareaProps
-  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {}
+type PromptInputTextareaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement>;
 
 const PromptInputTextarea = React.forwardRef<
   HTMLTextAreaElement,
