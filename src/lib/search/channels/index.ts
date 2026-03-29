@@ -6,9 +6,6 @@ import type { SignalCategory } from "@/types/database";
 export type ChannelId =
   | "exa"
   | "edgar-efts"
-  | "gnews"
-  | "opencorporates"
-  | "crunchbase"
   | "attom";
 
 /**
@@ -65,10 +62,7 @@ export type ChannelFn = (params: ChannelParams) => Promise<ChannelOutput>;
  */
 export const CHANNEL_TTLS: Record<ChannelId, number> = {
   exa: 3600,             // 1 hour
-  gnews: 3600,           // 1 hour
   "edgar-efts": 86400,   // 24 hours
-  crunchbase: 86400,     // 24 hours
-  opencorporates: 86400, // 24 hours
   attom: 604800,         // 7 days
 };
 
@@ -78,9 +72,6 @@ export const CHANNEL_TTLS: Record<ChannelId, number> = {
 export const CHANNEL_DISPLAY_NAMES: Record<ChannelId, string> = {
   exa: "Exa",
   "edgar-efts": "SEC EDGAR",
-  gnews: "GNews",
-  opencorporates: "OpenCorporates",
-  crunchbase: "Crunchbase",
   attom: "ATTOM Property",
 };
 

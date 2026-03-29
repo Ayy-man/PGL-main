@@ -37,27 +37,3 @@ export const edgarRateLimiter = new Ratelimit({
   analytics: true,
   prefix: "ratelimit:edgar",
 });
-
-/** GNews rate limiter — 10 req/s local throttle (free tier: 100/day) */
-export const gNewsRateLimiter = new Ratelimit({
-  redis,
-  limiter: Ratelimit.slidingWindow(10, "1 s"),
-  analytics: true,
-  prefix: "ratelimit:gnews",
-});
-
-/** OpenCorporates rate limiter — 5 req/s (free tier, conservative) */
-export const openCorporatesRateLimiter = new Ratelimit({
-  redis,
-  limiter: Ratelimit.slidingWindow(5, "1 s"),
-  analytics: true,
-  prefix: "ratelimit:opencorporates",
-});
-
-/** Crunchbase rate limiter — 10 req/s (Basic free tier: 200/min) */
-export const crunchbaseRateLimiter = new Ratelimit({
-  redis,
-  limiter: Ratelimit.slidingWindow(10, "1 s"),
-  analytics: true,
-  prefix: "ratelimit:crunchbase",
-});

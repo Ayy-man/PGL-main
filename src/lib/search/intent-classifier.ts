@@ -11,9 +11,6 @@ export type IntentClassification = {
 const ALL_CHANNEL_IDS: ChannelId[] = [
   "exa",
   "edgar-efts",
-  "gnews",
-  "opencorporates",
-  "crunchbase",
   "attom",
 ];
 
@@ -24,8 +21,6 @@ Given a user query and prospect context, return which search channels to use and
 Channel selection rules:
 - Always include "exa" (general web search — always on)
 - Add "edgar-efts" for queries about SEC filings, insider trading, Form 4, 13F, 8-K, 10-K, regulatory disclosures
-- Add "gnews" for queries about recent news, press releases, announcements, media coverage
-- Add "opencorporates" and/or "crunchbase" for queries about company details, founding, funding rounds, investors, startups, corporate structure
 - Add "attom" for queries about property, real estate, homes, address, owns property
 
 Entity type rules:
@@ -36,7 +31,7 @@ Entity type rules:
 
 Return ONLY valid JSON in this exact format:
 {
-  "channels": ["exa", "gnews"],
+  "channels": ["exa", "edgar-efts"],
   "reformulatedQuery": "reformulated search query optimized for the selected channels",
   "entityType": "person",
   "reasoning": "brief explanation of channel selection"
@@ -83,12 +78,6 @@ Public ticker: ${prospect.publicly_traded_symbol || "None"}`;
     // Filter out channels whose API keys are not configured
     channels = channels.filter((ch) => {
       switch (ch) {
-        case "gnews":
-          return !!process.env.GNEWS_API_KEY;
-        case "opencorporates":
-          return !!process.env.OPENCORPORATES_API_TOKEN;
-        case "crunchbase":
-          return !!process.env.CRUNCHBASE_API_KEY;
         case "attom":
           return !!process.env.ATTOM_API_KEY;
         default:

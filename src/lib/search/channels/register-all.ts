@@ -4,7 +4,4 @@
  */
 import "./exa-channel";
 import "./edgar-efts-channel";
-import "./gnews-channel";
-import "./opencorporates-channel";
-import "./crunchbase-channel";
 import "./attom-channel";

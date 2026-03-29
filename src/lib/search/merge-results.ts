@@ -34,10 +34,7 @@ const RELEVANCE_SCORES: Record<"high" | "medium" | "low", number> = {
 const CHANNEL_PRIORITY: Record<string, number> = {
   "edgar-efts": 6, // SEC filings most authoritative
   exa: 5,          // Web intelligence, broad coverage
-  gnews: 4,        // News timeliness
-  crunchbase: 3,   // Company/funding data
-  opencorporates: 2, // Registration data
-  attom: 1,        // Property data (niche)
+  attom: 4,        // Property data
 };
 
 /**
