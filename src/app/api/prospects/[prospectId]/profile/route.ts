@@ -26,7 +26,7 @@ const profilePatchSchema = z
     manual_state: z.string().max(100).nullable().optional(),
     manual_country: z.string().max(100).nullable().optional(),
     manual_wealth_tier: z
-      .enum(["low", "medium", "high", "ultra_high"])
+      .enum(["ultra_high", "very_high", "high", "emerging", "unknown"])
       .nullable()
       .optional(),
     pinned_note: z.string().max(500).nullable().optional(),

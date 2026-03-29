@@ -62,21 +62,18 @@ export function InlineEditField({
     const newValue = inputValue.trim() === "" ? null : inputValue.trim();
     const previousValue = displayValue;
 
-    // Optimistic update
+    // Optimistic: show the new value and exit edit mode immediately
     setDisplayValue(newValue);
-    setEditState("saving");
+    setEditState("idle");
+    setFlash(true);
+    setTimeout(() => setFlash(false), 500);
 
+    // Persist in background — rollback on failure
     try {
       await onSave(newValue);
-      setEditState("idle");
-      // Gold flash on success
-      setFlash(true);
-      setTimeout(() => setFlash(false), 500);
     } catch {
-      // Revert on error, go back to editing
       setDisplayValue(previousValue);
       setInputValue(previousValue ?? "");
-      setEditState("editing");
     }
   }, [inputValue, displayValue, onSave]);
 
