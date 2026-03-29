@@ -124,8 +124,10 @@ export async function GET(
     let usersMap: Record<string, { full_name: string }> = {};
 
     if (userIds.length > 0) {
-      const { data: profiles } = await supabase
-        .from("profiles")
+      // Use admin client to bypass RLS — user table RLS may block reading other team members
+      const admin = createAdminClient();
+      const { data: profiles } = await admin
+        .from("users")
         .select("id, full_name")
         .in("id", userIds);
 

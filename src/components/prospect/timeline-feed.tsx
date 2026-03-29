@@ -222,8 +222,8 @@ function EventRow({ event, users, prospectId, onEventDeleted, onEventUpdated }: 
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => { setIsHovered(false); setShowMenu(false); }}
     >
-      {/* Icon */}
-      <div className="flex-shrink-0 mt-[2px]">
+      {/* Icon — fixed width for alignment */}
+      <div className="w-4 h-4 flex items-center justify-center flex-shrink-0 mt-[2px]">
         <Icon className="h-3.5 w-3.5" style={{ color: iconColor }} />
       </div>
 

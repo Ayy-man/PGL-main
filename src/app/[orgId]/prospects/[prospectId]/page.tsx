@@ -1,11 +1,14 @@
 import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { logActivity } from "@/lib/activity-logger";
 import { logProspectActivity, isDuplicateActivity } from "@/lib/activity";
 import { ProfileView } from "@/components/prospect/profile-view";
 import { ROLE_PERMISSIONS } from "@/types/auth";
 import type { UserRole } from "@/types/auth";
+
+export const dynamic = "force-dynamic";
 
 /**
  * Prospect Profile Page
@@ -197,7 +200,9 @@ export default async function ProspectProfilePage({
   );
   let activityUsers: Record<string, { full_name: string }> = {};
   if (activityUserIds.length > 0) {
-    const { data: userProfiles } = await supabase
+    // Use admin client to bypass RLS — user table RLS may block reading other team members
+    const adminClient = createAdminClient();
+    const { data: userProfiles } = await adminClient
       .from("users")
       .select("id, full_name")
       .in("id", activityUserIds);
