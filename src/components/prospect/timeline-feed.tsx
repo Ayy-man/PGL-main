@@ -26,13 +26,13 @@ import {
   ChevronDown,
   Loader2,
 } from "lucide-react";
-import { ProspectActivity, ActivityCategory } from "@/types/activity";
+import type { ProspectActivity, ActivityCategory, EventType } from "@/types/activity";
 
 /* ------------------------------------------------------------------ */
 /*  Icon + color maps                                                  */
 /* ------------------------------------------------------------------ */
 
-const EVENT_ICONS: Record<string, React.ElementType> = {
+const EVENT_ICONS: Partial<Record<EventType, React.ElementType>> = {
   call: Phone,
   email: Mail,
   met: Users,
@@ -62,7 +62,7 @@ const EVENT_ICONS: Record<string, React.ElementType> = {
   custom: Activity,
 };
 
-const ICON_COLORS: Record<string, string> = {
+const ICON_COLORS: Record<ActivityCategory, string> = {
   outreach: "var(--gold-primary)",
   data: "var(--info, #3b82f6)",
   team: "rgba(255,255,255,0.3)",
@@ -173,7 +173,7 @@ function EventRow({ event, users, prospectId, onEventDeleted, onEventUpdated }: 
   const Icon = EVENT_ICONS[event.event_type] ?? Activity;
   const iconColor = ICON_COLORS[event.category] ?? "rgba(255,255,255,0.3)";
 
-  const userName = event.user_id ? (users[event.user_id]?.full_name ?? null) : null;
+  const userName = event.user_id ? (users[event.user_id]?.full_name ?? "Team member") : null;
   const firstName = userName ? userName.split(" ")[0] : null;
 
   // Check if event was backdated (event_at differs from created_at by more than 1 minute)
