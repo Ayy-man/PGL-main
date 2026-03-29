@@ -11,7 +11,6 @@ import {
   Check,
   X,
   Loader2,
-  PenLine,
 } from "lucide-react";
 import {
   ProspectActivity,
@@ -128,31 +127,17 @@ export function QuickActionBar({ prospectId, onActivityCreated }: QuickActionBar
 
   return (
     <div ref={containerRef} className="relative">
-      {/* Single Log button — or active mode label */}
+      {/* Compact Log trigger — or active mode label */}
       {!activeMode ? (
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="flex items-center justify-center gap-2 w-full py-2.5 text-sm font-semibold rounded-[8px] transition-all duration-150 border cursor-pointer"
-          style={{
-            background: menuOpen ? "rgba(212,175,55,0.15)" : "rgba(212,175,55,0.06)",
-            borderColor: menuOpen ? "var(--gold-primary)" : "rgba(212,175,55,0.2)",
-            color: "var(--gold-primary)",
-          }}
-          onMouseEnter={(e) => {
-            if (!menuOpen) {
-              (e.currentTarget as HTMLButtonElement).style.background = "rgba(212,175,55,0.12)";
-              (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(212,175,55,0.4)";
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (!menuOpen) {
-              (e.currentTarget as HTMLButtonElement).style.background = "rgba(212,175,55,0.06)";
-              (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(212,175,55,0.2)";
-            }
-          }}
+          className="flex items-center gap-1 text-xs font-medium transition-colors cursor-pointer"
+          style={{ color: "var(--gold-primary)" }}
+          onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = "0.7"; }}
+          onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = "1"; }}
         >
-          <PenLine className="h-4 w-4" />
-          Log Activity
+          <Plus className="h-3.5 w-3.5" />
+          Log
         </button>
       ) : (
         <div className="flex items-center gap-2 text-xs" style={{ color: activeItem?.color }}>

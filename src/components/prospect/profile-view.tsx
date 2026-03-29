@@ -623,125 +623,6 @@ export function ProfileView({
             snapshotAt={prospect.stock_snapshot_at ?? null}
           />
 
-          {/* Company Context */}
-          {(() => {
-            const hasCompanyContext = !!(
-              prospect.company ||
-              prospect.publicly_traded_symbol ||
-              prospect.company_cik ||
-              prospect.location ||
-              prospect.title
-            );
-            const hasDetails = !!(prospect.title || prospect.company_cik);
-            if (!hasCompanyContext) return null;
-            return (
-              <div className="surface-card rounded-[14px] p-4 md:p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-foreground text-lg font-bold font-serif">
-                    Company Context
-                  </h3>
-                  {prospect.company && (
-                    <span
-                      className="text-xs font-bold px-2 py-1 rounded"
-                      style={{
-                        background: "rgba(255,255,255,0.03)",
-                        border:
-                          "1px solid var(--border-default, rgba(255,255,255,0.06))",
-                        color:
-                          "var(--text-secondary, rgba(232,228,220,0.5))",
-                      }}
-                    >
-                      {prospect.company.toUpperCase()}
-                    </span>
-                  )}
-                </div>
-                {hasDetails ? (
-                  <div className="grid grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                      {prospect.publicly_traded_symbol && (
-                        <div>
-                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
-                            Ticker
-                          </p>
-                          <p className="text-sm font-semibold text-foreground font-mono">
-                            {prospect.publicly_traded_symbol}
-                          </p>
-                        </div>
-                      )}
-                      {prospect.location && (
-                        <div>
-                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
-                            Headquarters
-                          </p>
-                          <p className="text-sm font-semibold text-foreground">
-                            {prospect.location}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-2">
-                        Details
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {prospect.title && (
-                          <span
-                            className="px-2 py-1 rounded text-xs font-medium"
-                            style={{
-                              background: "rgba(255,255,255,0.03)",
-                              border:
-                                "1px solid var(--border-default, rgba(255,255,255,0.06))",
-                              color:
-                                "var(--text-primary-ds, var(--text-primary, #e8e4dc))",
-                            }}
-                          >
-                            {prospect.title}
-                          </span>
-                        )}
-                        {prospect.company_cik && (
-                          <span
-                            className="px-2 py-1 rounded text-xs font-medium"
-                            style={{
-                              background: "rgba(255,255,255,0.03)",
-                              border:
-                                "1px solid var(--border-default, rgba(255,255,255,0.06))",
-                              color:
-                                "var(--text-primary-ds, var(--text-primary, #e8e4dc))",
-                            }}
-                          >
-                            CIK: {prospect.company_cik}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {prospect.publicly_traded_symbol && (
-                      <div>
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
-                          Ticker
-                        </p>
-                        <p className="text-sm font-semibold text-foreground font-mono">
-                          {prospect.publicly_traded_symbol}
-                        </p>
-                      </div>
-                    )}
-                    {prospect.location && (
-                      <div>
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
-                          Headquarters
-                        </p>
-                        <p className="text-sm font-semibold text-foreground">
-                          {prospect.location}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            );
-          })()}
         </div>
 
         {/* ─── RIGHT COLUMN ─── */}
@@ -860,12 +741,16 @@ export function ProfileView({
 
           {/* Activity Log */}
           <div className="surface-card rounded-[14px] flex flex-col overflow-hidden">
-            <div className="p-5" style={{ borderBottom: activityEntries.length > 0 ? "1px solid var(--border-default, rgba(255,255,255,0.06))" : "none" }}>
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <h3 className="text-foreground text-lg font-bold font-serif">Activity Log</h3>
-                  <p className="text-xs text-muted-foreground mt-1">Recent team touchpoints</p>
-                </div>
+            <div className="flex items-center justify-between p-4 pb-3">
+              <div className="flex items-center gap-2">
+                <h3 className="text-foreground text-sm font-bold font-serif">Activity</h3>
+                {activityEntries.length > 0 && (
+                  <span className="text-[10px]" style={{ color: "var(--text-secondary, rgba(232,228,220,0.4))" }}>
+                    {activityEntries.length}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-3">
                 {activityEntries.length > 0 && (
                   <ActivityFilter
                     activeCategories={activeCategories}
@@ -875,14 +760,14 @@ export function ProfileView({
                     onShowSystemEventsChange={setShowSystemEvents}
                   />
                 )}
+                <QuickActionBar
+                  prospectId={prospect.id}
+                  onActivityCreated={handleActivityCreated}
+                />
               </div>
-              <QuickActionBar
-                prospectId={prospect.id}
-                onActivityCreated={handleActivityCreated}
-              />
             </div>
             <div
-              className="overflow-y-auto p-3"
+              className="overflow-y-auto px-4 pb-4"
               style={{ maxHeight: activityEntries.length > 0 ? "400px" : "auto" }}
             >
               <TimelineFeed
@@ -895,6 +780,100 @@ export function ProfileView({
               />
             </div>
           </div>
+
+          {/* Company Context */}
+          {(() => {
+            const hasCompanyContext = !!(
+              prospect.company ||
+              prospect.publicly_traded_symbol ||
+              prospect.company_cik ||
+              prospect.location ||
+              prospect.title
+            );
+            if (!hasCompanyContext) return null;
+            return (
+              <div className="surface-card rounded-[14px] p-4">
+                <div className="flex justify-between items-start mb-3">
+                  <h3 className="text-foreground text-sm font-bold font-serif">
+                    Company Context
+                  </h3>
+                  {prospect.company && (
+                    <span
+                      className="text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 ml-2"
+                      style={{
+                        background: "rgba(255,255,255,0.03)",
+                        border:
+                          "1px solid var(--border-default, rgba(255,255,255,0.06))",
+                        color:
+                          "var(--text-secondary, rgba(232,228,220,0.5))",
+                      }}
+                    >
+                      {prospect.company.toUpperCase()}
+                    </span>
+                  )}
+                </div>
+                <div className="space-y-3">
+                  {prospect.publicly_traded_symbol && (
+                    <div>
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">
+                        Ticker
+                      </p>
+                      <p className="text-sm font-semibold text-foreground font-mono">
+                        {prospect.publicly_traded_symbol}
+                      </p>
+                    </div>
+                  )}
+                  {prospect.location && (
+                    <div>
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-0.5">
+                        Headquarters
+                      </p>
+                      <p className="text-sm font-semibold text-foreground">
+                        {prospect.location}
+                      </p>
+                    </div>
+                  )}
+                  {(prospect.title || prospect.company_cik) && (
+                    <div>
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
+                        Details
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {prospect.title && (
+                          <span
+                            className="px-2 py-0.5 rounded text-xs font-medium"
+                            style={{
+                              background: "rgba(255,255,255,0.03)",
+                              border:
+                                "1px solid var(--border-default, rgba(255,255,255,0.06))",
+                              color:
+                                "var(--text-primary-ds, var(--text-primary, #e8e4dc))",
+                            }}
+                          >
+                            {prospect.title}
+                          </span>
+                        )}
+                        {prospect.company_cik && (
+                          <span
+                            className="px-2 py-0.5 rounded text-xs font-medium"
+                            style={{
+                              background: "rgba(255,255,255,0.03)",
+                              border:
+                                "1px solid var(--border-default, rgba(255,255,255,0.06))",
+                              color:
+                                "var(--text-primary-ds, var(--text-primary, #e8e4dc))",
+                            }}
+                          >
+                            CIK: {prospect.company_cik}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </div>
     </div>
