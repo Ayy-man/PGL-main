@@ -1,15 +1,8 @@
-/**
- * Channel type contracts, registry, and constants for multi-source search.
- *
- * All channel implementations must conform to the types defined here.
- * Channels self-register via registerChannel() at module import time.
- */
-
 import type { SignalCategory } from "@/types/database";
 
-// ─── Channel Identifiers ────────────────────────────────────────────────────
-
-/** Union of all supported search channel IDs */
+/**
+ * Supported channel identifiers for the multi-source search system.
+ */
 export type ChannelId =
   | "exa"
   | "edgar-efts"
@@ -18,19 +11,16 @@ export type ChannelId =
   | "crunchbase"
   | "attom";
 
-// ─── Core Types ──────────────────────────────────────────────────────────────
-
 /**
- * Unified result shape returned by every channel.
- * All channels must normalize their raw API responses into this shape.
+ * Unified result shape returned by every channel adapter.
  */
 export type ChannelResult = {
   channelId: ChannelId;
   headline: string;
   summary: string;
   source_url: string;
-  source_name: string; // e.g. "GNews", "SEC EDGAR", "Crunchbase"
-  event_date: string | null; // ISO date string
+  source_name: string;
+  event_date: string | null;
   category: SignalCategory | "news" | "corporate" | "property";
   relevance: "high" | "medium" | "low";
   raw_snippet: string;
@@ -39,7 +29,6 @@ export type ChannelResult = {
 
 /**
  * Wrapper returned by each channel function.
- * Includes timing, cache status, and error info alongside results.
  */
 export type ChannelOutput = {
   channelId: ChannelId;
@@ -51,10 +40,9 @@ export type ChannelOutput = {
 
 /**
  * Input parameters passed to every channel function.
- * Contains the reformulated query, prospect context, and tenant ID.
  */
 export type ChannelParams = {
-  query: string; // reformulated query from classifier
+  query: string;
   prospect: {
     id: string;
     full_name: string;
@@ -68,29 +56,24 @@ export type ChannelParams = {
 };
 
 /**
- * Function signature all channel implementations must satisfy.
+ * Function signature all channel adapters implement.
  */
 export type ChannelFn = (params: ChannelParams) => Promise<ChannelOutput>;
 
-// ─── Per-Channel Cache TTLs ──────────────────────────────────────────────────
-
 /**
- * Cache TTL in seconds for each channel.
- * News channels refresh hourly; regulatory/property data is stable for days.
+ * Per-channel cache TTL in seconds.
  */
 export const CHANNEL_TTLS: Record<ChannelId, number> = {
-  exa: 3600, // 1 hour
-  gnews: 3600, // 1 hour
-  "edgar-efts": 86400, // 24 hours
-  crunchbase: 86400, // 24 hours
+  exa: 3600,             // 1 hour
+  gnews: 3600,           // 1 hour
+  "edgar-efts": 86400,   // 24 hours
+  crunchbase: 86400,     // 24 hours
   opencorporates: 86400, // 24 hours
-  attom: 604800, // 7 days
+  attom: 604800,         // 7 days
 };
 
-// ─── Human-Readable Display Names ────────────────────────────────────────────
-
 /**
- * Display labels used in UI badges and source attributions.
+ * Human-readable labels for UI badges.
  */
 export const CHANNEL_DISPLAY_NAMES: Record<ChannelId, string> = {
   exa: "Exa",
@@ -101,26 +84,15 @@ export const CHANNEL_DISPLAY_NAMES: Record<ChannelId, string> = {
   attom: "ATTOM Property",
 };
 
-// ─── Channel Registry ─────────────────────────────────────────────────────────
-
 /**
- * Mutable map of channel ID to channel function.
- * Channel modules self-register by calling registerChannel() at import time.
+ * Mutable registry populated by channel modules at import time via registerChannel().
  */
 export const CHANNEL_REGISTRY = new Map<ChannelId, ChannelFn>();
 
-/**
- * Register a channel implementation.
- * Call this at the top level of each channel module so it's wired at import time.
- */
 export function registerChannel(id: ChannelId, fn: ChannelFn): void {
   CHANNEL_REGISTRY.set(id, fn);
 }
 
-/**
- * Retrieve a registered channel function by ID.
- * Returns undefined if the channel is not registered.
- */
 export function getChannel(id: ChannelId): ChannelFn | undefined {
   return CHANNEL_REGISTRY.get(id);
 }

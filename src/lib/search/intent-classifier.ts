@@ -1,21 +1,6 @@
-/**
- * Intent classifier for multi-source search.
- *
- * Uses an LLM to analyze a user query + prospect context and determine:
- * - Which search channels to activate
- * - A reformulated query optimized for those channels
- * - The entity type being searched
- */
-
 import { chatCompletion } from "@/lib/ai/openrouter";
 import type { ChannelId } from "./channels";
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-
-/**
- * Result of intent classification.
- * Channels array always contains at least "exa".
- */
 export type IntentClassification = {
   channels: ChannelId[];
   reformulatedQuery: string;
@@ -23,70 +8,45 @@ export type IntentClassification = {
   reasoning: string;
 };
 
-// ─── System Prompt ────────────────────────────────────────────────────────────
+const ALL_CHANNEL_IDS: ChannelId[] = [
+  "exa",
+  "edgar-efts",
+  "gnews",
+  "opencorporates",
+  "crunchbase",
+  "attom",
+];
 
 const CLASSIFY_SYSTEM_PROMPT = `You are a search intent classifier for a wealth intelligence platform.
-Given a user query and prospect context, determine which data channels to activate.
 
-Available channels:
-- "exa": Semantic web search — ALWAYS include this channel
-- "edgar-efts": SEC EDGAR full-text search — include for queries about SEC filings, insider trading, Form 4, Form 10-K, 10-Q, 8-K, stock options, executive compensation, regulatory filings
-- "gnews": News aggregator — include for queries about news, recent announcements, press releases, media coverage, current events
-- "opencorporates": Corporate registry — include for queries about company formation, registered companies, subsidiaries, corporate structure, officers
-- "crunchbase": Startup/funding data — include for queries about funding rounds, investors, startup history, founded date, venture capital, acquisitions
-- "attom": Property records — include for queries about real estate, property ownership, house, home, address, land records
+Given a user query and prospect context, return which search channels to use and a reformulated query.
 
-Rules:
-1. ALWAYS include "exa" in channels
-2. Select additional channels based on query keywords and intent
-3. Reformulate the query to be more precise and effective for the selected channels
-4. Determine the entity type: "person", "company", "property", or "general"
-5. Return ONLY valid JSON — no markdown, no explanation outside the JSON
+Channel selection rules:
+- Always include "exa" (general web search — always on)
+- Add "edgar-efts" for queries about SEC filings, insider trading, Form 4, 13F, 8-K, 10-K, regulatory disclosures
+- Add "gnews" for queries about recent news, press releases, announcements, media coverage
+- Add "opencorporates" and/or "crunchbase" for queries about company details, founding, funding rounds, investors, startups, corporate structure
+- Add "attom" for queries about property, real estate, homes, address, owns property
 
-Response format (JSON only):
+Entity type rules:
+- "person" — query is about an individual (default for most prospect queries)
+- "company" — query is primarily about a company/organization
+- "property" — query is about real estate or property ownership
+- "general" — mixed or unclear
+
+Return ONLY valid JSON in this exact format:
 {
-  "channels": ["exa", ...],
-  "reformulatedQuery": "optimized query string",
-  "entityType": "person|company|property|general",
+  "channels": ["exa", "gnews"],
+  "reformulatedQuery": "reformulated search query optimized for the selected channels",
+  "entityType": "person",
   "reasoning": "brief explanation of channel selection"
-}`;
-
-// ─── Available-Channel Filter ─────────────────────────────────────────────────
-
-/**
- * Checks which optional channels have their API keys configured.
- * Exa and edgar-efts are always available (no runtime key check needed here).
- */
-function getAvailableChannels(): Set<ChannelId> {
-  const available = new Set<ChannelId>(["exa", "edgar-efts"]);
-
-  if (process.env.GNEWS_API_KEY) {
-    available.add("gnews");
-  }
-  if (process.env.OPENCORPORATES_API_TOKEN) {
-    available.add("opencorporates");
-  }
-  if (process.env.CRUNCHBASE_API_KEY) {
-    available.add("crunchbase");
-  }
-  if (process.env.ATTOM_API_KEY) {
-    available.add("attom");
-  }
-
-  return available;
 }
 
-// ─── Classifier ───────────────────────────────────────────────────────────────
+Do not include any explanation outside the JSON object.`;
 
 /**
- * Classify user query intent and select appropriate search channels.
- *
- * Always includes "exa" in the channels array. Filters channels whose
- * API keys are not configured in the environment.
- *
- * @param query - The user's search query
- * @param prospect - Prospect context to aid classification
- * @returns IntentClassification with channels, reformulated query, and metadata
+ * Classify a search query into channels + reformulated query using an LLM.
+ * Falls back gracefully to Exa-only on parse errors or API failures.
  */
 export async function classifyIntent(
   query: string,
@@ -103,13 +63,6 @@ Company: ${prospect.company || "Unknown"}
 Title: ${prospect.title || "Unknown"}
 Public ticker: ${prospect.publicly_traded_symbol || "None"}`;
 
-  const fallback: IntentClassification = {
-    channels: ["exa"],
-    reformulatedQuery: query,
-    entityType: "general",
-    reasoning: "Parse failure, defaulting to exa",
-  };
-
   try {
     const response = await chatCompletion(
       CLASSIFY_SYSTEM_PROMPT,
@@ -117,31 +70,60 @@ Public ticker: ${prospect.publicly_traded_symbol || "None"}`;
       200
     );
 
-    let parsed: IntentClassification;
-    try {
-      parsed = JSON.parse(response.text) as IntentClassification;
-    } catch {
-      return fallback;
-    }
+    const parsed = JSON.parse(response.text) as Partial<IntentClassification>;
 
-    // Filter to only available channels
-    const available = getAvailableChannels();
-    const filteredChannels = (parsed.channels || []).filter((ch) =>
-      available.has(ch as ChannelId)
-    ) as ChannelId[];
+    // Validate channels array — only accept known channel IDs
+    const rawChannels: string[] = Array.isArray(parsed.channels)
+      ? parsed.channels
+      : [];
+    let channels = rawChannels.filter((c): c is ChannelId =>
+      ALL_CHANNEL_IDS.includes(c as ChannelId)
+    );
 
-    // Ensure "exa" is always present
-    if (!filteredChannels.includes("exa")) {
-      filteredChannels.unshift("exa");
+    // Filter out channels whose API keys are not configured
+    channels = channels.filter((ch) => {
+      switch (ch) {
+        case "gnews":
+          return !!process.env.GNEWS_API_KEY;
+        case "opencorporates":
+          return !!process.env.OPENCORPORATES_API_TOKEN;
+        case "crunchbase":
+          return !!process.env.CRUNCHBASE_API_KEY;
+        case "attom":
+          return !!process.env.ATTOM_API_KEY;
+        default:
+          return true; // exa, edgar-efts are always available
+      }
+    });
+
+    // Ensure exa is always present
+    if (!channels.includes("exa")) {
+      channels.unshift("exa");
     }
 
     return {
-      channels: filteredChannels,
-      reformulatedQuery: parsed.reformulatedQuery || query,
-      entityType: parsed.entityType || "general",
-      reasoning: parsed.reasoning || "",
+      channels,
+      reformulatedQuery:
+        typeof parsed.reformulatedQuery === "string"
+          ? parsed.reformulatedQuery
+          : query,
+      entityType:
+        parsed.entityType === "person" ||
+        parsed.entityType === "company" ||
+        parsed.entityType === "property" ||
+        parsed.entityType === "general"
+          ? parsed.entityType
+          : "general",
+      reasoning:
+        typeof parsed.reasoning === "string" ? parsed.reasoning : "",
     };
   } catch {
-    return fallback;
+    // Fallback: exa-only, original query
+    return {
+      channels: ["exa"],
+      reformulatedQuery: query,
+      entityType: "general",
+      reasoning: "Parse failure, defaulting to exa",
+    };
   }
 }

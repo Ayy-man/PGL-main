@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 26-03-PLAN.md
-last_updated: "2026-03-28T23:59:21.289Z"
-last_activity: 2026-03-29
+stopped_at: Completed 26-02-PLAN.md
+last_updated: "2026-03-28T23:59:51.553Z"
+last_activity: 2026-03-28
 progress:
-  total_phases: 23
+  total_phases: 22
   completed_phases: 4
   total_plans: 34
-  completed_plans: 32
+  completed_plans: 26
   percent: 100
 ---
 
@@ -22,14 +22,14 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** Real estate teams can quickly find and qualify wealthy prospects by searching structured lead databases, enriching profiles with personal contact info and wealth signals, and organizing prospects into actionable lists.
 
-**Current focus:** Phase 26 — Targeted Multi-Source Search (Intent-Routed Channels)
+**Current focus:** Phase 24 — Activity Log Full Build
 
 ## Current Position
 
-Phase: 26
-Plan: 01 complete — ready for 26-02
-Status: Executing
-Last activity: 2026-03-29
+Phase: 24
+Plan: Not started
+Status: Ready to execute
+Last activity: 2026-03-28
 
 Progress: [████████████████████] 100% (20/20 phases complete)
 
@@ -101,10 +101,7 @@ Progress: [████████████████████] 100% (2
 | Phase 23 P04 | 17 | 3 tasks | 5 files |
 | Phase 23 P03 | 25 | 1 tasks | 1 files |
 | Phase 23 P05 | 4 | 2 tasks | 3 files |
-| Phase 25-exa-research-scrapbook P04 | 4 | 2 tasks | 5 files |
-| Phase 25 P05 | 2 | 2 tasks | 3 files |
-| Phase 26-targeted-multi-source-search P01 | 2min | 2 tasks | 4 files |
-| Phase 26-targeted-multi-source-search P03 | 2 | 2 tasks | 3 files |
+| Phase 26 P02 | 3 | 2 tasks | 7 files |
 
 ### Phase 3 Plan Completion
 
@@ -342,16 +339,8 @@ Recent decisions affecting current work:
 - [Phase 23]: Dual-write pattern: prospect_signals written alongside web_data/insider_data JSONB for backward compat
 - [Phase 23]: Dossier generation (Step 5.5) never throws — failure returns status:failed, enrichment continues
 - [Phase 23]: Removed duplicate type definitions (IntelligenceDossierData, SignalCategory, ProspectSignal, SignalView) from database.ts that were added by both Plan 01 and Plan 04
-- [Phase 25-exa-research-scrapbook]: SSE over useChat: fetch+ReadableStream for research streaming — avoids AI SDK message format coupling
-- [Phase 25-exa-research-scrapbook]: research.ts types created in Plan 04 (not 01 as planned) — ScrapbookCard, PinTarget, SessionListItem
-- [Phase 25-05]: profile_viewed event_type with metadata.section=research used for tab logging (TeamEventType has no 'viewed' value)
-- [Phase 26-01]: ChannelId is a string literal union (not enum) for JSON-serialization compatibility with LLM output
-- [Phase 26-01]: CHANNEL_REGISTRY uses a mutable Map with self-registration pattern to avoid circular imports
-- [Phase 26-01]: classifyIntent filters channels by API key presence at runtime — channels with unconfigured keys silently excluded; exa always guaranteed present
-- [Phase 26-01]: Cache TTL for attom set to 7 days (604800s); news/exa at 1 hour reflecting data volatility differences
-- [Phase 26-01]: Intent classifier JSON parse fallback returns exa-only classification on malformed LLM output — never throws
-- [Phase 26-targeted-multi-source-search]: Crunchbase Basic free tier: field_ids limited to 4 safe fields to avoid 403 on premium fields
-- [Phase 26-targeted-multi-source-search]: ATTOM documented as optional premium channel ($95/mo) — skips silently when ATTOM_API_KEY absent
+- [Phase 26]: Exa channel replicates API call pattern (not reusing enrichExa) because enrichExa returns ExaResult not ChannelOutput
+- [Phase 26]: EDGAR EFTS uses efts.sec.gov full-text search distinct from CIK-based enrichEdgar; both share edgarRateLimiter
 
 ### Roadmap Evolution
 
@@ -438,8 +427,8 @@ All 20 phases complete (6-20, including 14.1). The following items remain before
 
 ## Session Continuity
 
-Last session: 2026-03-28T23:59:21.286Z
-Stopped at: Completed 26-03-PLAN.md
+Last session: 2026-03-28T23:59:51.550Z
+Stopped at: Completed 26-02-PLAN.md
 
 ---
 
