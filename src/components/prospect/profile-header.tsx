@@ -100,10 +100,10 @@ export function ProfileHeader({
   onTagsChange,
 }: ProfileHeaderProps) {
   return (
-    <div className="surface-card surface-card-featured rounded-[14px] p-6 flex flex-col items-center text-center relative overflow-hidden">
+    <div className="surface-card surface-card-featured rounded-[14px] p-5 flex flex-col items-center text-center relative overflow-hidden">
 
       {/* Avatar */}
-      <div className="relative z-10 mb-4">
+      <div className="relative z-10 mb-3">
         {canEdit ? (
           <AvatarUpload
             currentPhotoUrl={currentPhotoUrl ?? null}
@@ -153,7 +153,7 @@ export function ProfileHeader({
       </div>
 
       {/* Company */}
-      <div className="text-sm text-muted-foreground mb-4 flex items-center gap-1.5 justify-center">
+      <div className="text-sm text-muted-foreground mb-3 flex items-center gap-1.5 justify-center">
         <Building2 className="h-3.5 w-3.5 shrink-0" />
         <InlineEditField
           value={resolveField(prospect.manual_company, prospect.company)}
@@ -168,7 +168,7 @@ export function ProfileHeader({
       </div>
 
       {/* Enrichment status grid */}
-      <div className="w-full grid grid-cols-1 gap-3 mb-5">
+      <div className="w-full grid grid-cols-1 gap-3 mb-3">
         <div
           className="rounded-[8px] p-3"
           style={{
@@ -190,7 +190,7 @@ export function ProfileHeader({
       </div>
 
       {/* Contact info inline edits */}
-      <div className="w-full text-left space-y-2 mb-4">
+      <div className="w-full text-left space-y-1.5 mb-3">
         <div className="flex flex-col gap-1">
           <InlineEditField
             value={resolveField(prospect.manual_email, prospect.work_email)}
@@ -256,9 +256,9 @@ export function ProfileHeader({
       </div>
 
       {/* Location inline edits */}
-      <div className="w-full mt-3 pt-3 border-t border-[var(--border-default)] text-left">
+      <div className="w-full mt-2 pt-2 border-t border-[var(--border-default)] text-left">
         <p className="text-xs text-muted-foreground mb-1">Location</p>
-        <div className="space-y-1">
+        <div className="space-y-0.5">
           <InlineEditField
             value={resolveField(prospect.manual_city, prospect.city)}
             originalValue={prospect.city}
@@ -294,7 +294,7 @@ export function ProfileHeader({
 
       {/* Pinned note */}
       {(prospect.pinned_note || canEdit) && (
-        <div className="w-full mt-3 pt-3 border-t border-[var(--border-default)] text-left">
+        <div className="w-full mt-2 pt-2 border-t border-[var(--border-default)] text-left">
           <InlineEditField
             value={prospect.pinned_note ?? null}
             onSave={async (v) => { await onFieldSave?.("pinned_note", v); }}
@@ -308,7 +308,7 @@ export function ProfileHeader({
 
       {/* Lead owner */}
       {teamMembers && teamMembers.length > 0 && (
-        <div className="w-full mt-3 pt-3 border-t border-[var(--border-default)] text-left">
+        <div className="w-full mt-2 pt-2 border-t border-[var(--border-default)] text-left">
           <p className="text-xs text-muted-foreground mb-1">Assigned to</p>
           <LeadOwnerSelect
             currentOwnerId={prospect.lead_owner_id ?? null}
@@ -320,7 +320,7 @@ export function ProfileHeader({
       )}
 
       {/* Tags */}
-      <div className="w-full mt-3 pt-3 border-t border-[var(--border-default)] text-left">
+      <div className="w-full mt-2 pt-2 border-t border-[var(--border-default)] text-left">
         <p className="text-xs text-muted-foreground mb-1">Tags</p>
         {canEdit ? (
           <TagInput
@@ -347,7 +347,7 @@ export function ProfileHeader({
       </div>
 
       {/* CTA Buttons */}
-      <div className="w-full flex flex-col gap-2 mt-4">
+      <div className="w-full flex flex-col gap-2 mt-3">
         <button
           className="w-full h-10 rounded-[8px] text-sm font-semibold flex items-center justify-center gap-2 transition-all opacity-50 cursor-not-allowed"
           style={{

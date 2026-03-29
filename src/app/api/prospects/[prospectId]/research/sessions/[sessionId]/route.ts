@@ -36,6 +36,18 @@ export async function GET(
 
   const admin = createAdminClient();
 
+  // --- Verify session belongs to this tenant ---
+  const { data: session, error: sessionError } = await admin
+    .from("research_sessions")
+    .select("id")
+    .eq("id", sessionId)
+    .eq("tenant_id", tenantId)
+    .single();
+
+  if (sessionError || !session) {
+    return NextResponse.json({ error: "Session not found" }, { status: 404 });
+  }
+
   // --- Fetch messages ---
   const { data: messages, error: messagesError } = await admin
     .from("research_messages")

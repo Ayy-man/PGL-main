@@ -1,9 +1,10 @@
-import "./channels/register-all"; // Side-effect: populates CHANNEL_REGISTRY with all 6 channels
+import "./channels/register-all"; // Side-effect: populates CHANNEL_REGISTRY
 
 import type { ChannelId, ChannelOutput, ChannelResult, ChannelParams } from "./channels";
 import { getChannel, CHANNEL_DISPLAY_NAMES } from "./channels";
 import { classifyIntent, type IntentClassification } from "./intent-classifier";
 import { mergeAndRank } from "./merge-results";
+import { recordResearchTelemetry } from "./telemetry";
 
 /**
  * Unified result returned by executeResearch.
@@ -140,11 +141,30 @@ export async function executeResearch(
   }
 
   const mergedResults = mergeAndRank(allResults, params.query);
+  const totalLatencyMs = Date.now() - startMs;
+
+  // Fire-and-forget telemetry
+  recordResearchTelemetry({
+    ts: new Date().toISOString(),
+    tenantId: params.tenantId,
+    prospectId: params.prospect.id,
+    query: params.query,
+    totalLatencyMs,
+    entityType: classification.entityType,
+    channelsUsed: classification.channels,
+    channels: channelStatuses.map((s) => ({
+      channelId: s.channelId,
+      resultCount: s.resultCount,
+      latencyMs: s.latencyMs,
+      cached: s.cached,
+      error: s.error,
+    })),
+  }).catch(() => {});
 
   return {
     results: mergedResults,
     classification,
     channelStatuses,
-    totalLatencyMs: Date.now() - startMs,
+    totalLatencyMs,
   };
 }

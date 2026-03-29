@@ -1,6 +1,7 @@
 import { withCircuitBreaker } from "@/lib/circuit-breaker";
 import { trackApiUsage } from "@/lib/enrichment/track-api-usage";
 import { getChannelCache, setChannelCache } from "../channel-cache";
+import { CHANNEL_MAX_RESULTS, EXA_CHANNEL_MAX_CHARS, EXA_HIGHLIGHT_SENTENCES } from "../constants";
 import type { ChannelParams, ChannelOutput, ChannelResult } from "./index";
 import { registerChannel } from "./index";
 
@@ -97,10 +98,10 @@ async function searchExaInternal(params: ChannelParams): Promise<ChannelOutput> 
         query: exaQuery,
         type: "auto",
         useAutoprompt: true,
-        numResults: 10,
+        numResults: CHANNEL_MAX_RESULTS,
         contents: {
-          text: { maxCharacters: 1000 },
-          highlights: { numSentences: 3 },
+          text: { maxCharacters: EXA_CHANNEL_MAX_CHARS },
+          highlights: { numSentences: EXA_HIGHLIGHT_SENTENCES },
         },
       }),
     });

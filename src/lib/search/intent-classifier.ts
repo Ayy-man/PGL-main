@@ -1,5 +1,6 @@
 import { chatCompletion } from "@/lib/ai/openrouter";
 import type { ChannelId } from "./channels";
+import { INTENT_CLASSIFIER_MAX_TOKENS } from "./constants";
 
 export type IntentClassification = {
   channels: ChannelId[];
@@ -60,7 +61,7 @@ Public ticker: ${prospect.publicly_traded_symbol || "None"}`;
     const response = await chatCompletion(
       CLASSIFY_SYSTEM_PROMPT,
       userMessage,
-      200
+      INTENT_CLASSIFIER_MAX_TOKENS
     );
 
     const parsed = JSON.parse(response.text) as Partial<IntentClassification>;

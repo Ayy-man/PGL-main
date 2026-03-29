@@ -8,6 +8,7 @@ import { digestForScrapbook } from "@/lib/research/research-digest";
 import { researchRateLimiter } from "@/lib/research/research-rate-limit";
 import { chatCompletion } from "@/lib/ai/openrouter";
 import { logProspectActivity } from "@/lib/activity";
+import { recordResearchTelemetry } from "@/lib/search/telemetry";
 
 const bodySchema = z.object({
   query: z.string().min(1).max(500),
@@ -142,6 +143,8 @@ export async function POST(
   // --- Build stream ---
   const stream = createUIMessageStream({
     execute: async ({ writer }) => {
+      const streamStartMs = Date.now();
+
       // Phase 0: Stream session and message IDs first so client can capture them
       writer.write({
         type: "data-session",
@@ -258,6 +261,23 @@ export async function POST(
           data: { message_id: assistantMessage.id },
         } as Parameters<typeof writer.write>[0]);
       }
+
+      // Fire-and-forget telemetry for scrapbook search
+      recordResearchTelemetry({
+        ts: new Date().toISOString(),
+        tenantId,
+        prospectId,
+        query,
+        totalLatencyMs: Date.now() - streamStartMs,
+        entityType: "person",
+        channelsUsed: ["exa"],
+        channels: [{
+          channelId: "exa",
+          resultCount: exaResults.length,
+          latencyMs: Date.now() - streamStartMs,
+          cached: false,
+        }],
+      }).catch(() => {});
 
       // Update session updated_at
       await admin

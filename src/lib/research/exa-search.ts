@@ -1,3 +1,5 @@
+import { CHANNEL_MAX_RESULTS, EXA_SCRAPBOOK_MAX_CHARS } from "@/lib/search/constants";
+
 /**
  * Exa.ai search for the Research Scrapbook.
  * Uses neural search with higher text limits than the enrichment pipeline.
@@ -30,11 +32,11 @@ export async function searchExaForResearch(
       body: JSON.stringify({
         query,
         type: "neural",
-        numResults: 10,
+        numResults: CHANNEL_MAX_RESULTS,
         useAutoprompt: false,
         contents: {
           text: {
-            maxCharacters: 3000,
+            maxCharacters: EXA_SCRAPBOOK_MAX_CHARS,
             includeHtmlTags: false,
           },
         },

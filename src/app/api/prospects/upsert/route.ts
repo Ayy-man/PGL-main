@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { upsertProspectFromApollo } from "@/lib/prospects/queries";
 import { addProspectToList } from "@/lib/lists/queries";
 import { logError } from "@/lib/error-logger";
+import { ApiError, handleApiError } from "@/lib/api-error";
 import { z } from "zod";
 import type { ApolloPerson } from "@/lib/apollo/types";
 
@@ -47,7 +48,7 @@ export async function POST(request: Request) {
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      throw new ApiError("Unauthorized", "UNAUTHORIZED", 401);
     }
 
     userId = user.id;
@@ -55,10 +56,7 @@ export async function POST(request: Request) {
     // 2. Extract tenant_id from session app_metadata
     tenantId = user.app_metadata?.tenant_id as string | undefined;
     if (!tenantId) {
-      return NextResponse.json(
-        { error: "Tenant ID not found in session" },
-        { status: 401 }
-      );
+      throw new ApiError("Tenant ID not found in session", "UNAUTHORIZED", 401);
     }
 
     // 3. Parse and validate request body
@@ -66,9 +64,11 @@ export async function POST(request: Request) {
     const parseResult = upsertRequestSchema.safeParse(body);
 
     if (!parseResult.success) {
-      return NextResponse.json(
-        { error: "Invalid request", details: parseResult.error.issues },
-        { status: 400 }
+      throw new ApiError(
+        "Invalid request",
+        "VALIDATION_ERROR",
+        400,
+        parseResult.error.issues
       );
     }
 
@@ -106,6 +106,11 @@ export async function POST(request: Request) {
       addedToLists: successfulAdds,
     });
   } catch (error) {
+    // ApiError instances (validation, auth) get their specific status/code
+    if (error instanceof ApiError) {
+      return handleApiError(error);
+    }
+
     console.error("Error upserting prospect:", error);
     logError({
       route: "/api/prospects/upsert",
@@ -116,14 +121,6 @@ export async function POST(request: Request) {
       tenantId,
       userId,
     });
-    return NextResponse.json(
-      {
-        error: "Internal server error",
-        ...(process.env.NODE_ENV === "development" && {
-          message: error instanceof Error ? error.message : "Unknown error",
-        }),
-      },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

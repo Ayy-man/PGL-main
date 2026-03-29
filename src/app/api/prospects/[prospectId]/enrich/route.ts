@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { inngest } from "@/inngest/client";
 import { logError } from "@/lib/error-logger";
+import { ApiError, handleApiError } from "@/lib/api-error";
 
 /**
  * POST /api/prospects/[prospectId]/enrich
@@ -30,18 +31,12 @@ export async function POST(
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      return NextResponse.json(
-        { error: "Not authenticated" },
-        { status: 401 }
-      );
+      throw new ApiError("Not authenticated", "UNAUTHORIZED", 401);
     }
 
     const tenantId = user.app_metadata?.tenant_id as string | undefined;
     if (!tenantId) {
-      return NextResponse.json(
-        { error: "No tenant ID found in session" },
-        { status: 401 }
-      );
+      throw new ApiError("No tenant ID found in session", "UNAUTHORIZED", 401);
     }
 
     // Extract prospectId from route params
@@ -69,18 +64,12 @@ export async function POST(
       .single();
 
     if (fetchError || !prospect) {
-      return NextResponse.json(
-        { error: "Prospect not found" },
-        { status: 404 }
-      );
+      throw new ApiError("Prospect not found", "NOT_FOUND", 404);
     }
 
     // RLS ensures prospect belongs to tenant, but double-check
     if (prospect.tenant_id !== tenantId) {
-      return NextResponse.json(
-        { error: "Prospect not found" },
-        { status: 404 }
-      );
+      throw new ApiError("Prospect not found", "NOT_FOUND", 404);
     }
 
     // Check staleness: if last_enriched_at is within 7 days AND status is 'complete', skip
@@ -152,6 +141,10 @@ export async function POST(
       { status: 202 }
     );
   } catch (error) {
+    if (error instanceof ApiError) {
+      return handleApiError(error);
+    }
+
     console.error("Enrichment trigger error:", error);
     logError({
       route: "/api/prospects/[prospectId]/enrich",
@@ -159,9 +152,6 @@ export async function POST(
       statusCode: 500,
       errorMessage: error instanceof Error ? error.message : String(error),
     });
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

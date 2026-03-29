@@ -301,9 +301,9 @@ export function ProfileView({
     prospect.contact_data?.personal_email || prospect.contact_data?.phone;
 
   return (
-    <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 py-6 page-enter">
+    <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-6 py-4 page-enter">
       {/* Breadcrumbs + Find Lookalikes */}
-      <div className="flex flex-wrap gap-2 mb-6 items-center justify-between">
+      <div className="flex flex-wrap gap-2 mb-4 items-center justify-between">
         <Breadcrumbs
           items={[
             { label: "Search Results", href: `/${orgId}/search` },
@@ -335,7 +335,7 @@ export function ProfileView({
 
       {/* Lookalike Discovery (toggled) */}
       {showLookalikes && (
-        <div className="mb-6">
+        <div className="mb-4">
           <div className="surface-card rounded-[14px] p-4 md:p-6">
             <h3 className="mb-5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Similar People
@@ -349,9 +349,9 @@ export function ProfileView({
       )}
 
       {/* === THREE-COLUMN DOSSIER === */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* ─── LEFT COLUMN ─── */}
-        <div className="lg:col-span-3 flex flex-col gap-6">
+        <div className="lg:col-span-3 flex flex-col gap-4">
           {/* Profile Card */}
           <ProfileHeader
             prospect={{ ...prospect, enrichment_status: prospect.enrichment_status ?? "none" }}
@@ -562,7 +562,7 @@ export function ProfileView({
         </div>
 
         {/* ─── CENTER COLUMN ─── */}
-        <div className="lg:col-span-6 flex flex-col gap-6">
+        <div className="lg:col-span-6 flex flex-col gap-4">
           {/* Dossier/Research Toggle */}
           <DossierResearchToggle
             active={activePanel}
@@ -745,7 +745,7 @@ export function ProfileView({
         </div>
 
         {/* ─── RIGHT COLUMN ─── */}
-        <div className="lg:col-span-3 flex flex-col gap-6">
+        <div className="lg:col-span-3 flex flex-col gap-4">
           {/* Enrichment Status Card */}
           <div
             className="rounded-[14px] p-5"

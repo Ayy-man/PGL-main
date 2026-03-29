@@ -4,6 +4,7 @@ import { logActivity } from "@/lib/activity-logger";
 import { logProspectActivity } from "@/lib/activity";
 import { stringify } from "csv-stringify";
 import { CSV_COLUMNS, formatProspectRow } from "@/lib/csv-export";
+import { ApiError, handleApiError } from "@/lib/api-error";
 import type { Prospect, ListMember } from "@/types/database";
 
 /**
@@ -29,17 +30,14 @@ export async function GET(request: Request) {
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      throw new ApiError("Unauthorized", "UNAUTHORIZED", 401);
     }
 
     const tenantId = user.app_metadata?.tenant_id as string | undefined;
     const userId = user.id;
 
     if (!tenantId) {
-      return NextResponse.json(
-        { error: "User not associated with a tenant" },
-        { status: 400 }
-      );
+      throw new ApiError("User not associated with a tenant", "FORBIDDEN", 403);
     }
 
     // 2. Extract and validate query parameters
@@ -47,9 +45,10 @@ export async function GET(request: Request) {
     const listId = searchParams.get("listId");
 
     if (!listId) {
-      return NextResponse.json(
-        { error: "Missing required parameter: listId" },
-        { status: 400 }
+      throw new ApiError(
+        "Missing required parameter: listId",
+        "VALIDATION_ERROR",
+        400
       );
     }
 
@@ -62,10 +61,7 @@ export async function GET(request: Request) {
       .single();
 
     if (listError || !list) {
-      return NextResponse.json(
-        { error: "List not found or access denied" },
-        { status: 404 }
-      );
+      throw new ApiError("List not found or access denied", "NOT_FOUND", 404);
     }
 
     // 4. Create CSV stringifier with BOM for Excel compatibility
@@ -207,15 +203,11 @@ export async function GET(request: Request) {
 
     return new NextResponse(stream, { headers });
   } catch (error) {
+    if (error instanceof ApiError) {
+      return handleApiError(error);
+    }
+
     console.error("CSV export error:", error);
-    return NextResponse.json(
-      {
-        error: "Internal server error",
-        ...(process.env.NODE_ENV === "development" && {
-          message: error instanceof Error ? error.message : "Unknown error",
-        }),
-      },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

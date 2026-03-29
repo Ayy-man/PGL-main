@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { executeResearch } from "@/lib/search/execute-research";
+import { researchRateLimiter } from "@/lib/research/research-rate-limit";
+import { ApiError, handleApiError } from "@/lib/api-error";
 
 /**
  * POST /api/prospects/[prospectId]/research/multi-source
@@ -34,15 +36,12 @@ export async function POST(
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+      throw new ApiError("Not authenticated", "UNAUTHORIZED", 401);
     }
 
     const tenantId = user.app_metadata?.tenant_id as string | undefined;
     if (!tenantId) {
-      return NextResponse.json(
-        { error: "No tenant ID found in session" },
-        { status: 403 }
-      );
+      throw new ApiError("No tenant ID found in session", "FORBIDDEN", 403);
     }
 
     // Parse and validate request body
@@ -51,19 +50,30 @@ export async function POST(
       const body = await request.json();
       query = body?.query ?? "";
     } catch {
-      return NextResponse.json(
-        {
-          error:
-            "Invalid request body — expected JSON with { query: string }",
-        },
-        { status: 400 }
+      throw new ApiError(
+        "Invalid request body — expected JSON with { query: string }",
+        "VALIDATION_ERROR",
+        400
       );
     }
 
     if (!query || query.trim().length < 2) {
-      return NextResponse.json(
-        { error: "Query must be at least 2 characters" },
-        { status: 400 }
+      throw new ApiError(
+        "Query must be at least 2 characters",
+        "VALIDATION_ERROR",
+        400
+      );
+    }
+
+    // --- Rate limit ---
+    const { success: rateLimitOk } = await researchRateLimiter.limit(
+      `research:${tenantId}`
+    );
+    if (!rateLimitOk) {
+      throw new ApiError(
+        "Daily research limit reached. Resets at midnight UTC.",
+        "RATE_LIMITED",
+        429
       );
     }
 
@@ -78,10 +88,7 @@ export async function POST(
       .single();
 
     if (fetchError || !prospect) {
-      return NextResponse.json(
-        { error: "Prospect not found" },
-        { status: 404 }
-      );
+      throw new ApiError("Prospect not found", "NOT_FOUND", 404);
     }
 
     const result = await executeResearch({
@@ -100,10 +107,11 @@ export async function POST(
 
     return NextResponse.json(result, { status: 200 });
   } catch (error) {
+    if (error instanceof ApiError) {
+      return handleApiError(error);
+    }
+
     console.error("[research/multi-source] Error:", error);
-    return NextResponse.json(
-      { error: "Research failed", details: String(error) },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

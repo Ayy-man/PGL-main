@@ -1,4 +1,5 @@
 import type { ChannelResult } from "./channels";
+import { RELEVANCE_SCORES, CHANNEL_PRIORITY } from "./constants";
 
 /**
  * Normalizes a URL for deduplication purposes.
@@ -20,21 +21,6 @@ function normalizeUrl(url: string): string {
       .replace(/\/$/, "");
   }
 }
-
-const RELEVANCE_SCORES: Record<"high" | "medium" | "low", number> = {
-  high: 3,
-  medium: 2,
-  low: 1,
-};
-
-/**
- * Channel preference for tie-breaking during sort.
- * Higher number = higher priority.
- */
-const CHANNEL_PRIORITY: Record<string, number> = {
-  "edgar-efts": 6, // SEC filings most authoritative
-  exa: 5,          // Web intelligence, broad coverage
-};
 
 /**
  * Deduplicates results by normalized source_url and sorts by:

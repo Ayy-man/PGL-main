@@ -2,6 +2,7 @@ import { withCircuitBreaker } from "@/lib/circuit-breaker";
 import { edgarRateLimiter } from "@/lib/rate-limit/limiters";
 import { lookupCompanyCik } from "@/lib/enrichment/edgar";
 import { getChannelCache, setChannelCache } from "../channel-cache";
+import { CHANNEL_MAX_RESULTS, EDGAR_SCAN_LIMIT } from "../constants";
 import type { ChannelParams, ChannelOutput, ChannelResult } from "./index";
 import { registerChannel } from "./index";
 
@@ -110,9 +111,9 @@ async function searchByCik(
   const relevantForms = ["4", "3", "5", "13F-HR", "SC 13D", "SC 13G", "8-K"];
   const results: ChannelResult[] = [];
 
-  for (let i = 0; i < Math.min(recent.form.length, 50); i++) {
+  for (let i = 0; i < Math.min(recent.form.length, EDGAR_SCAN_LIMIT); i++) {
     if (!relevantForms.includes(recent.form[i])) continue;
-    if (results.length >= 10) break;
+    if (results.length >= CHANNEL_MAX_RESULTS) break;
 
     const formType = recent.form[i];
     const filingDate = recent.filingDate[i];

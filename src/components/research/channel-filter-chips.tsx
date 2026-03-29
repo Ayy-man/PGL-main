@@ -20,8 +20,10 @@ export function ChannelFilterChips({
   const allActive = activeFilters.size === 0;
 
   const handleAllClick = () => {
-    // Clear all active filters to show everything
-    activeFilters.forEach((id) => onToggle(id));
+    // Clear all active filters to show everything — call onToggle for each
+    // active filter so parent state resets to empty (= "all")
+    const ids = Array.from(activeFilters);
+    for (const id of ids) onToggle(id);
   };
 
   return (
