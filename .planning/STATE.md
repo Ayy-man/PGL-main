@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 26-02-PLAN.md
-last_updated: "2026-03-28T23:59:51.553Z"
+stopped_at: Completed 26-04-PLAN.md
+last_updated: "2026-03-29T00:17:16.948Z"
 last_activity: 2026-03-28
 progress:
-  total_phases: 22
+  total_phases: 23
   completed_phases: 4
   total_plans: 34
-  completed_plans: 26
+  completed_plans: 34
   percent: 100
 ---
 
@@ -102,6 +102,7 @@ Progress: [████████████████████] 100% (2
 | Phase 23 P03 | 25 | 1 tasks | 1 files |
 | Phase 23 P05 | 4 | 2 tasks | 3 files |
 | Phase 26 P02 | 3 | 2 tasks | 7 files |
+| Phase 26 P04 | 8min | 2 tasks | 3 files |
 
 ### Phase 3 Plan Completion
 
@@ -341,6 +342,9 @@ Recent decisions affecting current work:
 - [Phase 23]: Removed duplicate type definitions (IntelligenceDossierData, SignalCategory, ProspectSignal, SignalView) from database.ts that were added by both Plan 01 and Plan 04
 - [Phase 26]: Exa channel replicates API call pattern (not reusing enrichExa) because enrichExa returns ExaResult not ChannelOutput
 - [Phase 26]: EDGAR EFTS uses efts.sec.gov full-text search distinct from CIK-based enrichEdgar; both share edgarRateLimiter
+- [Phase 26]: Exa fires in parallel with classifyIntent for latency reduction
+- [Phase 26]: Promise.allSettled for fault-isolated channel execution
+- [Phase 26]: Heuristic ranking (relevance + channel priority + recency) over LLM re-rank for MVP
 
 ### Roadmap Evolution
 
@@ -427,8 +431,8 @@ All 20 phases complete (6-20, including 14.1). The following items remain before
 
 ## Session Continuity
 
-Last session: 2026-03-28T23:59:51.550Z
-Stopped at: Completed 26-02-PLAN.md
+Last session: 2026-03-29T00:17:16.945Z
+Stopped at: Completed 26-04-PLAN.md
 
 ---
 
