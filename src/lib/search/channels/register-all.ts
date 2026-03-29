@@ -4,4 +4,3 @@
  */
 import "./exa-channel";
 import "./edgar-efts-channel";
-import "./attom-channel";

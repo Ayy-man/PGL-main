@@ -5,8 +5,7 @@ import type { SignalCategory } from "@/types/database";
  */
 export type ChannelId =
   | "exa"
-  | "edgar-efts"
-  | "attom";
+  | "edgar-efts";
 
 /**
  * Unified result shape returned by every channel adapter.
@@ -63,7 +62,6 @@ export type ChannelFn = (params: ChannelParams) => Promise<ChannelOutput>;
 export const CHANNEL_TTLS: Record<ChannelId, number> = {
   exa: 3600,             // 1 hour
   "edgar-efts": 86400,   // 24 hours
-  attom: 604800,         // 7 days
 };
 
 /**
@@ -72,7 +70,6 @@ export const CHANNEL_TTLS: Record<ChannelId, number> = {
 export const CHANNEL_DISPLAY_NAMES: Record<ChannelId, string> = {
   exa: "Exa",
   "edgar-efts": "SEC EDGAR",
-  attom: "ATTOM Property",
 };
 
 /**

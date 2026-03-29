@@ -11,7 +11,6 @@ export type IntentClassification = {
 const ALL_CHANNEL_IDS: ChannelId[] = [
   "exa",
   "edgar-efts",
-  "attom",
 ];
 
 const CLASSIFY_SYSTEM_PROMPT = `You are a search intent classifier for a wealth intelligence platform.
@@ -21,7 +20,6 @@ Given a user query and prospect context, return which search channels to use and
 Channel selection rules:
 - Always include "exa" (general web search — always on)
 - Add "edgar-efts" for queries about SEC filings, insider trading, Form 4, 13F, 8-K, 10-K, regulatory disclosures
-- Add "attom" for queries about property, real estate, homes, address, owns property
 
 Entity type rules:
 - "person" — query is about an individual (default for most prospect queries)
@@ -76,14 +74,7 @@ Public ticker: ${prospect.publicly_traded_symbol || "None"}`;
     );
 
     // Filter out channels whose API keys are not configured
-    channels = channels.filter((ch) => {
-      switch (ch) {
-        case "attom":
-          return !!process.env.ATTOM_API_KEY;
-        default:
-          return true; // exa, edgar-efts are always available
-      }
-    });
+    // All remaining channels (exa, edgar-efts) are free — no key filtering needed
 
     // Ensure exa is always present
     if (!channels.includes("exa")) {
