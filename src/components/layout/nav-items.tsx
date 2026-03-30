@@ -15,6 +15,7 @@ import {
 interface NavItemsProps {
   orgId: string;
   userRole?: string;
+  collapsed?: boolean;
 }
 
 interface NavItem {
@@ -37,7 +38,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Team",           href: "/team",                icon: Users,           exact: false, roles: ["tenant_admin", "super_admin"] },
 ];
 
-export function NavItems({ orgId, userRole }: NavItemsProps) {
+export function NavItems({ orgId, userRole, collapsed }: NavItemsProps) {
   const pathname = usePathname();
 
   const visibleItems = NAV_ITEMS.filter(
@@ -45,7 +46,7 @@ export function NavItems({ orgId, userRole }: NavItemsProps) {
   );
 
   return (
-    <nav className="flex flex-col gap-1 px-3">
+    <nav className={`flex flex-col gap-1 ${collapsed ? "px-2" : "px-3"}`}>
       {visibleItems.map((item) => {
         const fullHref = item.href === "/" ? `/${orgId}` : `/${orgId}${item.href}`;
         const isActive = item.exact
@@ -56,7 +57,8 @@ export function NavItems({ orgId, userRole }: NavItemsProps) {
           <Link
             key={item.href}
             href={fullHref}
-            className={`flex items-center gap-3 rounded-[8px] px-3 py-3 text-sm font-medium transition-all duration-200 cursor-pointer${
+            title={collapsed ? item.label : undefined}
+            className={`flex items-center ${collapsed ? "justify-center" : "gap-3"} rounded-[8px] ${collapsed ? "px-0 py-3" : "px-3 py-3"} text-sm font-medium transition-all duration-200 cursor-pointer${
               !isActive ? " hover:bg-[rgba(255,255,255,0.02)] hover:text-[var(--text-primary-ds)]" : ""
             }`}
             style={
@@ -71,7 +73,7 @@ export function NavItems({ orgId, userRole }: NavItemsProps) {
             }
           >
             <item.icon className="h-4 w-4 shrink-0" />
-            {item.label}
+            {!collapsed && item.label}
           </Link>
         );
       })}
