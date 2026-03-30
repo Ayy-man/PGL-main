@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 27-01-PLAN.md
-last_updated: "2026-03-30T20:44:08.377Z"
+stopped_at: Completed 27-02-PLAN.md
+last_updated: "2026-03-30T20:50:58.112Z"
 last_activity: 2026-03-30
 progress:
   total_phases: 24
   completed_phases: 5
   total_plans: 37
-  completed_plans: 36
+  completed_plans: 37
   percent: 100
 ---
 
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 ## Current Position
 
 Phase: 27 (Research Chat UX Polish) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-03-30
 
@@ -105,6 +105,7 @@ Progress: [████████████████████] 100% (2
 | Phase 26 P04 | 8min | 2 tasks | 3 files |
 | Phase 26-targeted-multi-source-search P05 | 3 | 2 tasks | 4 files |
 | Phase 27-research-chat-ux-polish-streaming-indicators-exa-response-surfacing-chat-ui-templates P01 | 8min | 2 tasks | 3 files |
+| Phase 27-research-chat-ux-polish P02 | 12 | 2 tasks | 3 files |
 
 ### Phase 3 Plan Completion
 
@@ -351,6 +352,9 @@ Recent decisions affecting current work:
 - [Phase 26-targeted-multi-source-search]: ChannelFilterChips uses Set<string>.size===0 as all-active sentinel (no separate all-channels tracking)
 - [Phase 26-targeted-multi-source-search]: ResearchResultCard falls back to source_name if channelId not in CHANNEL_DISPLAY_NAMES for forward compatibility
 - [Phase 27-01]: Use maxCharacters: 600 for Exa highlights (numSentences deprecated Feb 2026); all new ScrapbookCard fields are optional for JSONB backward compatibility
+- [Phase 27-02]: Shimmer phase shows ToolStatus label alongside skeleton cards for continuous streaming feedback
+- [Phase 27-02]: ExaHighlightQuote gates on score >= 0.7 only; numeric scores never surfaced in UI
+- [Phase 27-02]: exa_image thumbnail skipped per RESEARCH.md Pitfall 5 (og:image often generic)
 
 ### Roadmap Evolution
 
@@ -438,8 +442,8 @@ All 20 phases complete (6-20, including 14.1). The following items remain before
 
 ## Session Continuity
 
-Last session: 2026-03-30T20:44:08.373Z
-Stopped at: Completed 27-01-PLAN.md
+Last session: 2026-03-30T20:50:58.109Z
+Stopped at: Completed 27-02-PLAN.md
 
 ---
 
