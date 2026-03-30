@@ -362,6 +362,20 @@ Plans:
 - [x] 26-05-PLAN.md — API route + UI components (channel status bar, filter chips, result card) + build verification
 
 
+### Phase 27: Research Chat UX Polish — Streaming indicators, Exa response surfacing, chat UI templates
+
+**Goal:** Enhance the research chat panel with contextual streaming phase labels (thinking, searching, analyzing N results, building cards), surface richer Exa API response data (highlights, summary, author, favicon) in result cards, improve empty states, and clean up inline CSS animations. No new dependencies — pure code-level UX polish of existing research panel.
+**Requirements:** RCH-01, RCH-02, RCH-03, RCH-04, RCH-05, RCH-06, RCH-07, RCH-08
+**Depends on:** Phase 26
+**Status:** PLANNED — 3 plans ready for execution
+
+**Plans:** 0/3 complete
+
+Plans:
+- [ ] 27-01-PLAN.md — Type contracts + Exa API request enhancement + digest prompt upgrade
+- [ ] 27-02-PLAN.md — Streaming phase labels + ExaHighlightQuote + keyframe cleanup + empty state
+- [ ] 27-03-PLAN.md — Build verification + design system compliance audit
+
 ---
 
 ### Phase 19: Admin Automations Dashboard — Inngest Monitoring
