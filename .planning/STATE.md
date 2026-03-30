@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: executing
-stopped_at: Checkpoint at Task 3 of 26-05-PLAN.md (human-verify)
-last_updated: "2026-03-29T00:23:32.732Z"
-last_activity: 2026-03-29
+stopped_at: Completed 27-01-PLAN.md
+last_updated: "2026-03-30T20:44:08.377Z"
+last_activity: 2026-03-30
 progress:
-  total_phases: 23
+  total_phases: 24
   completed_phases: 5
-  total_plans: 34
-  completed_plans: 35
+  total_plans: 37
+  completed_plans: 36
   percent: 100
 ---
 
@@ -22,14 +22,14 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** Real estate teams can quickly find and qualify wealthy prospects by searching structured lead databases, enriching profiles with personal contact info and wealth signals, and organizing prospects into actionable lists.
 
-**Current focus:** Phase 24 — Activity Log Full Build
+**Current focus:** Phase 27 — Research Chat UX Polish
 
 ## Current Position
 
-Phase: 26
-Plan: Not started
+Phase: 27 (Research Chat UX Polish) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
-Last activity: 2026-03-29
+Last activity: 2026-03-30
 
 Progress: [████████████████████] 100% (20/20 phases complete)
 
@@ -104,6 +104,7 @@ Progress: [████████████████████] 100% (2
 | Phase 26 P02 | 3 | 2 tasks | 7 files |
 | Phase 26 P04 | 8min | 2 tasks | 3 files |
 | Phase 26-targeted-multi-source-search P05 | 3 | 2 tasks | 4 files |
+| Phase 27-research-chat-ux-polish-streaming-indicators-exa-response-surfacing-chat-ui-templates P01 | 8min | 2 tasks | 3 files |
 
 ### Phase 3 Plan Completion
 
@@ -349,6 +350,7 @@ Recent decisions affecting current work:
 - [Phase 26-targeted-multi-source-search]: Route placed at /research/multi-source to avoid breaking Phase 25 streaming scrapbook endpoint at /research
 - [Phase 26-targeted-multi-source-search]: ChannelFilterChips uses Set<string>.size===0 as all-active sentinel (no separate all-channels tracking)
 - [Phase 26-targeted-multi-source-search]: ResearchResultCard falls back to source_name if channelId not in CHANNEL_DISPLAY_NAMES for forward compatibility
+- [Phase 27-01]: Use maxCharacters: 600 for Exa highlights (numSentences deprecated Feb 2026); all new ScrapbookCard fields are optional for JSONB backward compatibility
 
 ### Roadmap Evolution
 
@@ -365,6 +367,7 @@ Recent decisions affecting current work:
 - Phase 23 added: Intelligence Dossier & Wealth Signal Timeline — Split Enrichment Display
 - Phase 24 added: Activity Log — Full Build: prospect_activity table, quick action bar, timeline feed, filter bar, system event triggers, auto-status upgrade, note tooltips
 - Phase 25 added: Exa Research Scrapbook — First-class research workbench in prospect profiles. Freeform questions → Exa search → LLM digest → rich result cards → pin to Dossier/Signals. shadcn AI components, streaming UX, session history.
+- Phase 27 added: Research Chat UX Polish — Streaming indicators, Exa response surfacing, chat UI templates
 - Phase 26 added: Targeted Multi-Source Search — Intent-routed channels (SEC EDGAR, ATTOM property, NewsAPI, Proxycurl, FAA Registry, Crunchbase) alongside Exa. LLM classifies query intent → fires specialized APIs in parallel → merges/deduplicates/ranks results into unified scrapbook feed.
 
 ### Pending Todos
@@ -435,8 +438,8 @@ All 20 phases complete (6-20, including 14.1). The following items remain before
 
 ## Session Continuity
 
-Last session: 2026-03-29T00:22:31.254Z
-Stopped at: Checkpoint at Task 3 of 26-05-PLAN.md (human-verify)
+Last session: 2026-03-30T20:44:08.373Z
+Stopped at: Completed 27-01-PLAN.md
 
 ---
 
