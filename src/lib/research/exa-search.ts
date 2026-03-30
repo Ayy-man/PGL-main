@@ -11,6 +11,12 @@ export interface ExaSearchResult {
   url: string;
   text: string;
   publishedDate?: string;
+  author?: string;
+  image?: string;
+  favicon?: string;
+  highlights?: string[];
+  highlightScores?: number[];
+  summary?: string;
 }
 
 export async function searchExaForResearch(
@@ -39,6 +45,8 @@ export async function searchExaForResearch(
             maxCharacters: EXA_SCRAPBOOK_MAX_CHARS,
             includeHtmlTags: false,
           },
+          highlights: { maxCharacters: 600 },
+          summary: { query: "Key facts about this person and their recent activities" },
         },
       }),
     });

@@ -54,6 +54,12 @@ export interface ScrapbookCard {
   is_about_target: boolean;
   raw_snippet: string;
   confidence_note: string;
+  // Exa-sourced optional fields (not present on old persisted cards)
+  exa_highlights?: string[];
+  exa_highlight_scores?: number[];
+  exa_summary?: string;
+  exa_author?: string;
+  exa_image?: string;
 }
 
 // --- Pin types ---
