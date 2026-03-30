@@ -93,9 +93,19 @@ export function Sidebar({ orgId, tenantName, logoUrl, userRole, userName, userIn
           <button
             onClick={toggle}
             className="flex items-center justify-center rounded-[6px] p-1.5 transition-colors cursor-pointer"
-            style={{ color: "var(--text-ghost)" }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.04)"; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
+            style={{
+              color: "var(--text-secondary-ds, rgba(232,228,220,0.6))",
+              background: "rgba(255,255,255,0.04)",
+              border: "1px solid rgba(255,255,255,0.08)",
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.08)";
+              (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.15)";
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.04)";
+              (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(255,255,255,0.08)";
+            }}
             title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             <PanelLeft className="h-4 w-4" />
