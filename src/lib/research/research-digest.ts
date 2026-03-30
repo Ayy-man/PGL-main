@@ -50,10 +50,14 @@ Return a JSON array. Each element:
 Return ONLY the JSON array. No markdown fences. No explanation.`;
 
     const userMessage = results
-      .map(
-        (r, i) =>
-          `[${i}] Title: ${r.title}\nURL: ${r.url}\nDate: ${r.publishedDate ?? "unknown"}\nText: ${r.text?.slice(0, 2000) ?? "(empty)"}`
-      )
+      .map((r, i) => {
+        const summarySection = r.summary
+          ? `Exa Summary: ${r.summary}`
+          : r.highlights?.[0]
+          ? `Top Highlight: ${r.highlights[0]}`
+          : `Text: ${r.text?.slice(0, 2000) ?? "(empty)"}`;
+        return `[${i}] Title: ${r.title}\nURL: ${r.url}\nDate: ${r.publishedDate ?? "unknown"}\n${summarySection}`;
+      })
       .join("\n\n---\n\n");
 
     const response = await chatCompletion(systemPrompt, userMessage, 4000);
@@ -118,7 +122,9 @@ Return ONLY the JSON array. No markdown fences. No explanation.`;
           ) as ScrapbookCardCategory,
           source_url: sourceUrl,
           source_name: domain.replace(/^www\./, ""),
-          source_favicon: domain ? `https://${domain}/favicon.ico` : "",
+          source_favicon:
+            results[item.index]?.favicon ??
+            (domain ? `https://${domain}/favicon.ico` : ""),
           event_date: item.event_date ?? null,
           event_date_precision: (
             ["exact", "approximate", "unknown"].includes(
@@ -142,6 +148,11 @@ Return ONLY the JSON array. No markdown fences. No explanation.`;
           is_about_target: true,
           raw_snippet: results[item.index]?.text?.slice(0, 500) ?? "",
           confidence_note: item.confidence_note ?? "",
+          exa_highlights: results[item.index]?.highlights,
+          exa_highlight_scores: results[item.index]?.highlightScores,
+          exa_summary: results[item.index]?.summary,
+          exa_author: results[item.index]?.author,
+          exa_image: results[item.index]?.image,
         };
       })
       .sort(
