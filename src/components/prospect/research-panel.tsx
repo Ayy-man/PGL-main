@@ -90,12 +90,7 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
         const res = await fetch(`/api/prospects/${prospectId}/research/suggestions`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: prospect.full_name,
-            title: prospect.title,
-            company: prospect.company,
-            summary: prospect.intelligence_dossier?.summary,
-          }),
+          body: JSON.stringify({ count: 4 }),
         });
         if (res.ok) {
           const data = await res.json();
@@ -108,7 +103,45 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
     if (messages.length === 0) {
       fetchSuggestions();
     }
-  }, [prospectId, prospect, messages.length]);
+  }, [prospectId, messages.length]);
+
+  // Replace a single used suggestion with a fresh one (saves LLM cost vs regenerating all 4)
+  const replaceSuggestion = useCallback(async (usedIndex: number, usedText: string) => {
+    // Mark as loading with a placeholder
+    setSuggestions((prev) => {
+      const next = [...prev];
+      next[usedIndex] = "...";
+      return next;
+    });
+
+    try {
+      const res = await fetch(`/api/prospects/${prospectId}/research/suggestions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          count: 1,
+          exclude: [...suggestions.filter((_, i) => i !== usedIndex), usedText],
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const newSuggestion = data.suggestions?.[0];
+        if (newSuggestion) {
+          setSuggestions((prev) => {
+            const next = [...prev];
+            next[usedIndex] = newSuggestion;
+            return next;
+          });
+          return;
+        }
+      }
+    } catch {
+      // Silent fail
+    }
+
+    // If replacement failed, just remove the slot
+    setSuggestions((prev) => prev.filter((_, i) => i !== usedIndex));
+  }, [prospectId, suggestions]);
 
   // Auto-resize textarea
   const handleTextareaInput = () => {
@@ -540,9 +573,13 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
             <div className="flex flex-wrap gap-2">
               {suggestions.map((suggestion, i) => (
                 <button
-                  key={i}
-                  onClick={() => handleSend(suggestion)}
-                  className="px-3 py-1.5 rounded-full text-xs font-sans transition-all duration-150"
+                  key={`${i}-${suggestion}`}
+                  onClick={() => {
+                    handleSend(suggestion);
+                    replaceSuggestion(i, suggestion);
+                  }}
+                  disabled={suggestion === "..."}
+                  className="px-3 py-1.5 rounded-full text-xs font-sans transition-all duration-150 disabled:opacity-40"
                   style={{
                     background: "var(--bg-card, rgba(255,255,255,0.04))",
                     border: "1px solid var(--border-subtle, rgba(255,255,255,0.08))",
