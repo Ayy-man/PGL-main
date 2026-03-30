@@ -225,8 +225,8 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
         const sources: Array<{ url: string; title: string }> = [];
         let buffer = "";
         let _newSessionId = sessionId;
-        let reasoningText = "";
-        let assistantContent = "";
+        const reasoningText = "";
+        const assistantContent = "";
 
         while (true) {
           const { done, value } = await reader.read();
@@ -245,38 +245,43 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
               const event = JSON.parse(raw);
               const { type } = event;
 
-              if (type === "session") {
-                _newSessionId = event.session_id;
-                setSessionId(event.session_id);
-              } else if (type === "reasoning") {
-                if (event.status === "complete" && event.reformulated) {
-                  setReformulatedQuery(event.reformulated);
+              // Vercel AI SDK wraps custom types as "data-*"
+              // event.data contains the actual payload
+              const eventData = event.data ?? event;
+
+              if (type === "data-session") {
+                _newSessionId = eventData.session_id;
+                setSessionId(eventData.session_id);
+              } else if (type === "data-message-id") {
+                currentMessageIdRef.current = eventData.message_id;
+              } else if (type === "data-reasoning") {
+                if (eventData.status === "complete" && eventData.reformulated) {
+                  setReformulatedQuery(eventData.reformulated);
                 }
-                reasoningText += event.content ?? "";
-                setStreamingReasoning(reasoningText);
                 setStreamPhase("reasoning");
-              } else if (type === "tool_call") {
+              } else if (type === "data-tool") {
                 setStreamPhase("tool");
-                if (event.status === "completed" && typeof event.count === "number") {
-                  setExaResultCount(event.count);
-                  setToolStatus(`${event.count} results`);
+                if (eventData.status === "completed" && typeof eventData.count === "number") {
+                  setExaResultCount(eventData.count);
+                  setToolStatus(`${eventData.count} results`);
                 } else {
                   setToolStatus("Searching...");
                 }
-              } else if (type === "shimmer") {
+              } else if (type === "data-shimmer") {
                 setStreamPhase("shimmer");
                 setReasoningCollapsed(true);
-              } else if (type === "card") {
-                const card: ScrapbookCard = event.card;
+              } else if (type === "data-card") {
+                const card: ScrapbookCard = eventData as ScrapbookCard;
                 cards.push(card);
                 setStreamingCards((prev) => [...prev, card]);
                 setStreamPhase("cards");
-              } else if (type === "source") {
-                sources.push(event.source);
+              } else if (type === "data-sources") {
+                const urls: string[] = eventData.urls ?? [];
+                for (const url of urls) {
+                  sources.push({ url, title: url });
+                }
                 setStreamPhase("sources");
-              } else if (type === "content") {
-                assistantContent += event.content ?? "";
-              } else if (type === "complete") {
+              } else if (type === "data-complete") {
                 setStreamPhase("complete");
               }
             } catch {
