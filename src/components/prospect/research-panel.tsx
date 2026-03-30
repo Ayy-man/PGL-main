@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
-import { Clock, SendHorizontal, X, ChevronDown, ChevronUp } from "lucide-react";
+import { Clock, SendHorizontal, X, ChevronDown, ChevronUp, Globe, Loader2, CheckCircle2 } from "lucide-react";
 import type { ScrapbookCard } from "@/types/research";
 import { ResearchResultCard } from "./research-result-card";
 
@@ -57,7 +57,7 @@ function generateId(): string {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
-const STREAMING_LABELS: Partial<Record<StreamPhase, string>> = {
+const _STREAMING_LABELS: Partial<Record<StreamPhase, string>> = {
   reasoning: "Thinking about your question...",
   tool: "Searching the web...",
   shimmer: "Analyzing results...",
@@ -76,12 +76,14 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
   const [showSessionHistory, setShowSessionHistory] = useState(false);
   const [sessions, setSessions] = useState<SessionListItem[]>([]);
   const [loadingSessions, setLoadingSessions] = useState(false);
-  const [streamingReasoning, setStreamingReasoning] = useState<string>("");
+  const [_streamingReasoning, setStreamingReasoning] = useState<string>("");
   const [_reasoningCollapsed, setReasoningCollapsed] = useState(false);
   const [toolStatus, setToolStatus] = useState<string>("");
   const [_exaResultCount, setExaResultCount] = useState<number | null>(null);
   const [lowRelevanceCollapsed, setLowRelevanceCollapsed] = useState(true);
   const [streamingCards, setStreamingCards] = useState<ScrapbookCard[]>([]);
+  const [reformulatedQuery, setReformulatedQuery] = useState<string>("");
+  const [searchExpanded, setSearchExpanded] = useState(true);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -168,6 +170,8 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
 
       setIsSearching(true);
       setStreamPhase("reasoning");
+      setReformulatedQuery("");
+      setSearchExpanded(true);
       setStreamingReasoning("");
       setReasoningCollapsed(false);
       setToolStatus("");
@@ -245,6 +249,9 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
                 _newSessionId = event.session_id;
                 setSessionId(event.session_id);
               } else if (type === "reasoning") {
+                if (event.status === "complete" && event.reformulated) {
+                  setReformulatedQuery(event.reformulated);
+                }
                 reasoningText += event.content ?? "";
                 setStreamingReasoning(reasoningText);
                 setStreamPhase("reasoning");
@@ -252,9 +259,9 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
                 setStreamPhase("tool");
                 if (event.status === "completed" && typeof event.count === "number") {
                   setExaResultCount(event.count);
-                  setToolStatus(`Analyzing ${event.count} results...`);
+                  setToolStatus(`${event.count} results`);
                 } else {
-                  setToolStatus(event.status === "running" ? "Searching the web..." : (event.status ?? "Searching web..."));
+                  setToolStatus("Searching...");
                 }
               } else if (type === "shimmer") {
                 setStreamPhase("shimmer");
@@ -312,6 +319,7 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
         setStreamingReasoning("");
         setToolStatus("");
         setStreamingCards([]);
+        setSearchExpanded(false);
       }
     },
     [prospectId, sessionId, isSearching]
@@ -692,43 +700,117 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
           </div>
         ))}
 
-        {/* Streaming indicators */}
+        {/* Streaming indicators — Claude-style search visualization */}
         {isSearching && (
           <div className="space-y-3">
-            {/* Reasoning streaming */}
-            {streamPhase === "reasoning" && streamingReasoning && (
-              <ReasoningBlock
-                text={streamingReasoning}
-                streaming
-                defaultCollapsed={false}
-              />
-            )}
+            {/* "Searched the web" collapsible section */}
+            <div className="space-y-2">
+              {/* Header — clickable to expand/collapse */}
+              <button
+                type="button"
+                onClick={() => setSearchExpanded((v) => !v)}
+                className="flex items-center gap-2 text-left w-full cursor-pointer group"
+              >
+                {streamPhase === "complete" || streamPhase === "cards" || streamPhase === "sources" ? (
+                  <CheckCircle2 className="h-4 w-4 shrink-0" style={{ color: "var(--gold-primary)" }} />
+                ) : (
+                  <Loader2 className="h-4 w-4 shrink-0 animate-spin" style={{ color: "var(--gold-primary)" }} />
+                )}
+                <span
+                  className="text-sm font-medium"
+                  style={{ color: "var(--text-secondary, rgba(232,228,220,0.7))" }}
+                >
+                  {streamPhase === "reasoning" ? "Thinking..." :
+                   streamPhase === "tool" ? "Searching the web" :
+                   streamPhase === "shimmer" ? "Analyzing results" :
+                   streamPhase === "cards" || streamPhase === "sources" || streamPhase === "complete" ? "Searched the web" :
+                   "Searching..."}
+                </span>
+                {searchExpanded ? (
+                  <ChevronUp className="h-3.5 w-3.5 shrink-0 opacity-40" />
+                ) : (
+                  <ChevronDown className="h-3.5 w-3.5 shrink-0 opacity-40" />
+                )}
+              </button>
 
-            {/* Tool call status */}
-            {(streamPhase === "tool" || streamPhase === "shimmer") && (
-              <ToolStatus status={toolStatus || STREAMING_LABELS[streamPhase] || ""} />
-            )}
+              {/* Expanded: show search query + results list */}
+              {searchExpanded && (
+                <div
+                  className="ml-6 rounded-lg overflow-hidden"
+                  style={{
+                    background: "rgba(255,255,255,0.02)",
+                    border: "1px solid var(--border-default, rgba(255,255,255,0.06))",
+                  }}
+                >
+                  {/* Search query row */}
+                  {(reformulatedQuery || streamPhase !== "reasoning") && (
+                    <div
+                      className="flex items-center gap-2 px-3 py-2"
+                      style={{ borderBottom: "1px solid var(--border-default, rgba(255,255,255,0.06))" }}
+                    >
+                      <Globe className="h-3.5 w-3.5 shrink-0 opacity-40" />
+                      <span className="text-xs truncate" style={{ color: "var(--text-tertiary, rgba(232,228,220,0.4))" }}>
+                        {reformulatedQuery || "Searching..."}
+                      </span>
+                      {toolStatus && (
+                        <span className="text-[10px] shrink-0 ml-auto" style={{ color: "var(--text-tertiary, rgba(232,228,220,0.4))" }}>
+                          {toolStatus}
+                        </span>
+                      )}
+                    </div>
+                  )}
 
-            {/* Shimmer cards */}
+                  {/* Results list — show cards as they stream in */}
+                  {streamingCards.length > 0 && (
+                    <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
+                      {streamingCards.slice(0, 8).map((card) => (
+                        <div key={card.index} className="flex items-center gap-2.5 px-3 py-2">
+                          {card.source_favicon ? (
+                            <img
+                              src={card.source_favicon}
+                              alt=""
+                              className="h-4 w-4 rounded shrink-0"
+                              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                            />
+                          ) : (
+                            <Globe className="h-3.5 w-3.5 shrink-0 opacity-30" />
+                          )}
+                          <span className="text-xs truncate flex-1" style={{ color: "var(--text-primary, #e8e4dc)" }}>
+                            {card.headline}
+                          </span>
+                          <span className="text-[10px] shrink-0 truncate max-w-[120px]" style={{ color: "var(--text-tertiary, rgba(232,228,220,0.4))" }}>
+                            {(() => { try { return new URL(card.source_url).hostname.replace("www.", ""); } catch { return card.source_name; } })()}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Loading shimmer rows when no cards yet */}
+                  {streamingCards.length === 0 && streamPhase !== "reasoning" && (
+                    <div className="divide-y" style={{ borderColor: "rgba(255,255,255,0.04)" }}>
+                      {[0, 1, 2, 3].map((i) => (
+                        <div key={i} className="flex items-center gap-2.5 px-3 py-2.5">
+                          <div className="h-4 w-4 rounded bg-white/5 animate-pulse shrink-0" />
+                          <div className="h-3 rounded bg-white/5 animate-pulse flex-1" style={{ maxWidth: `${60 + i * 10}%` }} />
+                          <div className="h-2.5 w-16 rounded bg-white/5 animate-pulse shrink-0" />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Status line */}
             {streamPhase === "shimmer" && (
-              <div className="space-y-3">
-                {[0, 1, 2].map((i) => (
-                  <ShimmerCard key={i} />
-                ))}
+              <div className="flex items-center gap-2 ml-6">
+                <Loader2 className="h-3.5 w-3.5 animate-spin" style={{ color: "var(--gold-primary)" }} />
+                <span className="text-xs" style={{ color: "var(--text-tertiary, rgba(232,228,220,0.4))" }}>
+                  Analyzing and building intelligence cards...
+                </span>
               </div>
             )}
-
-            {/* Streaming cards */}
-            {(streamPhase === "cards" || streamPhase === "sources") &&
-              streamingCards.map((card, idx) => (
-                <ResearchResultCard
-                  key={card.index}
-                  card={card}
-                  prospectId={prospectId}
-                  messageId="streaming"
-                  index={idx}
-                />
-              ))}
           </div>
         )}
 
@@ -862,7 +944,7 @@ function ReasoningBlock({
   );
 }
 
-function ToolStatus({ status }: { status: string }) {
+function _ToolStatus({ status }: { status: string }) {
   return (
     <div
       className="flex items-center gap-2 text-xs font-mono px-3 py-2 rounded-lg"
@@ -881,7 +963,7 @@ function ToolStatus({ status }: { status: string }) {
   );
 }
 
-function ShimmerCard() {
+function _ShimmerCard() {
   return (
     <div
       className="rounded-xl p-4 space-y-3"
