@@ -190,6 +190,8 @@ export async function POST(
 
       const exaResults = await searchExaForResearch(reformulatedQuery);
 
+      console.log(`[research] Query: "${query}" → Reformulated: "${reformulatedQuery}" → Exa returned ${exaResults.length} results`);
+
       writer.write({
         type: "data-tool",
         id: "exa-search",
@@ -209,6 +211,8 @@ export async function POST(
         query,
         exaResults
       );
+
+      console.log(`[research] Digest returned ${cards.length} cards from ${exaResults.length} Exa results`);
 
       writer.write({
         type: "data-shimmer",
