@@ -25,6 +25,27 @@ const CATEGORY_COLORS: Record<string, { bg: string; text: string }> = {
   other: { bg: "rgba(255,255,255,0.08)", text: "var(--text-tertiary, rgba(232,228,220,0.4))" },
 };
 
+function ExaHighlightQuote({ highlights, scores }: { highlights?: string[]; scores?: number[] }) {
+  if (!highlights?.length || !scores?.length) return null;
+  // Only show the top highlight (index 0) if score >= 0.7
+  const topScore = scores[0] ?? 0;
+  if (topScore < 0.7) return null;
+  const topHighlight = highlights[0];
+  if (!topHighlight) return null;
+
+  return (
+    <blockquote
+      className="mt-2 pl-3 text-xs font-sans italic leading-relaxed"
+      style={{
+        borderLeft: "2px solid rgba(212,175,55,0.3)",
+        color: "var(--text-tertiary, rgba(232,228,220,0.4))",
+      }}
+    >
+      {topHighlight}
+    </blockquote>
+  );
+}
+
 function formatCategoryLabel(category: string): string {
   return category
     .split("_")
@@ -189,6 +210,9 @@ export function ResearchResultCard({
         </button>
       )}
 
+      {/* Exa highlight pull-quote */}
+      <ExaHighlightQuote highlights={card.exa_highlights} scores={card.exa_highlight_scores} />
+
       {/* Source + confidence footer */}
       <div
         className="mt-3 pt-2 flex items-center justify-between gap-2"
@@ -217,6 +241,14 @@ export function ResearchResultCard({
             {card.source_name || card.source_url}
             <ExternalLink className="w-3 h-3 flex-shrink-0" />
           </a>
+          {card.exa_author && (
+            <span
+              className="text-[11px] font-sans truncate max-w-[120px]"
+              style={{ color: "var(--text-tertiary, rgba(232,228,220,0.4))" }}
+            >
+              by {card.exa_author}
+            </span>
+          )}
         </div>
         {card.confidence_note && (
           <span
@@ -280,29 +312,6 @@ export function ResearchResultCard({
         </button>
       </div>
 
-      {/* Inline CSS keyframes for cardFadeIn */}
-      <style>{`
-        @keyframes cardFadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(8px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        @keyframes slideDown {
-          from {
-            opacity: 0;
-            transform: translateY(-8px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
     </div>
   );
 }
