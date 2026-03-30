@@ -149,12 +149,11 @@ export function QuickActionBar({ prospectId, onActivityCreated }: QuickActionBar
       {/* Dropdown menu */}
       {menuOpen && !activeMode && (
         <div
-          className="absolute top-full left-0 mt-1 z-50 rounded-[10px] py-1 min-w-[180px]"
+          className="absolute top-full right-0 mt-1 z-50 rounded-[10px] py-1 min-w-[180px]"
           style={{
-            background: "rgba(8,8,10,0.95)",
-            backdropFilter: "blur(12px)",
+            background: "#1a1a1a",
             border: "1px solid rgba(255,255,255,0.08)",
-            boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.6)",
           }}
         >
           {MENU_ITEMS.map((item) => {
