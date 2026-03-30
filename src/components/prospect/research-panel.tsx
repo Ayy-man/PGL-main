@@ -57,6 +57,14 @@ function generateId(): string {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
+const STREAMING_LABELS: Partial<Record<StreamPhase, string>> = {
+  reasoning: "Thinking about your question...",
+  tool: "Searching the web...",
+  shimmer: "Analyzing results...",
+  cards: "Building intelligence cards...",
+  sources: "Collecting sources...",
+};
+
 export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchPanelProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -71,6 +79,7 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
   const [streamingReasoning, setStreamingReasoning] = useState<string>("");
   const [_reasoningCollapsed, setReasoningCollapsed] = useState(false);
   const [toolStatus, setToolStatus] = useState<string>("");
+  const [_exaResultCount, setExaResultCount] = useState<number | null>(null);
   const [lowRelevanceCollapsed, setLowRelevanceCollapsed] = useState(true);
   const [streamingCards, setStreamingCards] = useState<ScrapbookCard[]>([]);
 
@@ -162,6 +171,7 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
       setStreamingReasoning("");
       setReasoningCollapsed(false);
       setToolStatus("");
+      setExaResultCount(null);
       setStreamingCards([]);
       setSuggestions([]); // hide after first query
       setInputValue("");
@@ -240,7 +250,12 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
                 setStreamPhase("reasoning");
               } else if (type === "tool_call") {
                 setStreamPhase("tool");
-                setToolStatus(event.status ?? "Searching web...");
+                if (event.status === "completed" && typeof event.count === "number") {
+                  setExaResultCount(event.count);
+                  setToolStatus(`Analyzing ${event.count} results...`);
+                } else {
+                  setToolStatus(event.status === "running" ? "Searching the web..." : (event.status ?? "Searching web..."));
+                }
               } else if (type === "shimmer") {
                 setStreamPhase("shimmer");
                 setReasoningCollapsed(true);
@@ -267,7 +282,7 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
           assistantContent ||
           (cards.length > 0
             ? `Found ${cards.length} result${cards.length !== 1 ? "s" : ""}`
-            : "No results found for your query.");
+            : "No results found. Try rephrasing your question, or ask about a different aspect of " + prospect.first_name + "'s background.");
 
         setMessages((prev) => [
           ...prev,
@@ -601,6 +616,24 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
           </div>
         )}
 
+        {/* Empty state: no messages, no suggestions, not searching */}
+        {messages.length === 0 && suggestions.length === 0 && !isSearching && (
+          <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+            <div
+              className="w-12 h-12 rounded-full flex items-center justify-center mb-4"
+              style={{ background: "rgba(212,175,55,0.1)" }}
+            >
+              <SendHorizontal className="w-5 h-5" style={{ color: "var(--gold-primary, #d4af37)" }} />
+            </div>
+            <p className="font-sans text-sm mb-1" style={{ color: "var(--text-primary, #e8e4dc)" }}>
+              Research {prospect.first_name}
+            </p>
+            <p className="font-sans text-xs max-w-[280px]" style={{ color: "var(--text-tertiary, rgba(232,228,220,0.4))" }}>
+              Ask about their career, investments, recent news, SEC filings, or company activities.
+            </p>
+          </div>
+        )}
+
         {/* Chat Messages */}
         {messages.map((msg) => (
           <div key={msg.id} className="space-y-3">
@@ -672,8 +705,8 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
             )}
 
             {/* Tool call status */}
-            {streamPhase === "tool" && toolStatus && (
-              <ToolStatus status={toolStatus} />
+            {(streamPhase === "tool" || streamPhase === "shimmer") && (
+              <ToolStatus status={toolStatus || STREAMING_LABELS[streamPhase] || ""} />
             )}
 
             {/* Shimmer cards */}
