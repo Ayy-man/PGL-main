@@ -562,7 +562,7 @@ export function ProfileView({
         </div>
 
         {/* ─── CENTER COLUMN ─── */}
-        <div className="lg:col-span-6 flex flex-col gap-4">
+        <div className={`lg:col-span-6 flex flex-col gap-4${activePanel === "research" ? " min-h-[calc(100vh-120px)]" : ""}`}>
           {/* Dossier/Research Toggle */}
           <DossierResearchToggle
             active={activePanel}
@@ -570,7 +570,7 @@ export function ProfileView({
           />
 
           {/* Crossfade: Dossier vs Research */}
-          <div className="relative">
+          <div className={`relative${activePanel === "research" ? " flex-1 flex flex-col" : ""}`}>
             {activePanel === "dossier" ? (
               <div
                 key="dossier"
@@ -584,7 +584,7 @@ export function ProfileView({
             ) : (
               <div
                 key="research"
-                className="animate-in fade-in slide-in-from-bottom-1 duration-250"
+                className="animate-in fade-in slide-in-from-bottom-1 duration-250 flex-1 flex flex-col"
               >
                 <ResearchPanel
                   prospectId={prospect.id}
@@ -606,22 +606,27 @@ export function ProfileView({
             )}
           </div>
 
-          {/* Wealth Signal Timeline */}
-          <SignalTimeline
-            prospectId={prospect.id}
-            orgId={orgId}
-            initialSignals={initialSignals ?? []}
-            totalCount={signalCount ?? 0}
-          />
+          {/* Dossier-only cards — hidden when Research is active so chatbot gets full height */}
+          {activePanel === "dossier" && (
+            <>
+              {/* Wealth Signal Timeline */}
+              <SignalTimeline
+                prospectId={prospect.id}
+                orgId={orgId}
+                initialSignals={initialSignals ?? []}
+                totalCount={signalCount ?? 0}
+              />
 
-          {/* Market Intelligence */}
-          <MarketIntelligenceCard
-            prospectId={prospect.id}
-            orgId={orgId}
-            ticker={prospect.publicly_traded_symbol ?? null}
-            initialSnapshot={prospect.stock_snapshot ?? null}
-            snapshotAt={prospect.stock_snapshot_at ?? null}
-          />
+              {/* Market Intelligence */}
+              <MarketIntelligenceCard
+                prospectId={prospect.id}
+                orgId={orgId}
+                ticker={prospect.publicly_traded_symbol ?? null}
+                initialSnapshot={prospect.stock_snapshot ?? null}
+                snapshotAt={prospect.stock_snapshot_at ?? null}
+              />
+            </>
+          )}
 
         </div>
 

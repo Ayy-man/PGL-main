@@ -157,8 +157,8 @@ export function ListMemberTable({ members }: ListMemberTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[240px]">Prospect</TableHead>
-              <TableHead className="w-[110px]">Location</TableHead>
+              <TableHead className="w-[280px]">Prospect</TableHead>
+              <TableHead className="w-[120px]">Location</TableHead>
               <TableHead className="w-[50px] text-center">Contact</TableHead>
               <TableHead className="w-[100px]">Status</TableHead>
               <TableHead className="w-[70px]">Added</TableHead>
@@ -174,20 +174,20 @@ export function ListMemberTable({ members }: ListMemberTableProps) {
                 style={{ background: i % 2 === 1 ? "rgba(255,255,255,0.015)" : "transparent" }}
               >
                 {/* Prospect: Name + Title at Company */}
-                <TableCell>
-                  <div className="flex items-center gap-2 min-w-0">
+                <TableCell className="py-3">
+                  <div className="flex items-center gap-3 min-w-0">
                     <ProspectAvatar
                       name={member.prospect.name}
                       photoUrl={member.prospect.photo_url}
                       email={member.prospect.email}
-                      size="sm"
+                      size="md"
                     />
                     <EnrichmentDot status={member.prospect.enrichment_status} />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
                         <Link
                           href={`/${orgId}/prospects/${member.prospect.id}`}
-                          className="text-sm font-semibold truncate hover:underline transition-colors"
+                          className="text-[15px] font-semibold truncate hover:underline transition-colors"
                           style={{ color: "var(--gold-primary)" }}
                         >
                           {member.prospect.name}
@@ -204,7 +204,7 @@ export function ListMemberTable({ members }: ListMemberTableProps) {
                           </a>
                         )}
                       </div>
-                      <p className="text-xs truncate" style={{ color: "var(--text-tertiary, rgba(232,228,220,0.4))" }}>
+                      <p className="text-sm truncate" style={{ color: "var(--text-tertiary, rgba(232,228,220,0.4))" }}>
                         {member.prospect.title || ""}
                         {member.prospect.title && member.prospect.company && " at "}
                         {member.prospect.company || ""}
@@ -214,8 +214,8 @@ export function ListMemberTable({ members }: ListMemberTableProps) {
                 </TableCell>
 
                 {/* Location (shortened) */}
-                <TableCell>
-                  <span className="text-xs" style={{ color: "var(--text-secondary, rgba(232,228,220,0.5))" }}>
+                <TableCell className="py-3">
+                  <span className="text-sm" style={{ color: "var(--text-secondary, rgba(232,228,220,0.5))" }}>
                     {member.prospect.location ? shortLocation(member.prospect.location) : "—"}
                   </span>
                 </TableCell>
@@ -249,9 +249,9 @@ export function ListMemberTable({ members }: ListMemberTableProps) {
                 </TableCell>
 
                 {/* Added timestamp */}
-                <TableCell>
+                <TableCell className="py-3">
                   <span
-                    className="text-[11px]"
+                    className="text-xs"
                     style={{ color: "var(--text-tertiary, rgba(232,228,220,0.4))" }}
                     title={new Date(member.added_at).toLocaleString()}
                   >

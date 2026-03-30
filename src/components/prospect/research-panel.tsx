@@ -346,7 +346,7 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
 
   return (
     <div
-      className="flex flex-col h-full"
+      className="surface-card rounded-[14px] flex flex-col flex-1 h-full overflow-hidden"
       style={{ minHeight: 0 }}
     >
       {/* Prospect Context Strip */}
