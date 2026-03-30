@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { NavItems } from "./nav-items";
 import { MobileHeader } from "./mobile-sidebar";
-import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { PanelLeft } from "lucide-react";
 
 interface SidebarProps {
   orgId: string;
@@ -83,38 +83,24 @@ export function Sidebar({ orgId, tenantName, logoUrl, userRole, userName, userIn
           <NavItems orgId={orgId} userRole={userRole} collapsed={collapsed} />
         </div>
 
-        {/* Collapse toggle */}
-        <div className={`px-3 py-3 ${collapsed ? "flex justify-center" : ""}`}>
+        {/* Footer with collapse toggle */}
+        <div className={`flex items-center ${collapsed ? "justify-center px-2" : "justify-between px-5"} py-4`}>
+          {!collapsed && (
+            <p className="text-[11px]" style={{ color: "var(--text-ghost)" }}>
+              Phronesis <span className="ml-1">v1.0</span>
+            </p>
+          )}
           <button
             onClick={toggle}
-            className="flex items-center gap-2 rounded-[6px] px-2 py-2 text-xs transition-colors cursor-pointer w-full"
+            className="flex items-center justify-center rounded-[6px] p-1.5 transition-colors cursor-pointer"
             style={{ color: "var(--text-ghost)" }}
             onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.04)"; }}
             onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
             title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
-            {collapsed ? (
-              <PanelLeftOpen className="h-4 w-4 shrink-0 mx-auto" />
-            ) : (
-              <>
-                <PanelLeftClose className="h-4 w-4 shrink-0" />
-                <span>Collapse</span>
-              </>
-            )}
+            <PanelLeft className="h-4 w-4" />
           </button>
         </div>
-
-        {/* Footer */}
-        {!collapsed && (
-          <div className="px-5 py-4">
-            <p
-              className="text-[11px]"
-              style={{ color: "var(--text-ghost)" }}
-            >
-              Phronesis <span className="ml-1">v1.0</span>
-            </p>
-          </div>
-        )}
       </aside>
 
       {/* Mobile header — visible below lg */}
