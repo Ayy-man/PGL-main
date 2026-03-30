@@ -143,6 +143,7 @@ export async function POST(
   // --- Build stream ---
   const stream = createUIMessageStream({
     execute: async ({ writer }) => {
+      try {
       const streamStartMs = Date.now();
 
       // Phase 0: Stream session and message IDs first so client can capture them
@@ -284,6 +285,10 @@ export async function POST(
         .from("research_sessions")
         .update({ updated_at: new Date().toISOString() })
         .eq("id", sessionId);
+
+      } catch (err) {
+        console.error("[research] Stream execution error:", err);
+      }
     },
   });
 
