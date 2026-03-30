@@ -189,7 +189,7 @@ export function ProfileView({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             category: "team",
-            event_type: "profile_viewed",
+            eventType: "profile_viewed",
             title: "Viewed research tab",
             metadata: { section: "research" },
           }),
