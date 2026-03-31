@@ -94,6 +94,12 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, streamingCards, streamPhase]);
 
+  // Prefetch sessions on mount so dropdown opens instantly
+  useEffect(() => {
+    loadSessions();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Fetch suggestions on mount
   useEffect(() => {
     const fetchSuggestions = async () => {
@@ -475,7 +481,6 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
           <button
             onClick={() => {
               setShowSessionHistory((v) => !v);
-              if (!showSessionHistory) loadSessions();
             }}
             className="flex items-center justify-center w-8 h-8 rounded-md transition-all duration-200"
             style={{
