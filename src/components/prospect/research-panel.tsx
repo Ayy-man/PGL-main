@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
-import { Clock, SendHorizontal, X, ChevronDown, ChevronUp, Globe, Loader2, CheckCircle2 } from "lucide-react";
+import { Clock, SendHorizontal, ChevronDown, ChevronUp, Globe, Loader2, CheckCircle2 } from "lucide-react";
 import type { ScrapbookCard } from "@/types/research";
 import { ResearchResultCard } from "./research-result-card";
 
@@ -477,7 +477,7 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
         </div>
 
         {/* Session History Clock Button */}
-        <div className="relative flex-shrink-0">
+        <div className="flex-shrink-0">
           <button
             onClick={() => {
               setShowSessionHistory((v) => !v);
@@ -500,91 +500,84 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
             <Clock className="w-4 h-4" />
           </button>
 
-          {/* Session Dropdown */}
-          {showSessionHistory && (
+        </div>
+      </div>
+
+      {/* Inline Session History */}
+      {showSessionHistory && (
+        <div
+          className="flex-shrink-0 overflow-y-auto"
+          style={{
+            background: "#1a1a1a",
+            borderBottom: "1px solid var(--border-subtle, rgba(255,255,255,0.08))",
+            maxHeight: "220px",
+          }}
+        >
+          <button
+            onClick={startNewSession}
+            className="flex items-center gap-1.5 w-full px-4 py-2 text-sm font-medium transition-colors"
+            style={{
+              color: "var(--gold-primary, #d4af37)",
+              borderBottom: "1px solid var(--border-subtle, rgba(255,255,255,0.08))",
+            }}
+            onMouseEnter={(e) =>
+              ((e.currentTarget as HTMLButtonElement).style.background =
+                "rgba(212,175,55,0.08)")
+            }
+            onMouseLeave={(e) =>
+              ((e.currentTarget as HTMLButtonElement).style.background = "transparent")
+            }
+          >
+            + New
+          </button>
+          {loadingSessions ? (
             <div
-              className="absolute right-0 top-10 z-50 w-72 rounded-lg shadow-xl py-1 overflow-y-auto"
-              style={{
-                background: "#1a1a1a",
-                border: "1px solid rgba(255,255,255,0.08)",
-                maxHeight: "320px",
-              }}
+              className="px-4 py-2.5 text-sm"
+              style={{ color: "var(--text-tertiary, rgba(232,228,220,0.4))" }}
             >
+              Loading...
+            </div>
+          ) : sessions.length === 0 ? (
+            <div
+              className="px-4 py-2.5 text-sm"
+              style={{ color: "var(--text-tertiary, rgba(232,228,220,0.4))" }}
+            >
+              No sessions yet
+            </div>
+          ) : (
+            sessions.map((session) => (
               <button
-                onClick={startNewSession}
-                className="flex items-center gap-2 w-full px-3 py-2 text-sm transition-colors"
-                style={{
-                  color: "var(--gold-primary, #d4af37)",
-                  borderBottom: "1px solid var(--border-subtle, rgba(255,255,255,0.08))",
-                }}
+                key={session.id}
+                onClick={() => loadSession(session.id)}
+                className="flex items-center gap-2 w-full px-4 py-2 text-left transition-colors"
                 onMouseEnter={(e) =>
                   ((e.currentTarget as HTMLButtonElement).style.background =
-                    "rgba(212,175,55,0.08)")
+                    "rgba(255,255,255,0.04)")
                 }
                 onMouseLeave={(e) =>
                   ((e.currentTarget as HTMLButtonElement).style.background = "transparent")
                 }
               >
-                + New research
-              </button>
-              {loadingSessions ? (
-                <div
-                  className="px-3 py-2 text-sm"
+                <span
+                  className="text-sm truncate flex-1"
+                  style={{ color: "var(--text-primary, #e8e4dc)" }}
+                >
+                  {session.first_query}
+                </span>
+                <span
+                  className="font-mono text-[11px] shrink-0"
                   style={{ color: "var(--text-tertiary, rgba(232,228,220,0.4))" }}
                 >
-                  Loading...
-                </div>
-              ) : sessions.length === 0 ? (
-                <div
-                  className="px-3 py-2 text-sm"
-                  style={{ color: "var(--text-tertiary, rgba(232,228,220,0.4))" }}
-                >
-                  No sessions yet
-                </div>
-              ) : (
-                sessions.map((session) => (
-                  <button
-                    key={session.id}
-                    onClick={() => loadSession(session.id)}
-                    className="flex flex-col w-full px-3 py-2 text-left transition-colors"
-                    onMouseEnter={(e) =>
-                      ((e.currentTarget as HTMLButtonElement).style.background =
-                        "rgba(255,255,255,0.04)")
-                    }
-                    onMouseLeave={(e) =>
-                      ((e.currentTarget as HTMLButtonElement).style.background = "transparent")
-                    }
-                  >
-                    <span
-                      className="text-sm truncate"
-                      style={{ color: "var(--text-primary, #e8e4dc)" }}
-                    >
-                      {session.first_query}
-                    </span>
-                    <span
-                      className="font-mono text-[11px] mt-0.5"
-                      style={{ color: "var(--text-tertiary, rgba(232,228,220,0.4))" }}
-                    >
-                      {session.result_count} results ·{" "}
-                      {new Date(session.created_at).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </span>
-                  </button>
-                ))
-              )}
-              <button
-                onClick={() => setShowSessionHistory(false)}
-                className="absolute top-2 right-2 w-5 h-5 flex items-center justify-center rounded"
-                style={{ color: "var(--text-tertiary, rgba(232,228,220,0.4))" }}
-              >
-                <X className="w-3 h-3" />
+                  {new Date(session.created_at).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </span>
               </button>
-            </div>
+            ))
           )}
         </div>
-      </div>
+      )}
 
       {/* Messages Area */}
       <div
