@@ -27,20 +27,22 @@ const ADMIN_NAV_SYSTEM = [
   { label: "Integrations",       icon: Plug     },
 ];
 
-export function AdminNavLinks() {
+export function AdminNavLinks({ collapsed = false }: { collapsed?: boolean }) {
   const pathname = usePathname();
 
   return (
     <div className="flex flex-col gap-1">
       {/* Section 1: Platform Control */}
-      <div className="px-3 mb-1 mt-2">
-        <p
-          className="text-[10px] font-semibold uppercase tracking-widest"
-          style={{ color: "var(--text-ghost)" }}
-        >
-          Platform Control
-        </p>
-      </div>
+      {!collapsed && (
+        <div className="px-3 mb-1 mt-2">
+          <p
+            className="text-[10px] font-semibold uppercase tracking-widest"
+            style={{ color: "var(--text-ghost)" }}
+          >
+            Platform Control
+          </p>
+        </div>
+      )}
 
       {ADMIN_NAV_PLATFORM.map((item) => {
         const isActive = item.exact
@@ -80,7 +82,7 @@ export function AdminNavLinks() {
             }}
           >
             <item.icon className="h-4 w-4 shrink-0" />
-            {item.label}
+            {!collapsed && item.label}
           </Link>
         );
       })}
@@ -92,14 +94,16 @@ export function AdminNavLinks() {
       />
 
       {/* Section 2: System Config */}
-      <div className="px-3 mb-1">
-        <p
-          className="text-[10px] font-semibold uppercase tracking-widest"
-          style={{ color: "var(--text-ghost)" }}
-        >
-          System Config
-        </p>
-      </div>
+      {!collapsed && (
+        <div className="px-3 mb-1">
+          <p
+            className="text-[10px] font-semibold uppercase tracking-widest"
+            style={{ color: "var(--text-ghost)" }}
+          >
+            System Config
+          </p>
+        </div>
+      )}
 
       {ADMIN_NAV_SYSTEM.map((item) => (
         <button
@@ -122,7 +126,7 @@ export function AdminNavLinks() {
           }}
         >
           <item.icon className="h-4 w-4 shrink-0" />
-          {item.label}
+          {!collapsed && item.label}
         </button>
       ))}
     </div>
