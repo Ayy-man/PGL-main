@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 Phase: 27 (Research Chat UX Polish) — EXECUTING
 Plan: 3 of 3
 Status: Phase complete — ready for verification
-Last activity: 2026-03-30
+Last activity: 2026-03-31 - Completed quick task 260331-qpm: Replace floating session history dropdown with inline panel inside research card
 
 Progress: [████████████████████] 100% (20/20 phases complete)
 
@@ -394,6 +394,7 @@ Recent decisions affecting current work:
 | 260327-rqs | Prospect profile UI fixes: collapse enrichment status, clean wealth signals, fix breadcrumbs, hide market intel, conditional company context, decorative activity empty state | 2026-03-27 | 3ce6e7d | [260327-rqs-prospect-profile-ui-fixes-collapse-enric](./quick/260327-rqs-prospect-profile-ui-fixes-collapse-enric/) |
 | 260327-tzg | Add prospect profile photos: ProspectAvatar component with photo_url/Gravatar/initials cascade, wired into profile header (lg) and list table (sm), photo_url persisted from Apollo into contact_data JSONB | 2026-03-27 | 806622b | [260327-tzg-add-prospect-profile-photos-photo-url-gr](./quick/260327-tzg-add-prospect-profile-photos-photo-url-gr/) |
 | 260327-usu | Depth and polish: dual-shadow surface-card, gold crown line, noise grain overlay, staggered row entrance, card glow hover, click press feedback, sidebar shadow | 2026-03-27 | 4211252 | [260327-usu-depth-and-polish-dual-shadows-gradient-b](./quick/260327-usu-depth-and-polish-dual-shadows-gradient-b/) |
+| 260331-qpm | Replace floating session history dropdown with inline panel inside research card | 2026-03-31 | 64684ad | [260331-qpm-replace-floating-session-history-dropdow](./quick/260331-qpm-replace-floating-session-history-dropdow/) |
 
 ### Blockers/Concerns
 
