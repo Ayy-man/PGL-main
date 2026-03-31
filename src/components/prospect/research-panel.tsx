@@ -345,7 +345,7 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
       );
       if (res.ok) {
         const data = await res.json();
-        setSessions(data.sessions ?? []);
+        setSessions(Array.isArray(data) ? data : data.sessions ?? []);
       }
     } catch {
       // ignore
@@ -500,8 +500,8 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
             <div
               className="absolute right-0 top-10 z-50 w-72 rounded-lg shadow-xl py-1 overflow-y-auto"
               style={{
-                background: "var(--bg-elevated, #1a1a1a)",
-                border: "1px solid var(--border-subtle, rgba(255,255,255,0.08))",
+                background: "#1a1a1a",
+                border: "1px solid rgba(255,255,255,0.08)",
                 maxHeight: "320px",
               }}
             >
