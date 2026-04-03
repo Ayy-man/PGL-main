@@ -10,6 +10,7 @@ import {
 describe('translateFiltersToApolloParams', () => {
   it('maps all PersonaFilters fields to Apollo API parameters', () => {
     const filters: PersonaFilters = {
+      organization_names: ['Jane Street', 'Citadel Securities'],
       titles: ['CEO', 'CFO'],
       seniorities: ['c_suite'],
       industries: ['Finance'],
@@ -21,12 +22,25 @@ describe('translateFiltersToApolloParams', () => {
     const result = translateFiltersToApolloParams(filters);
 
     expect(result).toEqual({
+      organization_names: ['Jane Street', 'Citadel Securities'],
       person_titles: ['CEO', 'CFO'],
       person_seniorities: ['c_suite'],
-      organization_industries: ['Finance'],
+      q_organization_keyword_tags: ['Finance'],
       person_locations: ['New York'],
-      organization_num_employees_ranges: ['51-200'],
+      organization_num_employees_ranges: ['51,200'],
       q_keywords: 'private equity',
+    });
+  });
+
+  it('maps organization_names directly to Apollo params', () => {
+    const filters: PersonaFilters = {
+      organization_names: ['Jane Street', 'Citadel Securities'],
+    };
+
+    const result = translateFiltersToApolloParams(filters);
+
+    expect(result).toEqual({
+      organization_names: ['Jane Street', 'Citadel Securities'],
     });
   });
 

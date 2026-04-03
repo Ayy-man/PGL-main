@@ -28,6 +28,7 @@ export async function createPersonaAction(formData: FormData) {
   const description = formData.get("description") as string | null;
 
   // Parse filter fields
+  const organizationNamesStr = formData.get("organization_names") as string;
   const titlesStr = formData.get("titles") as string;
   const senioritiesStr = formData.get("seniorities") as string;
   const industriesStr = formData.get("industries") as string;
@@ -38,6 +39,9 @@ export async function createPersonaAction(formData: FormData) {
   // Build filters object
   const filters: PersonaFilters = {};
 
+  if (organizationNamesStr) {
+    filters.organization_names = organizationNamesStr.split("|").map(n => n.trim()).filter(Boolean);
+  }
   if (titlesStr) {
     filters.titles = titlesStr.split("|").map(t => t.trim()).filter(Boolean);
   }
@@ -101,6 +105,7 @@ export async function updatePersonaAction(id: string, formData: FormData) {
   const description = formData.get("description") as string | null;
 
   // Parse filter fields
+  const organizationNamesStr = formData.get("organization_names") as string;
   const titlesStr = formData.get("titles") as string;
   const senioritiesStr = formData.get("seniorities") as string;
   const industriesStr = formData.get("industries") as string;
@@ -111,6 +116,9 @@ export async function updatePersonaAction(id: string, formData: FormData) {
   // Build filters object
   const filters: PersonaFilters = {};
 
+  if (organizationNamesStr) {
+    filters.organization_names = organizationNamesStr.split("|").map(n => n.trim()).filter(Boolean);
+  }
   if (titlesStr) {
     filters.titles = titlesStr.split("|").map(t => t.trim()).filter(Boolean);
   }

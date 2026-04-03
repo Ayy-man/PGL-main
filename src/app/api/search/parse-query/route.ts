@@ -8,6 +8,7 @@ const SYSTEM_PROMPT = `You are a search query parser for a lead generation platf
 
 Return ONLY valid JSON with this structure (omit fields that aren't mentioned in the query):
 {
+  "organization_names": ["array of specific company names mentioned, e.g. 'Jane Street', 'Goldman Sachs'"],
   "titles": ["array of job titles"],
   "seniorities": ["from ONLY: owner, founder, c_suite, partner, vp, head, director, manager, senior, entry, intern"],
   "industries": ["use ONLY these Apollo industry names: Financial Services, Banking, Insurance, Investment Management, Private Equity, Venture Capital, Real Estate, Technology, Software, Information Technology, Healthcare, Pharmaceuticals, Biotechnology, Manufacturing, Retail, E-Commerce, Telecommunications, Energy, Oil & Gas, Mining, Construction, Automotive, Aerospace & Defense, Media & Entertainment, Hospitality, Legal Services, Consulting, Education, Government, Nonprofit, Transportation & Logistics, Computer Software, Internet, Hospital & Health Care, Marketing & Advertising, Accounting, Human Resources, Staffing & Recruiting, Food & Beverages, Consumer Goods, Mechanical or Industrial Engineering, Civil Engineering, Electrical & Electronic Manufacturing, Chemicals, Textiles, Plastics, Environmental Services, Utilities, Renewables & Environment, Warehousing, Aviation & Aerospace, Defense & Space, Luxury Goods & Jewelry, Sporting Goods, Wine & Spirits, Farming, Fishery, Dairy, Tobacco, Packaging & Containers, Glass, Ceramics & Concrete, Paper & Forest Products, Printing, Publishing, Writing & Editing, Libraries, Museums & Institutions, Fine Art, Performing Arts, Recreational Facilities & Services, Gambling & Casinos, Leisure, Travel & Tourism, Airlines & Aviation, Maritime, Railroad Manufacture, Shipbuilding, Military, Judiciary, Legislative Office, Political Organization, Public Policy, Public Safety, International Affairs, Think Tanks, Philanthropy, Civic & Social Organization, Religious Institutions, Research, Veterinary, Security & Investigations, Law Enforcement, Capital Markets, Investment Banking, Fund-Raising, Program Development, Events Services, Design, Graphic Design, Architecture & Planning, Industrial Design, Animation, Apparel & Fashion, Cosmetics, Furniture, Health, Wellness & Fitness, Sports, Music, Broadcast Media, Motion Pictures & Film, Photography, Semiconductors, Nanotechnology, Computer Networking, Computer Hardware, Information Services, Computer Games, Online Media, Computer & Network Security, Wireless, Consumer Electronics"],
@@ -17,6 +18,7 @@ Return ONLY valid JSON with this structure (omit fields that aren't mentioned in
 }
 
 Rules:
+- If the user mentions specific companies by name, extract them into organization_names. Don't put company names into keywords — use organization_names instead.
 - Map natural language to the EXACT Apollo enum values listed above
 - "C-level", "C-suite", "executive" → seniority "c_suite"
 - "VP", "vice president" → seniority "vp"

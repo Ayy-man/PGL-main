@@ -3,6 +3,7 @@
  * Maps to Apollo's /api/v1/mixed_people/api_search endpoint.
  */
 export interface ApolloSearchParams {
+  organization_names?: string[];
   person_titles?: string[];
   person_seniorities?: string[];
   q_organization_keyword_tags?: string[];

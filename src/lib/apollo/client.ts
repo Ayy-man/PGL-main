@@ -36,6 +36,9 @@ export function translateFiltersToApolloParams(
 ): Partial<ApolloSearchParams> {
   const params: Partial<ApolloSearchParams> = {};
 
+  if (filters.organization_names && filters.organization_names.length > 0) {
+    params.organization_names = filters.organization_names;
+  }
   if (filters.titles && filters.titles.length > 0) {
     params.person_titles = filters.titles;
   }

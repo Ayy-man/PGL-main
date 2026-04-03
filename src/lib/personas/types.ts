@@ -1,4 +1,5 @@
 export interface PersonaFilters {
+  organization_names?: string[];
   titles?: string[];
   seniorities?: string[];
   industries?: string[];

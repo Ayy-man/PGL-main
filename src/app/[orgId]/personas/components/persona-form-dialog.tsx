@@ -120,6 +120,9 @@ export function PersonaFormDialog({ mode, persona, trigger, open: controlledOpen
   const [error, setError] = useState<string | null>(null);
 
   // Controlled state for multi-select & tag fields
+  const [organizationNames, setOrganizationNames] = useState<string[]>(
+    persona?.filters.organization_names ?? []
+  );
   const [seniorities, setSeniorities] = useState<string[]>(
     persona?.filters.seniorities ?? []
   );
@@ -148,6 +151,7 @@ export function PersonaFormDialog({ mode, persona, trigger, open: controlledOpen
 
     debounceRef.current = setTimeout(async () => {
       const hasFilter =
+        organizationNames.length > 0 ||
         titles.length > 0 ||
         seniorities.length > 0 ||
         industries.length > 0 ||
@@ -170,6 +174,7 @@ export function PersonaFormDialog({ mode, persona, trigger, open: controlledOpen
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
+            organization_names: organizationNames.length > 0 ? organizationNames : undefined,
             titles: titles.length > 0 ? titles : undefined,
             seniorities: seniorities.length > 0 ? seniorities : undefined,
             industries: industries.length > 0 ? industries : undefined,
@@ -190,7 +195,7 @@ export function PersonaFormDialog({ mode, persona, trigger, open: controlledOpen
         if (!controller.signal.aborted) setCountLoading(false);
       }
     }, 600);
-  }, [titles, seniorities, industries, locations, companySizes, keywords]);
+  }, [organizationNames, titles, seniorities, industries, locations, companySizes, keywords]);
 
   useEffect(() => {
     if (open) fetchLeadCount();
@@ -214,6 +219,7 @@ export function PersonaFormDialog({ mode, persona, trigger, open: controlledOpen
 
   const resetForm = () => {
     if (mode === "edit" && persona) {
+      setOrganizationNames(persona.filters.organization_names ?? []);
       setSeniorities(persona.filters.seniorities ?? []);
       setCompanySizes(persona.filters.companySize ?? []);
       setTitles(persona.filters.titles ?? []);
@@ -221,6 +227,7 @@ export function PersonaFormDialog({ mode, persona, trigger, open: controlledOpen
       setLocations(persona.filters.locations ?? []);
       setKeywords(persona.filters.keywords ?? "");
     } else {
+      setOrganizationNames([]);
       setSeniorities([]);
       setCompanySizes([]);
       setTitles([]);
@@ -324,6 +331,20 @@ export function PersonaFormDialog({ mode, persona, trigger, open: controlledOpen
               </div>
               <p className="text-xs text-muted-foreground">
                 At least one filter is required
+              </p>
+            </div>
+
+            {/* Target Companies — tag input */}
+            <div className="space-y-2">
+              <Label>Target Companies</Label>
+              <TagInput
+                value={organizationNames}
+                onChange={setOrganizationNames}
+                placeholder="Add company names..."
+                name="organization_names"
+              />
+              <p className="text-xs text-muted-foreground">
+                Search for people at specific companies
               </p>
             </div>
 

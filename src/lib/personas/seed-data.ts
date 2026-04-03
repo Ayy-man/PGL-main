@@ -36,12 +36,23 @@ export const STARTER_PERSONAS: CreatePersonaInput[] = [
   },
   {
     name: "BigLaw Partners",
-    description: "Partners at Am Law 200 firms",
+    description: "Equity partners at firms with highest profit per partner — $7M-$9M+ PEP",
     filters: {
-      titles: ["Partner", "Managing Partner", "Senior Partner", "Equity Partner", "Named Partner"],
-      seniorities: ["c_suite", "vp", "director", "owner"],
-      industries: ["Law Practice", "Legal Services"],
-      companySize: ["201-500", "501-1000", "1001-5000", "5001-10000"]
+      organization_names: [
+        "Kirkland & Ellis",
+        "Wachtell Lipton Rosen & Katz",
+        "Latham & Watkins",
+        "Quinn Emanuel Urquhart & Sullivan",
+        "Davis Polk & Wardwell",
+        "Simpson Thacher & Bartlett",
+        "Paul Weiss Rifkind Wharton & Garrison",
+        "Sullivan & Cromwell",
+        "Cravath Swaine & Moore",
+        "Skadden Arps Slate Meagher & Flom"
+      ],
+      titles: ["Partner", "Managing Partner", "Equity Partner", "Senior Partner"],
+      seniorities: ["director", "vp", "c_suite", "owner"],
+      industries: ["Law Practice", "Legal Services"]
     }
   },
   {
@@ -52,6 +63,79 @@ export const STARTER_PERSONAS: CreatePersonaInput[] = [
       seniorities: ["c_suite", "vp", "owner"],
       industries: ["Financial Services", "Computer Software", "Internet"],
       keywords: "crypto blockchain web3 defi nft"
+    }
+  },
+  {
+    name: "Prop Trading Elite",
+    description: "Traders and quants at top proprietary trading firms — average comp $650K-$1.4M+",
+    filters: {
+      organization_names: [
+        "Jane Street",
+        "Citadel Securities",
+        "XTX Markets",
+        "Hudson River Trading",
+        "Jump Trading",
+        "Virtu Financial",
+        "DRW",
+        "Two Sigma",
+        "Optiver",
+        "IMC Trading",
+        "Akuna Capital"
+      ],
+      titles: ["Trader", "Quantitative Trader", "Quant Researcher", "Quantitative Analyst", "Portfolio Manager"],
+      seniorities: ["senior", "manager", "director", "vp"],
+      keywords: "quantitative trading"
+    }
+  },
+  {
+    name: "Hedge Fund Leaders",
+    description: "Portfolio managers and principals at top-performing hedge funds",
+    filters: {
+      organization_names: [
+        "Citadel",
+        "Renaissance Technologies",
+        "Millennium Management",
+        "D.E. Shaw",
+        "Two Sigma",
+        "Point72 Asset Management",
+        "Bridgewater Associates",
+        "AQR Capital Management",
+        "Balyasny Asset Management",
+        "Schonfeld Strategic Advisors",
+        "ExodusPoint Capital Management"
+      ],
+      titles: ["Portfolio Manager", "Managing Director", "Partner", "Principal", "Head of Trading"],
+      seniorities: ["c_suite", "vp", "director"],
+    }
+  },
+  {
+    name: "Top Tech Earners",
+    description: "Senior engineers and leadership at the 20 highest-paying tech companies",
+    filters: {
+      organization_names: [
+        "OpenAI",
+        "Anthropic",
+        "NVIDIA",
+        "Meta",
+        "Google",
+        "Microsoft",
+        "Apple",
+        "Amazon",
+        "Stripe",
+        "Netflix",
+        "Palantir",
+        "Databricks",
+        "Salesforce",
+        "Snowflake",
+        "Tesla",
+        "Uber",
+        "Airbnb",
+        "Coinbase",
+        "LinkedIn",
+        "Adobe"
+      ],
+      titles: ["Staff Engineer", "Principal Engineer", "Distinguished Engineer", "VP of Engineering", "Director of Engineering", "CTO", "VP of Product"],
+      seniorities: ["senior", "manager", "director", "vp", "c_suite"],
     }
   }
 ];

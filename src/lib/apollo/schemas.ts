@@ -4,6 +4,7 @@ import { z } from "zod";
  * Persona filter criteria matching Apollo.io search capabilities.
  */
 export const PersonaFilters = z.object({
+  organization_names: z.array(z.string()).optional(),
   titles: z.array(z.string()).optional(),
   seniorities: z.array(z.string()).optional(),
   industries: z.array(z.string()).optional(),
