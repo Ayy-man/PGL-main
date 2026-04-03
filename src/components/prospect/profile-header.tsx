@@ -2,7 +2,6 @@
 
 import {
   Building2,
-  Sparkles,
   Plus,
 } from "lucide-react";
 import { ProspectAvatar } from "./prospect-avatar";
@@ -348,20 +347,6 @@ export function ProfileHeader({
 
       {/* CTA Buttons */}
       <div className="w-full flex flex-col gap-2 mt-3">
-        <button
-          className="w-full h-10 rounded-[8px] text-sm font-semibold flex items-center justify-center gap-2 transition-all opacity-50 cursor-not-allowed"
-          style={{
-            background: "var(--gold-bg-strong)",
-            border: "1px solid var(--border-gold)",
-            color: "var(--gold-primary)",
-          }}
-          disabled
-          title="Coming Soon"
-          aria-label="Draft Outreach — Coming Soon"
-        >
-          <Sparkles className="h-4 w-4 shrink-0" />
-          Draft Outreach
-        </button>
         <button
           className="w-full h-10 rounded-[8px] text-sm font-medium flex items-center justify-center gap-2 cursor-pointer transition-colors"
           style={{
