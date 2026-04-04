@@ -168,6 +168,10 @@ export async function generateLookalikePersona(
   }
 
   const personaData = JSON.parse(jsonStr);
+  // Normalize seniorities to lowercase (AI often returns "Director" instead of "director")
+  if (Array.isArray(personaData.seniorities)) {
+    personaData.seniorities = personaData.seniorities.map((s: string) => s.toLowerCase());
+  }
   const persona = PersonaSchema.parse(personaData);
 
   console.info("[lookalike] ── Persona generated ──", {
