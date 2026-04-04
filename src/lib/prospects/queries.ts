@@ -165,10 +165,13 @@ export async function upsertProspectFromApollo(
       ? person.phone_numbers[0].sanitized_number || person.phone_numbers[0].raw_number
       : null;
 
+  const firstName = person.first_name || person.name?.split(" ")[0] || "Unknown";
+  const lastName = person.last_name || person.name?.split(" ").slice(1).join(" ") || "Unknown";
+
   const input: UpsertProspectInput = {
     apollo_id: person.id,
-    first_name: person.first_name,
-    last_name: person.last_name,
+    first_name: firstName,
+    last_name: lastName,
     title: person.title || null,
     company: person.organization_name || null,
     location,

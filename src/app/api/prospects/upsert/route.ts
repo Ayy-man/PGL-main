@@ -10,9 +10,9 @@ import type { ApolloPerson } from "@/lib/apollo/types";
 const upsertRequestSchema = z.object({
   prospect: z.object({
     id: z.string(),
-    first_name: z.string(),
-    last_name: z.string(),
-    name: z.string(),
+    first_name: z.string().nullable().optional(),
+    last_name: z.string().nullable().optional(),
+    name: z.string().nullable().optional(),
     title: z.string().optional(),
     organization_name: z.string().optional(),
     city: z.string().optional(),
