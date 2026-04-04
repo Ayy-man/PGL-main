@@ -149,10 +149,7 @@ export async function POST(request: NextRequest) {
       console.info(`[lookalike] Tier ${filterTiers.indexOf(tierFilters)}: 0 results, relaxing filters...`);
     }
 
-    // Use the filters that actually produced results for saving
-    const personaFilters = usedFilters;
-
-    // 6. Save persona if requested
+    // 6. Save persona if requested (using the filters that actually produced results)
     let savedPersonaId: string | undefined;
     if (savePersona) {
       const adminClient = createAdminClient();
@@ -163,7 +160,7 @@ export async function POST(request: NextRequest) {
           tenant_id: tenantId,
           name: persona.name,
           description: persona.reasoning,
-          filters: mapApolloFiltersToPersonaFilters(apolloFilters),
+          filters: usedFilters,
           is_starter: false,
           is_generated: true,
           created_by: user.id,
