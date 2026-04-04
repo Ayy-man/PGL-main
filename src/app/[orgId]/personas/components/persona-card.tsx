@@ -226,7 +226,7 @@ export function PersonaCard({ persona }: PersonaCardProps) {
       >
         <Link
           href={searchHref}
-          className="flex items-center gap-1.5 text-[12px] font-medium px-4 py-2 rounded-[8px] cursor-pointer transition-all"
+          className="flex items-center gap-1.5 text-[12px] font-medium px-3 py-2 rounded-[8px] cursor-pointer transition-all whitespace-nowrap"
           style={{
             background: "var(--gold-bg)",
             border: "1px solid var(--border-gold)",

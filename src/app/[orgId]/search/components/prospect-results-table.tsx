@@ -65,28 +65,28 @@ export function ProspectResultsTable({
                 />
               </th>
               <th
-                className="py-3.5 pl-4 pr-3 text-left text-[11px] font-semibold uppercase tracking-wider"
+                className="py-3.5 pl-4 pr-3 text-left text-xs font-semibold uppercase tracking-wider"
                 style={{ color: "var(--text-tertiary)" }}
                 scope="col"
               >
                 Prospect
               </th>
               <th
-                className="px-3 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider"
+                className="px-3 py-3.5 text-left text-xs font-semibold uppercase tracking-wider"
                 style={{ color: "var(--text-tertiary)" }}
                 scope="col"
               >
                 Wealth Tier
               </th>
               <th
-                className="px-3 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider"
+                className="px-3 py-3.5 text-left text-xs font-semibold uppercase tracking-wider"
                 style={{ color: "var(--text-tertiary)" }}
                 scope="col"
               >
                 Title &amp; Company
               </th>
               <th
-                className="px-3 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider"
+                className="px-3 py-3.5 text-left text-xs font-semibold uppercase tracking-wider"
                 style={{ color: "var(--text-tertiary)" }}
                 scope="col"
               >
@@ -116,7 +116,7 @@ export function ProspectResultsTable({
                   style={{ borderBottom: "1px solid var(--border-subtle)" }}
                 >
                   {/* Checkbox */}
-                  <td className="whitespace-nowrap py-4 pl-5 pr-3">
+                  <td className="whitespace-nowrap py-5 pl-5 pr-3">
                     <input
                       type="checkbox"
                       checked={isSelected}
@@ -131,26 +131,26 @@ export function ProspectResultsTable({
                   </td>
 
                   {/* Prospect: Avatar + Name + Location */}
-                  <td className="whitespace-nowrap px-3 py-4">
+                  <td className="whitespace-nowrap px-3 py-5">
                     <div className="flex items-center">
                       <div
                         className="h-10 w-10 flex-shrink-0 rounded-full flex items-center justify-center"
                         style={{ background: avatarGradient }}
                       >
-                        <span className="font-serif text-[14px] text-white/80">
+                        <span className="font-serif text-[15px] text-white/80">
                           {initials}
                         </span>
                       </div>
                       <div className="ml-3">
                         <div
-                          className="text-[14px] font-medium transition-colors duration-150 group-hover:text-[var(--gold-primary)]"
+                          className="text-[15px] font-medium transition-colors duration-150 group-hover:text-[var(--gold-primary)]"
                           style={{ color: "var(--text-primary-ds)" }}
                         >
                           {name}
                         </div>
                         {location && (
                           <div
-                            className="text-[12px] flex items-center gap-1 mt-0.5"
+                            className="text-[13px] flex items-center gap-1 mt-0.5"
                             style={{ color: "var(--text-tertiary)" }}
                           >
                             <MapPin className="h-3 w-3" />
@@ -162,9 +162,9 @@ export function ProspectResultsTable({
                   </td>
 
                   {/* Wealth Tier — shown after enrichment */}
-                  <td className="whitespace-nowrap px-3 py-4">
+                  <td className="whitespace-nowrap px-3 py-5">
                     <span
-                      className="text-[12px]"
+                      className="text-sm"
                       style={{ color: "var(--text-ghost)" }}
                     >
                       —
@@ -172,16 +172,16 @@ export function ProspectResultsTable({
                   </td>
 
                   {/* Title & Company */}
-                  <td className="whitespace-nowrap px-3 py-4">
+                  <td className="whitespace-nowrap px-3 py-5">
                     <div className="flex flex-col">
                       <span
-                        className="text-[13px] font-medium"
+                        className="text-sm font-medium"
                         style={{ color: "var(--text-secondary-ds)" }}
                       >
                         {prospect.title || "—"}
                       </span>
                       <span
-                        className="text-[12px] mt-0.5"
+                        className="text-[13px] mt-0.5"
                         style={{ color: "var(--text-tertiary)" }}
                       >
                         {prospect.organization_name ||
@@ -192,10 +192,10 @@ export function ProspectResultsTable({
                   </td>
 
                   {/* Enrichment status dots */}
-                  <td className="whitespace-nowrap px-3 py-4 text-sm">
+                  <td className="whitespace-nowrap px-3 py-5 text-sm">
                     {prospect._enriched === false ? (
                       <span
-                        className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-medium"
+                        className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium"
                         style={{
                           background: "rgba(245,158,11,0.15)",
                           color: "rgb(245,158,11)",
@@ -221,7 +221,7 @@ export function ProspectResultsTable({
                           />
                         </div>
                         <span
-                          className="text-[11px] ml-1"
+                          className="text-xs ml-1"
                           style={{ color: "var(--text-ghost)" }}
                         >
                           Not enriched
