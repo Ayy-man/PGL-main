@@ -43,52 +43,83 @@ export async function upsertProspect(
 ): Promise<Prospect> {
   const supabase = createAdminClient();
 
-  const insertData = {
-    tenant_id: tenantId,
+  const updateData = {
     apollo_id: input.apollo_id,
     first_name: input.first_name,
     last_name: input.last_name,
     title: input.title,
     company: input.company,
     location: input.location,
-    work_email: input.work_email,
     work_phone: input.work_phone,
     personal_email: input.personal_email,
     personal_phone: input.personal_phone,
     linkedin_url: input.linkedin_url,
   };
 
-  // Determine which unique constraint to use for deduplication
-  let onConflict: string | undefined;
-  if (input.work_email) {
-    onConflict = "tenant_id,work_email";
-  } else if (input.linkedin_url) {
-    onConflict = "tenant_id,linkedin_url";
-  }
-  // If neither, onConflict is undefined -> regular insert
+  // 1. Try to find existing prospect by dedup key
+  let existing: { id: string } | null = null;
 
+  if (input.work_email) {
+    const { data } = await supabase
+      .from("prospects")
+      .select("id")
+      .eq("tenant_id", tenantId)
+      .eq("work_email", input.work_email)
+      .limit(1)
+      .maybeSingle();
+    existing = data;
+  }
+
+  if (!existing && input.linkedin_url) {
+    const { data } = await supabase
+      .from("prospects")
+      .select("id")
+      .eq("tenant_id", tenantId)
+      .eq("linkedin_url", input.linkedin_url)
+      .limit(1)
+      .maybeSingle();
+    existing = data;
+  }
+
+  if (!existing && input.apollo_id) {
+    const { data } = await supabase
+      .from("prospects")
+      .select("id")
+      .eq("tenant_id", tenantId)
+      .eq("apollo_id", input.apollo_id)
+      .limit(1)
+      .maybeSingle();
+    existing = data;
+  }
+
+  // 2. Update existing or insert new
+  if (existing) {
+    const { data, error } = await supabase
+      .from("prospects")
+      .update(updateData)
+      .eq("id", existing.id)
+      .select(PROSPECT_SELECT)
+      .single();
+
+    if (error) {
+      throw new Error(`Failed to update prospect: ${error.message}`);
+    }
+    return data as Prospect;
+  }
+
+  // 3. Insert new prospect
   const { data, error } = await supabase
     .from("prospects")
-    .upsert(insertData, {
-      onConflict: onConflict,
-      ignoreDuplicates: false, // Update on conflict
+    .insert({
+      tenant_id: tenantId,
+      ...updateData,
+      work_email: input.work_email,
     })
     .select(PROSPECT_SELECT)
     .single();
 
   if (error) {
-    // Handle race condition: if unique constraint still fires (concurrent requests),
-    // fall back to finding the existing record and updating it.
-    // Check both error code and message — Supabase/PostgREST may format differently.
-    const isDuplicate =
-      error.code === "23505" ||
-      error.message?.includes("duplicate key") ||
-      error.message?.includes("unique constraint");
-    if (isDuplicate) {
-      console.warn(`[upsertProspect] Unique constraint race — falling back to select+update for ${input.work_email || input.linkedin_url}`);
-      return upsertProspectFallback(supabase, tenantId, input);
-    }
-    throw new Error(`Failed to upsert prospect: ${error.message}`);
+    throw new Error(`Failed to insert prospect: ${error.message}`);
   }
 
   return data as Prospect;
