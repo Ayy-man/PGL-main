@@ -85,19 +85,12 @@ export function ProspectSlideOver({
                   className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border-2 border-border text-sm font-semibold text-foreground"
                   style={{ background: "var(--bg-card)" }}
                 >
-                  {isEnriched ? initials : "?"}
+                  {initials}
                 </div>
                 <div className="min-w-0">
-                  {isEnriched ? (
-                    <h2 className="font-serif text-xl sm:text-[24px] font-semibold text-foreground leading-tight">
-                      {prospect.full_name}
-                    </h2>
-                  ) : (
-                    <div
-                      className="h-6 w-40 rounded-md"
-                      style={{ background: "rgba(255,255,255,0.08)" }}
-                    />
-                  )}
+                  <h2 className="font-serif text-xl sm:text-[24px] font-semibold text-foreground leading-tight">
+                    {prospect.full_name}
+                  </h2>
                 </div>
               </div>
 

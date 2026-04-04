@@ -5,7 +5,7 @@ milestone_name: milestone
 status: verifying
 stopped_at: Completed 27-03-PLAN.md
 last_updated: "2026-03-30T20:55:42.017Z"
-last_activity: 2026-03-30
+last_activity: 2026-04-04
 progress:
   total_phases: 23
   completed_phases: 5
@@ -395,6 +395,7 @@ Recent decisions affecting current work:
 | 260327-tzg | Add prospect profile photos: ProspectAvatar component with photo_url/Gravatar/initials cascade, wired into profile header (lg) and list table (sm), photo_url persisted from Apollo into contact_data JSONB | 2026-03-27 | 806622b | [260327-tzg-add-prospect-profile-photos-photo-url-gr](./quick/260327-tzg-add-prospect-profile-photos-photo-url-gr/) |
 | 260327-usu | Depth and polish: dual-shadow surface-card, gold crown line, noise grain overlay, staggered row entrance, card glow hover, click press feedback, sidebar shadow | 2026-03-27 | 4211252 | [260327-usu-depth-and-polish-dual-shadows-gradient-b](./quick/260327-usu-depth-and-polish-dual-shadows-gradient-b/) |
 | 260331-qpm | Replace floating session history dropdown with inline panel inside research card | 2026-03-31 | 64684ad | [260331-qpm-replace-floating-session-history-dropdow](./quick/260331-qpm-replace-floating-session-history-dropdow/) |
+| 260404-uia | Redesign prospect slide-over: dual state (preview vs enriched), fix broken buttons | 2026-04-04 | c0155bb | [260404-uia-redesign-prospect-slide-over-dual-state-](./quick/260404-uia-redesign-prospect-slide-over-dual-state-/) |
 
 ### Blockers/Concerns
 
