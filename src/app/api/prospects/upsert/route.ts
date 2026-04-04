@@ -13,25 +13,26 @@ const upsertRequestSchema = z.object({
     first_name: z.string().nullable().optional(),
     last_name: z.string().nullable().optional(),
     name: z.string().nullable().optional(),
-    title: z.string().optional(),
-    organization_name: z.string().optional(),
-    city: z.string().optional(),
-    state: z.string().optional(),
-    country: z.string().optional(),
-    email: z.string().optional(),
-    email_status: z.string().optional(),
+    title: z.string().nullable().optional(),
+    organization_name: z.string().nullable().optional(),
+    city: z.string().nullable().optional(),
+    state: z.string().nullable().optional(),
+    country: z.string().nullable().optional(),
+    email: z.string().nullable().optional(),
+    email_status: z.string().nullable().optional(),
     phone_numbers: z
       .array(
         z.object({
           raw_number: z.string(),
-          sanitized_number: z.string().optional(),
-          type: z.string().optional(),
+          sanitized_number: z.string().nullable().optional(),
+          type: z.string().nullable().optional(),
         })
       )
+      .nullable()
       .optional(),
-    linkedin_url: z.string().optional(),
-    photo_url: z.string().optional(),
-  }),
+    linkedin_url: z.string().nullable().optional(),
+    photo_url: z.string().nullable().optional(),
+  }).passthrough(),
   listIds: z.array(z.string()).min(1, "At least one list must be selected"),
 });
 
