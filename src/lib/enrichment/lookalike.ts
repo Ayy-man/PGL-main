@@ -76,7 +76,7 @@ const SYSTEM_PROMPT = `You are a lead research analyst. Extract key professional
 
 Return ONLY a valid JSON object with this exact structure:
 {
-  "name": "Generated persona name",
+  "name": "A descriptive persona label like 'Senior Quant Trader - Hedge Funds' (NEVER use the prospect's own name)",
   "jobTitles": ["array", "of", "job", "titles"],
   "seniorities": ["array of seniority levels from ONLY these values: owner, founder, c_suite, partner, vp, head, director, manager, senior, entry, intern"],
   "industries": ["array", "of", "industries"],

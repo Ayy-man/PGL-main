@@ -166,6 +166,7 @@ export function LookalikeDiscovery({
           <div className="bg-card border rounded-lg p-6 space-y-4">
             <div className="flex items-start justify-between">
               <div>
+                <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Search Profile</p>
                 <h3 className="text-xl font-semibold text-white mb-2">
                   {result.persona.name}
                 </h3>
