@@ -183,6 +183,11 @@ export async function generateLookalikePersona(
     locations: persona.locations,
   });
 
+  // Strip invalid/placeholder locations
+  const validLocations = (persona.locations || []).filter(
+    (l) => l && !["unknown", "n/a", "not specified", "undisclosed"].includes(l.toLowerCase())
+  );
+
   // Convert to Apollo.io search filters
   const apolloFilters: ApolloFilters = {
     person_titles: persona.jobTitles,
@@ -190,7 +195,7 @@ export async function generateLookalikePersona(
     q_organization_domains: [], // Optional, filled if company domain known
     organization_industry_tag_ids: persona.industries,
     organization_num_employees_ranges: persona.companySizes,
-    person_locations: persona.locations,
+    person_locations: validLocations.length > 0 ? validLocations : undefined,
     q_keywords: persona.keywords.join(" OR "),
   };
 

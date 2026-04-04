@@ -92,11 +92,13 @@ export function LookalikeDiscovery({
 
     setIsLoading(true);
     try {
-      // Re-run with savePersona flag if not already saved
-      const response = await fetch("/api/search/lookalike", {
+      const response = await fetch("/api/search/lookalike/save", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prospectId, savePersona: true }),
+        body: JSON.stringify({
+          prospectId,
+          persona: result.persona,
+        }),
       });
 
       if (!response.ok) {
@@ -104,8 +106,7 @@ export function LookalikeDiscovery({
       }
 
       const data = await response.json();
-      setResult(data);
-      alert(`Persona "${data.persona.name}" saved successfully!`);
+      setResult({ ...result, savedPersonaId: data.personaId });
     } catch (err) {
       console.error("Save persona error:", err);
       alert("Failed to save persona");
