@@ -113,8 +113,10 @@ async function upsertProspectFallback(
     query = query.eq("work_email", input.work_email);
   } else if (input.linkedin_url) {
     query = query.eq("linkedin_url", input.linkedin_url);
+  } else if (input.apollo_id) {
+    query = query.eq("apollo_id", input.apollo_id);
   } else {
-    throw new Error("Cannot resolve duplicate: no work_email or linkedin_url");
+    throw new Error("Cannot resolve duplicate: no work_email, linkedin_url, or apollo_id");
   }
 
   const { data: existing, error: selectError } = await query.single();
