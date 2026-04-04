@@ -399,9 +399,8 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
             .filter(Boolean)
             .join(", ") || null,
         work_email: selectedProspect.email || null,
-        ai_summary: selectedProspect.headline || null,
-        enrichment_source_status: null,
-        insider_data: null,
+        phone: selectedProspect.phone_numbers?.[0]?.raw_number ?? null,
+        _enriched: selectedProspect._enriched === true,
       }
     : null;
 
