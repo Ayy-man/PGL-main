@@ -139,7 +139,7 @@ export async function POST(request: NextRequest) {
           tenant_id: tenantId,
           name: persona.name,
           description: persona.reasoning,
-          filters: apolloFilters,
+          filters: mapApolloFiltersToPersonaFilters(apolloFilters),
           is_starter: false,
           is_generated: true,
           created_by: user.id,
