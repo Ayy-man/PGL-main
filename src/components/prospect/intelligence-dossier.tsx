@@ -6,9 +6,10 @@ import type { IntelligenceDossierData } from "@/types/database";
 interface IntelligenceDossierProps {
   dossier: IntelligenceDossierData | null;
   generatedAt?: string | null;
+  enrichmentComplete?: boolean;
 }
 
-export function IntelligenceDossier({ dossier, generatedAt }: IntelligenceDossierProps) {
+export function IntelligenceDossier({ dossier, generatedAt, enrichmentComplete }: IntelligenceDossierProps) {
   if (!dossier) {
     return (
       <div className="surface-card rounded-[14px] p-4 md:p-6">
@@ -17,7 +18,9 @@ export function IntelligenceDossier({ dossier, generatedAt }: IntelligenceDossie
           Intelligence Dossier
         </h3>
         <p className="text-sm text-muted-foreground mt-3">
-          No dossier generated yet. Will appear after enrichment completes.
+          {enrichmentComplete
+            ? "No dossier could be generated for this prospect."
+            : "No dossier generated yet. Will appear after enrichment completes."}
         </p>
       </div>
     );

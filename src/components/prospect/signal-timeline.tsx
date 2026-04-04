@@ -21,6 +21,7 @@ interface SignalTimelineProps {
   orgId: string;
   initialSignals: Array<ProspectSignal & { is_seen: boolean }>;
   totalCount: number;
+  enrichmentComplete?: boolean;
 }
 
 function getCategoryIcon(category: SignalCategory) {
@@ -81,6 +82,7 @@ export function SignalTimeline({
   orgId: _orgId,
   initialSignals,
   totalCount,
+  enrichmentComplete,
 }: SignalTimelineProps) {
   const [signals, setSignals] = useState<Array<ProspectSignal & { is_seen: boolean }>>(initialSignals);
   const [page, setPage] = useState(1);
@@ -193,7 +195,9 @@ export function SignalTimeline({
       {/* Empty state */}
       {filteredSignals.length === 0 && (
         <p className="text-sm text-muted-foreground">
-          No signals yet. Will appear after enrichment.
+          {enrichmentComplete
+            ? "No wealth signals found for this prospect."
+            : "No signals yet. Will appear after enrichment."}
         </p>
       )}
 

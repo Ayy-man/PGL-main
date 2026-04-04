@@ -487,7 +487,9 @@ export function ProfileView({
                 !prospect.work_phone &&
                 !hasContact && (
                   <p className="text-sm text-muted-foreground">
-                    No contact info yet. Will appear after enrichment.
+                    {prospect.enrichment_status === "complete"
+                      ? "No contact info found for this prospect."
+                      : "No contact info yet. Will appear after enrichment."}
                   </p>
                 )}
             </div>
@@ -606,6 +608,7 @@ export function ProfileView({
                 <IntelligenceDossier
                   dossier={prospect.intelligence_dossier ?? null}
                   generatedAt={prospect.dossier_generated_at ?? null}
+                  enrichmentComplete={prospect.enrichment_status === "complete"}
                 />
               </div>
             ) : (
@@ -642,6 +645,7 @@ export function ProfileView({
                 orgId={orgId}
                 initialSignals={initialSignals ?? []}
                 totalCount={signalCount ?? 0}
+                enrichmentComplete={prospect.enrichment_status === "complete"}
               />
 
               {/* Market Intelligence */}

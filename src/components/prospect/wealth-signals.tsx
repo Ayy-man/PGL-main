@@ -53,6 +53,7 @@ interface WealthSignalsProps {
     enriched_at?: string;
   } | null;
   insiderData?: EdgarResult | null;
+  enrichmentComplete?: boolean;
 }
 
 function getCategoryIcon(category: DigestedSignal["category"]) {
@@ -131,7 +132,7 @@ function legacyToSignals(mentions: LegacyMention[]): DigestedSignal[] {
   });
 }
 
-export function WealthSignals({ webData, insiderData }: WealthSignalsProps) {
+export function WealthSignals({ webData, insiderData, enrichmentComplete }: WealthSignalsProps) {
   // Support both new digested signals and legacy mentions format
   const signals: DigestedSignal[] =
     webData?.signals && webData.signals.length > 0
@@ -161,7 +162,9 @@ export function WealthSignals({ webData, insiderData }: WealthSignalsProps) {
 
       {!hasAny && (
         <p className="text-sm text-muted-foreground">
-          No wealth signals found. Data will appear after enrichment.
+          {enrichmentComplete
+            ? "No wealth signals found for this prospect."
+            : "No wealth signals yet. Data will appear after enrichment."}
         </p>
       )}
 
