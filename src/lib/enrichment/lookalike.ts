@@ -176,7 +176,7 @@ export async function generateLookalikePersona(
   const personaData = JSON.parse(jsonStr);
   // Map AI seniority strings to Apollo enum values
   const SENIORITY_MAP: Record<string, string> = {
-    "owner": "owner", "founder": "founder", "c_suite": "c_suite", "c suite": "c_suite",
+    "owner": "owner", "founder": "founder", "c_suite": "c_suite", "c suite": "c_suite", "c-suite": "c_suite", "c-level": "c_suite", "c level": "c_suite",
     "partner": "partner", "vp": "vp", "vice president": "vp", "head": "head",
     "director": "director", "manager": "manager", "senior": "senior",
     "entry": "entry", "entry level": "entry", "entry-level": "entry",
