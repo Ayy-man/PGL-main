@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import {
   UserSearch,
   Mail,
@@ -219,6 +221,31 @@ export function ProfileView({
 
   // Tags state (optimistic)
   const [currentTags, setCurrentTags] = useState<string[]>(tags ?? []);
+
+  // Realtime: refresh page when enrichment data updates
+  const router = useRouter();
+  useEffect(() => {
+    const supabase = createClient();
+    const channel = supabase
+      .channel(`prospect-${prospect.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "prospects",
+          filter: `id=eq.${prospect.id}`,
+        },
+        () => {
+          router.refresh();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [prospect.id, router]);
 
   // Field save handler — PATCH /api/prospects/[id]/profile
   const handleFieldSave = useCallback(async (field: string, value: string | null) => {
