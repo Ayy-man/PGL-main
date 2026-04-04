@@ -168,9 +168,25 @@ export async function generateLookalikePersona(
   }
 
   const personaData = JSON.parse(jsonStr);
-  // Normalize seniorities to lowercase (AI often returns "Director" instead of "director")
+  // Map AI seniority strings to Apollo enum values
+  const SENIORITY_MAP: Record<string, string> = {
+    "owner": "owner", "founder": "founder", "c_suite": "c_suite", "c suite": "c_suite",
+    "partner": "partner", "vp": "vp", "vice president": "vp", "head": "head",
+    "director": "director", "manager": "manager", "senior": "senior",
+    "entry": "entry", "entry level": "entry", "entry-level": "entry",
+    "intern": "intern", "internship": "intern",
+    "mid-senior level": "senior", "mid-senior": "senior", "mid level": "manager",
+    "executive": "c_suite", "chief": "c_suite", "principal": "director",
+    "lead": "head", "associate": "entry", "analyst": "entry", "junior": "entry",
+  };
+  const VALID_SENIORITIES = new Set(["owner","founder","c_suite","partner","vp","head","director","manager","senior","entry","intern"]);
   if (Array.isArray(personaData.seniorities)) {
-    personaData.seniorities = personaData.seniorities.map((s: string) => s.toLowerCase());
+    personaData.seniorities = personaData.seniorities
+      .map((s: string) => SENIORITY_MAP[s.toLowerCase()] || s.toLowerCase())
+      .filter((s: string) => VALID_SENIORITIES.has(s));
+    if (personaData.seniorities.length === 0) {
+      personaData.seniorities = ["senior", "manager", "director"];
+    }
   }
   const persona = PersonaSchema.parse(personaData);
 
