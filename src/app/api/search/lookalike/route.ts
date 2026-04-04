@@ -4,6 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { generateLookalikePersona } from "@/lib/enrichment/lookalike";
 import type { ApolloFilters } from "@/lib/enrichment/lookalike";
 import { searchApollo } from "@/lib/apollo/client";
+import type { ApolloPerson } from "@/lib/apollo/types";
 import { logActivity } from "@/lib/activity-logger";
 import { logError } from "@/lib/error-logger";
 import type { PersonaFilters } from "@/lib/personas/types";
@@ -118,15 +119,38 @@ export async function POST(request: NextRequest) {
 
     const { persona, apolloFilters } = await generateLookalikePersona(prospectData);
 
-    // 5. Search Apollo for similar people (via rate-limited, cached client)
-    const personaFilters = mapApolloFiltersToPersonaFilters(apolloFilters);
-    const apolloResults = await searchApollo(
-      tenantId,
-      prospectId, // Use prospectId as persona identifier for caching
-      personaFilters,
-      1,  // page
-      25  // pageSize
-    );
+    // 5. Search Apollo with progressive filter relaxation
+    //    Start with all filters; if 0 results, drop least important and retry.
+    //    Priority (most to least important): titles > seniorities > industries > companySize > keywords
+    const fullFilters = mapApolloFiltersToPersonaFilters(apolloFilters);
+
+    // Build filter tiers from most restrictive to broadest
+    const filterTiers: PersonaFilters[] = [
+      fullFilters, // all filters
+      { ...fullFilters, keywords: undefined }, // drop keywords
+      { ...fullFilters, keywords: undefined, companySize: undefined }, // drop companySize
+      { ...fullFilters, keywords: undefined, companySize: undefined, industries: undefined }, // drop industries
+      { titles: fullFilters.titles, seniorities: fullFilters.seniorities }, // just titles + seniority
+      { titles: fullFilters.titles }, // just titles
+    ];
+
+    let apolloResults = { people: [] as ApolloPerson[], pagination: { page: 1, pageSize: 25, totalPages: 0, totalResults: 0, hasMore: false }, cached: false };
+    let usedFilters = fullFilters;
+
+    for (const tierFilters of filterTiers) {
+      const cacheId = `${prospectId}-tier${filterTiers.indexOf(tierFilters)}`;
+      const result = await searchApollo(tenantId, cacheId, tierFilters, 1, 25);
+      if (result.pagination.totalResults > 0) {
+        apolloResults = result;
+        usedFilters = tierFilters;
+        console.info(`[lookalike] Found ${result.pagination.totalResults} results at filter tier ${filterTiers.indexOf(tierFilters)}`);
+        break;
+      }
+      console.info(`[lookalike] Tier ${filterTiers.indexOf(tierFilters)}: 0 results, relaxing filters...`);
+    }
+
+    // Use the filters that actually produced results for saving
+    const personaFilters = usedFilters;
 
     // 6. Save persona if requested
     let savedPersonaId: string | undefined;
