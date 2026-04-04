@@ -72,18 +72,27 @@ export interface LookalikeResult {
   apolloFilters: ApolloFilters;
 }
 
-const SYSTEM_PROMPT = `You are a lead research analyst. Extract key professional attributes from a prospect to find similar people. Focus on role seniority, industry, company characteristics, and wealth indicators.
+const SYSTEM_PROMPT = `You are a lead research analyst. Your goal is to generate search filters that will find REAL similar people on Apollo.io. The filters must be broad enough to return results.
+
+CRITICAL RULES:
+- NEVER use the prospect's own name as the persona name. Use a descriptive label like "Quant Traders - Financial Services".
+- Cast a WIDE net: use 3-5 job title VARIATIONS (e.g., "Quant Trader", "Quantitative Analyst", "Algorithmic Trader", "Portfolio Manager").
+- Use BROAD industries (e.g., "Financial Services" not "Hedge Funds"). Apollo uses keyword tags, so keep them general.
+- Include MULTIPLE seniority levels to avoid filtering out results.
+- Only include locations if the prospect's location is known. Omit locations entirely if unknown.
+- Keep keywords short and general (2-3 max). Avoid overly specific terms.
+- Company size should cover a range — include 2-3 ranges.
 
 Return ONLY a valid JSON object with this exact structure:
 {
-  "name": "A descriptive persona label like 'Senior Quant Trader - Hedge Funds' (NEVER use the prospect's own name)",
-  "jobTitles": ["array", "of", "job", "titles"],
-  "seniorities": ["array of seniority levels from ONLY these values: owner, founder, c_suite, partner, vp, head, director, manager, senior, entry, intern"],
-  "industries": ["array", "of", "industries"],
-  "companySizes": ["array of employee ranges from ONLY these values: 1,10 | 11,50 | 51,200 | 201,500 | 501,1000 | 1001,5000 | 5001,10000 | 10001,"],
-  "locations": ["array", "of", "locations"],
-  "keywords": ["array", "of", "keywords"],
-  "reasoning": "Why these attributes match"
+  "name": "Descriptive persona label (NEVER the prospect's name)",
+  "jobTitles": ["3-5 related title variations"],
+  "seniorities": ["include 2-3 levels to cast a wider net"],
+  "industries": ["1-2 broad industries"],
+  "companySizes": ["2-3 ranges from ONLY: 1,10 | 11,50 | 51,200 | 201,500 | 501,1000 | 1001,5000 | 5001,10000 | 10001,"],
+  "locations": ["omit or leave empty if location unknown"],
+  "keywords": ["2-3 broad keywords"],
+  "reasoning": "Brief explanation"
 }`;
 
 /**
