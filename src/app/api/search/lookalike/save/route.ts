@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { prospectId, persona } = body;
+    const { prospectId, persona, effectiveFilters } = body;
 
     if (!prospectId || !persona?.name) {
       return NextResponse.json(
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
         tenant_id: tenantId,
         name: persona.name,
         description: persona.reasoning || null,
-        filters: {
+        filters: effectiveFilters || {
           titles: persona.jobTitles,
           seniorities: persona.seniority?.split(", ") || [],
           industries: persona.industries,

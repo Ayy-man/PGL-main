@@ -216,6 +216,7 @@ export async function POST(request: NextRequest) {
           reasoning: persona.reasoning,
         },
         apolloFilters,
+        effectiveFilters: usedFilters,
         searchResults: apolloResults.people,
         totalResults: apolloResults.pagination.totalResults,
         savedPersonaId,

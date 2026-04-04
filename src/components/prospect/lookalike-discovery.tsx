@@ -46,6 +46,7 @@ interface SearchResult {
 
 interface LookalikeResult {
   persona: Persona;
+  effectiveFilters?: Record<string, unknown>;
   searchResults: SearchResult[];
   totalResults: number;
   savedPersonaId?: string;
@@ -98,6 +99,7 @@ export function LookalikeDiscovery({
         body: JSON.stringify({
           prospectId,
           persona: result.persona,
+          effectiveFilters: result.effectiveFilters,
         }),
       });
 
