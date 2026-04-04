@@ -160,11 +160,17 @@ export async function generateLookalikePersona(
   // Parse structured output
   console.info("[lookalike] Raw LLM output:", response.text);
 
-  // Handle markdown code blocks
+  // Extract JSON from AI response — handle code blocks, preamble text, and trailing commentary
   let jsonStr = response.text.trim();
-  const jsonMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
-  if (jsonMatch) {
-    jsonStr = jsonMatch[1].trim();
+  const codeBlockMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (codeBlockMatch) {
+    jsonStr = codeBlockMatch[1].trim();
+  } else {
+    // Extract first { ... } block, ignoring any text before/after
+    const jsonObjectMatch = jsonStr.match(/\{[\s\S]*\}/);
+    if (jsonObjectMatch) {
+      jsonStr = jsonObjectMatch[0];
+    }
   }
 
   const personaData = JSON.parse(jsonStr);
