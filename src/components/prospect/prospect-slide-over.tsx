@@ -23,6 +23,7 @@ interface ProspectSlideOverProps {
   prospectId: string | null;
   prospect?: Prospect | null;
   orgId?: string;
+  onEnrich?: (prospectId: string) => void;
 }
 
 export function ProspectSlideOver({
@@ -31,6 +32,7 @@ export function ProspectSlideOver({
   prospectId,
   prospect,
   orgId,
+  onEnrich,
 }: ProspectSlideOverProps) {
   const initials = prospect
     ? `${prospect.first_name?.[0] ?? ""}${prospect.last_name?.[0] ?? ""}`.toUpperCase()
@@ -191,7 +193,7 @@ export function ProspectSlideOver({
 
                 {/* Enrich & Save CTA */}
                 <div
-                  className="rounded-[10px] border p-5 space-y-3"
+                  className="rounded-[10px] border p-5 space-y-4"
                   style={{
                     borderColor: "rgba(212,175,55,0.3)",
                     background: "rgba(212,175,55,0.04)",
@@ -210,16 +212,20 @@ export function ProspectSlideOver({
                     </span>
                   </div>
                   <p className="text-sm leading-relaxed text-muted-foreground">
-                    Enriching this prospect unlocks their full contact data,
-                    intelligence dossier, and wealth signals.
+                    Unlock full contact data, intelligence dossier, and wealth
+                    signals for this prospect.
                   </p>
-                  <p className="text-xs text-muted-foreground">
-                    Select this prospect in the table and click{" "}
-                    <span className="font-medium text-foreground">
-                      Enrich Selection
-                    </span>{" "}
-                    to get started.
-                  </p>
+                  <button
+                    onClick={() => onEnrich?.(prospect.id)}
+                    className="w-full rounded-lg border py-2.5 text-sm font-medium transition-colors cursor-pointer hover:brightness-110"
+                    style={{
+                      borderColor: "rgba(212,175,55,0.4)",
+                      background: "rgba(212,175,55,0.12)",
+                      color: "var(--gold-primary)",
+                    }}
+                  >
+                    Enrich This Prospect
+                  </button>
                 </div>
               </>
             )}

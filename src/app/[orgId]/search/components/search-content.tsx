@@ -814,6 +814,12 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
         prospectId={searchState.prospect || null}
         prospect={slideOverProspect}
         orgId={orgId}
+        onEnrich={(id) => {
+          setSelectedIds(new Set([id]));
+          setBulkMode("enrich");
+          setBulkSelectedListIds([]);
+          setBulkListDialogOpen(true);
+        }}
       />
     </div>
   );
