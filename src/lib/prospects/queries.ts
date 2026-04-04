@@ -119,8 +119,33 @@ async function upsertProspectFallback(
     throw new Error("Cannot resolve duplicate: no work_email, linkedin_url, or apollo_id");
   }
 
-  const { data: existing, error: selectError } = await query.single();
+  const { data: existing, error: selectError } = await query.limit(1).maybeSingle();
   if (selectError || !existing) {
+    // No existing record found — do a plain insert instead of updating
+    if (!existing && !selectError) {
+      const { data: inserted, error: insertError } = await supabase
+        .from("prospects")
+        .insert({
+          tenant_id: tenantId,
+          apollo_id: input.apollo_id,
+          first_name: input.first_name,
+          last_name: input.last_name,
+          title: input.title,
+          company: input.company,
+          location: input.location,
+          work_email: input.work_email,
+          work_phone: input.work_phone,
+          personal_email: input.personal_email,
+          personal_phone: input.personal_phone,
+          linkedin_url: input.linkedin_url,
+        })
+        .select(PROSPECT_SELECT)
+        .single();
+      if (insertError) {
+        throw new Error(`Fallback insert failed: ${insertError.message}`);
+      }
+      return inserted as Prospect;
+    }
     throw new Error(`Fallback select failed: ${selectError?.message || "not found"}`);
   }
 
