@@ -273,7 +273,7 @@ export function PersonaFormDialog({ mode, persona, trigger, open: controlledOpen
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-serif text-2xl">
-            {mode === "create" ? "Create Persona" : "Edit Persona"}
+            {mode === "create" ? "Save Search" : "Edit Search"}
           </DialogTitle>
           <DialogDescription>
             Configure Apollo.io search filters to define your target audience.
@@ -302,7 +302,7 @@ export function PersonaFormDialog({ mode, persona, trigger, open: controlledOpen
               <Textarea
                 id="description"
                 name="description"
-                placeholder="Brief description of this persona..."
+                placeholder="Brief description of this saved search..."
                 defaultValue={persona?.description ?? ""}
                 maxLength={500}
                 rows={2}
@@ -455,7 +455,7 @@ export function PersonaFormDialog({ mode, persona, trigger, open: controlledOpen
               Cancel
             </Button>
             <Button type="submit" disabled={isPending}>
-              {isPending ? "Saving..." : mode === "create" ? "Create Persona" : "Save Changes"}
+              {isPending ? "Saving..." : mode === "create" ? "Save Search" : "Save Changes"}
             </Button>
           </DialogFooter>
         </form>

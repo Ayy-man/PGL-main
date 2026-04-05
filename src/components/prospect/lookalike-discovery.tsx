@@ -149,7 +149,7 @@ export function LookalikeDiscovery({
                   onChange={(e) => setSaveChecked(e.target.checked)}
                   className="w-4 h-4 rounded border bg-muted text-gold focus:ring-gold focus:ring-offset-card"
                 />
-                Save generated persona for reuse
+                Save generated search for reuse
               </label>
             )}
           </div>
@@ -181,7 +181,7 @@ export function LookalikeDiscovery({
                   disabled={isLoading}
                   className="bg-muted hover:bg-accent text-foreground px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                 >
-                  Save Persona
+                  Save Search
                 </button>
               )}
               {result.savedPersonaId && (

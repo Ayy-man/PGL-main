@@ -30,7 +30,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard",      href: "/",                    icon: LayoutDashboard, exact: true },
   { label: "Lead Discovery", href: "/search",              icon: Search,          exact: false },
-  { label: "Personas",       href: "/personas",            icon: Users,           exact: false },
+  { label: "Saved Searches",  href: "/personas",            icon: Users,           exact: false },
   { label: "Lists",          href: "/lists",               icon: List,            exact: false },
   { label: "Exports",        href: "/exports",             icon: FileDown,        exact: false },
   { label: "Activity",       href: "/dashboard/activity",  icon: Activity,        exact: false },

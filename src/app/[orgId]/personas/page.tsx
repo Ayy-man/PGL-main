@@ -47,7 +47,7 @@ export default async function PersonasPage({
   return (
     <div className="space-y-6 page-enter">
       {/* Breadcrumbs */}
-      <Breadcrumbs items={[{ label: "Personas" }]} />
+      <Breadcrumbs items={[{ label: "Saved Searches" }]} />
 
       {/* Page header */}
       <div>
@@ -55,13 +55,13 @@ export default async function PersonasPage({
           className="font-serif text-2xl sm:text-[32px] md:text-[38px] font-medium"
           style={{ color: "var(--text-primary)", letterSpacing: "-0.5px" }}
         >
-          Saved Personas & Living Data
+          Saved Searches & Living Data
         </h1>
         <p
           className="mt-1 text-[14px] font-light"
           style={{ color: "var(--text-tertiary)" }}
         >
-          Your active data streams. These personas are constantly updated with
+          Your active data streams. These saved searches are constantly updated with
           new leads matching your criteria.
         </p>
       </div>
@@ -70,8 +70,8 @@ export default async function PersonasPage({
       {personas.length === 0 ? (
         <EmptyState
           icon={Users}
-          title="No personas yet"
-          description="Create a persona to define your ideal buyer profile and start searching for qualified prospects."
+          title="No saved searches yet"
+          description="Create a saved search to define your ideal buyer profile and start searching for qualified prospects."
         />
       ) : (
         <PersonasLayout personas={personas} prospectCount={prospectCount} hasActivity={hasActivity} orgId={orgId} />

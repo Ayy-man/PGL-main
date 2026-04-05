@@ -81,7 +81,7 @@ export function PersonasLibrarySidebar({
               className="text-[11px]"
               style={{ color: "var(--text-tertiary)" }}
             >
-              Active Personas
+              Active Searches
             </div>
           </div>
           {/* Est. Matches chip */}

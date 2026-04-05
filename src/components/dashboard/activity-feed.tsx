@@ -24,7 +24,7 @@ const ACTION_LABELS: Record<string, string> = {
   status_updated: "Updated Status",
   note_added: "Added Note",
   csv_exported: "Exported CSV",
-  persona_created: "Created Persona",
+  persona_created: "Created Saved Search",
   lookalike_search: "Lookalike Search",
 };
 

@@ -41,7 +41,7 @@ export function MobileBottomNav({ orgId, userRole }: MobileBottomNavProps) {
   const tabs = [
     { label: "Home", icon: LayoutDashboard, href: `/${orgId}`, exact: true },
     { label: "Search", icon: Search, href: `/${orgId}/search`, exact: false },
-    { label: "Personas", icon: Users, href: `/${orgId}/personas`, exact: false },
+    { label: "Searches", icon: Users, href: `/${orgId}/personas`, exact: false },
   ];
 
   // "More" is active when on any secondary route
@@ -108,7 +108,7 @@ export function MobileBottomNav({ orgId, userRole }: MobileBottomNavProps) {
       onAction: () => router.push(`/${orgId}/search`),
     },
     {
-      label: "Create Persona",
+      label: "Save Search",
       description: "Define a new prospect segment",
       icon: Users,
       iconBg: "rgba(192,132,252,0.15)",
