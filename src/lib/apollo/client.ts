@@ -6,6 +6,7 @@ import type {
 import { apolloRateLimiter } from "@/lib/rate-limit/limiters";
 import { apolloBreaker } from "@/lib/circuit-breaker/apollo-breaker";
 import { getCachedData, setCachedData } from "@/lib/cache/keys";
+import { redis } from "@/lib/cache/redis";
 import { trackApiUsage } from "@/lib/enrichment/track-api-usage";
 
 /** Hard limit on results per search — set to 25 for demo. */
@@ -199,6 +200,37 @@ export async function searchApollo(
     // 5. Return search previews only — NO auto bulk-enrich.
     //    Enrichment is triggered explicitly via "Enrich Selection" button,
     //    which calls bulkEnrichPeople → upsert → Inngest pipeline.
+
+    // Track first-seen timestamps per person in a persistent Redis hash.
+    // TTL is 365 days (reset on each search). Survives the 24h search cache.
+    const firstSeenKey = `tenant:${tenantId}:apollo:first-seen`;
+    const apolloIds = searchPeople.map((p) => p.id);
+    const firstSeenMap = new Map<string, string>();
+    const now = new Date().toISOString();
+
+    try {
+      const existing = apolloIds.length > 0
+        ? await redis.hmget<string>(firstSeenKey, ...apolloIds)
+        : [];
+      const toSet: Record<string, string> = {};
+      for (let i = 0; i < apolloIds.length; i++) {
+        const id = apolloIds[i];
+        const ts = existing[i] ?? null;
+        if (ts) {
+          firstSeenMap.set(id, ts);
+        } else {
+          firstSeenMap.set(id, now);
+          toSet[id] = now;
+        }
+      }
+      if (Object.keys(toSet).length > 0) {
+        await redis.hset(firstSeenKey, toSet);
+        await redis.expire(firstSeenKey, 365 * 24 * 60 * 60);
+      }
+    } catch (err) {
+      console.warn("[searchApollo] Failed to track first-seen timestamps (non-fatal):", err);
+    }
+
     const previewPeople: ApolloPerson[] = searchPeople.map((p) => ({
       id: p.id,
       first_name: p.first_name,
@@ -206,7 +238,7 @@ export async function searchApollo(
       name: `${p.first_name} ${p.last_name_obfuscated || ""}`.trim(),
       title: p.title || "",
       organization_name: p.organization?.name,
-      last_refreshed_at: p.last_refreshed_at,
+      first_seen_at: firstSeenMap.get(p.id),
       _enriched: false,
     }));
 

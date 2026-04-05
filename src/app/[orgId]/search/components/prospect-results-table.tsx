@@ -105,7 +105,7 @@ export function ProspectResultsTable({
                 style={{ color: "var(--text-tertiary)" }}
                 scope="col"
               >
-                Last Updated
+                First Seen
               </th>
               <th
                 className="px-3 py-3.5 text-left text-xs font-semibold uppercase tracking-wider"
@@ -213,10 +213,10 @@ export function ProspectResultsTable({
                     </div>
                   </td>
 
-                  {/* Last Updated */}
+                  {/* First Seen */}
                   <td className="whitespace-nowrap px-3 py-5">
                     <span className="text-xs" style={{ color: "var(--text-tertiary)" }}>
-                      {formatRelativeDate(prospect.last_refreshed_at)}
+                      {formatRelativeDate(prospect.first_seen_at)}
                     </span>
                   </td>
 
