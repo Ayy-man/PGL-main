@@ -129,7 +129,7 @@ export async function upsertProspect(
  * Fallback for when concurrent upserts race on the same unique key.
  * Finds the existing record and updates it.
  */
-async function upsertProspectFallback(
+async function _upsertProspectFallback(
   supabase: ReturnType<typeof createAdminClient>,
   tenantId: string,
   input: UpsertProspectInput
