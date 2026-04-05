@@ -665,7 +665,7 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
                       }}
                     >
                       <Plus className="h-3 w-3" />
-                      New Persona
+                      New Search
                     </button>
                   }
                 />
