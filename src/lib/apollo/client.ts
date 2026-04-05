@@ -209,13 +209,13 @@ export async function searchApollo(
     const now = new Date().toISOString();
 
     try {
+      // Upstash hmget returns Record<field, value> | null, not an array
       const existing = apolloIds.length > 0
-        ? await redis.hmget(firstSeenKey, ...apolloIds) as (string | null)[]
-        : [] as (string | null)[];
+        ? (await redis.hmget(firstSeenKey, ...apolloIds) as unknown as Record<string, string | null> | null) ?? {}
+        : {} as Record<string, string | null>;
       const toSet: Record<string, string> = {};
-      for (let i = 0; i < apolloIds.length; i++) {
-        const id = apolloIds[i];
-        const ts = existing[i] ?? null;
+      for (const id of apolloIds) {
+        const ts = existing[id] ?? null;
         if (ts) {
           firstSeenMap.set(id, ts);
         } else {
