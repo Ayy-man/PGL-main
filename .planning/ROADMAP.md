@@ -383,10 +383,10 @@ Plans:
 **Depends on:** Phase 27
 **Status:** PLANNED — 4 plans ready for execution
 
-**Plans:** 0/4 complete
+**Plans:** 1/4 plans executed
 
 Plans:
-- [ ] 28-01-PLAN.md — DB migration (saved_search_prospects table + personas columns) + types + schema push
+- [x] 28-01-PLAN.md — DB migration (saved_search_prospects table + personas columns) + types + schema push
 - [ ] 28-02-PLAN.md — Refresh diff algorithm + API routes (refresh, prospects, dismiss) + enrichment sync hook
 - [ ] 28-03-PLAN.md — UI integration (search-content, results table, bulk actions bar)
 - [ ] 28-04-PLAN.md — UI rename (Persona -> Saved Search) + build verification

@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
-status: verifying
+status: executing
 stopped_at: Completed 27-03-PLAN.md
-last_updated: "2026-03-30T20:55:42.017Z"
-last_activity: 2026-04-04
+last_updated: "2026-04-05T14:47:04.016Z"
+last_activity: 2026-04-05 -- Phase 28 execution started
 progress:
-  total_phases: 23
-  completed_phases: 5
-  total_plans: 37
-  completed_plans: 37
-  percent: 100
+  total_phases: 25
+  completed_phases: 6
+  total_plans: 41
+  completed_plans: 38
+  percent: 93
 ---
 
 # Project State
@@ -22,14 +22,14 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** Real estate teams can quickly find and qualify wealthy prospects by searching structured lead databases, enriching profiles with personal contact info and wealth signals, and organizing prospects into actionable lists.
 
-**Current focus:** Phase 27 — Research Chat UX Polish
+**Current focus:** Phase 28 — saved-search-incremental-refresh-dismiss-and-delete
 
 ## Current Position
 
-Phase: 27 (Research Chat UX Polish) — EXECUTING
-Plan: 3 of 3
-Status: Phase complete — ready for verification
-Last activity: 2026-03-31 - Completed quick task 260331-qpm: Replace floating session history dropdown with inline panel inside research card
+Phase: 28 (saved-search-incremental-refresh-dismiss-and-delete) — EXECUTING
+Plan: 1 of 4
+Status: Executing Phase 28
+Last activity: 2026-04-05 -- Phase 28 execution started
 
 Progress: [████████████████████] 100% (20/20 phases complete)
 
@@ -375,6 +375,7 @@ Recent decisions affecting current work:
 - Phase 25 added: Exa Research Scrapbook — First-class research workbench in prospect profiles. Freeform questions → Exa search → LLM digest → rich result cards → pin to Dossier/Signals. shadcn AI components, streaming UX, session history.
 - Phase 27 added: Research Chat UX Polish — Streaming indicators, Exa response surfacing, chat UI templates
 - Phase 26 added: Targeted Multi-Source Search — Intent-routed channels (SEC EDGAR, ATTOM property, NewsAPI, Proxycurl, FAA Registry, Crunchbase) alongside Exa. LLM classifies query intent → fires specialized APIs in parallel → merges/deduplicates/ranks results into unified scrapbook feed.
+- Phase 28 added: Saved Search Incremental Refresh, Dismiss, and Delete
 
 ### Pending Todos
 
