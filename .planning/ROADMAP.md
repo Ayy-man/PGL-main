@@ -376,6 +376,21 @@ Plans:
 - [x] 27-02-PLAN.md — Streaming phase labels + ExaHighlightQuote + keyframe cleanup + empty state
 - [ ] 27-03-PLAN.md — Build verification + design system compliance audit
 
+### Phase 28: Saved Search Incremental Refresh, Dismiss, and Delete
+
+**Goal:** Add persistent memory layer to saved searches so they track which Apollo prospects have been seen, dismissed, or enriched. On refresh, show only genuinely new results. Dismiss individual or bulk prospects, undo dismissals, prevent dismissed from reappearing. Keep enrichment status synced across searches. Rename user-facing "Persona" to "Saved Search".
+**Requirements**: TBD
+**Depends on:** Phase 27
+**Status:** PLANNED — 4 plans ready for execution
+
+**Plans:** 0/4 complete
+
+Plans:
+- [ ] 28-01-PLAN.md — DB migration (saved_search_prospects table + personas columns) + types + schema push
+- [ ] 28-02-PLAN.md — Refresh diff algorithm + API routes (refresh, prospects, dismiss) + enrichment sync hook
+- [ ] 28-03-PLAN.md — UI integration (search-content, results table, bulk actions bar)
+- [ ] 28-04-PLAN.md — UI rename (Persona -> Saved Search) + build verification
+
 ---
 
 ### Phase 19: Admin Automations Dashboard — Inngest Monitoring
