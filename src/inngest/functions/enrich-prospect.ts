@@ -105,6 +105,41 @@ export const enrichProspect = inngest.createFunction(
 
     const supabase = createAdminClient();
 
+    // Step 0: Duplicate enrichment guard — check if this person is already enriched
+    const shouldSkip = await step.run("check-duplicate-enrichment", async () => {
+      // Look up the Apollo ID for this prospect
+      const { data: prospectRow } = await supabase
+        .from('prospects')
+        .select('apollo_id')
+        .eq('id', prospectId)
+        .single();
+
+      if (!prospectRow?.apollo_id) return false; // No Apollo ID, proceed normally
+
+      // Check if any saved search already has this person as enriched with a linked prospect
+      const { data: existing } = await supabase
+        .from('saved_search_prospects')
+        .select('prospect_id')
+        .eq('apollo_person_id', prospectRow.apollo_id)
+        .eq('tenant_id', tenantId)
+        .eq('status', 'enriched')
+        .not('prospect_id', 'is', null)
+        .limit(1);
+
+      if (existing && existing.length > 0) {
+        // Already enriched — just link the current prospect record
+        // (the prospect row already exists if we got here from upsert)
+        return true; // Signal to skip remaining steps
+      }
+
+      return false;
+    });
+
+    if (shouldSkip) {
+      console.info(`[Inngest] Skipping enrichment for prospect ${prospectId} — already enriched via saved search`);
+      return { skipped: true, prospectId };
+    }
+
     // Step 1: Mark enrichment as in progress
     await step.run("mark-in-progress", async () => {
       const initialSourceStatus: Record<string, { status: string; at: string }> = {
@@ -631,6 +666,21 @@ export const enrichProspect = inngest.createFunction(
           last_enriched_at: new Date().toISOString(),
         })
         .eq("id", prospectId);
+
+      // Cross-search enrichment sync: mark all saved searches containing this person as enriched
+      const { data: prospectRow } = await supabase
+        .from('prospects')
+        .select('apollo_id')
+        .eq('id', prospectId)
+        .single();
+
+      if (prospectRow?.apollo_id) {
+        await supabase
+          .from('saved_search_prospects')
+          .update({ status: 'enriched', prospect_id: prospectId })
+          .eq('apollo_person_id', prospectRow.apollo_id)
+          .eq('tenant_id', tenantId);
+      }
 
       // Log activity (backward compat)
       await logActivity({
