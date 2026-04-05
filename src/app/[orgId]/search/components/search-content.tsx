@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import type { Persona } from "@/lib/personas/types";
+import type { SavedSearchProspect } from "@/lib/personas/types";
 import type { List } from "@/lib/lists/types";
 import type { PersonaFiltersType } from "@/lib/apollo/schemas";
+import type { ApolloPerson } from "@/lib/apollo/types";
 import { useSearch } from "../hooks/use-search";
 import { PersonaPills } from "./persona-pills";
 import { NLSearchBar } from "./nl-search-bar";
@@ -49,6 +51,50 @@ function SkeletonRow() {
   );
 }
 
+function formatRefreshedAgo(dateStr: string): string {
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return "Unknown";
+  const diffMs = Date.now() - date.getTime();
+  const diffMins = Math.floor(diffMs / (1000 * 60));
+  if (diffMins < 1) return "just now";
+  if (diffMins < 60) return `${diffMins}m ago`;
+  const diffHours = Math.floor(diffMins / 60);
+  if (diffHours < 24) return `${diffHours}h ago`;
+  const diffDays = Math.floor(diffHours / 24);
+  if (diffDays === 1) return "yesterday";
+  if (diffDays < 30) return `${diffDays}d ago`;
+  const diffMonths = Math.floor(diffDays / 30);
+  return `${diffMonths}mo ago`;
+}
+
+function savedProspectToApolloPerson(
+  sp: SavedSearchProspect
+): ApolloPerson & { _savedSearchMeta?: { status: string; is_new: boolean; prospect_id: string | null; last_seen_at: string } } {
+  const data = sp.apollo_data as Record<string, unknown>;
+  const org = data.organization as Record<string, unknown> | undefined;
+  return {
+    id: sp.apollo_person_id,
+    first_name: (data.first_name as string) ?? "",
+    last_name: (data.last_name as string) ?? "",
+    name: (data.name as string) ?? "",
+    title: (data.title as string) ?? "",
+    organization_name: (data.organization_name as string) ?? undefined,
+    organization: org ? { name: (org.name as string) ?? "" } : undefined,
+    city: (data.city as string) ?? undefined,
+    state: (data.state as string) ?? undefined,
+    country: (data.country as string) ?? undefined,
+    email_status: (data.email_status as string) ?? undefined,
+    photo_url: (data.photo_url as string) ?? undefined,
+    linkedin_url: (data.linkedin_url as string) ?? undefined,
+    _savedSearchMeta: {
+      status: sp.status,
+      is_new: sp.is_new,
+      prospect_id: sp.prospect_id,
+      last_seen_at: sp.last_seen_at,
+    },
+  };
+}
+
 export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
   const router = useRouter();
   const { toast } = useToast();
@@ -80,16 +126,151 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
   const [newListName, setNewListName] = useState("");
   const [isCreatingList, setIsCreatingList] = useState(false);
 
+  // Saved search state
+  const [savedProspects, setSavedProspects] = useState<SavedSearchProspect[]>([]);
+  const [dismissedCount, setDismissedCount] = useState(0);
+  const [lastRefreshedAt, setLastRefreshedAt] = useState<string | null>(null);
+  const [totalApolloResults, setTotalApolloResults] = useState<number | null>(null);
+  const [showDismissed, setShowDismissed] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isSavedSearchMode, setIsSavedSearchMode] = useState(false);
+  // Dismiss confirmation dialog
+  const [dismissDialogOpen, setDismissDialogOpen] = useState(false);
+  const [pendingDismissIds, setPendingDismissIds] = useState<string[]>([]);
+
   // Sync local lists with prop
   useEffect(() => {
     setLocalLists(lists);
   }, [lists]);
 
-  // Reset selection and filter overrides when persona changes
+  // ----------------------------------------------------------------
+  // Saved search helpers
+  // ----------------------------------------------------------------
+  const loadSavedProspects = useCallback(async (searchId: string) => {
+    try {
+      const resp = await fetch(`/api/search/${searchId}/prospects?includeDismissed=${showDismissed}`);
+      if (!resp.ok) throw new Error("Failed to load");
+      const data = await resp.json();
+      setSavedProspects(data.prospects);
+      setDismissedCount(data.dismissedCount);
+      setLastRefreshedAt(data.lastRefreshedAt);
+      setTotalApolloResults(data.totalApolloResults);
+      setIsSavedSearchMode(true);
+    } catch {
+      // Fallback to Apollo search
+      setIsSavedSearchMode(false);
+    }
+  }, [showDismissed]);
+
+  const handleRefresh = useCallback(async (searchId?: string) => {
+    const id = searchId || searchState.persona;
+    if (!id) return;
+    setIsRefreshing(true);
+    try {
+      const resp = await fetch(`/api/search/${id}/refresh`, { method: "POST" });
+      if (!resp.ok) throw new Error("Refresh failed");
+      const result = await resp.json();
+      toast({
+        title: "Search refreshed",
+        description: `${result.newProspects} new prospects found${result.resurfaced > 0 ? `, ${result.resurfaced} resurfaced` : ""}.`,
+      });
+      // Reload from DB to get updated data
+      await loadSavedProspects(id);
+    } catch {
+      toast({ title: "Refresh failed", description: "Could not refresh search results.", variant: "destructive" });
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [searchState.persona, loadSavedProspects, toast]);
+
+  const handleDismiss = useCallback(async (apolloPersonIds: string[]) => {
+    if (!searchState.persona) return;
+    try {
+      const resp = await fetch(`/api/search/${searchState.persona}/dismiss`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: apolloPersonIds.length > 1 ? "bulk-dismiss" : "dismiss", apolloPersonIds }),
+      });
+      if (!resp.ok) throw new Error("Dismiss failed");
+      // Remove dismissed from local state
+      setSavedProspects(prev => prev.filter(p => !apolloPersonIds.includes(p.apollo_person_id)));
+      setDismissedCount(prev => prev + apolloPersonIds.length);
+      setSelectedIds(new Set());
+      toast({ title: `${apolloPersonIds.length} prospect${apolloPersonIds.length > 1 ? "s" : ""} dismissed` });
+    } catch {
+      toast({ title: "Dismiss failed", variant: "destructive" });
+    }
+  }, [searchState.persona, toast]);
+
+  const handleUndoDismiss = useCallback(async (apolloPersonId: string) => {
+    if (!searchState.persona) return;
+    try {
+      const resp = await fetch(`/api/search/${searchState.persona}/dismiss`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "undo", apolloPersonIds: [apolloPersonId] }),
+      });
+      if (!resp.ok) throw new Error("Undo failed");
+      // Reload to get updated data
+      await loadSavedProspects(searchState.persona);
+      toast({ title: "Prospect restored" });
+    } catch {
+      toast({ title: "Undo failed", variant: "destructive" });
+    }
+  }, [searchState.persona, loadSavedProspects, toast]);
+
+  const handleBulkDismissClick = useCallback(() => {
+    const ids = Array.from(selectedIds);
+    // Filter out enriched prospects — they can't be dismissed
+    const dismissableIds = isSavedSearchMode
+      ? ids.filter(id => {
+          const prospect = savedProspects.find(p => p.apollo_person_id === id);
+          return prospect && prospect.status !== 'enriched';
+        })
+      : ids;
+    if (dismissableIds.length === 0) {
+      toast({ title: "No prospects to dismiss", description: "Enriched prospects cannot be dismissed." });
+      return;
+    }
+    setPendingDismissIds(dismissableIds);
+    setDismissDialogOpen(true);
+  }, [selectedIds, savedProspects, isSavedSearchMode, toast]);
+
+  // Persona change effect — load from DB or run first refresh
   useEffect(() => {
     setSelectedIds(new Set());
     setFilterOverrides({});
-  }, [searchState.persona, setFilterOverrides]);
+
+    if (!searchState.persona) {
+      setIsSavedSearchMode(false);
+      setSavedProspects([]);
+      return;
+    }
+
+    const selectedPersona = personas.find(p => p.id === searchState.persona);
+    if (!selectedPersona) return;
+
+    if (selectedPersona.last_refreshed_at) {
+      loadSavedProspects(selectedPersona.id);
+      // Check staleness (>7 days)
+      const daysSinceRefresh = (Date.now() - new Date(selectedPersona.last_refreshed_at).getTime()) / (1000 * 60 * 60 * 24);
+      if (daysSinceRefresh > 7) {
+        toast({ title: "Results may be outdated", description: "This search hasn't been refreshed in over a week. Click Refresh to update.", variant: "default" });
+      }
+    } else {
+      // First load — trigger refresh
+      handleRefresh(selectedPersona.id);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchState.persona]);
+
+  // Reload when showDismissed toggles
+  useEffect(() => {
+    if (isSavedSearchMode && searchState.persona) {
+      loadSavedProspects(searchState.persona);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showDismissed]);
 
   // ----------------------------------------------------------------
   // Selection handlers
@@ -103,10 +284,19 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
   };
 
   const handleSelectAll = () => {
-    if (selectedIds.size === results.length) {
-      setSelectedIds(new Set());
+    if (isSavedSearchMode) {
+      const allIds = savedProspects.map((p) => p.apollo_person_id);
+      if (selectedIds.size === allIds.length) {
+        setSelectedIds(new Set());
+      } else {
+        setSelectedIds(new Set(allIds));
+      }
     } else {
-      setSelectedIds(new Set(results.map((r) => r.id)));
+      if (selectedIds.size === results.length) {
+        setSelectedIds(new Set());
+      } else {
+        setSelectedIds(new Set(results.map((r) => r.id)));
+      }
     }
   };
 
@@ -132,6 +322,13 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
   // Filter override handler
   // ----------------------------------------------------------------
   const handleApplyFilters = (filters: Partial<PersonaFiltersType>) => {
+    if (isSavedSearchMode) {
+      toast({
+        title: "Filters changed",
+        description: "Changing filters will refresh results. Previously dismissed prospects may reappear if they match the new criteria.",
+      });
+      // Clear is_new flags will happen naturally on next refresh
+    }
     if (filters.keywords !== undefined) {
       setSearchState({ keywords: filters.keywords });
     }
@@ -144,7 +341,8 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
   // ----------------------------------------------------------------
   const handleBulkAddToList = () => {
     if (selectedIds.size === 0) return;
-    const selected = results.filter((r) => selectedIds.has(r.id));
+    const activeResults = isSavedSearchMode ? savedProspects.map(savedProspectToApolloPerson) : results;
+    const selected = activeResults.filter((r) => selectedIds.has(r.id));
     const allUnenriched = selected.every((p) => p._enriched === false);
     if (allUnenriched) {
       toast({
@@ -162,7 +360,8 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
 
   const handleBulkExport = () => {
     if (selectedIds.size === 0) return;
-    const selectedProspects = results.filter((r) => selectedIds.has(r.id));
+    const activeResults = isSavedSearchMode ? savedProspects.map(savedProspectToApolloPerson) : results;
+    const selectedProspects = activeResults.filter((r) => selectedIds.has(r.id));
 
     const headers = ["Name", "Title", "Company", "Location", "Email", "LinkedIn URL"];
     const rows = selectedProspects.map((p) => [
@@ -213,7 +412,8 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
   const handleBulkListSubmit = async () => {
     if (bulkSelectedListIds.length === 0 || selectedIds.size === 0) return;
     setIsBulkSubmitting(true);
-    const allSelected = results.filter((r) => selectedIds.has(r.id));
+    const activeResults = isSavedSearchMode ? savedProspects.map(savedProspectToApolloPerson) : results;
+    const allSelected = activeResults.filter((r) => selectedIds.has(r.id));
 
     // In add-to-list mode, skip preview-only prospects.
     // In enrich mode, process ALL prospects — Apollo bulk enrich first, then upsert.
@@ -374,7 +574,9 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
   // Map ApolloPerson to Prospect shape for slide-over
   // ----------------------------------------------------------------
   const selectedProspect = searchState.prospect
-    ? results.find((r) => r.id === searchState.prospect) ?? null
+    ? (isSavedSearchMode
+        ? savedProspects.map(savedProspectToApolloPerson).find((r) => r.id === searchState.prospect)
+        : results.find((r) => r.id === searchState.prospect)) ?? null
     : null;
 
   const slideOverProspect = selectedProspect
@@ -403,6 +605,10 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
         _enriched: selectedProspect._enriched === true,
       }
     : null;
+
+  // Determine the active results to display
+  const activeResults = isSavedSearchMode ? savedProspects.map(savedProspectToApolloPerson) : results;
+  const activeResultCount = isSavedSearchMode ? savedProspects.length : results.length;
 
   return (
     <div className="page-enter flex flex-col">
@@ -479,31 +685,71 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
                   className="text-[13px]"
                   style={{ color: "var(--text-secondary-ds)" }}
                 >
-                  {pagination.totalEntries > 0
-                    ? `${pagination.totalEntries.toLocaleString()} results`
-                    : isLoading
+                  {activeResultCount > 0
+                    ? `${(isSavedSearchMode ? activeResultCount : pagination.totalEntries).toLocaleString()} results`
+                    : isLoading || isRefreshing
                       ? "Searching..."
                       : "No results"}
                 </p>
               </div>
 
+              {/* Saved search toolbar — last refreshed + refresh button */}
+              {isSavedSearchMode && (
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-[13px]" style={{ color: "var(--text-tertiary)" }}>
+                      {lastRefreshedAt ? `Last refreshed: ${formatRefreshedAgo(lastRefreshedAt)}` : "Never refreshed"}
+                    </span>
+                    {totalApolloResults !== null && totalApolloResults > 500 && (
+                      <span className="text-[12px]" style={{ color: "var(--text-tertiary)" }}>
+                        Showing first 500 of {totalApolloResults.toLocaleString()} matches. Refine your filters for more targeted results.
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {/* Show dismissed toggle */}
+                    <button
+                      onClick={() => setShowDismissed(!showDismissed)}
+                      className="text-[13px] px-2 py-1 rounded-md transition-colors"
+                      style={{
+                        color: showDismissed ? "var(--gold-text)" : "var(--text-tertiary)",
+                        background: showDismissed ? "rgba(212, 175, 55, 0.1)" : "transparent",
+                      }}
+                    >
+                      {showDismissed ? "Hide" : "Show"} dismissed ({dismissedCount})
+                    </button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleRefresh()}
+                      disabled={isRefreshing}
+                    >
+                      {isRefreshing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                      <span className="ml-1.5">Refresh</span>
+                    </Button>
+                  </div>
+                </div>
+              )}
+
               {/* Bulk actions bar */}
-              {results.length > 0 && (
+              {(results.length > 0 || (isSavedSearchMode && savedProspects.length > 0)) && (
                 <BulkActionsBar
                   selectedCount={selectedIds.size}
-                  totalCount={results.length}
+                  totalCount={activeResultCount}
                   allSelected={
-                    selectedIds.size === results.length && results.length > 0
+                    selectedIds.size === activeResultCount && activeResultCount > 0
                   }
                   onSelectAll={handleSelectAll}
                   onAddToList={handleBulkAddToList}
                   onExport={handleBulkExport}
                   onEnrich={handleBulkEnrich}
+                  onDismiss={handleBulkDismissClick}
+                  showDismiss={isSavedSearchMode}
                 />
               )}
 
               {/* Loading state: skeleton table */}
-              {isLoading && results.length === 0 && (
+              {(isLoading || isRefreshing) && activeResultCount === 0 && (
                 <div
                   className="overflow-hidden rounded-xl"
                   style={{
@@ -522,7 +768,7 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
               )}
 
               {/* Empty state: no results */}
-              {!isLoading && results.length === 0 && (
+              {!isLoading && !isRefreshing && activeResultCount === 0 && (
                 <EmptyState
                   icon={Search}
                   title="No matching prospects"
@@ -531,18 +777,21 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
               )}
 
               {/* Prospect results table */}
-              {results.length > 0 && (
+              {(results.length > 0 || (isSavedSearchMode && savedProspects.length > 0)) && (
                 <ProspectResultsTable
-                  results={results}
+                  results={activeResults}
                   selectedIds={selectedIds}
                   onSelect={handleSelect}
                   onSelectAll={handleSelectAll}
                   onProspectClick={handleProspectClick}
+                  savedSearchMode={isSavedSearchMode}
+                  onUndoDismiss={handleUndoDismiss}
+                  lastRefreshedAt={lastRefreshedAt}
                 />
               )}
 
-              {/* Pagination — mockup style */}
-              {pagination.totalPages > 1 && (
+              {/* Pagination — mockup style (only in Apollo mode) */}
+              {!isSavedSearchMode && pagination.totalPages > 1 && (
                 <div
                   className="flex items-center justify-between py-4 px-2"
                   style={{ borderTop: "1px solid var(--border-subtle)" }}
@@ -804,6 +1053,31 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
               </Button>
             </DialogFooter>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Dismiss confirmation dialog */}
+      <Dialog open={dismissDialogOpen} onOpenChange={setDismissDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Dismiss {pendingDismissIds.length} prospect{pendingDismissIds.length > 1 ? "s" : ""}?</DialogTitle>
+            <DialogDescription>
+              They won&apos;t appear in future refreshes of this search.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setDismissDialogOpen(false)}>Cancel</Button>
+            <Button
+              variant="ghost"
+              className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+              onClick={() => {
+                handleDismiss(pendingDismissIds);
+                setDismissDialogOpen(false);
+              }}
+            >
+              Dismiss
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
