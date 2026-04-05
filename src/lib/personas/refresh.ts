@@ -59,8 +59,16 @@ export async function refreshSavedSearchProspects(params: {
     }
   }
 
+  // Deduplicate by apollo_person_id — Apollo can return the same person across pages
+  const seenIds = new Set<string>();
+  const deduped = allApolloResults.filter((p) => {
+    if (seenIds.has(p.id)) return false;
+    seenIds.add(p.id);
+    return true;
+  });
+
   // f. Edge case — empty Apollo results: do NOT clear existing rows
-  if (allApolloResults.length === 0) {
+  if (deduped.length === 0) {
     await supabase
       .from("personas")
       .update({ last_refreshed_at: now, total_apollo_results: 0 })
@@ -109,7 +117,7 @@ export async function refreshSavedSearchProspects(params: {
   let totalDismissed = 0;
   let resurfaced = 0;
 
-  for (const p of allApolloResults) {
+  for (const p of deduped) {
     const orgName = (p.organization as { name?: string } | undefined)?.name ?? p.organization_name ?? "";
     const existing = existingMap.get(p.id);
 
@@ -238,6 +246,6 @@ export async function refreshSavedSearchProspects(params: {
     existingEnriched,
     totalDismissed: totalDismissed < 0 ? 0 : totalDismissed,
     resurfaced,
-    totalFromApollo: allApolloResults.length,
+    totalFromApollo: deduped.length,
   };
 }
