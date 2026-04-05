@@ -18,7 +18,7 @@ const ACTION_CONFIG: Record<string, { icon: LucideIcon; label: string; color: st
   profile_enriched: { icon: Zap, label: "Enrichment", color: "var(--success)", bg: "rgba(34,197,94,0.08)" },
   add_to_list: { icon: UserPlus, label: "Added to List", color: "var(--gold-bright)", bg: "rgba(240,208,96,0.08)" },
   csv_exported: { icon: FileDown, label: "Export", color: "var(--gold-primary)", bg: "var(--gold-bg-strong)" },
-  persona_created: { icon: TrendingUp, label: "New Persona", color: "var(--gold-bright)", bg: "rgba(240,208,96,0.08)" },
+  persona_created: { icon: TrendingUp, label: "New Search", color: "var(--gold-bright)", bg: "rgba(240,208,96,0.08)" },
   lookalike_search: { icon: Search, label: "Lookalike", color: "var(--gold-primary)", bg: "var(--gold-bg)" },
   login: { icon: Users, label: "Login", color: "var(--text-secondary)", bg: "rgba(255,255,255,0.04)" },
 };

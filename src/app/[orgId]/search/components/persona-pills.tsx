@@ -67,7 +67,7 @@ export function PersonaPills({
         className="text-[10px] uppercase tracking-wider font-semibold mb-2"
         style={{ color: "var(--text-tertiary)" }}
       >
-        Saved Personas
+        Saved Searches
       </p>
       <div className="flex items-center gap-2 overflow-x-auto pb-1">
         {personas.map((persona) => (

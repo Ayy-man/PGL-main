@@ -136,7 +136,7 @@ export function CreatePersonaCard({ onPress }: CreatePersonaCardProps) {
       </div>
 
       <div className="text-center">
-        <p className="text-sm font-medium text-foreground">Create Persona</p>
+        <p className="text-sm font-medium text-foreground">New Saved Search</p>
         <p className="text-xs text-muted-foreground/50 mt-1">Custom filter combination</p>
       </div>
     </button>

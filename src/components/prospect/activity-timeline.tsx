@@ -47,7 +47,7 @@ function getEventDetail(event: ActivityEvent): string | null {
   if (!event.metadata) return null;
   const m = event.metadata;
   if (m.list_name) return `List: "${m.list_name}"`;
-  if (m.persona_name) return `Persona: "${m.persona_name}"`;
+  if (m.persona_name) return `Search: "${m.persona_name}"`;
   if (m.query) return `Query: "${String(m.query).slice(0, 40)}"`;
   return null;
 }

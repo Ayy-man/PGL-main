@@ -58,7 +58,7 @@ export function PersonaCardGrid({ personas, orgId }: PersonaCardGridProps) {
                 className="text-[14px] font-medium"
                 style={{ color: "var(--text-primary)" }}
               >
-                Create New Persona
+                New Saved Search
               </span>
               <span className="flex items-center gap-1 text-[12px]" style={{ color: "var(--text-tertiary)" }}>
                 <Sparkles className="h-3 w-3" />
