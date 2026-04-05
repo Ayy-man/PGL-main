@@ -210,8 +210,8 @@ export async function searchApollo(
 
     try {
       const existing = apolloIds.length > 0
-        ? await redis.hmget<string>(firstSeenKey, ...apolloIds)
-        : [];
+        ? await redis.hmget(firstSeenKey, ...apolloIds) as (string | null)[]
+        : [] as (string | null)[];
       const toSet: Record<string, string> = {};
       for (let i = 0; i < apolloIds.length; i++) {
         const id = apolloIds[i];
