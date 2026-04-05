@@ -32,12 +32,24 @@ function getAvatarGradient(name: string): string {
   return `linear-gradient(135deg, hsl(${hue}, 40%, 30%), hsl(${hue}, 50%, 20%))`;
 }
 
+type SavedSearchMeta = {
+  status: string;
+  is_new: boolean;
+  prospect_id: string | null;
+  last_seen_at: string;
+};
+
+type ApolloPersonWithMeta = ApolloPerson & { _savedSearchMeta?: SavedSearchMeta };
+
 interface ProspectResultsTableProps {
-  results: ApolloPerson[];
+  results: ApolloPersonWithMeta[];
   selectedIds: Set<string>;
   onSelect: (id: string) => void;
   onSelectAll: () => void;
   onProspectClick: (id: string) => void;
+  savedSearchMode?: boolean;             // NEW
+  onUndoDismiss?: (id: string) => void;  // NEW
+  lastRefreshedAt?: string | null;       // NEW — for "Not in latest results" indicator
 }
 
 export function ProspectResultsTable({
@@ -46,6 +58,9 @@ export function ProspectResultsTable({
   onSelect,
   onSelectAll,
   onProspectClick,
+  savedSearchMode,
+  onUndoDismiss,
+  lastRefreshedAt,
 }: ProspectResultsTableProps) {
   const allSelected = selectedIds.size === results.length && results.length > 0;
 
@@ -128,6 +143,11 @@ export function ProspectResultsTable({
                 .filter(Boolean)
                 .join(", ");
               const isSelected = selectedIds.has(prospect.id);
+              const isDismissed = prospect._savedSearchMeta?.status === 'dismissed';
+              const isEnriched = prospect._savedSearchMeta?.status === 'enriched';
+              const isNew = savedSearchMode && prospect._savedSearchMeta?.is_new;
+              const notInLatest = savedSearchMode && lastRefreshedAt && prospect._savedSearchMeta?.last_seen_at
+                && new Date(prospect._savedSearchMeta.last_seen_at) < new Date(lastRefreshedAt);
 
               return (
                 <tr
@@ -135,21 +155,33 @@ export function ProspectResultsTable({
                   onClick={() => onProspectClick(prospect.id)}
                   className="row-hover-gold group transition-colors duration-150 cursor-pointer"
                   data-selected={isSelected || undefined}
-                  style={{ borderBottom: "1px solid var(--border-subtle)" }}
+                  style={{
+                    borderBottom: "1px solid var(--border-subtle)",
+                    opacity: isDismissed ? 0.4 : 1,
+                  }}
                 >
-                  {/* Checkbox */}
+                  {/* Checkbox — hidden for enriched prospects in saved search mode */}
                   <td className="whitespace-nowrap py-5 pl-5 pr-3">
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={(e) => {
-                        e.stopPropagation();
-                        onSelect(prospect.id);
-                      }}
-                      onClick={(e) => e.stopPropagation()}
-                      className="h-4 w-4 rounded border-border accent-[var(--gold-primary)] cursor-pointer"
-                      aria-label={`Select ${name}`}
-                    />
+                    {savedSearchMode && isEnriched ? (
+                      <span
+                        className="text-[10px] px-1.5 py-0.5 rounded"
+                        style={{ color: "var(--text-tertiary)", background: "rgba(255,255,255,0.05)" }}
+                      >
+                        Enriched
+                      </span>
+                    ) : (
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          onSelect(prospect.id);
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        className="h-4 w-4 rounded border-border accent-[var(--gold-primary)] cursor-pointer"
+                        aria-label={`Select ${name}`}
+                      />
+                    )}
                   </td>
 
                   {/* Prospect: Avatar + Name + Location */}
@@ -165,10 +197,27 @@ export function ProspectResultsTable({
                       </div>
                       <div className="ml-3">
                         <div
-                          className="text-[15px] font-medium transition-colors duration-150 group-hover:text-[var(--gold-primary)]"
+                          className="text-[15px] font-medium transition-colors duration-150 group-hover:text-[var(--gold-primary)] flex items-center gap-1.5"
                           style={{ color: "var(--text-primary-ds)" }}
                         >
                           {name}
+                          {isNew && (
+                            <span
+                              className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide"
+                              style={{
+                                background: "rgba(212, 175, 55, 0.15)",
+                                color: "var(--gold-text, #f4d47f)",
+                                border: "1px solid rgba(212, 175, 55, 0.3)",
+                              }}
+                            >
+                              NEW
+                            </span>
+                          )}
+                          {notInLatest && (
+                            <span className="text-[10px]" style={{ color: "var(--text-tertiary)" }}>
+                              Not in latest results
+                            </span>
+                          )}
                         </div>
                         {location && (
                           <div
@@ -220,43 +269,54 @@ export function ProspectResultsTable({
                     </span>
                   </td>
 
-                  {/* Enrichment status dots */}
+                  {/* Enrichment status dots + Undo button for dismissed */}
                   <td className="whitespace-nowrap px-3 py-5 text-sm">
-                    {prospect._enriched === false ? (
-                      <span
-                        className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium"
-                        style={{
-                          background: "rgba(245,158,11,0.15)",
-                          color: "rgb(245,158,11)",
-                          border: "1px solid rgba(245,158,11,0.3)",
-                        }}
-                      >
-                        Preview Only
-                      </span>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                        <div className="flex gap-1">
-                          <span
-                            className="h-2.5 w-2.5 rounded-full"
-                            style={{ background: "rgba(255,255,255,0.15)" }}
-                          />
-                          <span
-                            className="h-2.5 w-2.5 rounded-full"
-                            style={{ background: "rgba(255,255,255,0.15)" }}
-                          />
-                          <span
-                            className="h-2.5 w-2.5 rounded-full"
-                            style={{ background: "rgba(255,255,255,0.15)" }}
-                          />
-                        </div>
+                    <div className="flex items-center gap-2">
+                      {prospect._enriched === false ? (
                         <span
-                          className="text-xs ml-1"
-                          style={{ color: "var(--text-ghost)" }}
+                          className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium"
+                          style={{
+                            background: "rgba(245,158,11,0.15)",
+                            color: "rgb(245,158,11)",
+                            border: "1px solid rgba(245,158,11,0.3)",
+                          }}
                         >
-                          Not enriched
+                          Preview Only
                         </span>
-                      </div>
-                    )}
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <div className="flex gap-1">
+                            <span
+                              className="h-2.5 w-2.5 rounded-full"
+                              style={{ background: "rgba(255,255,255,0.15)" }}
+                            />
+                            <span
+                              className="h-2.5 w-2.5 rounded-full"
+                              style={{ background: "rgba(255,255,255,0.15)" }}
+                            />
+                            <span
+                              className="h-2.5 w-2.5 rounded-full"
+                              style={{ background: "rgba(255,255,255,0.15)" }}
+                            />
+                          </div>
+                          <span
+                            className="text-xs ml-1"
+                            style={{ color: "var(--text-ghost)" }}
+                          >
+                            Not enriched
+                          </span>
+                        </div>
+                      )}
+                      {savedSearchMode && isDismissed && onUndoDismiss && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); onUndoDismiss(prospect.id); }}
+                          className="text-[12px] px-2 py-1 rounded transition-colors"
+                          style={{ color: "var(--gold-text)", background: "rgba(212, 175, 55, 0.1)" }}
+                        >
+                          Undo
+                        </button>
+                      )}
+                    </div>
                   </td>
 
                 </tr>
@@ -276,12 +336,15 @@ export function ProspectResultsTable({
             .filter(Boolean)
             .join(", ");
           const isSelected = selectedIds.has(prospect.id);
+          const isDismissed = prospect._savedSearchMeta?.status === 'dismissed';
+          const isNew = savedSearchMode && prospect._savedSearchMeta?.is_new;
 
           return (
             <div
               key={prospect.id}
               className="p-4 space-y-2 cursor-pointer"
               onClick={() => onProspectClick(prospect.id)}
+              style={{ opacity: isDismissed ? 0.4 : 1 }}
             >
               <div className="flex items-start gap-3">
                 {/* Checkbox */}
@@ -295,9 +358,23 @@ export function ProspectResultsTable({
                 />
                 {/* Name + details */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate" style={{ color: "var(--text-primary-ds)" }}>
-                    {name}
-                  </p>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <p className="text-sm font-medium truncate" style={{ color: "var(--text-primary-ds)" }}>
+                      {name}
+                    </p>
+                    {isNew && (
+                      <span
+                        className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide"
+                        style={{
+                          background: "rgba(212, 175, 55, 0.15)",
+                          color: "var(--gold-text, #f4d47f)",
+                          border: "1px solid rgba(212, 175, 55, 0.3)",
+                        }}
+                      >
+                        NEW
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs truncate" style={{ color: "var(--text-secondary)" }}>
                     {prospect.title || "—"}
                     {(prospect.organization_name || prospect.organization?.name) &&
@@ -320,6 +397,15 @@ export function ProspectResultsTable({
                     >
                       Preview Only
                     </span>
+                  )}
+                  {savedSearchMode && isDismissed && onUndoDismiss && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onUndoDismiss(prospect.id); }}
+                      className="text-[12px] px-2 py-1 rounded mt-1 transition-colors"
+                      style={{ color: "var(--gold-text)", background: "rgba(212, 175, 55, 0.1)" }}
+                    >
+                      Undo
+                    </button>
                   )}
                 </div>
                 <span className="text-[11px] shrink-0" style={{ color: "var(--text-ghost)" }}>—</span>

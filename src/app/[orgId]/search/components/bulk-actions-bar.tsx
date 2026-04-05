@@ -1,6 +1,6 @@
 "use client";
 
-import { ListPlus, Download, Sparkles } from "lucide-react";
+import { ListPlus, Download, Sparkles, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface BulkActionsBarProps {
@@ -11,6 +11,8 @@ interface BulkActionsBarProps {
   onAddToList: () => void;
   onExport: () => void;
   onEnrich: () => void;
+  onDismiss?: () => void;     // NEW
+  showDismiss?: boolean;       // NEW — only show in saved search mode
 }
 
 export function BulkActionsBar({
@@ -20,6 +22,8 @@ export function BulkActionsBar({
   onAddToList,
   onExport,
   onEnrich,
+  onDismiss,
+  showDismiss,
 }: BulkActionsBarProps) {
   return (
     <div
@@ -61,6 +65,17 @@ export function BulkActionsBar({
             <Sparkles className="h-4 w-4 mr-1.5" />
             Enrich Selection
           </Button>
+          {showDismiss && onDismiss && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onDismiss}
+              className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+            >
+              <Trash2 className="h-4 w-4 mr-1.5" />
+              Dismiss Selected
+            </Button>
+          )}
         </div>
       )}
     </div>
