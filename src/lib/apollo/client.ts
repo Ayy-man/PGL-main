@@ -206,6 +206,7 @@ export async function searchApollo(
       name: `${p.first_name} ${p.last_name_obfuscated || ""}`.trim(),
       title: p.title || "",
       organization_name: p.organization?.name,
+      last_refreshed_at: p.last_refreshed_at,
       _enriched: false,
     }));
 

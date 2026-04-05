@@ -3,6 +3,21 @@
 import type { ApolloPerson } from "@/lib/apollo/types";
 import { MapPin } from "lucide-react";
 
+function formatRelativeDate(dateStr: string | undefined): string {
+  if (!dateStr) return "—";
+  const date = new Date(dateStr);
+  if (isNaN(date.getTime())) return "—";
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Yesterday";
+  if (diffDays < 30) return `${diffDays}d ago`;
+  const diffMonths = Math.floor(diffDays / 30);
+  if (diffMonths < 12) return `${diffMonths}mo ago`;
+  return `${Math.floor(diffMonths / 12)}y ago`;
+}
+
 function getInitials(name: string): string {
   return name
     .split(" ")
@@ -84,6 +99,13 @@ export function ProspectResultsTable({
                 scope="col"
               >
                 Title &amp; Company
+              </th>
+              <th
+                className="px-3 py-3.5 text-left text-xs font-semibold uppercase tracking-wider"
+                style={{ color: "var(--text-tertiary)" }}
+                scope="col"
+              >
+                Last Updated
               </th>
               <th
                 className="px-3 py-3.5 text-left text-xs font-semibold uppercase tracking-wider"
@@ -189,6 +211,13 @@ export function ProspectResultsTable({
                           ""}
                       </span>
                     </div>
+                  </td>
+
+                  {/* Last Updated */}
+                  <td className="whitespace-nowrap px-3 py-5">
+                    <span className="text-xs" style={{ color: "var(--text-tertiary)" }}>
+                      {formatRelativeDate(prospect.last_refreshed_at)}
+                    </span>
                   </td>
 
                   {/* Enrichment status dots */}
