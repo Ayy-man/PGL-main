@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { ACTION_TYPES, type ActivityLogEntry } from "@/lib/activity-logger";
 
 /**
@@ -40,6 +41,12 @@ export async function GET(request: Request) {
         { error: "Forbidden - Admin access required" },
         { status: 403 }
       );
+    }
+
+    // 2b. Extract tenant ID from user metadata (required for admin-client scoping)
+    const tenantId = user.app_metadata?.tenant_id as string | undefined;
+    if (!tenantId) {
+      return NextResponse.json({ error: "No tenant associated" }, { status: 403 });
     }
 
     // 3. Extract and validate query parameters
@@ -107,10 +114,14 @@ export async function GET(request: Request) {
     );
     const offset = (page - 1) * limit;
 
-    // 4. Build query (RLS automatically scopes to user's tenant)
-    let query = supabase
+    // 4. Build query using admin client to bypass RLS (logActivity writes via admin client
+    //    for the same reason — no RLS SELECT policy exists for activity_log).
+    //    Tenant scoping is applied explicitly via .eq("tenant_id", tenantId).
+    const adminSupabase = createAdminClient();
+    let query = adminSupabase
       .from("activity_log")
-      .select("*", { count: "exact" });
+      .select("*", { count: "exact" })
+      .eq("tenant_id", tenantId);
 
     // Apply filters
     if (actionTypeFilter && actionTypeFilter.length > 0) {
