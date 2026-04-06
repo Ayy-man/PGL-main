@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Pin, Check, X, Zap, MessageSquare, FileText } from "lucide-react";
+import { Pin, Check, X, Zap, FileText } from "lucide-react";
 import type { ScrapbookCard, PinTarget } from "@/types/research";
 
 interface ResearchPinDropdownProps {
