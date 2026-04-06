@@ -168,7 +168,7 @@ export function ResearchPinDropdown({
     const isHook = editMode === "dossier_hook";
     return (
       <div
-        className="absolute left-0 z-50 w-full mt-1 rounded-lg p-3 space-y-2"
+        className="absolute top-0 left-0 right-0 z-50 rounded-lg p-3 space-y-2"
         style={{
           background: "#1e1e1e",
           border: "1px solid rgba(212,175,55,0.4)",
