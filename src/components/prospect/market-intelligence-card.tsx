@@ -144,7 +144,17 @@ export function MarketIntelligenceCard({
   }, [ticker, snapshotAt, prospectId]);
 
   if (!ticker) {
-    return null;
+    return (
+      <section className="rounded-xl border border-border/40 bg-card/50 p-6">
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <BarChart3 className="h-5 w-5" />
+          <h2 className="font-serif text-lg font-semibold">Market Intelligence</h2>
+        </div>
+        <p className="mt-2 text-sm text-muted-foreground">
+          No public ticker found for this company. Market data is only available for publicly traded companies.
+        </p>
+      </section>
+    );
   }
 
   const handleFetch = async () => {

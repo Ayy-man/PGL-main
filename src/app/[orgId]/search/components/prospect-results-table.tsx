@@ -337,6 +337,7 @@ export function ProspectResultsTable({
             .join(", ");
           const isSelected = selectedIds.has(prospect.id);
           const isDismissed = prospect._savedSearchMeta?.status === 'dismissed';
+          const isEnriched = prospect._savedSearchMeta?.status === 'enriched';
           const isNew = savedSearchMode && prospect._savedSearchMeta?.is_new;
 
           return (
@@ -347,7 +348,15 @@ export function ProspectResultsTable({
               style={{ opacity: isDismissed ? 0.4 : 1 }}
             >
               <div className="flex items-start gap-3">
-                {/* Checkbox */}
+                {/* Checkbox — hidden for enriched prospects in saved search mode (matches desktop) */}
+                {savedSearchMode && isEnriched ? (
+                  <span
+                    className="mt-1 text-[10px] px-1.5 py-0.5 rounded shrink-0"
+                    style={{ color: "var(--text-tertiary)", background: "rgba(255,255,255,0.05)" }}
+                  >
+                    Enriched
+                  </span>
+                ) : (
                 <input
                   type="checkbox"
                   className="mt-1 h-5 w-5 rounded accent-[var(--gold-primary)] cursor-pointer"
@@ -356,6 +365,7 @@ export function ProspectResultsTable({
                   onClick={(e) => e.stopPropagation()}
                   aria-label={`Select ${name}`}
                 />
+                )}
                 {/* Name + details */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">

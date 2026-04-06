@@ -105,9 +105,9 @@ export function useSearch(): SearchResult {
     });
 
     try {
-      // ── Step 1: NL parse (keyword-only, no persona) ──
+      // ── Step 1: NL parse ──
       let nlFilters: Partial<PersonaFiltersType> = {};
-      if (!searchState.persona && searchState.keywords?.trim()) {
+      if (searchState.keywords?.trim()) {
         const parseStart = performance.now();
         console.info("[useSearch] [1/3] Parsing NL query:", searchState.keywords);
         try {

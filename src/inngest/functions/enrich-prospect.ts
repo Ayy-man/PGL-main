@@ -127,8 +127,17 @@ export const enrichProspect = inngest.createFunction(
         .limit(1);
 
       if (existing && existing.length > 0) {
-        // Already enriched — just link the current prospect record
-        // (the prospect row already exists if we got here from upsert)
+        // Already enriched — sync any saved search rows added AFTER the original enrichment ran
+        // (e.g. person added to a new search after they were already enriched in another)
+        const existingProspectId = existing[0].prospect_id;
+        if (existingProspectId && prospectRow?.apollo_id) {
+          await supabase
+            .from('saved_search_prospects')
+            .update({ status: 'enriched', prospect_id: existingProspectId, is_new: false })
+            .eq('apollo_person_id', prospectRow.apollo_id)
+            .eq('tenant_id', tenantId)
+            .neq('status', 'enriched'); // Only update rows not yet linked
+        }
         return true; // Signal to skip remaining steps
       }
 
@@ -677,7 +686,7 @@ export const enrichProspect = inngest.createFunction(
       if (prospectRow?.apollo_id) {
         await supabase
           .from('saved_search_prospects')
-          .update({ status: 'enriched', prospect_id: prospectId })
+          .update({ status: 'enriched', prospect_id: prospectId, is_new: false })
           .eq('apollo_person_id', prospectRow.apollo_id)
           .eq('tenant_id', tenantId);
       }

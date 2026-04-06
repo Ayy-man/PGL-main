@@ -240,6 +240,7 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
   useEffect(() => {
     setSelectedIds(new Set());
     setFilterOverrides({});
+    setShowDismissed(false);
 
     if (!searchState.persona) {
       setIsSavedSearchMode(false);
@@ -285,11 +286,14 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
 
   const handleSelectAll = () => {
     if (isSavedSearchMode) {
-      const allIds = savedProspects.map((p) => p.apollo_person_id);
-      if (selectedIds.size === allIds.length) {
+      // Enriched prospects show an indicator instead of a checkbox — exclude from Select All
+      const selectableIds = savedProspects
+        .filter(p => p.status !== 'enriched')
+        .map((p) => p.apollo_person_id);
+      if (selectedIds.size === selectableIds.length && selectableIds.length > 0) {
         setSelectedIds(new Set());
       } else {
-        setSelectedIds(new Set(allIds));
+        setSelectedIds(new Set(selectableIds));
       }
     } else {
       if (selectedIds.size === results.length) {
@@ -315,7 +319,10 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
   // NL search handler
   // ----------------------------------------------------------------
   const handleNLSearch = (keywords: string) => {
-    setSearchState({ keywords });
+    // Typing a keyword query exits saved search mode — the two modes are mutually exclusive.
+    // Saved search mode shows stored DB prospects; keyword search hits Apollo live.
+    // For filtering within a saved search, use the Advanced Filters panel instead.
+    setSearchState({ keywords, persona: "" });
   };
 
   // ----------------------------------------------------------------
@@ -651,7 +658,7 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
             <PersonaPills
               personas={personas}
               selectedId={searchState.persona}
-              onSelect={(id) => setSearchState({ persona: id })}
+              onSelect={(id) => setSearchState({ persona: id, keywords: "" })}
               createButton={
                 <PersonaFormDialog
                   mode="create"
