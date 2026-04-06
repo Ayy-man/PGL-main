@@ -10,7 +10,9 @@ interface ResearchResultCardProps {
   prospectId: string;
   messageId: string;
   index?: number;
+  initialPinned?: boolean;
   onPinSuccess?: (cardIndex: number, pinTarget: PinTarget) => void;
+  onNotePinned?: () => void;
 }
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string }> = {
@@ -77,11 +79,13 @@ export function ResearchResultCard({
   prospectId,
   messageId,
   index = 0,
+  initialPinned = false,
   onPinSuccess,
+  onNotePinned,
 }: ResearchResultCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [isPinned, setIsPinned] = useState(false);
+  const [isPinned, setIsPinned] = useState(initialPinned);
 
   const colors = CATEGORY_COLORS[card.category] ?? CATEGORY_COLORS.other;
   const animDelay = `${index * 120}ms`;
@@ -268,6 +272,7 @@ export function ResearchResultCard({
           messageId={messageId}
           isPinned={isPinned}
           onPinSuccess={handlePinSuccess}
+          onNotePinned={onNotePinned}
         />
 
         {/* Copy button */}

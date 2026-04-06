@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Clock, SendHorizontal, ChevronDown, ChevronUp, Globe, Loader2, CheckCircle2 } from "lucide-react";
 import type { ScrapbookCard } from "@/types/research";
 import { ResearchResultCard } from "./research-result-card";
@@ -35,6 +36,7 @@ interface ChatMessage {
     toolStatus?: string;
     resultCount?: number;
   };
+  pinnedCardIndices?: Set<number>;
 }
 
 interface SessionListItem {
@@ -66,6 +68,7 @@ const _STREAMING_LABELS: Partial<Record<StreamPhase, string>> = {
 };
 
 export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchPanelProps) {
+  const router = useRouter();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [streamPhase, setStreamPhase] = useState<StreamPhase>("idle");
@@ -368,6 +371,7 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
       );
       if (!res.ok) return;
       const data = await res.json();
+      const pins: Array<{ message_id: string; card_index: number }> = data.pins ?? [];
       setSessionId(id);
       setMessages(
         (data.messages ?? []).map((m: {
@@ -382,6 +386,9 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
           content: m.content,
           cards: m.result_cards ?? [],
           metadata: m.metadata,
+          pinnedCardIndices: new Set(
+            pins.filter((p) => p.message_id === m.id).map((p) => p.card_index)
+          ),
         }))
       );
     } catch {
@@ -691,6 +698,8 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
                     onToggleLowRelevance={() =>
                       setLowRelevanceCollapsed((v) => !v)
                     }
+                    pinnedCardIndices={msg.pinnedCardIndices}
+                    onNotePinned={() => router.refresh()}
                   />
                 )}
 
@@ -1007,12 +1016,16 @@ function CardGroup({
   messageId,
   lowRelevanceCollapsed,
   onToggleLowRelevance,
+  pinnedCardIndices,
+  onNotePinned,
 }: {
   cards: ScrapbookCard[];
   prospectId: string;
   messageId: string;
   lowRelevanceCollapsed: boolean;
   onToggleLowRelevance: () => void;
+  pinnedCardIndices?: Set<number>;
+  onNotePinned?: () => void;
 }) {
   const primary = cards.filter(
     (c) => c.relevance !== "low" && c.answer_relevance !== "background"
@@ -1030,6 +1043,8 @@ function CardGroup({
           prospectId={prospectId}
           messageId={messageId}
           index={idx}
+          initialPinned={pinnedCardIndices?.has(card.index)}
+          onNotePinned={onNotePinned}
         />
       ))}
       {background.length > 0 && (
@@ -1072,6 +1087,8 @@ function CardGroup({
                     prospectId={prospectId}
                     messageId={messageId}
                     index={primary.length + idx}
+                    initialPinned={pinnedCardIndices?.has(card.index)}
+                    onNotePinned={onNotePinned}
                   />
                 </div>
               ))}

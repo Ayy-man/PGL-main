@@ -10,6 +10,7 @@ interface ResearchPinDropdownProps {
   messageId: string;
   isPinned?: boolean;
   onPinSuccess?: (cardIndex: number, pinTarget: PinTarget) => void;
+  onNotePinned?: () => void;
 }
 
 interface PinTargetOption {
@@ -29,6 +30,7 @@ export function ResearchPinDropdown({
   messageId,
   isPinned: externalIsPinned = false,
   onPinSuccess,
+  onNotePinned,
 }: ResearchPinDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [editMode, setEditMode] = useState<PinTarget | null>(null);
@@ -36,6 +38,7 @@ export function ResearchPinDropdown({
   const [editedSummary, setEditedSummary] = useState("");
   const [isPinning, setIsPinning] = useState(false);
   const [isPinned, setIsPinned] = useState(externalIsPinned);
+  const [pinError, setPinError] = useState<string | null>(null);
   const [showUndo, setShowUndo] = useState(false);
   const [undoTimeout, setUndoTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
 
@@ -82,6 +85,7 @@ export function ResearchPinDropdown({
   const handlePin = async () => {
     if (!editMode) return;
     setIsPinning(true);
+    setPinError(null);
 
     try {
       const res = await fetch(
@@ -105,6 +109,7 @@ export function ResearchPinDropdown({
         setEditMode(null);
         setShowUndo(true);
         onPinSuccess?.(card.index, editMode);
+        if (editMode === "note") onNotePinned?.();
 
         const timeout = setTimeout(() => {
           setShowUndo(false);
@@ -114,9 +119,11 @@ export function ResearchPinDropdown({
       } else {
         const data = await res.json().catch(() => ({}));
         console.error("Pin failed:", data);
+        setPinError(data?.error ?? "Failed to save. Please try again.");
       }
     } catch (err) {
       console.error("Pin request failed:", err);
+      setPinError("Network error. Please try again.");
     } finally {
       setIsPinning(false);
     }
@@ -218,6 +225,10 @@ export function ResearchPinDropdown({
             }}
             placeholder="Summary"
           />
+        )}
+
+        {pinError && (
+          <p className="text-xs px-1" style={{ color: "#f87171" }}>{pinError}</p>
         )}
 
         <div className="flex gap-2 pt-1">

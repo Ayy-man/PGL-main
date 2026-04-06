@@ -64,8 +64,21 @@ export async function GET(
     );
   }
 
+  // --- Fetch pins for these messages ---
+  const messageIds = (messages ?? []).map((m: { id: string }) => m.id);
+  let pins: Array<{ message_id: string; card_index: number }> = [];
+  if (messageIds.length > 0) {
+    const { data: pinData } = await admin
+      .from("research_pins")
+      .select("message_id, card_index")
+      .in("message_id", messageIds)
+      .eq("tenant_id", tenantId);
+    pins = pinData ?? [];
+  }
+
   return NextResponse.json({
     session_id: sessionId,
     messages: messages ?? [],
+    pins,
   });
 }
