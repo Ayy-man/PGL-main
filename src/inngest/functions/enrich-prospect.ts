@@ -2,7 +2,7 @@ import { inngest } from "../client";
 import { enrichContactOut } from "@/lib/enrichment/contactout";
 import { enrichExa } from "@/lib/enrichment/exa";
 import { digestExaResults, type DigestedSignal } from "@/lib/enrichment/exa-digest";
-import { enrichEdgar, lookupCompanyCik } from "@/lib/enrichment/edgar";
+import { enrichEdgar, lookupCompanyCik, enrichEdgarByName } from "@/lib/enrichment/edgar";
 import { generateProspectSummary, generateIntelligenceDossier } from "@/lib/enrichment/claude";
 import { logActivity } from "@/lib/activity-logger";
 import { logProspectActivity } from "@/lib/activity";
@@ -390,10 +390,10 @@ export const enrichProspect = inngest.createFunction(
     const effectiveTicker = resolvedCompany.ticker || ticker;
     const effectiveIsPublic = !!(effectiveCik || effectiveTicker);
 
-    // Step 4: Fetch SEC EDGAR data (only for public companies)
+    // Step 4: Fetch SEC EDGAR data (public companies via CIK, non-public via EFTS name search)
     const edgarData = await step.run("fetch-edgar", async () => {
-      // Skip if not public company
-      if (!effectiveIsPublic || !effectiveCik) {
+      // Skip only when there is no CIK and no name to search with
+      if (!effectiveIsPublic && !name) {
         await updateSourceStatus(prospectId, "sec", {
           status: "skipped",
           at: new Date().toISOString(),
@@ -401,8 +401,54 @@ export const enrichProspect = inngest.createFunction(
         return { found: false, transactions: [], status: "skipped" };
       }
 
+      // If no CIK, go straight to EFTS name search
+      if (!effectiveCik) {
+        if (!name) {
+          await updateSourceStatus(prospectId, "sec", { status: "skipped", at: new Date().toISOString() });
+          return { found: false, transactions: [], status: "skipped" };
+        }
+        try {
+          const eftsResult = await enrichEdgarByName({ name });
+          const eftsStatus = eftsResult.found ? "complete" : "failed";
+          await updateSourceStatus(prospectId, "sec", { status: eftsStatus, at: new Date().toISOString() });
+          if (eftsResult.found && eftsResult.transactions.length > 0) {
+            await supabase.from("prospects").update({
+              insider_data: {
+                transactions: eftsResult.transactions,
+                total_value: eftsResult.transactions.reduce((sum, tx) => sum + tx.totalValue, 0),
+                source: "sec-edgar-efts",
+                enriched_at: new Date().toISOString(),
+              },
+            }).eq("id", prospectId);
+            for (const tx of eftsResult.transactions) {
+              await supabase.from("prospect_signals").insert({
+                prospect_id: prospectId,
+                tenant_id: tenantId,
+                category: "sec_filing",
+                headline: `${tx.transactionType} ${tx.shares.toLocaleString()} shares ($${tx.totalValue.toLocaleString()})`,
+                summary: `SEC Form 4: ${tx.transactionType} of ${tx.shares.toLocaleString()} shares at $${tx.pricePerShare.toFixed(2)}/share, total value $${tx.totalValue.toLocaleString()}. Filed ${tx.filingDate}.`,
+                source_url: null,
+                event_date: tx.filingDate || null,
+                raw_source: "sec-edgar",
+                is_new: true,
+              }).then(({ error: insertErr }) => {
+                if (insertErr && !insertErr.message.includes("duplicate")) {
+                  console.error("[enrich] SEC EFTS signal insert error:", insertErr.message);
+                }
+              });
+            }
+            logProspectActivity({ prospectId, tenantId, userId: null, category: "data", eventType: "sec_updated", title: "SEC filings updated (EFTS)", metadata: { transactionCount: eftsResult.transactions.length } }).catch(() => {});
+          }
+          return { found: eftsResult.found, transactions: eftsResult.transactions, status: eftsStatus };
+        } catch (error) {
+          console.error("[Inngest] EFTS-only SEC enrichment failed:", error);
+          await updateSourceStatus(prospectId, "sec", { status: "failed", error: error instanceof Error ? error.message : String(error), at: new Date().toISOString() });
+          return { found: false, transactions: [], status: "failed" };
+        }
+      }
+
       try {
-        const result = await enrichEdgar({ cik: effectiveCik, name });
+        let result = await enrichEdgar({ cik: effectiveCik, name });
 
         // Determine source status
         let sourceStatus = "complete";
@@ -429,6 +475,27 @@ export const enrichProspect = inngest.createFunction(
             status: sourceStatus,
             at: new Date().toISOString(),
           });
+        }
+
+        // EFTS fallback: if CIK-based search found no transactions, try person name search
+        if ((!result.found || result.transactions.length === 0) && name) {
+          try {
+            const eftsResult = await enrichEdgarByName({ name });
+            if (eftsResult.found && eftsResult.transactions.length > 0) {
+              result = {
+                found: true,
+                transactions: eftsResult.transactions,
+              };
+              sourceStatus = "complete";
+              await updateSourceStatus(prospectId, "sec", {
+                status: "complete",
+                at: new Date().toISOString(),
+              });
+            }
+          } catch (eftsError) {
+            console.warn("[Inngest] EFTS name search fallback failed:", eftsError);
+            // Don't override the original result — this is best-effort
+          }
         }
 
         // Save insider data if found
@@ -469,8 +536,8 @@ export const enrichProspect = inngest.createFunction(
 
           logProspectActivity({
             prospectId, tenantId, userId: null,
-            category: 'data', eventType: 'sec_updated',
-            title: 'SEC filings updated',
+            category: "data", eventType: "sec_updated",
+            title: "SEC filings updated",
             metadata: { transactionCount: result.transactions.length },
           }).catch(() => {});
         }
