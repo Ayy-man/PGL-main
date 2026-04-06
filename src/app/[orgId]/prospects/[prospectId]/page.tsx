@@ -255,6 +255,15 @@ export default async function ProspectProfilePage({
     is_seen: viewedSignalIds.has(s.id),
   }));
 
+  // Fetch pinned research notes for this prospect
+  const { data: researchNotes } = await supabase
+    .from("research_pins")
+    .select("edited_headline, edited_summary, created_at")
+    .eq("prospect_id", prospectId)
+    .eq("tenant_id", tenantId)
+    .eq("pin_target", "note")
+    .order("created_at", { ascending: false });
+
   // Fetch team members and tag suggestions in parallel — only if canEdit
   let teamMembers: Array<{ id: string; full_name: string; email: string }> = [];
   let tagSuggestions: string[] = [];
@@ -292,6 +301,7 @@ export default async function ProspectProfilePage({
       tagSuggestions={tagSuggestions}
       initialSignals={signalsWithSeen}
       signalCount={signalCount || 0}
+      researchNotes={researchNotes ?? []}
     />
   );
 }

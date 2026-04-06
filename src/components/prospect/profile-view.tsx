@@ -140,6 +140,7 @@ interface ProfileViewProps {
   tagSuggestions?: string[];
   initialSignals?: Array<import("@/types/database").ProspectSignal & { is_seen: boolean }>;
   signalCount?: number;
+  researchNotes?: Array<{ edited_headline: string | null; edited_summary: string | null; created_at: string }>;
 }
 
 /**
@@ -167,6 +168,7 @@ export function ProfileView({
   tagSuggestions,
   initialSignals,
   signalCount,
+  researchNotes = [],
 }: ProfileViewProps) {
   const [showLookalikes, setShowLookalikes] = useState(false);
   const [noteText, setNoteText] = useState(prospect.notes ?? "");
@@ -647,6 +649,37 @@ export function ProfileView({
                 totalCount={signalCount ?? 0}
                 enrichmentComplete={prospect.enrichment_status === "complete"}
               />
+
+              {/* Research Notes */}
+              {researchNotes.length > 0 && (
+                <div className="surface-card rounded-[14px] p-4 md:p-6">
+                  <h3 className="text-foreground text-xl font-bold font-serif flex items-center gap-2 mb-4">
+                    <svg className="h-5 w-5 shrink-0" style={{ color: "var(--gold-primary)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125" />
+                    </svg>
+                    Research Notes
+                  </h3>
+                  <div className="flex flex-col gap-3">
+                    {researchNotes.map((note, i) => (
+                      <div
+                        key={i}
+                        className="rounded-[10px] p-3"
+                        style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}
+                      >
+                        {note.edited_headline && (
+                          <p className="text-sm font-semibold text-foreground mb-1">{note.edited_headline}</p>
+                        )}
+                        {note.edited_summary && (
+                          <p className="text-xs leading-relaxed" style={{ color: "var(--text-secondary, rgba(232,228,220,0.6))" }}>{note.edited_summary}</p>
+                        )}
+                        <p className="text-[10px] mt-1.5" style={{ color: "var(--text-tertiary, rgba(232,228,220,0.35))" }}>
+                          {new Date(note.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Market Intelligence */}
               <MarketIntelligenceCard
