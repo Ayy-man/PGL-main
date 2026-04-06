@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   Briefcase,
   DollarSign,
@@ -89,6 +89,18 @@ export function SignalTimeline({
   const [total, setTotal] = useState(totalCount);
   const [loading, setLoading] = useState(false);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [filterOpen, setFilterOpen] = useState(false);
+  const filterRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (filterRef.current && !filterRef.current.contains(e.target as Node)) {
+        setFilterOpen(false);
+      }
+    }
+    if (filterOpen) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [filterOpen]);
 
   // Mark unseen signals as seen on mount
   useEffect(() => {
@@ -168,28 +180,51 @@ export function SignalTimeline({
         </h3>
 
         {/* Category filter */}
-        <select
-          value={categoryFilter}
-          onChange={(e) => setCategoryFilter(e.target.value)}
-          className="text-xs rounded-[8px] px-3 py-1.5 border outline-none cursor-pointer appearance-none"
-          style={{
-            background: "rgba(255,255,255,0.04)",
-            borderColor: "var(--border-default, rgba(255,255,255,0.08))",
-            color: "var(--text-secondary, rgba(232,228,220,0.7))",
-            colorScheme: "dark",
-            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(232,228,220,0.4)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
-            backgroundRepeat: "no-repeat",
-            backgroundPosition: "right 8px center",
-            paddingRight: "28px",
-          }}
-        >
-          <option value="all">All Categories</option>
-          {ALL_CATEGORIES.map((cat) => (
-            <option key={cat} value={cat}>
-              {getCategoryLabel(cat)}
-            </option>
-          ))}
-        </select>
+        <div ref={filterRef} className="relative">
+          <button
+            onClick={() => setFilterOpen((p) => !p)}
+            className="flex items-center gap-1.5 text-xs rounded-[8px] px-3 py-1.5 border outline-none cursor-pointer transition-all duration-150"
+            style={{
+              background: filterOpen ? "rgba(212,175,55,0.05)" : "rgba(255,255,255,0.04)",
+              borderColor: filterOpen ? "rgba(212,175,55,0.3)" : "var(--border-default, rgba(255,255,255,0.08))",
+              color: "var(--text-secondary, rgba(232,228,220,0.7))",
+            }}
+          >
+            {categoryFilter === "all" ? "All Categories" : getCategoryLabel(categoryFilter as SignalCategory)}
+            <svg className="h-3 w-3 ml-1 shrink-0" style={{ transform: filterOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 150ms" }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+
+          {filterOpen && (
+            <div
+              className="absolute top-full right-0 mt-1 z-50 rounded-[8px] border py-1 min-w-[160px]"
+              style={{
+                background: "#1a1a1a",
+                borderColor: "rgba(255,255,255,0.08)",
+                boxShadow: "0 8px 24px rgba(0,0,0,0.6)",
+              }}
+            >
+              {[{ value: "all", label: "All Categories" }, ...ALL_CATEGORIES.map((c) => ({ value: c, label: getCategoryLabel(c) }))].map(({ value, label }) => (
+                <button
+                  key={value}
+                  onClick={() => { setCategoryFilter(value); setFilterOpen(false); }}
+                  className="w-full text-left flex items-center gap-2 px-3 py-1.5 text-xs transition-colors duration-100"
+                  style={{
+                    color: categoryFilter === value ? "var(--gold-primary, #d4af37)" : "var(--text-foreground, rgba(232,228,220,0.9))",
+                    background: categoryFilter === value ? "rgba(212,175,55,0.08)" : "transparent",
+                  }}
+                  onMouseEnter={(e) => { if (categoryFilter !== value) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = categoryFilter === value ? "rgba(212,175,55,0.08)" : "transparent"; }}
+                >
+                  {categoryFilter === value && <svg className="h-3 w-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><polyline points="20 6 9 17 4 12" /></svg>}
+                  {categoryFilter !== value && <span className="w-3 shrink-0" />}
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Empty state */}

@@ -776,7 +776,7 @@ export function ProfileView({
           </div>
 
           {/* Activity Log */}
-          <div className="surface-card rounded-[14px] flex flex-col overflow-hidden">
+          <div className="surface-card rounded-[14px] flex flex-col">
             <div className="flex items-center justify-between p-4 pb-3">
               <div className="flex items-center gap-2">
                 <h3 className="text-foreground text-sm font-bold font-serif">Activity</h3>
