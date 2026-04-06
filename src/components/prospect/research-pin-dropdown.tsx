@@ -20,7 +20,6 @@ interface PinTargetOption {
 
 const PIN_TARGETS: PinTargetOption[] = [
   { id: "signal", label: "Add as Wealth Signal", Icon: Zap },
-  { id: "dossier_hook", label: "Add as Outreach Hook", Icon: MessageSquare },
   { id: "note", label: "Save as Research Note", Icon: FileText },
 ];
 
@@ -295,8 +294,9 @@ export function ResearchPinDropdown({
         <div
           className="absolute left-0 bottom-full mb-1 z-50 w-52 rounded-lg py-1 shadow-xl"
           style={{
-            background: "var(--bg-elevated, #1a1a1a)",
-            border: "1px solid var(--border-subtle, rgba(255,255,255,0.08))",
+            background: "#1e1e1e",
+            border: "1px solid rgba(255,255,255,0.1)",
+            boxShadow: "0 8px 24px rgba(0,0,0,0.7)",
           }}
         >
           {PIN_TARGETS.map(({ id, label, Icon }) => (
