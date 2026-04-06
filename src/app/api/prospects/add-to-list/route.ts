@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { addProspectToList } from "@/lib/lists/queries";
+import { logActivity } from "@/lib/activity-logger";
 import { z } from "zod";
 
 const schema = z.object({
@@ -45,6 +46,21 @@ export async function POST(request: Request) {
         (r.status === "rejected" &&
           r.reason?.message?.includes("already in list"))
     ).length;
+
+    // Fire-and-forget: log list addition activity (never blocks the response)
+    if (successCount > 0) {
+      logActivity({
+        tenantId,
+        userId: user.id,
+        actionType: "add_to_list",
+        targetType: "prospect",
+        targetId: prospectId,
+        metadata: {
+          listIds,
+          successCount,
+        },
+      }).catch(() => {}); // defensive catch — logActivity already catches internally
+    }
 
     return NextResponse.json({ addedToLists: successCount });
   } catch (error) {

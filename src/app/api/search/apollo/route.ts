@@ -9,6 +9,7 @@ import {
 import { getPersonaById, updatePersonaLastUsed } from "@/lib/personas/queries";
 import { logError } from "@/lib/error-logger";
 import { ApiError, handleApiError } from "@/lib/api-error";
+import { logActivity } from "@/lib/activity-logger";
 import type { PersonaFilters } from "@/lib/personas/types";
 
 export const dynamic = "force-dynamic";
@@ -109,6 +110,22 @@ export async function POST(request: NextRequest) {
       totalResults: result.pagination.totalResults,
       cached: result.cached,
     });
+
+    // Fire-and-forget: log search activity (never blocks the response)
+    logActivity({
+      tenantId,
+      userId: user.id,
+      actionType: "search_executed",
+      targetType: "persona",
+      targetId: personaId ?? undefined,
+      metadata: {
+        resultCount: result.people.length,
+        totalResults: result.pagination.totalResults,
+        cached: result.cached,
+        searchIdentifier,
+        page,
+      },
+    }).catch(() => {}); // defensive catch — logActivity already catches internally
 
     return NextResponse.json(result, {
       status: 200,
