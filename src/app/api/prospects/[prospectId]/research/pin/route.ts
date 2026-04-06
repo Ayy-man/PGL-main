@@ -24,7 +24,7 @@ const scrapbookCardSchema = z.object({
 
 const bodySchema = z.object({
   card_index: z.number().int().min(0),
-  pin_target: z.enum(["signal", "note"]),
+  pin_target: z.enum(["signal", "note", "dossier_hook"]),
   message_id: z.string().uuid(),
   edited_headline: z.string().optional(),
   edited_summary: z.string().optional(),

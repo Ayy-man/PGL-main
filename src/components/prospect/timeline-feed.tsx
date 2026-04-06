@@ -269,7 +269,7 @@ function EventRow({ event, users, prospectId, onEventDeleted, onEventUpdated }: 
                 <div
                   className="absolute right-0 top-full mt-1 z-50 rounded-[6px] border py-1 min-w-[120px]"
                   style={{
-                    background: "var(--bg-elevated, #1a1a1a)",
+                    background: "#1a1a1a",
                     borderColor: "var(--border-default, rgba(255,255,255,0.06))",
                     boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
                   }}
@@ -296,7 +296,7 @@ function EventRow({ event, users, prospectId, onEventDeleted, onEventUpdated }: 
                 <div
                   className="absolute right-0 top-full mt-1 z-50 rounded-[6px] border p-3 min-w-[160px]"
                   style={{
-                    background: "var(--bg-elevated, #1a1a1a)",
+                    background: "#1a1a1a",
                     borderColor: "var(--destructive, rgba(239,68,68,0.3))",
                     boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
                   }}
