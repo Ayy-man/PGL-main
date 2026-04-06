@@ -170,9 +170,9 @@ export function ResearchPinDropdown({
       <div
         className="absolute left-0 z-50 w-full mt-1 rounded-lg p-3 space-y-2"
         style={{
-          background: "var(--bg-elevated, #1a1a1a)",
-          border: "1px solid var(--border-gold, rgba(212,175,55,0.4))",
-          boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
+          background: "#1e1e1e",
+          border: "1px solid rgba(212,175,55,0.4)",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.7)",
         }}
         ref={dropdownRef}
       >

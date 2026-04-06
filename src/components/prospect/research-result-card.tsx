@@ -100,7 +100,7 @@ export function ResearchResultCard({
 
   return (
     <div
-      className="rounded-xl p-4 transition-all duration-150"
+      className="relative rounded-xl p-4 transition-all duration-150"
       style={{
         background: "var(--bg-card, rgba(255,255,255,0.04))",
         boxShadow:
