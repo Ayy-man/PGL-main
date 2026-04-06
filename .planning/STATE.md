@@ -5,7 +5,7 @@ milestone_name: milestone
 status: executing
 stopped_at: Completed 27-03-PLAN.md
 last_updated: "2026-04-05T14:47:04.016Z"
-last_activity: 2026-04-06 -- Completed quick task 260406-wbo: Fix SEC EDGAR filings enrichment for more matches and accurate results
+last_activity: 2026-04-06 -- Completed quick task 260407-02n: Fix activity log showing empty — diagnose and fix all root causes
 progress:
   total_phases: 25
   completed_phases: 6
@@ -398,6 +398,7 @@ Recent decisions affecting current work:
 | 260331-qpm | Replace floating session history dropdown with inline panel inside research card | 2026-03-31 | 64684ad | [260331-qpm-replace-floating-session-history-dropdow](./quick/260331-qpm-replace-floating-session-history-dropdow/) |
 | 260404-uia | Redesign prospect slide-over: dual state (preview vs enriched), fix broken buttons | 2026-04-04 | c0155bb | [260404-uia-redesign-prospect-slide-over-dual-state-](./quick/260404-uia-redesign-prospect-slide-over-dual-state-/) |
 | 260406-wbo | Fix SEC EDGAR filings enrichment for more matches and accurate results | 2026-04-06 | aa2cb18 | [260406-wbo-fix-sec-edgar-filings-enrichment-for-mor](./quick/260406-wbo-fix-sec-edgar-filings-enrichment-for-mor/) |
+| 260407-02n | Fix activity log showing empty — diagnose and fix all root causes | 2026-04-06 | ba74964 | [260407-02n-fix-activity-log-showing-empty-diagnose-](./quick/260407-02n-fix-activity-log-showing-empty-diagnose-/) |
 
 ### Blockers/Concerns
 
