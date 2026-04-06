@@ -50,6 +50,45 @@ export async function GET(
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
+  // For enriched rows, override the obfuscated Apollo preview data with real names/details
+  // Apollo search returns anonymized names (e.g. "Si***a") — the enriched prospects table has the real data
+  const enrichedProspectIds = (prospects ?? [])
+    .filter(p => p.prospect_id)
+    .map(p => p.prospect_id as string);
+
+  const enrichedDataMap = new Map<string, { first_name: string; last_name: string; full_name: string; title: string | null; company: string | null; linkedin_url: string | null }>();
+
+  if (enrichedProspectIds.length > 0) {
+    const { data: enrichedProspects } = await supabase
+      .from("prospects")
+      .select("id, first_name, last_name, full_name, title, company, linkedin_url")
+      .in("id", enrichedProspectIds);
+
+    for (const ep of enrichedProspects ?? []) {
+      enrichedDataMap.set(ep.id, ep);
+    }
+  }
+
+  const mergedProspects = (prospects ?? []).map(p => {
+    if (p.prospect_id && enrichedDataMap.has(p.prospect_id)) {
+      const enriched = enrichedDataMap.get(p.prospect_id)!;
+      const apolloData = (p.apollo_data ?? {}) as Record<string, unknown>;
+      return {
+        ...p,
+        apollo_data: {
+          ...apolloData,
+          first_name: enriched.first_name,
+          last_name: enriched.last_name,
+          name: enriched.full_name,
+          ...(enriched.title && { title: enriched.title }),
+          ...(enriched.company && { organization_name: enriched.company }),
+          ...(enriched.linkedin_url && { linkedin_url: enriched.linkedin_url }),
+        },
+      };
+    }
+    return p;
+  });
+
   // Count dismissed (always, for the toggle label)
   const { count: dismissedCount } = await supabase
     .from("saved_search_prospects")
@@ -58,7 +97,7 @@ export async function GET(
     .eq("status", "dismissed");
 
   return NextResponse.json({
-    prospects: prospects ?? [],
+    prospects: mergedProspects,
     dismissedCount: dismissedCount ?? 0,
     lastRefreshedAt: persona.last_refreshed_at,
     totalApolloResults: persona.total_apollo_results,
