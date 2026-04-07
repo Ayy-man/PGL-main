@@ -593,7 +593,7 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
   // Prefer the Supabase UUID (from saved search meta) so re-enrich hits the right row directly.
   // Falls back to the apollo_person_id; the enrich route resolves that via apollo_id lookup.
   const slideOverProspectId =
-    selectedProspect?._savedSearchMeta?.prospect_id ?? searchState.prospect || null;
+    (selectedProspect?._savedSearchMeta?.prospect_id ?? searchState.prospect) || null;
 
   const slideOverProspect = selectedProspect
     ? {
