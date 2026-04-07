@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { NLSearchBar } from "./nl-search-bar";
-import { AdvancedFiltersPanel } from "./advanced-filters-panel";
 import { FilterPillsRow } from "./filter-pills-row";
 import { SavedSearchShortcutList } from "./saved-search-shortcut-list";
 import { SuggestedPersonasSection } from "./suggested-personas-section";
@@ -33,7 +32,6 @@ export function DiscoverTab({
   onSelectSavedSearch,
   onViewAllSaved,
 }: DiscoverTabProps) {
-  const [filtersOpen, setFiltersOpen] = useState(false);
   const [prefillValue, setPrefillValue] = useState(keywords);
 
   const handlePrefill = (query: string) => {
@@ -54,18 +52,28 @@ export function DiscoverTab({
         />
 
         {/* Hero */}
-        <div className="mb-8 text-center relative">
+        <div className="mb-4 text-center relative">
           <h1
-            className="font-serif text-[44px] sm:text-[56px] font-medium"
+            className="font-serif text-[32px] sm:text-[40px] font-medium"
             style={{ letterSpacing: "-0.5px", color: "var(--text-primary-ds)" }}
           >
             Find high-net-worth prospects
           </h1>
           <p
-            className="mt-3 text-[13px] font-light"
+            className="mt-2 text-[13px] font-light"
             style={{ color: "var(--text-tertiary)" }}
           >
             Use natural language to surface wealthy individuals matching your criteria
+          </p>
+        </div>
+
+        {/* Stats bar — subtle trust strip */}
+        <div className="mb-4 text-center">
+          <p
+            className="text-[11px] uppercase tracking-wider font-medium"
+            style={{ color: "var(--text-tertiary)" }}
+          >
+            12,400+ prospects indexed <span style={{ opacity: 0.5 }}>·</span> Updated 2 hours ago
           </p>
         </div>
 
@@ -80,18 +88,9 @@ export function DiscoverTab({
               onSubmitSearch();
             }}
             isLoading={isLoading}
-            onToggleFilters={() => setFiltersOpen((p) => !p)}
-            filtersOpen={filtersOpen}
           />
 
-          {/* Filters below pill */}
-          {filtersOpen && (
-            <div className="mt-3">
-              <AdvancedFiltersPanel onApplyFilters={onApplyFilters} />
-            </div>
-          )}
-
-          {/* Filter pills row — replaces the old AdvancedFiltersPanel toggle */}
+          {/* Filter pills row */}
           <FilterPillsRow onApplyFilters={onApplyFilters} />
 
           {/* Ghost save link — only when keywords are present */}
