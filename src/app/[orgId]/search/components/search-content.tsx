@@ -825,6 +825,7 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
           </div>
 
           {/* ============ TAB PANELS ============ */}
+          <div className="flex-1 min-h-0 overflow-y-auto">
           {activeTab === "discover" ? (
             <DiscoverTab
               personas={personas}
@@ -860,7 +861,7 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
                   }}
                 >
                   <Plus className="h-3 w-3" />
-                  + New
+                  New
                 </button>
               }
               createButtonCollapsed={
@@ -901,6 +902,7 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
               {renderSavedSearchResults()}
             </SavedSearchesTab>
           )}
+          </div>
         </>
       )}
 
