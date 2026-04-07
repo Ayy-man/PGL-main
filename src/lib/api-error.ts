@@ -10,7 +10,8 @@ export type ApiErrorCode =
   | "UNAUTHORIZED"
   | "FORBIDDEN"
   | "EXTERNAL_API_ERROR"
-  | "INTERNAL_ERROR";
+  | "INTERNAL_ERROR"
+  | "OBFUSCATED_PROSPECT";
 
 /**
  * Structured API error class.

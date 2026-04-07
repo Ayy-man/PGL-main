@@ -75,6 +75,19 @@ export async function POST(request: Request) {
 
     const { prospect, listIds } = parseResult.data;
 
+    // Guard: reject obfuscated (preview-only) Apollo previews
+    const nameFields = [prospect.name, prospect.first_name, prospect.last_name];
+    const isObfuscated = nameFields.some(
+      (f) => typeof f === "string" && f.includes("***")
+    );
+    if (isObfuscated) {
+      throw new ApiError(
+        "Prospect data is obfuscated (preview-only). Use Enrich Selection before adding to a list.",
+        "OBFUSCATED_PROSPECT",
+        400
+      );
+    }
+
     // 4. Upsert prospect from Apollo data
     const upsertedProspect = await upsertProspectFromApollo(
       tenantId!,
