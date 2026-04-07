@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 29 UI-SPEC approved
-last_updated: "2026-04-07T13:35:32.489Z"
-last_activity: 2026-04-05 -- Phase 28 execution started
+stopped_at: Completed 27-03-PLAN.md
+last_updated: "2026-04-05T14:47:04.016Z"
+last_activity: 2026-04-06 -- Completed quick task 260407-02n: Fix activity log showing empty — diagnose and fix all root causes
 progress:
-  total_phases: 29
-  completed_phases: 7
+  total_phases: 25
+  completed_phases: 6
   total_plans: 41
-  completed_plans: 42
-  percent: 100
+  completed_plans: 38
+  percent: 93
 ---
 
 # Project State
@@ -376,10 +376,6 @@ Recent decisions affecting current work:
 - Phase 27 added: Research Chat UX Polish — Streaming indicators, Exa response surfacing, chat UI templates
 - Phase 26 added: Targeted Multi-Source Search — Intent-routed channels (SEC EDGAR, ATTOM property, NewsAPI, Proxycurl, FAA Registry, Crunchbase) alongside Exa. LLM classifies query intent → fires specialized APIs in parallel → merges/deduplicates/ranks results into unified scrapbook feed.
 - Phase 28 added: Saved Search Incremental Refresh, Dismiss, and Delete
-- Phase 29 added: Lead Discovery UI redesign — collapsible search rail and view header hierarchy
-- Phase 30 added: Admin Global API Keys Management — view, rotate, and test all external integration credentials from a central admin panel
-- Phase 31 added: Admin Master Data Schema Viewer — browse live DB tables, row counts, and column definitions from the admin panel
-- Phase 32 added: Admin Security Policies — manage RLS status, audit super-admin access, configure IP allowlists and session controls
 
 ### Pending Todos
 
@@ -453,8 +449,8 @@ All 20 phases complete (6-20, including 14.1). The following items remain before
 
 ## Session Continuity
 
-Last session: 2026-04-07T13:35:32.485Z
-Stopped at: Phase 29 UI-SPEC approved
+Last session: 2026-03-30T20:55:42.014Z
+Stopped at: Completed 27-03-PLAN.md
 
 ---
 
