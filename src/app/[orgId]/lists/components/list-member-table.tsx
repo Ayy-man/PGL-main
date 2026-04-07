@@ -18,6 +18,7 @@ import {
   CheckCircle2,
   Mail,
   Phone,
+  RefreshCw,
 } from "lucide-react";
 import { MemberStatusSelect } from "./member-status-select";
 import { MemberNotesCell } from "./member-notes-cell";
@@ -141,6 +142,7 @@ export function ListMemberTable({ members }: ListMemberTableProps) {
   const params = useParams();
   const orgId = params.orgId as string;
   const [removingId, setRemovingId] = useState<string | null>(null);
+  const [enrichingId, setEnrichingId] = useState<string | null>(null);
 
   const handleRemove = async (memberId: string) => {
     if (!confirm("Remove this prospect from the list?")) return;
@@ -148,6 +150,17 @@ export function ListMemberTable({ members }: ListMemberTableProps) {
     const result = await removeFromListAction(memberId);
     if (!result.success) alert(result.error || "Failed to remove from list");
     setRemovingId(null);
+  };
+
+  const handleReEnrich = async (prospectId: string) => {
+    setEnrichingId(prospectId);
+    try {
+      await fetch(`/api/prospects/${prospectId}/enrich?force=true`, { method: "POST" });
+    } catch {
+      // fire-and-forget — Inngest will handle it
+    }
+    // Keep spinner briefly so user sees feedback, then clear
+    setTimeout(() => setEnrichingId(null), 2000);
   };
 
   return (
@@ -267,17 +280,31 @@ export function ListMemberTable({ members }: ListMemberTableProps) {
                   />
                 </TableCell>
 
-                {/* Delete */}
+                {/* Actions: Re-enrich + Delete */}
                 <TableCell>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7"
-                    onClick={() => handleRemove(member.id)}
-                    disabled={removingId === member.id}
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7"
+                      title="Re-enrich prospect"
+                      onClick={() => handleReEnrich(member.prospect.id)}
+                      disabled={enrichingId === member.prospect.id}
+                    >
+                      {enrichingId === member.prospect.id
+                        ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        : <RefreshCw className="h-3.5 w-3.5" />}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={() => handleRemove(member.id)}
+                      disabled={removingId === member.id}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
@@ -329,6 +356,18 @@ export function ListMemberTable({ members }: ListMemberTableProps) {
                 <span className="text-[11px]" style={{ color: "var(--text-tertiary)" }}>
                   {timeAgo(member.added_at)}
                 </span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 shrink-0"
+                  title="Re-enrich prospect"
+                  onClick={() => handleReEnrich(member.prospect.id)}
+                  disabled={enrichingId === member.prospect.id}
+                >
+                  {enrichingId === member.prospect.id
+                    ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    : <RefreshCw className="h-3.5 w-3.5" />}
+                </Button>
                 <Button
                   variant="ghost"
                   size="icon"

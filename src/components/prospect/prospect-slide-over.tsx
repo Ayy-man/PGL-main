@@ -1,8 +1,9 @@
 "use client";
 
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { Mail, Phone, X, Sparkles, Loader2 } from "lucide-react";
+import { Mail, Phone, X, Sparkles, Loader2, RefreshCw } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 
 interface Prospect {
   id: string;
@@ -34,6 +35,19 @@ export function ProspectSlideOver({
   orgId,
   onEnrich,
 }: ProspectSlideOverProps) {
+  const [reEnriching, setReEnriching] = useState(false);
+
+  const handleReEnrich = async () => {
+    if (!prospectId || reEnriching) return;
+    setReEnriching(true);
+    try {
+      await fetch(`/api/prospects/${prospectId}/enrich?force=true`, { method: "POST" });
+    } catch {
+      // fire-and-forget
+    }
+    setTimeout(() => setReEnriching(false), 2000);
+  };
+
   const initials = prospect
     ? `${prospect.first_name?.[0] ?? ""}${prospect.last_name?.[0] ?? ""}`.toUpperCase()
     : "?";
@@ -122,48 +136,61 @@ export function ProspectSlideOver({
             </div>
 
             {isEnriched ? (
-              /* Enriched state: 4-cell grid */
-              <div
-                className="grid grid-cols-2 overflow-hidden rounded-[10px] border border-border"
-                style={{ background: "var(--bg-card-gradient)" }}
-              >
-                {/* Title */}
-                <div className="border-b border-r border-border p-4">
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground">
-                    Title
-                  </p>
-                  <p className="mt-1 text-sm font-medium text-foreground">
-                    {prospect.title ?? "—"}
-                  </p>
+              /* Enriched state: 4-cell grid + re-enrich */
+              <>
+                <div
+                  className="grid grid-cols-2 overflow-hidden rounded-[10px] border border-border"
+                  style={{ background: "var(--bg-card-gradient)" }}
+                >
+                  {/* Title */}
+                  <div className="border-b border-r border-border p-4">
+                    <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                      Title
+                    </p>
+                    <p className="mt-1 text-sm font-medium text-foreground">
+                      {prospect.title ?? "—"}
+                    </p>
+                  </div>
+                  {/* Company */}
+                  <div className="border-b border-border p-4">
+                    <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                      Company
+                    </p>
+                    <p className="mt-1 text-sm font-medium text-foreground">
+                      {prospect.company ?? "—"}
+                    </p>
+                  </div>
+                  {/* Location */}
+                  <div className="border-r border-border p-4">
+                    <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                      Location
+                    </p>
+                    <p className="mt-1 text-sm font-medium text-foreground">
+                      {prospect.location ?? "—"}
+                    </p>
+                  </div>
+                  {/* Email */}
+                  <div className="p-4">
+                    <p className="text-xs uppercase tracking-wider text-muted-foreground">
+                      Email
+                    </p>
+                    <p className="mt-1 truncate text-sm font-medium text-foreground">
+                      {prospect.work_email ?? "—"}
+                    </p>
+                  </div>
                 </div>
-                {/* Company */}
-                <div className="border-b border-border p-4">
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground">
-                    Company
-                  </p>
-                  <p className="mt-1 text-sm font-medium text-foreground">
-                    {prospect.company ?? "—"}
-                  </p>
-                </div>
-                {/* Location */}
-                <div className="border-r border-border p-4">
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground">
-                    Location
-                  </p>
-                  <p className="mt-1 text-sm font-medium text-foreground">
-                    {prospect.location ?? "—"}
-                  </p>
-                </div>
-                {/* Email */}
-                <div className="p-4">
-                  <p className="text-xs uppercase tracking-wider text-muted-foreground">
-                    Email
-                  </p>
-                  <p className="mt-1 truncate text-sm font-medium text-foreground">
-                    {prospect.work_email ?? "—"}
-                  </p>
-                </div>
-              </div>
+                <button
+                  onClick={handleReEnrich}
+                  disabled={reEnriching}
+                  className="flex items-center gap-2 text-xs transition-colors disabled:opacity-50"
+                  style={{ color: "var(--text-tertiary, rgba(232,228,220,0.4))" }}
+                >
+                  {reEnriching
+                    ? <Loader2 className="h-3 w-3 animate-spin" />
+                    : <RefreshCw className="h-3 w-3" />}
+                  {reEnriching ? "Re-enriching…" : "Re-enrich"}
+                </button>
+              </>
             ) : (
               /* Preview state: 2-cell grid + Enrich CTA */
               <>

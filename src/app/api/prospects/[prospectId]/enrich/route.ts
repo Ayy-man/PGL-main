@@ -72,6 +72,9 @@ export async function POST(
       throw new ApiError("Prospect not found", "NOT_FOUND", 404);
     }
 
+    // force=true bypasses the staleness check (used by Re-enrich buttons)
+    const force = request.nextUrl.searchParams.get("force") === "true";
+
     // Check staleness: if last_enriched_at is within 7 days AND status is 'complete', skip
     const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
     const now = Date.now();
@@ -80,6 +83,7 @@ export async function POST(
       : 0;
 
     if (
+      !force &&
       prospect.enrichment_status === "complete" &&
       lastEnriched > 0 &&
       now - lastEnriched < SEVEN_DAYS_MS
