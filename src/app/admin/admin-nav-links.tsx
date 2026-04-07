@@ -20,8 +20,11 @@ const ADMIN_NAV_PLATFORM = [
   { label: "Automations",     href: "/admin/automations", icon: Zap,            exact: false },
 ];
 
-const ADMIN_NAV_SYSTEM = [
-  { label: "Global API Keys",    icon: Key      },
+const ADMIN_NAV_SYSTEM_ACTIVE = [
+  { label: "Global API Keys", href: "/admin/api-keys", icon: Key, exact: false },
+];
+
+const ADMIN_NAV_SYSTEM_STUBS = [
   { label: "Master Data Schema", icon: Database },
   { label: "Security Policies",  icon: Shield   },
   { label: "Integrations",       icon: Plug     },
@@ -105,7 +108,50 @@ export function AdminNavLinks({ collapsed = false }: { collapsed?: boolean }) {
         </div>
       )}
 
-      {ADMIN_NAV_SYSTEM.map((item) => (
+      {ADMIN_NAV_SYSTEM_ACTIVE.map((item) => {
+        const isActive = item.exact
+          ? pathname === item.href
+          : pathname === item.href || pathname.startsWith(`${item.href}/`);
+
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className="flex items-center gap-3 rounded-[8px] px-3 py-3 text-sm font-medium transition-all duration-200 cursor-pointer"
+            style={
+              isActive
+                ? {
+                    background: "var(--gold-bg)",
+                    color: "var(--gold-primary)",
+                    borderLeft: "3px solid var(--gold-primary)",
+                    paddingLeft: "9px",
+                  }
+                : {
+                    color: "var(--text-secondary-ds)",
+                    borderLeft: "3px solid transparent",
+                    paddingLeft: "9px",
+                  }
+            }
+            onMouseEnter={(e) => {
+              if (!isActive) {
+                (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.02)";
+                (e.currentTarget as HTMLElement).style.color = "var(--text-primary-ds)";
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isActive) {
+                (e.currentTarget as HTMLElement).style.background = "";
+                (e.currentTarget as HTMLElement).style.color = "var(--text-secondary-ds)";
+              }
+            }}
+          >
+            <item.icon className="h-4 w-4 shrink-0" />
+            {!collapsed && item.label}
+          </Link>
+        );
+      })}
+
+      {ADMIN_NAV_SYSTEM_STUBS.map((item) => (
         <button
           key={item.label}
           onClick={(e) => e.preventDefault()}
