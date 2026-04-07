@@ -33,7 +33,6 @@ Declared values (must be multiples of 4):
 
 | Token | Value | Usage |
 |-------|-------|-------|
-| xxs | 12px | Dense sidebar item gaps (`gap-3`, `px-3`), shortcut list row layout gaps — dense spacing for sidebar items |
 | xs | 4px | Icon gaps, dot indicators, inline gaps |
 | sm | 8px | Sidebar item vertical padding, compact element spacing |
 | md | 16px | Sidebar item horizontal padding, card inner padding |
@@ -48,6 +47,7 @@ Exceptions:
 - Collapse toggle button: 44px × 44px minimum (WCAG touch target)
 - Colored dot diameter: 8px (sidebar item dot indicator)
 - Collapsed sidebar dot target area: 48px height per item (44px minimum met by row padding)
+- Sidebar item gap: 12px — dense spacing between sidebar items (`gap-3`, `px-3`); matches existing `gap-3` Tailwind utility; structural density decision, not a layout spacing token. Sits between standard 8px and 16px tokens.
 
 ---
 
@@ -57,14 +57,14 @@ Source: `globals.css` (`--font-sans: DM Sans`; `--font-serif: Cormorant Garamond
 
 | Role | Size | Weight | Line Height | Font |
 |------|------|--------|-------------|------|
-| Display (Discover tab h1) | 32px (sm: 38px) | 400 (font-medium, serif) | 1.2 | Cormorant Garamond |
-| Heading (Saved search name as h1) | 28px (sm: 32px) | 400 (font-medium, serif) | 1.2 | Cormorant Garamond |
+| Display (Discover tab h1) | 32px (sm: 38px) | 500 (font-medium, serif) | 1.2 | Cormorant Garamond |
+| Heading (Saved search name as h1) | 28px (sm: 32px) | 500 (font-medium, serif) | 1.2 | Cormorant Garamond |
 | Body / subtitle | 14px | 300 (font-light) | 1.5 | DM Sans |
 | Label / UI chrome | 13px | 500 (font-medium) | 1.4 | DM Sans |
 
-Exactly 2 weights in use per font:
+Exactly 2 weights across the design system: 300 (font-light) + 500 (font-medium).
 - DM Sans: 300 (font-light, body/subtitle) + 500 (font-medium, labels/section headers/emphasis)
-- Cormorant Garamond: 400 only (display use)
+- Cormorant Garamond: 500 (font-medium) only — display use
 
 Note: 13px + font-medium is the established token for all interactive pill/sidebar item text — carry unchanged from persona-pills.tsx.
 
@@ -197,7 +197,7 @@ Accent reserved for: active sidebar item text and border, active tab indicator, 
 
 - Item height: `min-h-[44px]` (WCAG touch target)
 - Item padding: `px-4 py-2`
-- Item layout: `flex items-center gap-3`
+- Item layout: `flex items-center gap-3` (gap-3 = 12px; structural density exception — see Spacing Exceptions)
 - Dot: `w-2 h-2 rounded-full flex-shrink-0` with `getPersonaColor(id)` background
 - Name text: `text-[13px] font-medium truncate`
 - Collapse toggle: chevron button `h-9 w-9` at top of sidebar; `ChevronLeft` icon when expanded, `ChevronRight` when collapsed
@@ -313,7 +313,7 @@ Format: compact list (not cards). Each row is `min-h-[40px]`, one row per saved 
 ● BigLaw Partners        · 23 prospects    →
 ```
 
-- Row layout: `flex items-center gap-3 px-3 py-2 rounded-[8px] cursor-pointer`
+- Row layout: `flex items-center gap-3 px-3 py-2 rounded-[8px] cursor-pointer` (gap-3 = 12px; structural density exception — see Spacing Exceptions)
 - Dot: `w-2 h-2 rounded-full` using `getPersonaColor(id)` — identical to sidebar
 - Name: `text-[13px] font-medium`, `color: var(--text-primary-ds)`
 - Count: `text-[13px]`, `color: var(--text-tertiary)`, preceded by `·` separator
