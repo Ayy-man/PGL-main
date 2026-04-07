@@ -391,6 +391,16 @@ Plans:
 - [x] 28-03-PLAN.md — UI integration (search-content, results table, bulk actions bar)
 - [x] 28-04-PLAN.md — UI rename (Persona -> Saved Search) + build verification
 
+### Phase 32: Discover Tab v2 — Layout Tightening, Search Depth, Filter Pills, Suggested Personas, Stats Bar, Nav Badges
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 31
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 32 to break down)
+
 ---
 
 ### Phase 19: Admin Automations Dashboard — Inngest Monitoring
