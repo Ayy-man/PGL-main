@@ -74,8 +74,9 @@ export function SavedSearchesTab({
   const selectedPersona = personas.find((p) => p.id === selectedId) ?? null;
 
   return (
-    <div className="page-enter flex flex-row h-full min-h-[600px]">
-      {/* Left: sidebar rail */}
+    <div className="page-enter flex flex-row h-full min-h-[600px] overflow-x-hidden">
+      {/* Left: sidebar rail — hidden on mobile */}
+      <div className="hidden md:flex flex-shrink-0 h-full">
       <SearchSidebarRail
         personas={personas}
         selectedId={selectedId}
@@ -85,6 +86,7 @@ export function SavedSearchesTab({
         createButton={createButton}
         createButtonCollapsed={createButtonCollapsed}
       />
+      </div>
 
       {/* Right: results panel */}
       <div className="flex-1 overflow-y-auto px-6 py-6">

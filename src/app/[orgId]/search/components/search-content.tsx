@@ -69,6 +69,7 @@ function savedProspectToApolloPerson(
     email_status: (data.email_status as string) ?? undefined,
     photo_url: (data.photo_url as string) ?? undefined,
     linkedin_url: (data.linkedin_url as string) ?? undefined,
+    first_seen_at: sp.first_seen_at,
     // Mark unlinked prospects as preview-only so the Apollo bulk-enrich de-obfuscation step
     // runs when enriching from saved search mode (without this, _enriched is undefined which
     // !== false, so bulk-enrich is skipped and the obfuscated name gets stored in prospects table)
