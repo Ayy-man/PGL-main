@@ -391,6 +391,18 @@ Plans:
 - [x] 28-03-PLAN.md — UI integration (search-content, results table, bulk actions bar)
 - [x] 28-04-PLAN.md — UI rename (Persona -> Saved Search) + build verification
 
+### Phase 31: Discover tab polish — ChatGPT-style search input, card grid saved searches, luxury depth
+
+**Goal:** Redesign the Discover tab with a ChatGPT pill-style search input, upgrade hero typography to 44–56px serif, add a radial gold glow, convert saved search shortcuts to a hoverable card grid, show suggested persona templates as empty state, and polish the sidebar active indicator with a 3px gold left border.
+**Requirements**: DISC-POLISH-A, DISC-POLISH-B, DISC-POLISH-C, DISC-POLISH-D, DISC-POLISH-E
+**Depends on:** Phase 30
+**Plans:** 3 plans
+
+Plans:
+- [ ] 31-01-PLAN.md — ChatGPT pill search input (NLSearchBar) + hero heading upgrade + discover-tab wiring
+- [ ] 31-02-PLAN.md — Saved search card grid + suggested persona empty state + onPrefillSearch wiring
+- [ ] 31-03-PLAN.md — Sidebar active left border polish + build verification
+
 ---
 
 ### Phase 19: Admin Automations Dashboard — Inngest Monitoring
