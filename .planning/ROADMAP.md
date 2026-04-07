@@ -391,6 +391,46 @@ Plans:
 - [x] 28-03-PLAN.md — UI integration (search-content, results table, bulk actions bar)
 - [x] 28-04-PLAN.md — UI rename (Persona -> Saved Search) + build verification
 
+### Phase 29: Lead Discovery UI redesign — collapsible search rail and view header hierarchy
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 28
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 29 to break down)
+
+### Phase 30: Admin Global API Keys Management — view, rotate, and test all external integration credentials from a central admin panel
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 29
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 30 to break down)
+
+### Phase 31: Admin Master Data Schema Viewer — browse live DB tables, row counts, and column definitions from the admin panel
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 30
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 31 to break down)
+
+### Phase 32: Admin Security Policies — manage RLS status, audit super-admin access, configure IP allowlists and session controls
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 31
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 32 to break down)
+
 ---
 
 ### Phase 19: Admin Automations Dashboard — Inngest Monitoring
