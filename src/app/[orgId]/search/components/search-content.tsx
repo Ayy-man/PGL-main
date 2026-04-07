@@ -8,7 +8,9 @@ import type { List } from "@/lib/lists/types";
 import type { PersonaFiltersType } from "@/lib/apollo/schemas";
 import type { ApolloPerson } from "@/lib/apollo/types";
 import { useSearch } from "../hooks/use-search";
-import { PersonaPills } from "./persona-pills";
+import { DiscoverTab } from "./discover-tab";
+import { SavedSearchesTab } from "./saved-searches-tab";
+import { formatRefreshedAgo } from "../lib/format-refreshed";
 import { NLSearchBar } from "./nl-search-bar";
 import { AdvancedFiltersPanel } from "./advanced-filters-panel";
 import { BulkActionsBar } from "./bulk-actions-bar";
@@ -51,22 +53,6 @@ function SkeletonRow() {
   );
 }
 
-function formatRefreshedAgo(dateStr: string): string {
-  const date = new Date(dateStr);
-  if (isNaN(date.getTime())) return "Unknown";
-  const diffMs = Date.now() - date.getTime();
-  const diffMins = Math.floor(diffMs / (1000 * 60));
-  if (diffMins < 1) return "just now";
-  if (diffMins < 60) return `${diffMins}m ago`;
-  const diffHours = Math.floor(diffMins / 60);
-  if (diffHours < 24) return `${diffHours}h ago`;
-  const diffDays = Math.floor(diffHours / 24);
-  if (diffDays === 1) return "yesterday";
-  if (diffDays < 30) return `${diffDays}d ago`;
-  const diffMonths = Math.floor(diffDays / 30);
-  return `${diffMonths}mo ago`;
-}
-
 function savedProspectToApolloPerson(
   sp: SavedSearchProspect
 ): ApolloPerson & { _savedSearchMeta?: { status: string; is_new: boolean; prospect_id: string | null; last_seen_at: string } } {
@@ -102,6 +88,14 @@ function savedProspectToApolloPerson(
 export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
   const router = useRouter();
   const { toast } = useToast();
+
+  // Tab state — D-01/D-02 (Discover is default)
+  const [activeTab, setActiveTab] = useState<"discover" | "saved">("discover");
+
+  // PersonaFormDialog controlled state (shared by Discover "Save as new search"
+  // button and sidebar "+ New" button)
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+
   const {
     searchState,
     setSearchState,
@@ -317,6 +311,13 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
     // Saved search mode shows stored DB prospects; keyword search hits Apollo live.
     // For filtering within a saved search, use the Advanced Filters panel instead.
     setSearchState({ keywords, persona: "" });
+    // D-19: submitting a search always navigates to Saved Searches tab
+    setActiveTab("saved");
+  };
+
+  const handleSelectSavedSearch = (id: string) => {
+    setSearchState({ persona: id, keywords: "" });
+    setActiveTab("saved");
   };
 
   // ----------------------------------------------------------------
