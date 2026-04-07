@@ -103,7 +103,7 @@ export async function bulkEnrichPeople(
     credits: data.credits_consumed ?? "?",
     missing: data.missing_records ?? 0,
   });
-  return data.matches || [];
+  return (data.matches || []).map((p) => ({ ...p, _enriched: true as const }));
 }
 
 /**
