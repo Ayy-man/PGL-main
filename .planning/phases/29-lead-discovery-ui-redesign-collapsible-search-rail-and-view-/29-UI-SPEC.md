@@ -33,6 +33,7 @@ Declared values (must be multiples of 4):
 
 | Token | Value | Usage |
 |-------|-------|-------|
+| xxs | 12px | Dense sidebar item gaps (`gap-3`, `px-3`), shortcut list row layout gaps — dense spacing for sidebar items |
 | xs | 4px | Icon gaps, dot indicators, inline gaps |
 | sm | 8px | Sidebar item vertical padding, compact element spacing |
 | md | 16px | Sidebar item horizontal padding, card inner padding |
@@ -60,10 +61,9 @@ Source: `globals.css` (`--font-sans: DM Sans`; `--font-serif: Cormorant Garamond
 | Heading (Saved search name as h1) | 28px (sm: 32px) | 400 (font-medium, serif) | 1.2 | Cormorant Garamond |
 | Body / subtitle | 14px | 300 (font-light) | 1.5 | DM Sans |
 | Label / UI chrome | 13px | 500 (font-medium) | 1.4 | DM Sans |
-| Micro / section header | 11px | 600 (font-semibold), uppercase, tracking-wider | 1.2 | DM Sans |
 
 Exactly 2 weights in use per font:
-- DM Sans: 300 (body/subtitle) + 500/600 (labels/section headers — treated as a single "emphasis" tier)
+- DM Sans: 300 (font-light, body/subtitle) + 500 (font-medium, labels/section headers/emphasis)
 - Cormorant Garamond: 400 only (display use)
 
 Note: 13px + font-medium is the established token for all interactive pill/sidebar item text — carry unchanged from persona-pills.tsx.
@@ -143,7 +143,7 @@ Accent reserved for: active sidebar item text and border, active tab indicator, 
 ─────────────────────────────────   ← 1px var(--border-default) bottom rule
 ```
 
-- Tab buttons: `text-[14px] font-medium px-4 py-3` 
+- Tab buttons: `text-[14px] font-medium px-4 py-3`
 - Active tab: `color: var(--text-primary-ds)` + `2px solid var(--gold-primary)` bottom border
 - Inactive tab: `color: var(--text-secondary-ds)`, no border
 - Tab bar sits flush at the top of page content area (below the global TopBar)
@@ -173,7 +173,7 @@ Accent reserved for: active sidebar item text and border, active tab indicator, 
 - Action button row: `flex gap-3 mt-4`
 - "Search" button: variant `outline` with gold border (`border: 1px solid var(--border-gold); color: var(--gold-primary)`)
 - "Save as new search" button: variant `ghost`, `color: var(--text-secondary-ds)`
-- Shortcut preview section: `mt-8`, section label `text-[10px] uppercase tracking-wider font-semibold` with `color: var(--text-tertiary)`
+- Shortcut preview section: `mt-8`, section label `text-[13px] uppercase tracking-wider font-medium` with `color: var(--text-tertiary)`
 
 ### Saved Searches tab layout
 
@@ -201,6 +201,8 @@ Accent reserved for: active sidebar item text and border, active tab indicator, 
 - Dot: `w-2 h-2 rounded-full flex-shrink-0` with `getPersonaColor(id)` background
 - Name text: `text-[13px] font-medium truncate`
 - Collapse toggle: chevron button `h-9 w-9` at top of sidebar; `ChevronLeft` icon when expanded, `ChevronRight` when collapsed
+  - `aria-label="Collapse sidebar"` when expanded
+  - `aria-label="Expand sidebar"` when collapsed
 - "+ New" button: dashed border pill at bottom, `text-[13px] font-medium`, same pattern as current PersonaPills create button
 
 ### Sidebar rail (collapsed — 48px)
@@ -210,6 +212,7 @@ Accent reserved for: active sidebar item text and border, active tab indicator, 
 - Dot: same `getPersonaColor(id)` color, same 8px diameter
 - Tooltip on hover: shadcn `Tooltip` component, content = full search name, `side="right"`
 - Collapse toggle: same chevron button, now shows `ChevronRight` icon, positioned at top center of the 48px strip
+  - `aria-label="Expand sidebar"` when collapsed
 
 ### View header (Saved Searches tab — search selected)
 
@@ -287,14 +290,14 @@ Source: CONTEXT.md D-04, D-08, D-14, D-17, D-18 + Claude's discretion for empty 
 | Error state heading | Something went wrong |
 | Error state body | Could not load results. Check your connection and try again. |
 | Error state CTA | Try Again |
-| Bulk dismiss confirmation | Dismiss {N} prospects from this saved search? This hides them from future refreshes. [Dismiss] [Cancel] |
+| Bulk dismiss confirmation | Dismiss {N} prospects from this saved search? This hides them from future refreshes. [Dismiss Prospects] [Keep Prospects] |
 | Single row dismiss (no-confirm) | Dismiss (inline button, immediate, undoable via toast "Undo" for 5s) |
 
 ### Destructive actions in this phase
 
 | Action | Location | Confirmation approach |
 |--------|----------|-----------------------|
-| Bulk dismiss prospects | BulkActionsBar "Dismiss" button | Inline confirmation dialog (shadcn AlertDialog): copy above |
+| Bulk dismiss prospects | BulkActionsBar "Dismiss" button | Inline confirmation dialog (shadcn AlertDialog): "Dismiss {N} prospects from this saved search? This hides them from future refreshes." Primary: [Dismiss Prospects] Secondary: [Keep Prospects] |
 | Single-row dismiss | Per-row Trash2 icon button | No dialog — immediate with 5-second toast undo (existing Phase 28 pattern, preserve as-is) |
 | No prospect or search deletion | — | Not in scope for this phase |
 
@@ -313,10 +316,10 @@ Format: compact list (not cards). Each row is `min-h-[40px]`, one row per saved 
 - Row layout: `flex items-center gap-3 px-3 py-2 rounded-[8px] cursor-pointer`
 - Dot: `w-2 h-2 rounded-full` using `getPersonaColor(id)` — identical to sidebar
 - Name: `text-[13px] font-medium`, `color: var(--text-primary-ds)`
-- Count: `text-[12px]`, `color: var(--text-tertiary)`, preceded by `·` separator
+- Count: `text-[13px]`, `color: var(--text-tertiary)`, preceded by `·` separator
 - Arrow: `ChevronRight` 14px, `color: var(--text-ghost)`, `ml-auto`
 - Hover: `background: var(--gold-bg); border: 1px solid var(--border-hover)`
-- Show maximum 5 items; if more, show "View all {N} →" link in `text-[12px]` gold
+- Show maximum 5 items; if more, show "View all {N} →" link in `text-[13px]` gold
 
 ---
 
