@@ -100,44 +100,6 @@ export async function POST(
         { status: 500 }
       );
     }
-  } else if (pin_target === "dossier_hook") {
-    // Fetch-then-update pattern for JSONB append
-    const { data: prospectData, error: fetchError } = await admin
-      .from("prospects")
-      .select("intelligence_dossier")
-      .eq("id", prospectId)
-      .single();
-
-    if (fetchError) {
-      console.error("[research/pin] Prospect fetch failed:", fetchError);
-      return NextResponse.json(
-        { error: "Failed to fetch prospect" },
-        { status: 500 }
-      );
-    }
-
-    const dossier =
-      (prospectData?.intelligence_dossier as Record<string, unknown>) ?? {};
-    const existingHooks = Array.isArray(dossier.outreach_hooks)
-      ? (dossier.outreach_hooks as string[])
-      : [];
-    const hookText = displaySummary || displayHeadline;
-    const updatedHooks = [...existingHooks, hookText];
-
-    const { error: updateError } = await admin
-      .from("prospects")
-      .update({
-        intelligence_dossier: { ...dossier, outreach_hooks: updatedHooks },
-      })
-      .eq("id", prospectId);
-
-    if (updateError) {
-      console.error("[research/pin] Dossier update failed:", updateError);
-      return NextResponse.json(
-        { error: "Failed to update dossier" },
-        { status: 500 }
-      );
-    }
   }
   // "note" target: just save to research_pins (handled below)
 
