@@ -32,6 +32,11 @@ export function DiscoverTab({
   onViewAllSaved,
 }: DiscoverTabProps) {
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [prefillValue, setPrefillValue] = useState(keywords);
+
+  const handlePrefill = (query: string) => {
+    setPrefillValue(query);
+  };
 
   return (
     <div className="page-enter max-w-[680px] mx-auto px-4 pt-12 pb-8">
@@ -64,8 +69,10 @@ export function DiscoverTab({
 
         {/* Search area */}
         <div className="relative">
+          {/* key remount seeds textarea when prefill changes */}
           <NLSearchBar
-            initialValue={keywords}
+            key={prefillValue}
+            initialValue={prefillValue}
             onSearch={(val) => {
               onNLSearch(val);
               onSubmitSearch();
@@ -114,6 +121,7 @@ export function DiscoverTab({
         counts={savedSearchCounts}
         onSelectSavedSearch={onSelectSavedSearch}
         onViewAllSaved={onViewAllSaved}
+        onPrefillSearch={handlePrefill}
       />
     </div>
   );
