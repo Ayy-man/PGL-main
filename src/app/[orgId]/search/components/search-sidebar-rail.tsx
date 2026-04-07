@@ -80,7 +80,7 @@ export function SearchSidebarRail({
                         isActive
                           ? {
                               background: "var(--gold-bg)",
-                              borderLeft: "2px solid var(--border-gold)",
+                              borderLeft: "3px solid var(--gold-primary)",
                             }
                           : { background: "transparent" }
                       }
@@ -104,6 +104,7 @@ export function SearchSidebarRail({
                     ? {
                         background: "var(--gold-bg)",
                         border: "1px solid var(--border-gold)",
+                        borderLeft: "3px solid var(--gold-primary)",
                         color: "var(--gold-primary)",
                       }
                     : {
@@ -126,7 +127,7 @@ export function SearchSidebarRail({
                 }}
               >
                 {dot}
-                <span className="text-[13px] font-medium truncate">{persona.name}</span>
+                <span className={`text-[13px] truncate ${isActive ? "font-medium" : "font-light"}`}>{persona.name}</span>
               </button>
             );
           })}
