@@ -17,6 +17,8 @@ export default async function TenantLayout({
   let userName: string;
   let userInitials: string;
   let userRole: string;
+  let savedSearchCount = 0;
+  let listsCount = 0;
 
   try {
     ({ orgId } = await params);
@@ -41,6 +43,24 @@ export default async function TenantLayout({
     }
 
     tenant = data;
+
+    // Live counts for sidebar nav badges (RLS handles tenant scoping for the session client)
+    const tenantScopeId = (user.app_metadata?.tenant_id as string | undefined) ?? tenant.id;
+
+    const [personasCountResult, listsCountResult] = await Promise.all([
+      supabase
+        .from("personas")
+        .select("*", { count: "exact", head: true })
+        .eq("tenant_id", tenantScopeId),
+      supabase
+        .from("lists")
+        .select("*", { count: "exact", head: true })
+        .eq("tenant_id", tenantScopeId),
+    ]);
+
+    savedSearchCount = personasCountResult.count ?? 0;
+    listsCount = listsCountResult.count ?? 0;
+
     userName = user?.user_metadata?.full_name ?? user?.email ?? "User";
     userInitials = userName.charAt(0).toUpperCase() || "?";
     userRole = (user?.app_metadata?.role as string) || "assistant";
@@ -73,6 +93,8 @@ export default async function TenantLayout({
           userRole={userRole}
           userName={userName}
           userInitials={userInitials}
+          savedSearchCount={savedSearchCount}
+          listsCount={listsCount}
         />
 
         <div className="flex flex-1 flex-col min-w-0">
