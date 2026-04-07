@@ -796,6 +796,7 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
                   onSelectAll={handleSelectAll}
                   onProspectClick={handleProspectClick}
                   savedSearchMode={isSavedSearchMode}
+                  onDismiss={isSavedSearchMode ? (id) => handleDismiss([id]) : undefined}
                   onUndoDismiss={handleUndoDismiss}
                   lastRefreshedAt={lastRefreshedAt}
                 />

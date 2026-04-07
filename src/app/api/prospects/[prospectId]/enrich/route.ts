@@ -40,7 +40,23 @@ export async function POST(
     }
 
     // Extract prospectId from route params
-    const { prospectId } = await context.params;
+    const { prospectId: rawProspectId } = await context.params;
+
+    // Apollo IDs are 24-char hex (MongoDB ObjectIDs); Supabase IDs are UUIDs.
+    // If the caller passed an Apollo ID, resolve it to the Supabase UUID first.
+    const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    let prospectId = rawProspectId;
+    if (!UUID_REGEX.test(rawProspectId)) {
+      const { data: resolved } = await supabase
+        .from("prospects")
+        .select("id")
+        .eq("apollo_id", rawProspectId)
+        .single();
+      if (!resolved) {
+        throw new ApiError("Prospect not found", "NOT_FOUND", 404);
+      }
+      prospectId = resolved.id;
+    }
 
     // Fetch prospect from database (verify it exists and belongs to tenant)
     const { data: prospect, error: fetchError } = await supabase

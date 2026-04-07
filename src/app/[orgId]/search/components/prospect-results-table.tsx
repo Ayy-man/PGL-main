@@ -1,7 +1,7 @@
 "use client";
 
 import type { ApolloPerson } from "@/lib/apollo/types";
-import { MapPin } from "lucide-react";
+import { MapPin, X } from "lucide-react";
 
 function formatRelativeDate(dateStr: string | undefined): string {
   if (!dateStr) return "—";
@@ -47,9 +47,10 @@ interface ProspectResultsTableProps {
   onSelect: (id: string) => void;
   onSelectAll: () => void;
   onProspectClick: (id: string) => void;
-  savedSearchMode?: boolean;             // NEW
-  onUndoDismiss?: (id: string) => void;  // NEW
-  lastRefreshedAt?: string | null;       // NEW — for "Not in latest results" indicator
+  savedSearchMode?: boolean;
+  onDismiss?: (id: string) => void;
+  onUndoDismiss?: (id: string) => void;
+  lastRefreshedAt?: string | null;
 }
 
 export function ProspectResultsTable({
@@ -59,6 +60,7 @@ export function ProspectResultsTable({
   onSelectAll,
   onProspectClick,
   savedSearchMode,
+  onDismiss,
   onUndoDismiss,
   lastRefreshedAt,
 }: ProspectResultsTableProps) {
@@ -314,6 +316,16 @@ export function ProspectResultsTable({
                           style={{ color: "var(--gold-text)", background: "rgba(212, 175, 55, 0.1)" }}
                         >
                           Undo
+                        </button>
+                      )}
+                      {savedSearchMode && !isDismissed && onDismiss && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); onDismiss(prospect.id); }}
+                          title="Dismiss prospect"
+                          className="opacity-0 group-hover:opacity-100 flex items-center justify-center h-5 w-5 rounded transition-opacity"
+                          style={{ color: "var(--text-tertiary)" }}
+                        >
+                          <X className="h-3 w-3" />
                         </button>
                       )}
                     </div>
