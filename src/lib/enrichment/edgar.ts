@@ -459,7 +459,9 @@ type EftsHit = {
     file_date?: string;
     display_names?: string[];
     entity_name?: string;
-    form_type?: string;
+    form?: string;         // actual field name in EFTS response (not form_type)
+    root_forms?: string[]; // top-level form types for this filing
+    adsh?: string;         // accession number (dashed) — use this, not _id (which has :filename suffix)
     file_num?: string;
   };
 };
@@ -508,19 +510,22 @@ async function enrichEdgarByNameInternal(params: { name: string }): Promise<Edga
     }
 
     // For Form 4 hits, try to fetch and parse XML (up to 5 filings)
-    const form4Hits = hits.filter(h => h._source.form_type === '4').slice(0, 5);
+    // EFTS uses _source.form (not form_type); _id has ":filename" suffix — use _source.adsh for accession
+    const form4Hits = hits.filter(h => h._source.form === '4' || h._source.root_forms?.includes('4')).slice(0, 5);
     const allTransactions: EdgarResult['transactions'] = [];
 
     for (const hit of form4Hits) {
       const filingDate = hit._source.file_date || 'unknown';
+      // adsh is the clean dashed accession number; _id may have ":filename" suffix
+      const accessionDashed = hit._source.adsh || hit._id.split(':')[0];
 
-      // EFTS _id is the accession number (format: XXXXXXXXXX-XX-XXXXXX)
       // We need to construct the XML URL. EFTS doesn't give us primaryDocument directly,
       // so we fetch the filing index page to find the XML doc.
       await waitForRateLimit();
 
-      const accessionNoSlash = hit._id.replace(/-/g, '');
-      const indexUrl = `https://www.sec.gov/Archives/edgar/data/${accessionNoSlash.slice(0, 10)}/${hit._id}/`;
+      const accessionNoSlash = accessionDashed.replace(/-/g, '');
+      // SEC archive paths require undashed accession numbers
+      const indexUrl = `https://www.sec.gov/Archives/edgar/data/${accessionNoSlash.slice(0, 10)}/${accessionNoSlash}/`;
 
       try {
         // Fetch filing index to find the XML document
@@ -531,14 +536,19 @@ async function enrichEdgarByNameInternal(params: { name: string }): Promise<Edga
 
         const indexHtml = await indexResponse.text();
 
-        // Find the primary XML document (usually ends in .xml and contains "primary_doc")
-        const xmlMatch = indexHtml.match(/href="([^"]+\.xml)"/i);
+        // Find the Form 4 XML document. Prefer form4.xml explicitly; fall back to first .xml
+        // that isn't a filing-summary or an XSLT-rendered path.
+        const xmlMatch =
+          indexHtml.match(/href="([^"]*form4[^"]*\.xml)"/i) ||
+          indexHtml.match(/href="((?![^"]*(?:filing-summary|xsl[A-Z]))[^"]+\.xml)"/i);
         if (!xmlMatch) continue;
 
-        const xmlFileName = xmlMatch[1];
+        // Hrefs from the index page are absolute paths (/Archives/...) — prepend origin
+        const rawHref = xmlMatch[1];
+        const xmlFileName = rawHref.startsWith('/') ? rawHref : `/${rawHref}`;
         await waitForRateLimit();
 
-        const xmlUrl = `${indexUrl}${xmlFileName}`;
+        const xmlUrl = `https://www.sec.gov${xmlFileName}`;
         const xmlResponse = await fetch(xmlUrl, {
           headers: { 'User-Agent': userAgent, Accept: 'application/xml,text/xml,*/*' },
         });
