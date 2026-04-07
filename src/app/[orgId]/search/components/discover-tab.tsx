@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { NLSearchBar } from "./nl-search-bar";
 import { AdvancedFiltersPanel } from "./advanced-filters-panel";
 import { SavedSearchShortcutList } from "./saved-search-shortcut-list";
@@ -30,80 +31,81 @@ export function DiscoverTab({
   onSelectSavedSearch,
   onViewAllSaved,
 }: DiscoverTabProps) {
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
   return (
-    <div className="page-enter max-w-2xl mx-auto px-4 pt-12 pb-8">
-      {/* Hero */}
-      <div className="mb-6">
-        <h1
-          className="font-serif text-[32px] sm:text-[38px] font-medium"
+    <div className="page-enter max-w-[680px] mx-auto px-4 pt-12 pb-8">
+      <div className="relative">
+        {/* Radial gold glow — decorative, pointer-events-none */}
+        <div
+          className="pointer-events-none absolute inset-0"
+          aria-hidden="true"
           style={{
-            letterSpacing: "-0.5px",
-            color: "var(--text-primary-ds)",
+            background:
+              "radial-gradient(ellipse 60% 40% at 50% 40%, rgba(212,175,55,0.05) 0%, transparent 70%)",
           }}
-        >
-          Find high-net-worth prospects
-        </h1>
-        <p
-          className="mt-1 text-[14px] font-light"
-          style={{ color: "var(--text-tertiary)" }}
-        >
-          Use natural language to surface wealthy individuals matching your criteria
-        </p>
-      </div>
+        />
 
-      {/* NL search bar */}
-      <NLSearchBar
-        initialValue={keywords}
-        onSearch={onNLSearch}
-        isLoading={isLoading}
-      />
+        {/* Hero */}
+        <div className="mb-8 text-center relative">
+          <h1
+            className="font-serif text-[44px] sm:text-[56px] font-medium"
+            style={{ letterSpacing: "-0.5px", color: "var(--text-primary-ds)" }}
+          >
+            Find high-net-worth prospects
+          </h1>
+          <p
+            className="mt-3 text-[13px] font-light"
+            style={{ color: "var(--text-tertiary)" }}
+          >
+            Use natural language to surface wealthy individuals matching your criteria
+          </p>
+        </div>
 
-      {/* Collapsible filters */}
-      <div className="mt-4">
-        <AdvancedFiltersPanel onApplyFilters={onApplyFilters} />
-      </div>
+        {/* Search area */}
+        <div className="relative">
+          <NLSearchBar
+            initialValue={keywords}
+            onSearch={(val) => {
+              onNLSearch(val);
+              onSubmitSearch();
+            }}
+            isLoading={isLoading}
+            onToggleFilters={() => setFiltersOpen((p) => !p)}
+            filtersOpen={filtersOpen}
+          />
 
-      {/* Action buttons */}
-      <div className="flex gap-3 mt-4">
-        <button
-          type="button"
-          onClick={onSubmitSearch}
-          disabled={isLoading}
-          className="inline-flex items-center justify-center rounded-[10px] px-5 py-2 text-[13px] font-medium cursor-pointer transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-          style={{
-            background: "transparent",
-            border: "1px solid var(--border-gold)",
-            color: "var(--gold-primary)",
-          }}
-          onMouseEnter={(e) => {
-            if (!isLoading) e.currentTarget.style.background = "var(--gold-bg)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = "transparent";
-          }}
-        >
-          Search
-        </button>
-        <button
-          type="button"
-          onClick={onSaveAsNewSearch}
-          className="inline-flex items-center justify-center rounded-[10px] px-5 py-2 text-[13px] font-medium cursor-pointer transition-colors"
-          style={{
-            background: "transparent",
-            border: "1px solid transparent",
-            color: "var(--text-secondary-ds)",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = "var(--bg-elevated)";
-            e.currentTarget.style.color = "var(--text-primary-ds)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = "transparent";
-            e.currentTarget.style.color = "var(--text-secondary-ds)";
-          }}
-        >
-          Save as new search
-        </button>
+          {/* Filters below pill */}
+          {filtersOpen && (
+            <div className="mt-3">
+              <AdvancedFiltersPanel onApplyFilters={onApplyFilters} />
+            </div>
+          )}
+
+          {/* Ghost save link — only when keywords are present */}
+          {keywords.trim() && (
+            <div className="mt-2 text-center">
+              <button
+                type="button"
+                onClick={onSaveAsNewSearch}
+                className="text-[12px] font-light cursor-pointer transition-colors"
+                style={{
+                  color: "var(--text-tertiary)",
+                  background: "transparent",
+                  border: "none",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = "var(--gold-primary)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = "var(--text-tertiary)";
+                }}
+              >
+                Save this search &rarr;
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Shortcut list */}
