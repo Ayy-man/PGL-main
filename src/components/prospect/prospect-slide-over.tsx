@@ -1,9 +1,10 @@
 "use client";
 
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { Mail, Phone, X, Sparkles, Loader2, RefreshCw } from "lucide-react";
+import { Mail, Phone, X, Sparkles, Loader2, RefreshCw, ListPlus } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 interface Prospect {
   id: string;
@@ -25,6 +26,7 @@ interface ProspectSlideOverProps {
   prospect?: Prospect | null;
   orgId?: string;
   onEnrich?: (prospectId: string) => void;
+  onAddToList?: (prospectId: string) => void;
 }
 
 export function ProspectSlideOver({
@@ -34,16 +36,23 @@ export function ProspectSlideOver({
   prospect,
   orgId,
   onEnrich,
+  onAddToList,
 }: ProspectSlideOverProps) {
   const [reEnriching, setReEnriching] = useState(false);
+  const { toast } = useToast();
 
   const handleReEnrich = async () => {
     if (!prospectId || reEnriching) return;
     setReEnriching(true);
     try {
-      await fetch(`/api/prospects/${prospectId}/enrich?force=true`, { method: "POST" });
+      const res = await fetch(`/api/prospects/${prospectId}/enrich?force=true`, { method: "POST" });
+      if (res.ok) {
+        toast({ title: "Re-enrichment queued", description: "Data will refresh in the background." });
+      } else {
+        toast({ title: "Re-enrichment failed", variant: "destructive" });
+      }
     } catch {
-      // fire-and-forget
+      toast({ title: "Re-enrichment failed", variant: "destructive" });
     }
     setTimeout(() => setReEnriching(false), 2000);
   };
@@ -179,17 +188,29 @@ export function ProspectSlideOver({
                     </p>
                   </div>
                 </div>
-                <button
-                  onClick={handleReEnrich}
-                  disabled={reEnriching}
-                  className="flex items-center gap-2 text-xs transition-colors disabled:opacity-50"
-                  style={{ color: "var(--text-tertiary, rgba(232,228,220,0.4))" }}
-                >
-                  {reEnriching
-                    ? <Loader2 className="h-3 w-3 animate-spin" />
-                    : <RefreshCw className="h-3 w-3" />}
-                  {reEnriching ? "Re-enriching…" : "Re-enrich"}
-                </button>
+                <div className="flex items-center gap-4">
+                  {onAddToList && (
+                    <button
+                      onClick={() => onAddToList(prospect.id)}
+                      className="flex items-center gap-2 text-xs transition-colors"
+                      style={{ color: "var(--gold-primary)" }}
+                    >
+                      <ListPlus className="h-3 w-3" />
+                      Add to List
+                    </button>
+                  )}
+                  <button
+                    onClick={handleReEnrich}
+                    disabled={reEnriching}
+                    className="flex items-center gap-2 text-xs transition-colors disabled:opacity-50"
+                    style={{ color: "var(--text-tertiary, rgba(232,228,220,0.4))" }}
+                  >
+                    {reEnriching
+                      ? <Loader2 className="h-3 w-3 animate-spin" />
+                      : <RefreshCw className="h-3 w-3" />}
+                    {reEnriching ? "Re-enriching…" : "Re-enrich"}
+                  </button>
+                </div>
               </>
             ) : (
               /* Preview state: 2-cell grid + Enrich CTA */

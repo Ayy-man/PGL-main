@@ -318,7 +318,7 @@ export function ProspectResultsTable({
                           Undo
                         </button>
                       )}
-                      {savedSearchMode && !isDismissed && onDismiss && (
+                      {savedSearchMode && !isDismissed && prospect._enriched !== true && onDismiss && (
                         <button
                           onClick={(e) => { e.stopPropagation(); onDismiss(prospect.id); }}
                           title="Dismiss prospect"

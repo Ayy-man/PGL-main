@@ -590,6 +590,11 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
         : results.find((r) => r.id === searchState.prospect)) ?? null
     : null;
 
+  // Prefer the Supabase UUID (from saved search meta) so re-enrich hits the right row directly.
+  // Falls back to the apollo_person_id; the enrich route resolves that via apollo_id lookup.
+  const slideOverProspectId =
+    selectedProspect?._savedSearchMeta?.prospect_id ?? searchState.prospect || null;
+
   const slideOverProspect = selectedProspect
     ? {
         id: selectedProspect.id,
@@ -1097,12 +1102,18 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
       <ProspectSlideOver
         open={Boolean(searchState.prospect)}
         onClose={handleSlideOverClose}
-        prospectId={searchState.prospect || null}
+        prospectId={slideOverProspectId}
         prospect={slideOverProspect}
         orgId={orgId}
         onEnrich={(id) => {
           setSelectedIds(new Set([id]));
           setBulkMode("enrich");
+          setBulkSelectedListIds([]);
+          setBulkListDialogOpen(true);
+        }}
+        onAddToList={(id) => {
+          setSelectedIds(new Set([id]));
+          setBulkMode("add");
           setBulkSelectedListIds([]);
           setBulkListDialogOpen(true);
         }}
