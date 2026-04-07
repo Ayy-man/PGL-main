@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight } from "lucide-react";
+import { useState } from "react";
 import { getPersonaColor } from "../lib/persona-color";
 import type { Persona } from "@/lib/personas/types";
 
@@ -10,8 +10,130 @@ interface SavedSearchShortcutListProps {
   counts?: Record<string, number>;
   onSelectSavedSearch: (id: string) => void;
   onViewAllSaved?: () => void;
-  /** Maximum rows to render before the "View all" link (default 5). */
+  /** Pre-fill NLSearchBar textarea without submitting. */
+  onPrefillSearch?: (query: string) => void;
+  /** Maximum cards to render before the "View all" link (default 6). */
   maxItems?: number;
+}
+
+const SUGGESTED_PERSONAS = [
+  {
+    id: "suggestion-finance",
+    label: "Finance Elite",
+    description: "MD+ at investment banks, hedge funds, private equity",
+    query:
+      "Managing Directors at investment banks, hedge funds, and private equity firms with $10M+ investable assets",
+    dotColor: "hsl(45, 70%, 55%)",
+  },
+  {
+    id: "suggestion-tech",
+    label: "Tech Founders",
+    description: "Series B+ founders with liquidity events",
+    query:
+      "Founders of Series B or later startups, or companies with recent acquisition exits, in tech",
+    dotColor: "hsl(210, 60%, 55%)",
+  },
+  {
+    id: "suggestion-realestate",
+    label: "Real Estate Principals",
+    description: "Commercial RE owners with $5M+ portfolios",
+    query: "Commercial real estate owners and principals with portfolios over $5M",
+    dotColor: "hsl(140, 50%, 45%)",
+  },
+];
+
+function SearchCard({
+  persona,
+  countLabel,
+  onClick,
+}: {
+  persona: Persona;
+  countLabel: string;
+  onClick: () => void;
+}) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className="text-left w-full rounded-[14px] p-4 cursor-pointer transition-all duration-150"
+      style={{
+        border: `1px solid ${hovered ? "var(--border-gold)" : "var(--border-subtle)"}`,
+        background: hovered ? "var(--gold-bg)" : "var(--bg-elevated)",
+        transform: hovered ? "translateY(-1px)" : "translateY(0)",
+      }}
+    >
+      <div className="flex items-center gap-2 mb-2">
+        <span
+          className="h-2 w-2 rounded-full flex-shrink-0"
+          style={{ background: getPersonaColor(persona.id) }}
+        />
+        <span
+          className="text-[14px] font-medium truncate"
+          style={{ color: "var(--text-primary-ds)" }}
+        >
+          {persona.name}
+        </span>
+      </div>
+      <span
+        className="text-[12px]"
+        style={{ color: "var(--gold-primary)", opacity: 0.75 }}
+      >
+        {countLabel}
+      </span>
+    </button>
+  );
+}
+
+function SuggestionCard({
+  suggestion,
+  onPrefill,
+}: {
+  suggestion: {
+    id: string;
+    label: string;
+    description: string;
+    query: string;
+    dotColor: string;
+  };
+  onPrefill?: (query: string) => void;
+}) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={() => onPrefill?.(suggestion.query)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className="text-left w-full rounded-[14px] p-4 cursor-pointer transition-all duration-150"
+      style={{
+        border: `1px solid ${hovered ? "var(--border-gold)" : "var(--border-subtle)"}`,
+        background: hovered ? "var(--gold-bg)" : "var(--bg-elevated)",
+        transform: hovered ? "translateY(-1px)" : "translateY(0)",
+      }}
+    >
+      <div className="flex items-center gap-2 mb-2">
+        <span
+          className="h-2 w-2 rounded-full flex-shrink-0"
+          style={{ background: suggestion.dotColor }}
+        />
+        <span
+          className="text-[14px] font-medium truncate"
+          style={{ color: "var(--text-primary-ds)" }}
+        >
+          {suggestion.label}
+        </span>
+      </div>
+      <span
+        className="text-[12px] font-light"
+        style={{ color: "var(--text-secondary-ds)" }}
+      >
+        {suggestion.description}
+      </span>
+    </button>
+  );
 }
 
 export function SavedSearchShortcutList({
@@ -19,78 +141,59 @@ export function SavedSearchShortcutList({
   counts = {},
   onSelectSavedSearch,
   onViewAllSaved,
-  maxItems = 5,
+  onPrefillSearch,
+  maxItems = 6,
 }: SavedSearchShortcutListProps) {
   if (personas.length === 0) {
-    return null;
+    return (
+      <section className="mt-10">
+        <p
+          className="text-[13px] uppercase tracking-wider font-medium mb-4"
+          style={{ color: "var(--text-tertiary)" }}
+        >
+          Start with a template
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {SUGGESTED_PERSONAS.map((s) => (
+            <SuggestionCard key={s.id} suggestion={s} onPrefill={onPrefillSearch} />
+          ))}
+        </div>
+      </section>
+    );
   }
 
   const visible = personas.slice(0, maxItems);
   const hasMore = personas.length > maxItems;
 
   return (
-    <section className="mt-8">
+    <section className="mt-10">
       <p
-        className="text-[13px] uppercase tracking-wider font-medium mb-3"
+        className="text-[13px] uppercase tracking-wider font-medium mb-4"
         style={{ color: "var(--text-tertiary)" }}
       >
         Saved Searches
       </p>
-      <ul className="flex flex-col gap-1">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {visible.map((persona) => {
           const count = counts[persona.id];
           const countLabel =
             typeof count === "number" ? `${count.toLocaleString()} prospects` : "—";
           return (
-            <li key={persona.id}>
-              <button
-                type="button"
-                onClick={() => onSelectSavedSearch(persona.id)}
-                className="flex items-center gap-3 w-full min-h-[40px] px-3 py-2 rounded-[8px] cursor-pointer transition-colors"
-                style={{
-                  background: "transparent",
-                  border: "1px solid transparent",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "var(--gold-bg)";
-                  e.currentTarget.style.border = "1px solid var(--border-hover)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = "transparent";
-                  e.currentTarget.style.border = "1px solid transparent";
-                }}
-              >
-                <span
-                  className="h-2 w-2 rounded-full flex-shrink-0"
-                  style={{ background: getPersonaColor(persona.id) }}
-                />
-                <span
-                  className="text-[13px] font-medium truncate"
-                  style={{ color: "var(--text-primary-ds)" }}
-                >
-                  {persona.name}
-                </span>
-                <span
-                  className="text-[13px] ml-1 flex-shrink-0"
-                  style={{ color: "var(--text-tertiary)" }}
-                >
-                  &middot; {countLabel}
-                </span>
-                <ChevronRight
-                  className="h-[14px] w-[14px] ml-auto flex-shrink-0"
-                  style={{ color: "var(--text-ghost)" }}
-                />
-              </button>
-            </li>
+            <SearchCard
+              key={persona.id}
+              persona={persona}
+              countLabel={countLabel}
+              onClick={() => onSelectSavedSearch(persona.id)}
+            />
           );
         })}
-      </ul>
+      </div>
       {hasMore && onViewAllSaved && (
         <button
           type="button"
           onClick={onViewAllSaved}
-          className="mt-3 text-[13px] font-medium cursor-pointer"
-          style={{ color: "var(--gold-primary)" }}
+          className="mt-4 text-[13px] font-medium cursor-pointer"
+          style={{ color: "var(--gold-primary)", background: "transparent", border: "none" }}
         >
           View all {personas.length} &rarr;
         </button>
