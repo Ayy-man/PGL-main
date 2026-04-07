@@ -376,9 +376,12 @@ async function enrichEdgarInternal(params: {
       // Respect rate limits between requests
       await waitForRateLimit();
 
-      // Build URL for Form 4 XML document
+      // Build URL for Form 4 XML document.
+      // Strip any XSLT rendering prefix (e.g. "xslF345X05/") — those paths return
+      // rendered HTML instead of raw XML, which breaks the regex parser.
       const accessionNoSlash = accessionNumber.replace(/-/g, '');
-      const documentUrl = `https://www.sec.gov/Archives/edgar/data/${params.cik}/${accessionNoSlash}/${primaryDocument}`;
+      const rawDocument = primaryDocument.replace(/^xsl[^/]+\//, '');
+      const documentUrl = `https://www.sec.gov/Archives/edgar/data/${params.cik}/${accessionNoSlash}/${rawDocument}`;
 
       try {
         const documentResponse = await fetch(documentUrl, {
