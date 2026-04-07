@@ -7,7 +7,7 @@ import { redis } from "@/lib/cache/redis";
  * TTL: 90 days
  */
 export async function trackApiUsage(
-  provider: "apollo" | "contactout" | "exa" | "edgar" | "claude"
+  provider: "apollo" | "contactout" | "exa" | "edgar" | "claude" | "openrouter"
 ): Promise<void> {
   try {
     const today = new Date().toISOString().slice(0, 10);

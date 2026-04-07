@@ -189,6 +189,7 @@ export async function lookupCompanyCik(companyName: string): Promise<{
         if (entryNorm === llmNorm || entryNorm.startsWith(llmNorm) || llmNorm.startsWith(entryNorm) ||
             entryCompact.startsWith(llmCompact) || llmCompact.startsWith(entryCompact)) {
           console.log(`[Edgar] LLM canonicalized "${companyName}" → "${llmName}" → matched "${entry.title}"`);
+          trackApiUsage('openrouter').catch(() => {});
           return { cik: String(entry.cik_str), ticker: entry.ticker, companyName: entry.title };
         }
       }

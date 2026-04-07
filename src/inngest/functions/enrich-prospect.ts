@@ -713,6 +713,28 @@ export const enrichProspect = inngest.createFunction(
             dossier_generated_at: new Date().toISOString(),
             dossier_model: "anthropic/claude-3.5-haiku",
           }).eq("id", prospectId);
+
+          // Log dossier output + inputs so we can trace where fields like
+          // "Geographic Preference" came from (what signals the LLM had access to)
+          logProspectActivity({
+            prospectId,
+            tenantId,
+            userId: null,
+            category: "data",
+            eventType: "ai_summary_updated",
+            title: "Intelligence dossier generated",
+            metadata: {
+              quick_facts: dossier.quick_facts,
+              inputs: {
+                webSignalsCount: exaData.found ? exaData.signals.length : 0,
+                hasInsiderTransactions: edgarData.found && edgarData.transactions.length > 0,
+                insiderTransactionCount: edgarData.found ? edgarData.transactions.length : 0,
+                hasTicker: !!effectiveTicker,
+                ticker: effectiveTicker ?? null,
+                hasContactData: contactData.found,
+              },
+            },
+          }).catch(() => {});
         }
 
         await updateSourceStatus(prospectId, "dossier", {
