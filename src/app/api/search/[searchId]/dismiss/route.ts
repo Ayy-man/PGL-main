@@ -50,8 +50,7 @@ export async function POST(
         dismissed_by: user.id,
       })
       .eq("saved_search_id", searchId)
-      .in("apollo_person_id", apolloPersonIds)
-      .neq("status", "enriched"); // Never dismiss enriched prospects
+      .in("apollo_person_id", apolloPersonIds);
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   } else if (action === "undo") {

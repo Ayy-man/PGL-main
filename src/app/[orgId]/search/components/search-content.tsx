@@ -225,20 +225,10 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
 
   const handleBulkDismissClick = useCallback(() => {
     const ids = Array.from(selectedIds);
-    // Filter out enriched prospects — they can't be dismissed
-    const dismissableIds = isSavedSearchMode
-      ? ids.filter(id => {
-          const prospect = savedProspects.find(p => p.apollo_person_id === id);
-          return prospect && prospect.status !== 'enriched';
-        })
-      : ids;
-    if (dismissableIds.length === 0) {
-      toast({ title: "No prospects to dismiss", description: "Enriched prospects cannot be dismissed." });
-      return;
-    }
-    setPendingDismissIds(dismissableIds);
+    if (ids.length === 0) return;
+    setPendingDismissIds(ids);
     setDismissDialogOpen(true);
-  }, [selectedIds, savedProspects, isSavedSearchMode, toast]);
+  }, [selectedIds]);
 
   // Persona change effect — load from DB or run first refresh
   useEffect(() => {

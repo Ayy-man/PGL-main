@@ -318,11 +318,11 @@ export function ProspectResultsTable({
                           Undo
                         </button>
                       )}
-                      {savedSearchMode && !isDismissed && prospect._enriched !== true && onDismiss && (
+                      {savedSearchMode && !isDismissed && onDismiss && (
                         <button
                           onClick={(e) => { e.stopPropagation(); onDismiss(prospect.id); }}
                           title="Dismiss prospect"
-                          className="opacity-0 group-hover:opacity-100 flex items-center justify-center h-5 w-5 rounded transition-opacity"
+                          className="flex items-center justify-center h-5 w-5 rounded transition-colors hover:text-foreground"
                           style={{ color: "var(--text-tertiary)" }}
                         >
                           <X className="h-3 w-3" />
