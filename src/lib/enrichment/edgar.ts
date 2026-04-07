@@ -2,6 +2,7 @@ import { withCircuitBreaker } from '../circuit-breaker';
 import { edgarRateLimiter } from '../rate-limit/limiters';
 import { trackApiUsage } from '@/lib/enrichment/track-api-usage';
 import { redis } from '@/lib/cache/redis';
+import { chatCompletion } from '@/lib/ai/openrouter';
 
 /**
  * SEC EDGAR API enrichment result
@@ -168,6 +169,32 @@ export async function lookupCompanyCik(companyName: string): Promise<{
     if (entryCompact.startsWith(compact) || compact.startsWith(entryCompact)) {
       return { cik: String(entry.cik_str), ticker: entry.ticker, companyName: entry.title };
     }
+  }
+
+  // Pass 4: LLM canonicalization — ask Haiku for the SEC legal entity name when string matching fails
+  try {
+    const { text } = await chatCompletion(
+      'You are a SEC EDGAR expert. Given a company name or brand, return ONLY the exact legal entity name used in SEC EDGAR filings (e.g. "Alphabet Inc" not "Google"). If the company is private with no SEC filings, return "PRIVATE". If unknown, return "UNKNOWN". Return nothing else — just the name.',
+      companyName,
+      60,
+      'google/gemini-2.0-flash-lite'
+    );
+    const llmName = text.trim();
+    if (llmName && llmName !== 'PRIVATE' && llmName !== 'UNKNOWN') {
+      const llmNorm = normalizeCompanyName(llmName);
+      const llmCompact = llmNorm.replace(/\s+/g, '');
+      for (const entry of entries) {
+        const entryNorm = normalizeCompanyName(entry.title);
+        const entryCompact = entryNorm.replace(/\s+/g, '');
+        if (entryNorm === llmNorm || entryNorm.startsWith(llmNorm) || llmNorm.startsWith(entryNorm) ||
+            entryCompact.startsWith(llmCompact) || llmCompact.startsWith(entryCompact)) {
+          console.log(`[Edgar] LLM canonicalized "${companyName}" → "${llmName}" → matched "${entry.title}"`);
+          return { cik: String(entry.cik_str), ticker: entry.ticker, companyName: entry.title };
+        }
+      }
+    }
+  } catch {
+    // LLM call failed — silently fall through, don't block enrichment
   }
 
   return null;
