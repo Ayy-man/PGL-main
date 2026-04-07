@@ -393,13 +393,19 @@ Plans:
 
 ### Phase 29: Lead Discovery UI redesign — collapsible search rail and view header hierarchy
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** Restructure the Lead Discovery page (`/[orgId]/search`) from a single-column stacked layout into a two-tab experience. Tab 1 "Discover" (default): centered NL search bar + collapsible filters + Search / Save-as-new-search CTAs + shortcut preview list of saved searches. Tab 2 "Saved Searches": left collapsible sidebar rail (240px expanded / 48px collapsed with tooltips) + right results panel showing saved search name as h1, `{N} prospects · Last refreshed: {X} ago [↺]` subtitle, bulk actions bar, results table. Frontend-only refactor — no API, schema, or backend changes. All Phase 28 behaviors (dismiss, refresh, NEW badge, show dismissed toggle) preserved unchanged.
+**Requirements:** LDU-01, LDU-02, LDU-03, LDU-04, LDU-05, LDU-06, LDU-07, LDU-08, LDU-09, LDU-10, LDU-11, LDU-12, LDU-13, LDU-14, LDU-15
 **Depends on:** Phase 28
-**Plans:** 0 plans
+**Status:** PLANNED — 5 plans ready for execution
+
+**Plans:** 5 plans
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 29 to break down)
+- [ ] 29-01-PLAN.md — Shared utils (persona-color, format-refreshed) + SearchSidebarRail + SavedSearchViewHeader
+- [ ] 29-02-PLAN.md — DiscoverTab layout + SavedSearchShortcutList components
+- [ ] 29-03-PLAN.md — SavedSearchesTab two-column assembly + empty states + localStorage collapse persistence
+- [ ] 29-04-PLAN.md — Refactor search-content.tsx into tab controller, preserve all Phase 28 handlers and dialogs
+- [ ] 29-05-PLAN.md — Delete legacy persona-pills.tsx + build verification + human visual QA
 
 ### Phase 30: Admin Global API Keys Management — view, rotate, and test all external integration credentials from a central admin panel
 
