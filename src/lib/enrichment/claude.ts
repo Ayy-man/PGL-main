@@ -90,6 +90,7 @@ export interface DossierInput {
   name: string;
   title: string;
   company: string;
+  workEmail?: string | null;
   contactData?: { personalEmail?: string; phone?: string } | null;
   webSignals?: Array<{ category: string; headline: string; summary: string }> | null;
   insiderTransactions?: Array<{ filingDate: string; transactionType: string; shares: number; totalValue: number }> | null;
@@ -116,10 +117,13 @@ export async function generateIntelligenceDossier(
   params: DossierInput
 ): Promise<IntelligenceDossierData | null> {
   try {
-    const { name, title, company, contactData, webSignals, insiderTransactions, stockSnapshot } = params;
+    const { name, title, company, workEmail, contactData, webSignals, insiderTransactions, stockSnapshot } = params;
+
+    // When company is unknown, surface the email domain as a company signal
+    const companyLine = company || (workEmail ? `Unknown (email domain: ${workEmail.split("@")[1]})` : "Unknown");
 
     // Build rich user message from ALL enrichment data
-    let userMessage = `Generate a structured intelligence dossier for:\n\nName: ${name}\nTitle: ${title}\nCompany: ${company}\n`;
+    let userMessage = `Generate a structured intelligence dossier for:\n\nName: ${name}\nTitle: ${title}\nCompany: ${companyLine}\n`;
 
     if (contactData?.personalEmail || contactData?.phone) {
       userMessage += `\nContact availability: ${contactData.personalEmail ? "Personal email found" : ""}${contactData.phone ? ", Phone found" : ""}\n`;

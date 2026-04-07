@@ -688,6 +688,7 @@ export const enrichProspect = inngest.createFunction(
           name,
           title,
           company,
+          workEmail: email || null,
           contactData: contactData.found && ("personalEmail" in contactData || "phone" in contactData)
             ? {
                 personalEmail: "personalEmail" in contactData ? contactData.personalEmail : undefined,

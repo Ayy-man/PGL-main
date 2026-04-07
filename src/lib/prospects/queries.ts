@@ -231,7 +231,7 @@ export async function upsertProspectFromApollo(
     first_name: firstName,
     last_name: lastName,
     title: person.title || null,
-    company: person.organization_name || null,
+    company: person.organization_name || person.organization?.name || null,
     location,
     work_email: person.email || null,
     work_phone: workPhone,
