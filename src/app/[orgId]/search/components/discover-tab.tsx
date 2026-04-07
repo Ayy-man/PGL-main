@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { NLSearchBar } from "./nl-search-bar";
 import { AdvancedFiltersPanel } from "./advanced-filters-panel";
+import { FilterPillsRow } from "./filter-pills-row";
 import { SavedSearchShortcutList } from "./saved-search-shortcut-list";
+import { SuggestedPersonasSection } from "./suggested-personas-section";
 import type { Persona, PersonaFilters } from "@/lib/personas/types";
 
 interface DiscoverTabProps {
@@ -89,6 +91,9 @@ export function DiscoverTab({
             </div>
           )}
 
+          {/* Filter pills row — replaces the old AdvancedFiltersPanel toggle */}
+          <FilterPillsRow onApplyFilters={onApplyFilters} />
+
           {/* Ghost save link — only when keywords are present */}
           {keywords.trim() && (
             <div className="mt-2 text-center">
@@ -123,6 +128,9 @@ export function DiscoverTab({
         onViewAllSaved={onViewAllSaved}
         onPrefillSearch={handlePrefill}
       />
+
+      {/* Suggested Searches — static persona templates */}
+      <SuggestedPersonasSection onPrefillSearch={handlePrefill} />
     </div>
   );
 }
