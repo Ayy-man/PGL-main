@@ -267,9 +267,11 @@ export function PersonaFormDialog({ mode, persona, trigger, open: controlledOpen
         if (next) resetForm();
       }}
     >
-      <DialogTrigger asChild>
-        {trigger}
-      </DialogTrigger>
+      {trigger != null && (
+        <DialogTrigger asChild>
+          {trigger}
+        </DialogTrigger>
+      )}
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-serif text-2xl">

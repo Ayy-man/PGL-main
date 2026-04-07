@@ -8,7 +8,9 @@ import type { List } from "@/lib/lists/types";
 import type { PersonaFiltersType } from "@/lib/apollo/schemas";
 import type { ApolloPerson } from "@/lib/apollo/types";
 import { useSearch } from "../hooks/use-search";
-import { PersonaPills } from "./persona-pills";
+import { DiscoverTab } from "./discover-tab";
+import { SavedSearchesTab } from "./saved-searches-tab";
+import { formatRefreshedAgo } from "../lib/format-refreshed";
 import { NLSearchBar } from "./nl-search-bar";
 import { AdvancedFiltersPanel } from "./advanced-filters-panel";
 import { BulkActionsBar } from "./bulk-actions-bar";
@@ -51,22 +53,6 @@ function SkeletonRow() {
   );
 }
 
-function formatRefreshedAgo(dateStr: string): string {
-  const date = new Date(dateStr);
-  if (isNaN(date.getTime())) return "Unknown";
-  const diffMs = Date.now() - date.getTime();
-  const diffMins = Math.floor(diffMs / (1000 * 60));
-  if (diffMins < 1) return "just now";
-  if (diffMins < 60) return `${diffMins}m ago`;
-  const diffHours = Math.floor(diffMins / 60);
-  if (diffHours < 24) return `${diffHours}h ago`;
-  const diffDays = Math.floor(diffHours / 24);
-  if (diffDays === 1) return "yesterday";
-  if (diffDays < 30) return `${diffDays}d ago`;
-  const diffMonths = Math.floor(diffDays / 30);
-  return `${diffMonths}mo ago`;
-}
-
 function savedProspectToApolloPerson(
   sp: SavedSearchProspect
 ): ApolloPerson & { _savedSearchMeta?: { status: string; is_new: boolean; prospect_id: string | null; last_seen_at: string } } {
@@ -102,6 +88,14 @@ function savedProspectToApolloPerson(
 export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
   const router = useRouter();
   const { toast } = useToast();
+
+  // Tab state — D-01/D-02 (Discover is default)
+  const [activeTab, setActiveTab] = useState<"discover" | "saved">("discover");
+
+  // PersonaFormDialog controlled state (shared by Discover "Save as new search"
+  // button and sidebar "+ New" button)
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+
   const {
     searchState,
     setSearchState,
@@ -317,6 +311,13 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
     // Saved search mode shows stored DB prospects; keyword search hits Apollo live.
     // For filtering within a saved search, use the Advanced Filters panel instead.
     setSearchState({ keywords, persona: "" });
+    // D-19: submitting a search always navigates to Saved Searches tab
+    setActiveTab("saved");
+  };
+
+  const handleSelectSavedSearch = (id: string) => {
+    setSearchState({ persona: id, keywords: "" });
+    setActiveTab("saved");
   };
 
   // ----------------------------------------------------------------
@@ -620,9 +621,175 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
   const activeResults = isSavedSearchMode ? savedProspects.map(savedProspectToApolloPerson) : results;
   const activeResultCount = isSavedSearchMode ? savedProspects.length : results.length;
 
+  // ----------------------------------------------------------------
+  // Inline results helper — extracted from legacy results block
+  // ----------------------------------------------------------------
+  const renderSavedSearchResults = () => {
+    return (
+      <div>
+        {/* Bulk actions bar */}
+        {(results.length > 0 || (isSavedSearchMode && savedProspects.length > 0)) && (
+          <BulkActionsBar
+            selectedCount={selectedIds.size}
+            totalCount={activeResultCount}
+            allSelected={
+              selectedIds.size === activeResultCount && activeResultCount > 0
+            }
+            onSelectAll={handleSelectAll}
+            onAddToList={handleBulkAddToList}
+            onExport={handleBulkExport}
+            onEnrich={handleBulkEnrich}
+            onDismiss={handleBulkDismissClick}
+            showDismiss={isSavedSearchMode}
+          />
+        )}
+
+        {/* Loading state: skeleton table */}
+        {(isLoading || isRefreshing) && activeResultCount === 0 && (
+          <div
+            className="overflow-hidden rounded-xl"
+            style={{
+              border: "1px solid var(--border-default)",
+              background: "var(--bg-card-gradient)",
+            }}
+          >
+            <table className="min-w-full">
+              <tbody>
+                {[1, 2, 3, 4].map((n) => (
+                  <SkeletonRow key={n} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Empty state: no results */}
+        {!isLoading && !isRefreshing && activeResultCount === 0 && hasActiveSearch && (
+          <EmptyState
+            icon={Search}
+            title="No matching prospects"
+            description="Try broadening the persona filters or adjusting your search keywords."
+          />
+        )}
+
+        {/* Prospect results table */}
+        {(results.length > 0 || (isSavedSearchMode && savedProspects.length > 0)) && (
+          <ProspectResultsTable
+            results={activeResults}
+            selectedIds={selectedIds}
+            onSelect={handleSelect}
+            onSelectAll={handleSelectAll}
+            onProspectClick={handleProspectClick}
+            savedSearchMode={isSavedSearchMode}
+            onDismiss={isSavedSearchMode ? (id) => handleDismiss([id]) : undefined}
+            onUndoDismiss={handleUndoDismiss}
+            lastRefreshedAt={lastRefreshedAt}
+          />
+        )}
+
+        {/* Pagination — mockup style (only in Apollo mode) */}
+        {!isSavedSearchMode && pagination.totalPages > 1 && (
+          <div
+            className="flex items-center justify-between py-4 px-2"
+            style={{ borderTop: "1px solid var(--border-subtle)" }}
+          >
+            <p className="text-[13px]" style={{ color: "var(--text-tertiary)" }}>
+              Showing{" "}
+              <span style={{ color: "var(--text-primary-ds)" }} className="font-medium">
+                {(searchState.page - 1) * 10 + 1}
+              </span>{" "}
+              to{" "}
+              <span style={{ color: "var(--text-primary-ds)" }} className="font-medium">
+                {Math.min(searchState.page * 10, pagination.totalEntries)}
+              </span>{" "}
+              of{" "}
+              <span style={{ color: "var(--text-primary-ds)" }} className="font-medium">
+                {pagination.totalEntries.toLocaleString()}
+              </span>{" "}
+              results
+            </p>
+            <nav className="isolate inline-flex -space-x-px rounded-md">
+              <button
+                disabled={searchState.page <= 1 || isLoading}
+                onClick={() => setSearchState({ page: searchState.page - 1 })}
+                className="relative inline-flex items-center rounded-l-md px-2 py-2 transition-colors duration-150 disabled:opacity-30 cursor-pointer disabled:cursor-not-allowed"
+                style={{
+                  color: "var(--text-tertiary)",
+                  border: "1px solid var(--border-default)",
+                }}
+              >
+                <span className="sr-only">Previous</span>
+                <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" /></svg>
+              </button>
+              {Array.from(
+                { length: Math.min(pagination.totalPages, 5) },
+                (_, i) => {
+                  const pageNum = i + 1;
+                  const isActive = pageNum === searchState.page;
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setSearchState({ page: pageNum })}
+                      disabled={isLoading}
+                      className="relative inline-flex items-center px-4 py-2 text-sm font-semibold transition-colors duration-150 cursor-pointer"
+                      style={
+                        isActive
+                          ? {
+                              background: "var(--gold-primary)",
+                              color: "var(--bg-root)",
+                              zIndex: 10,
+                            }
+                          : {
+                              color: "var(--text-primary-ds)",
+                              border: "1px solid var(--border-default)",
+                            }
+                      }
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                }
+              )}
+              {pagination.totalPages > 5 && (
+                <span
+                  className="relative inline-flex items-center px-4 py-2 text-sm font-semibold"
+                  style={{
+                    color: "var(--text-tertiary)",
+                    border: "1px solid var(--border-default)",
+                  }}
+                >
+                  ...
+                </span>
+              )}
+              <button
+                disabled={searchState.page >= pagination.totalPages || isLoading}
+                onClick={() => setSearchState({ page: searchState.page + 1 })}
+                className="relative inline-flex items-center rounded-r-md px-2 py-2 transition-colors duration-150 disabled:opacity-30 cursor-pointer disabled:cursor-not-allowed"
+                style={{
+                  color: "var(--text-tertiary)",
+                  border: "1px solid var(--border-default)",
+                }}
+              >
+                <span className="sr-only">Next</span>
+                <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" /></svg>
+              </button>
+            </nav>
+          </div>
+        )}
+
+        {/* Helpful hint when totalApolloResults > 500 */}
+        {isSavedSearchMode && totalApolloResults !== null && totalApolloResults > 500 && (
+          <p className="text-[12px] mt-2" style={{ color: "var(--text-tertiary)" }}>
+            Showing first 500 of {totalApolloResults.toLocaleString()} matches. Refine your filters for more targeted results.
+          </p>
+        )}
+      </div>
+    );
+  };
+
   return (
-    <div className="page-enter flex flex-col">
-      {/* Error state — full replacement */}
+    <div className="flex flex-col h-full">
+      {/* Error state — full replacement (preserved from existing) */}
       {error ? (
         <EmptyState icon={AlertCircle} title={error} variant="error">
           <Button variant="outline" size="sm" onClick={executeSearch}>
@@ -631,278 +798,122 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
         </EmptyState>
       ) : (
         <>
-          {/* HEADER SECTION — always visible */}
-          <div className="pt-8 pb-6 flex flex-col gap-5">
-            {/* Page title */}
-            <div>
-              <h1
-                className="font-serif text-2xl sm:text-[32px] md:text-[38px] font-medium"
-                style={{ letterSpacing: "-0.5px", color: "var(--text-primary-ds)" }}
-              >
-                Lead Discovery
-              </h1>
-              <p
-                className="mt-1 text-[14px] font-light"
-                style={{ color: "var(--text-tertiary)" }}
-              >
-                Use natural language to discover high-net-worth individuals and
-                properties
-              </p>
-            </div>
+          {/* ============ TAB BAR (D-01, D-02, D-03) ============ */}
+          <div
+            className="flex items-center gap-1 px-4"
+            style={{
+              background: "var(--bg-elevated)",
+              borderBottom: "1px solid var(--border-default)",
+            }}
+          >
+            {(["discover", "saved"] as const).map((tab) => {
+              const label = tab === "discover" ? "Discover" : "Saved Searches";
+              const isActive = activeTab === tab;
+              return (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => setActiveTab(tab)}
+                  className="text-[14px] font-medium px-4 py-3 cursor-pointer transition-colors"
+                  style={{
+                    color: isActive ? "var(--text-primary-ds)" : "var(--text-secondary-ds)",
+                    borderBottom: isActive ? "2px solid var(--gold-primary)" : "2px solid transparent",
+                    marginBottom: "-1px",
+                  }}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
 
-            {/* NL Search Bar */}
-            <NLSearchBar
-              initialValue={searchState.keywords}
-              onSearch={handleNLSearch}
+          {/* ============ TAB PANELS ============ */}
+          {activeTab === "discover" ? (
+            <DiscoverTab
+              personas={personas}
+              savedSearchCounts={{}}
+              keywords={searchState.keywords}
               isLoading={isLoading}
+              onNLSearch={handleNLSearch}
+              onApplyFilters={handleApplyFilters}
+              onSubmitSearch={() => {
+                // Submit the NL bar with whatever is currently in searchState.keywords
+                // (or empty keywords + filterOverrides). Navigate to Saved Searches tab.
+                setActiveTab("saved");
+                executeSearch();
+              }}
+              onSaveAsNewSearch={() => setCreateDialogOpen(true)}
+              onSelectSavedSearch={handleSelectSavedSearch}
+              onViewAllSaved={() => setActiveTab("saved")}
             />
-
-            {/* Persona Pills */}
-            <PersonaPills
+          ) : (
+            <SavedSearchesTab
               personas={personas}
               selectedId={searchState.persona}
               onSelect={(id) => setSearchState({ persona: id, keywords: "" })}
               createButton={
-                <PersonaFormDialog
-                  mode="create"
-                  trigger={
-                    <button
-                      className="flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[13px] font-medium transition-all duration-200 cursor-pointer shrink-0"
-                      style={{
-                        background: "transparent",
-                        border: "1px dashed var(--border-default)",
-                        color: "var(--text-secondary-ds)",
-                      }}
-                    >
-                      <Plus className="h-3 w-3" />
-                      New Search
-                    </button>
-                  }
-                />
-              }
-            />
-
-            {/* Advanced Filters toggle */}
-            <AdvancedFiltersPanel onApplyFilters={handleApplyFilters} />
-          </div>
-
-          {/* RESULTS SECTION — conditional on persona selected */}
-          {hasActiveSearch ? (
-            <div>
-              {/* Results header row */}
-              <div className="flex items-center justify-between mb-4">
-                <p
-                  className="text-[13px]"
-                  style={{ color: "var(--text-secondary-ds)" }}
-                >
-                  {activeResultCount > 0
-                    ? `${(isSavedSearchMode ? activeResultCount : pagination.totalEntries).toLocaleString()} results`
-                    : isLoading || isRefreshing
-                      ? "Searching..."
-                      : "No results"}
-                </p>
-              </div>
-
-              {/* Saved search toolbar — last refreshed + refresh button */}
-              {isSavedSearchMode && (
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <span className="text-[13px]" style={{ color: "var(--text-tertiary)" }}>
-                      {lastRefreshedAt ? `Last refreshed: ${formatRefreshedAgo(lastRefreshedAt)}` : "Never refreshed"}
-                    </span>
-                    {totalApolloResults !== null && totalApolloResults > 500 && (
-                      <span className="text-[12px]" style={{ color: "var(--text-tertiary)" }}>
-                        Showing first 500 of {totalApolloResults.toLocaleString()} matches. Refine your filters for more targeted results.
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {/* Show dismissed toggle */}
-                    <button
-                      onClick={() => setShowDismissed(!showDismissed)}
-                      className="text-[13px] px-2 py-1 rounded-md transition-colors"
-                      style={{
-                        color: showDismissed ? "var(--gold-text)" : "var(--text-tertiary)",
-                        background: showDismissed ? "rgba(212, 175, 55, 0.1)" : "transparent",
-                      }}
-                    >
-                      {showDismissed ? "Hide" : "Show"} dismissed ({dismissedCount})
-                    </button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRefresh()}
-                      disabled={isRefreshing}
-                    >
-                      {isRefreshing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-                      <span className="ml-1.5">Refresh</span>
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              {/* Bulk actions bar */}
-              {(results.length > 0 || (isSavedSearchMode && savedProspects.length > 0)) && (
-                <BulkActionsBar
-                  selectedCount={selectedIds.size}
-                  totalCount={activeResultCount}
-                  allSelected={
-                    selectedIds.size === activeResultCount && activeResultCount > 0
-                  }
-                  onSelectAll={handleSelectAll}
-                  onAddToList={handleBulkAddToList}
-                  onExport={handleBulkExport}
-                  onEnrich={handleBulkEnrich}
-                  onDismiss={handleBulkDismissClick}
-                  showDismiss={isSavedSearchMode}
-                />
-              )}
-
-              {/* Loading state: skeleton table */}
-              {(isLoading || isRefreshing) && activeResultCount === 0 && (
-                <div
-                  className="overflow-hidden rounded-xl"
+                <button
+                  type="button"
+                  onClick={() => setCreateDialogOpen(true)}
+                  className="flex items-center gap-1.5 rounded-full px-4 py-1.5 text-[13px] font-medium transition-all duration-200 cursor-pointer w-full justify-center"
                   style={{
-                    border: "1px solid var(--border-default)",
-                    background: "var(--bg-card-gradient)",
+                    background: "transparent",
+                    border: "1px dashed var(--border-default)",
+                    color: "var(--text-secondary-ds)",
                   }}
                 >
-                  <table className="min-w-full">
-                    <tbody>
-                      {[1, 2, 3, 4].map((n) => (
-                        <SkeletonRow key={n} />
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-
-              {/* Empty state: no results */}
-              {!isLoading && !isRefreshing && activeResultCount === 0 && (
-                <EmptyState
-                  icon={Search}
-                  title="No matching prospects"
-                  description="Try broadening the persona filters or adjusting your search keywords."
-                />
-              )}
-
-              {/* Prospect results table */}
-              {(results.length > 0 || (isSavedSearchMode && savedProspects.length > 0)) && (
-                <ProspectResultsTable
-                  results={activeResults}
-                  selectedIds={selectedIds}
-                  onSelect={handleSelect}
-                  onSelectAll={handleSelectAll}
-                  onProspectClick={handleProspectClick}
-                  savedSearchMode={isSavedSearchMode}
-                  onDismiss={isSavedSearchMode ? (id) => handleDismiss([id]) : undefined}
-                  onUndoDismiss={handleUndoDismiss}
-                  lastRefreshedAt={lastRefreshedAt}
-                />
-              )}
-
-              {/* Pagination — mockup style (only in Apollo mode) */}
-              {!isSavedSearchMode && pagination.totalPages > 1 && (
-                <div
-                  className="flex items-center justify-between py-4 px-2"
-                  style={{ borderTop: "1px solid var(--border-subtle)" }}
+                  <Plus className="h-3 w-3" />
+                  + New
+                </button>
+              }
+              createButtonCollapsed={
+                <button
+                  type="button"
+                  onClick={() => setCreateDialogOpen(true)}
+                  aria-label="New saved search"
+                  className="flex items-center justify-center h-9 w-9 rounded-full transition-all duration-200 cursor-pointer"
+                  style={{
+                    background: "transparent",
+                    border: "1px dashed var(--border-default)",
+                    color: "var(--text-secondary-ds)",
+                  }}
                 >
-                  <p className="text-[13px]" style={{ color: "var(--text-tertiary)" }}>
-                    Showing{" "}
-                    <span style={{ color: "var(--text-primary-ds)" }} className="font-medium">
-                      {(searchState.page - 1) * 10 + 1}
-                    </span>{" "}
-                    to{" "}
-                    <span style={{ color: "var(--text-primary-ds)" }} className="font-medium">
-                      {Math.min(searchState.page * 10, pagination.totalEntries)}
-                    </span>{" "}
-                    of{" "}
-                    <span style={{ color: "var(--text-primary-ds)" }} className="font-medium">
-                      {pagination.totalEntries.toLocaleString()}
-                    </span>{" "}
-                    results
-                  </p>
-                  <nav className="isolate inline-flex -space-x-px rounded-md">
-                    <button
-                      disabled={searchState.page <= 1 || isLoading}
-                      onClick={() => setSearchState({ page: searchState.page - 1 })}
-                      className="relative inline-flex items-center rounded-l-md px-2 py-2 transition-colors duration-150 disabled:opacity-30 cursor-pointer disabled:cursor-not-allowed"
-                      style={{
-                        color: "var(--text-tertiary)",
-                        border: "1px solid var(--border-default)",
-                      }}
-                    >
-                      <span className="sr-only">Previous</span>
-                      <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" /></svg>
-                    </button>
-                    {Array.from(
-                      { length: Math.min(pagination.totalPages, 5) },
-                      (_, i) => {
-                        const pageNum = i + 1;
-                        const isActive = pageNum === searchState.page;
-                        return (
-                          <button
-                            key={pageNum}
-                            onClick={() => setSearchState({ page: pageNum })}
-                            disabled={isLoading}
-                            className="relative inline-flex items-center px-4 py-2 text-sm font-semibold transition-colors duration-150 cursor-pointer"
-                            style={
-                              isActive
-                                ? {
-                                    background: "var(--gold-primary)",
-                                    color: "var(--bg-root)",
-                                    zIndex: 10,
-                                  }
-                                : {
-                                    color: "var(--text-primary-ds)",
-                                    border: "1px solid var(--border-default)",
-                                  }
-                            }
-                          >
-                            {pageNum}
-                          </button>
-                        );
-                      }
-                    )}
-                    {pagination.totalPages > 5 && (
-                      <span
-                        className="relative inline-flex items-center px-4 py-2 text-sm font-semibold"
-                        style={{
-                          color: "var(--text-tertiary)",
-                          border: "1px solid var(--border-default)",
-                        }}
-                      >
-                        ...
-                      </span>
-                    )}
-                    <button
-                      disabled={searchState.page >= pagination.totalPages || isLoading}
-                      onClick={() => setSearchState({ page: searchState.page + 1 })}
-                      className="relative inline-flex items-center rounded-r-md px-2 py-2 transition-colors duration-150 disabled:opacity-30 cursor-pointer disabled:cursor-not-allowed"
-                      style={{
-                        color: "var(--text-tertiary)",
-                        border: "1px solid var(--border-default)",
-                      }}
-                    >
-                      <span className="sr-only">Next</span>
-                      <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" /></svg>
-                    </button>
-                  </nav>
-                </div>
-              )}
-            </div>
-          ) : (
-            /* Empty state when no persona selected */
-            <div className="mt-4">
-              <EmptyState
-                icon={Search}
-                title="Start a search"
-                description="Type a query above and press Search, or select a saved search to discover matching prospects."
-              />
-            </div>
+                  <Plus className="h-3 w-3" />
+                </button>
+              }
+              prospectCount={isSavedSearchMode ? savedProspects.length : 0}
+              lastRefreshedAt={lastRefreshedAt}
+              onRefresh={() => handleRefresh()}
+              isRefreshing={isRefreshing}
+              headerRightSlot={
+                isSavedSearchMode ? (
+                  <button
+                    onClick={() => setShowDismissed(!showDismissed)}
+                    className="text-[13px] px-2 py-1 rounded-md transition-colors"
+                    style={{
+                      color: showDismissed ? "var(--gold-text)" : "var(--text-tertiary)",
+                      background: showDismissed ? "rgba(212, 175, 55, 0.1)" : "transparent",
+                    }}
+                  >
+                    {showDismissed ? "Hide" : "Show"} dismissed ({dismissedCount})
+                  </button>
+                ) : null
+              }
+            >
+              {/* Results panel children: bulk actions + table + loading + empty states */}
+              {renderSavedSearchResults()}
+            </SavedSearchesTab>
           )}
         </>
       )}
+
+      {/* ============ CONTROLLED PersonaFormDialog (shared trigger) ============ */}
+      <PersonaFormDialog
+        mode="create"
+        open={createDialogOpen}
+        onOpenChange={setCreateDialogOpen}
+        trigger={null}
+      />
 
       {/* Bulk list selection dialog */}
       <Dialog open={bulkListDialogOpen} onOpenChange={setBulkListDialogOpen}>
