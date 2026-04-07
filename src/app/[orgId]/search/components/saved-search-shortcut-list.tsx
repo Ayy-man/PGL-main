@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Play } from "lucide-react";
 import { getPersonaColor } from "../lib/persona-color";
 import type { Persona } from "@/lib/personas/types";
 
@@ -42,6 +43,19 @@ const SUGGESTED_PERSONAS = [
   },
 ];
 
+function formatRelative(iso: string | null | undefined): string {
+  if (!iso) return "Not run yet";
+  const then = new Date(iso).getTime();
+  if (Number.isNaN(then)) return "Not run yet";
+  const diffMs = Date.now() - then;
+  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  if (days < 1) return "Today";
+  if (days === 1) return "Yesterday";
+  if (days < 7) return `${days}d ago`;
+  if (days < 30) return `${Math.floor(days / 7)}w ago`;
+  return `${Math.floor(days / 30)}mo ago`;
+}
+
 function SearchCard({
   persona,
   countLabel,
@@ -52,37 +66,51 @@ function SearchCard({
   onClick: () => void;
 }) {
   const [hovered, setHovered] = useState(false);
+  const lastRun = formatRelative(persona.last_refreshed_at ?? persona.last_used_at);
   return (
     <button
       type="button"
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="text-left w-full rounded-[14px] p-4 cursor-pointer transition-all duration-150"
+      className="text-left w-full rounded-[14px] p-4 cursor-pointer transition-all duration-150 relative"
       style={{
         border: `1px solid ${hovered ? "var(--border-gold)" : "var(--border-subtle)"}`,
         background: hovered ? "var(--gold-bg)" : "var(--bg-elevated)",
         transform: hovered ? "translateY(-1px)" : "translateY(0)",
       }}
     >
-      <div className="flex items-center gap-2 mb-2">
+      {/* Top row: dot + name (full-width, wraps) + play icon */}
+      <div className="flex items-start gap-2 mb-2 pr-6">
         <span
-          className="h-2 w-2 rounded-full flex-shrink-0"
+          className="h-2 w-2 rounded-full flex-shrink-0 mt-1.5"
           style={{ background: getPersonaColor(persona.id) }}
         />
         <span
-          className="text-[14px] font-medium truncate"
+          className="text-[14px] font-medium leading-snug whitespace-normal break-words line-clamp-2"
           style={{ color: "var(--text-primary-ds)" }}
         >
           {persona.name}
         </span>
       </div>
-      <span
-        className="text-[12px]"
-        style={{ color: "var(--gold-primary)", opacity: 0.75 }}
-      >
-        {countLabel}
-      </span>
+
+      {/* Play icon — top right corner */}
+      <Play
+        className="absolute top-4 right-4 h-3.5 w-3.5"
+        style={{
+          color: hovered ? "var(--gold-primary)" : "var(--text-tertiary)",
+          fill: hovered ? "var(--gold-primary)" : "transparent",
+        }}
+      />
+
+      {/* Metadata row */}
+      <div className="flex items-center gap-2 text-[11px]">
+        <span style={{ color: "var(--gold-primary)", opacity: 0.85 }}>
+          {countLabel}
+        </span>
+        <span style={{ color: "var(--text-tertiary)" }}>·</span>
+        <span style={{ color: "var(--text-tertiary)" }}>{lastRun}</span>
+      </div>
     </button>
   );
 }
@@ -173,7 +201,7 @@ export function SavedSearchShortcutList({
       >
         Saved Searches
       </p>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {visible.map((persona) => {
           const count = counts[persona.id];
           const countLabel =
