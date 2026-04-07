@@ -4,16 +4,15 @@ import { bulkEnrichPeople } from "@/lib/circuit-breaker/apollo-breaker";
 import { logError } from "@/lib/error-logger";
 import { z } from "zod";
 import type { ApolloPerson } from "@/lib/apollo/types";
+import { isApolloMockMode } from "@/lib/platform-config";
 
 /**
- * When "true", returns fake enrichment data instead of calling Apollo API.
- * Set via env var so it can be toggled on Vercel without redeploying.
+ * Apollo mock mode — controlled via platform_config.apollo_mock_enrichment (DB)
+ * with fallback to APOLLO_MOCK_ENRICHMENT env var.
  *
- * To disable mock mode (use real Apollo credits):
- *   - Remove APOLLO_MOCK_ENRICHMENT from Vercel env vars (or set to "false")
- *   - Remove from .env.local (or set to "false")
+ * Super admins can toggle this at /admin/api-keys without a redeploy.
+ * See src/lib/platform-config/index.ts for the resolution order.
  */
-const USE_MOCK_ENRICHMENT = process.env.APOLLO_MOCK_ENRICHMENT === "true";
 
 const previewSchema = z.object({
   id: z.string(),
@@ -90,7 +89,7 @@ function generateMockPerson(
  * Enriches Apollo preview results into full contact data (costs credits).
  * Called explicitly by "Enrich Selection" — never on search.
  *
- * When USE_MOCK_ENRICHMENT is true, generates fake data for testing.
+ * When isApolloMockMode() returns true, generates fake data for testing.
  */
 export async function POST(request: Request) {
   try {
@@ -116,7 +115,8 @@ export async function POST(request: Request) {
     const { apolloIds, previews } = parseResult.data;
 
     // Mock mode: generate fake enrichment data for testing
-    if (USE_MOCK_ENRICHMENT) {
+    const useMock = await isApolloMockMode();
+    if (useMock) {
       const previewMap = new Map(
         (previews || []).map((p) => [p.id, p])
       );
