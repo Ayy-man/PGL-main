@@ -1,19 +1,22 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import { Search, Mic } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ArrowUp, Mic, SlidersHorizontal } from "lucide-react";
 
 interface NLSearchBarProps {
   initialValue?: string;
   onSearch: (keywords: string) => void;
   isLoading?: boolean;
+  onToggleFilters?: () => void;
+  filtersOpen?: boolean;
 }
 
 export function NLSearchBar({
   initialValue = "",
   onSearch,
   isLoading = false,
+  onToggleFilters,
+  filtersOpen = false,
 }: NLSearchBarProps) {
   const [value, setValue] = useState<string>(initialValue);
   const [isFocused, setIsFocused] = useState(false);
@@ -23,9 +26,8 @@ export function NLSearchBar({
     const textarea = textareaRef.current;
     if (!textarea) return;
     textarea.style.height = "auto";
-    const scrollHeight = textarea.scrollHeight;
-    const clamped = Math.min(Math.max(scrollHeight, 56), 120);
-    textarea.style.height = `${clamped}px`;
+    textarea.style.height =
+      Math.min(Math.max(textarea.scrollHeight, 56), 200) + "px";
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -40,25 +42,18 @@ export function NLSearchBar({
     }
   };
 
-  const handleSearchClick = () => {
-    onSearch(value.trim());
-  };
-
   return (
     <div
-      className="relative rounded-[12px] overflow-hidden"
+      className="relative rounded-[24px] overflow-hidden"
       style={{
         background: "var(--bg-input)",
-        border: `1px solid ${isFocused ? "var(--border-hover)" : "var(--border-subtle)"}`,
-        transition: "border-color 0.2s ease",
+        border: `1px solid ${
+          isFocused ? "rgba(212,175,55,0.3)" : "rgba(212,175,55,0.15)"
+        }`,
+        boxShadow: isFocused ? "0 0 0 3px rgba(212,175,55,0.06)" : "none",
+        transition: "border-color 0.2s ease, box-shadow 0.2s ease",
       }}
     >
-      {/* Left search icon */}
-      <Search
-        className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 shrink-0 pointer-events-none"
-        style={{ color: "var(--text-muted)" }}
-      />
-
       {/* Auto-resize textarea */}
       <textarea
         ref={textareaRef}
@@ -67,43 +62,79 @@ export function NLSearchBar({
         onKeyDown={handleKeyDown}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
-        className="w-full resize-none bg-transparent py-4 pl-14 pr-32 text-[16px] font-sans placeholder:italic outline-none"
+        className="w-full resize-none bg-transparent px-4 pt-4 pb-2 text-[16px] font-sans placeholder:italic outline-none"
         style={{
           color: "var(--text-primary-ds)",
           minHeight: "56px",
-          maxHeight: "120px",
+          maxHeight: "200px",
         }}
-        placeholder="Describe your ideal prospect... e.g., 'Tech founders in Miami over $5M looking for investment properties'"
+        placeholder="Describe your ideal prospect..."
         rows={1}
       />
 
-      {/* Right action area */}
-      <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
-        {/* Mic placeholder button (non-functional) */}
+      {/* Bottom toolbar */}
+      <div className="flex items-center justify-between px-3 pb-3">
+        {/* Left — Filters chip */}
         <button
           type="button"
-          disabled
-          aria-label="Voice search (coming soon)"
-          className="h-9 w-9 rounded-full flex items-center justify-center"
-          style={{
-            opacity: 0.3,
-            background: "transparent",
-            border: "none",
-            cursor: "not-allowed",
-          }}
+          onClick={onToggleFilters}
+          className="flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] font-medium cursor-pointer transition-colors"
+          style={
+            filtersOpen
+              ? {
+                  background: "var(--gold-bg)",
+                  border: "1px solid var(--border-gold)",
+                  color: "var(--gold-primary)",
+                }
+              : {
+                  background: "var(--bg-elevated)",
+                  border: "1px solid var(--border-subtle)",
+                  color: "var(--text-secondary-ds)",
+                }
+          }
         >
-          <Mic className="h-4 w-4" style={{ color: "var(--text-secondary-ds)" }} />
+          <SlidersHorizontal className="h-3 w-3" />
+          Filters
         </button>
 
-        {/* Gold search button */}
-        <Button
-          variant="gold"
-          size="sm"
-          onClick={handleSearchClick}
-          disabled={isLoading}
-        >
-          Search
-        </Button>
+        {/* Right — Mic + Send */}
+        <div className="flex items-center gap-2">
+          {/* Mic — disabled */}
+          <button
+            type="button"
+            disabled
+            aria-label="Voice search (coming soon)"
+            className="h-8 w-8 rounded-full flex items-center justify-center"
+            style={{
+              opacity: 0.25,
+              background: "transparent",
+              border: "none",
+              cursor: "not-allowed",
+            }}
+          >
+            <Mic className="h-4 w-4" style={{ color: "var(--text-secondary-ds)" }} />
+          </button>
+
+          {/* Send / ArrowUp */}
+          <button
+            type="button"
+            onClick={() => onSearch(value.trim())}
+            disabled={isLoading || !value.trim()}
+            aria-label="Search"
+            className="h-8 w-8 rounded-full flex items-center justify-center transition-colors cursor-pointer disabled:cursor-not-allowed"
+            style={
+              value.trim()
+                ? { background: "var(--gold-primary)", color: "#0a0a0a" }
+                : {
+                    background: "var(--bg-elevated)",
+                    color: "var(--text-ghost)",
+                    opacity: 0.5,
+                  }
+            }
+          >
+            <ArrowUp className="h-4 w-4" />
+          </button>
+        </div>
       </div>
     </div>
   );
