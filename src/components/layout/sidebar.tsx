@@ -12,13 +12,11 @@ interface SidebarProps {
   userRole?: string;
   userName: string;
   userInitials: string;
-  savedSearchCount?: number;
-  listsCount?: number;
 }
 
 const STORAGE_KEY = "pgl-sidebar-collapsed";
 
-export function Sidebar({ orgId, tenantName, logoUrl, userRole, userName, userInitials, savedSearchCount, listsCount }: SidebarProps) {
+export function Sidebar({ orgId, tenantName, logoUrl, userRole, userName, userInitials }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
 
   // Hydrate from localStorage after mount
@@ -82,7 +80,7 @@ export function Sidebar({ orgId, tenantName, logoUrl, userRole, userName, userIn
 
         {/* Navigation */}
         <div className="flex-1 overflow-y-auto py-2">
-          <NavItems orgId={orgId} userRole={userRole} collapsed={collapsed} savedSearchCount={savedSearchCount} listsCount={listsCount} />
+          <NavItems orgId={orgId} userRole={userRole} collapsed={collapsed} />
         </div>
 
         {/* Footer with collapse toggle */}

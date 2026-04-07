@@ -1,18 +1,22 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import { ArrowUp, Mic } from "lucide-react";
+import { ArrowUp, Mic, SlidersHorizontal } from "lucide-react";
 
 interface NLSearchBarProps {
   initialValue?: string;
   onSearch: (keywords: string) => void;
   isLoading?: boolean;
+  onToggleFilters?: () => void;
+  filtersOpen?: boolean;
 }
 
 export function NLSearchBar({
   initialValue = "",
   onSearch,
   isLoading = false,
+  onToggleFilters,
+  filtersOpen = false,
 }: NLSearchBarProps) {
   const [value, setValue] = useState<string>(initialValue);
   const [isFocused, setIsFocused] = useState(false);
@@ -42,13 +46,11 @@ export function NLSearchBar({
     <div
       className="relative rounded-[24px] overflow-hidden"
       style={{
-        background: "rgba(255,255,255,0.03)",
+        background: "var(--bg-input)",
         border: `1px solid ${
-          isFocused ? "rgba(212,175,55,0.55)" : "rgba(212,175,55,0.18)"
+          isFocused ? "rgba(212,175,55,0.3)" : "rgba(212,175,55,0.15)"
         }`,
-        boxShadow: isFocused
-          ? "inset 0 0 0 1px rgba(212,175,55,0.25), 0 0 0 4px rgba(212,175,55,0.08)"
-          : "none",
+        boxShadow: isFocused ? "0 0 0 3px rgba(212,175,55,0.06)" : "none",
         transition: "border-color 0.2s ease, box-shadow 0.2s ease",
       }}
     >
@@ -71,7 +73,30 @@ export function NLSearchBar({
       />
 
       {/* Bottom toolbar */}
-      <div className="flex items-center justify-end px-3 pb-3">
+      <div className="flex items-center justify-between px-3 pb-3">
+        {/* Left — Filters chip */}
+        <button
+          type="button"
+          onClick={onToggleFilters}
+          className="flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] font-medium cursor-pointer transition-colors"
+          style={
+            filtersOpen
+              ? {
+                  background: "var(--gold-bg)",
+                  border: "1px solid var(--border-gold)",
+                  color: "var(--gold-primary)",
+                }
+              : {
+                  background: "var(--bg-elevated)",
+                  border: "1px solid var(--border-subtle)",
+                  color: "var(--text-secondary-ds)",
+                }
+          }
+        >
+          <SlidersHorizontal className="h-3 w-3" />
+          Filters
+        </button>
+
         {/* Right — Mic + Send */}
         <div className="flex items-center gap-2">
           {/* Mic — disabled */}
