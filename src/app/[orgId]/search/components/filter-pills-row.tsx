@@ -59,11 +59,19 @@ export function FilterPillsRow({ onApplyFilters }: FilterPillsRowProps) {
     setOpenPill(null);
   };
 
+  const PILL_FILTER_KEY: Record<PillKey, keyof PersonaFilters> = {
+    industry: "industries",
+    title: "titles",
+    location: "locations",
+    networth: "net_worth_range",
+  };
+
   const clearPill = (key: PillKey) => {
     if (key === "industry") setIndustries("");
     if (key === "title") setTitles("");
     if (key === "location") setLocations("");
     if (key === "networth") setNetWorth("");
+    onApplyFilters({ [PILL_FILTER_KEY[key]]: undefined } as Partial<PersonaFilters>);
   };
 
   const hasValue: Record<PillKey, boolean> = {
