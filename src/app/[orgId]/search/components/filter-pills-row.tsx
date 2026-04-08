@@ -128,7 +128,7 @@ export function FilterPillsRow({ onApplyFilters }: FilterPillsRowProps) {
               <div
                 className="absolute left-1/2 top-[calc(100%+8px)] z-20 -translate-x-1/2 w-[280px] rounded-[12px] p-3"
                 style={{
-                  background: "var(--bg-elevated)",
+                  background: "var(--bg-elevated, #1a1a1a)",
                   border: "1px solid var(--border-default)",
                   boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
                 }}
