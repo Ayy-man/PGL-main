@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { TrendingUp, Briefcase, Scale, Building2, Wallet } from "lucide-react";
+import { useState } from "react";
 
 interface SuggestedPersona {
   id: string;
@@ -10,6 +10,7 @@ interface SuggestedPersona {
   count: string;
   query: string;
   Icon: typeof TrendingUp;
+  borderColor: string;
 }
 
 const SUGGESTED: SuggestedPersona[] = [
@@ -17,46 +18,46 @@ const SUGGESTED: SuggestedPersona[] = [
     id: "sugg-finance-elite",
     label: "Finance Elite",
     description: "MD+ at top investment banks",
-    count: "~8,400 prospects",
-    query:
-      "Managing Directors and above at Goldman Sachs, Morgan Stanley, JPMorgan, and other top investment banks",
+    count: "~8,400 matches",
+    query: "Managing Directors and above at Goldman Sachs, Morgan Stanley, JPMorgan, and other top investment banks",
     Icon: TrendingUp,
+    borderColor: "rgba(212,175,55,0.6)",
   },
   {
     id: "sugg-tech-founders",
     label: "Tech Founders",
     description: "Series B+ founders with exits",
-    count: "~3,200 prospects",
-    query:
-      "Founders and CEOs of Series B or later tech startups, or founders with recent acquisition exits",
+    count: "~3,200 matches",
+    query: "Founders and CEOs of Series B or later tech startups, or founders with recent acquisition exits",
     Icon: Briefcase,
+    borderColor: "rgba(20,184,166,0.6)",
   },
   {
     id: "sugg-biglaw",
     label: "BigLaw Partners",
     description: "Am Law 100 partners",
-    count: "~1,900 prospects",
-    query:
-      "Partners at Am Law 100 firms — equity partners with 10+ years tenure",
+    count: "~1,900 matches",
+    query: "Partners at Am Law 100 firms — equity partners with 10+ years tenure",
     Icon: Scale,
+    borderColor: "rgba(34,197,94,0.6)",
   },
   {
     id: "sugg-realestate",
     label: "Real Estate Principals",
     description: "Family office + commercial RE",
-    count: "~5,100 prospects",
-    query:
-      "Principals and owners of commercial real estate firms and family-office-backed real estate holdings",
+    count: "~5,100 matches",
+    query: "Principals and owners of commercial real estate firms and family-office-backed real estate holdings",
     Icon: Building2,
+    borderColor: "rgba(59,130,246,0.6)",
   },
   {
     id: "sugg-family-office",
     label: "Family Office Managers",
     description: "Single & multi-family offices",
-    count: "~2,700 prospects",
-    query:
-      "Managing directors, CIOs, and principals at single-family and multi-family offices",
+    count: "~2,700 matches",
+    query: "Managing directors, CIOs, and principals at single-family and multi-family offices",
     Icon: Wallet,
+    borderColor: "rgba(168,85,247,0.6)",
   },
 ];
 
@@ -73,6 +74,7 @@ function SuggestedCard({
 }) {
   const [hovered, setHovered] = useState(false);
   const { Icon } = item;
+
   return (
     <button
       type="button"
@@ -81,20 +83,26 @@ function SuggestedCard({
       onMouseLeave={() => setHovered(false)}
       className="text-left w-full rounded-[14px] p-4 cursor-pointer transition-all duration-150"
       style={{
-        border: `1px solid ${hovered ? "var(--border-gold)" : "var(--border-subtle)"}`,
-        background: hovered ? "var(--gold-bg)" : "var(--bg-elevated)",
-        transform: hovered ? "translateY(-1px)" : "translateY(0)",
+        borderTop: `1px solid ${hovered ? "rgba(255,255,255,0.1)" : "var(--border-subtle)"}`,
+        borderRight: `1px solid ${hovered ? "rgba(255,255,255,0.1)" : "var(--border-subtle)"}`,
+        borderBottom: `1px solid ${hovered ? "rgba(255,255,255,0.1)" : "var(--border-subtle)"}`,
+        borderLeft: `3px solid ${item.borderColor}`,
+        background: hovered ? "var(--bg-elevated)" : "var(--bg-card-gradient)",
+        transform: hovered ? "translateY(-2px)" : "translateY(0)",
+        boxShadow: hovered
+          ? `0 6px 20px rgba(0,0,0,0.2), 0 0 0 1px ${item.borderColor}30`
+          : "none",
       }}
     >
-      <div className="flex items-start gap-3 mb-2">
+      <div className="flex items-start gap-3 mb-3">
         <div
           className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px]"
           style={{
-            background: "var(--gold-bg)",
-            border: "1px solid var(--border-gold)",
+            background: `${item.borderColor}18`,
+            border: `1px solid ${item.borderColor}40`,
           }}
         >
-          <Icon className="h-4 w-4" style={{ color: "var(--gold-primary)" }} />
+          <Icon className="h-4 w-4" style={{ color: item.borderColor }} />
         </div>
         <div className="flex flex-col min-w-0 flex-1">
           <span
@@ -104,27 +112,19 @@ function SuggestedCard({
             {item.label}
           </span>
           <span
-            className="text-[12px] font-light truncate"
+            className="text-[12px] font-light mt-0.5"
             style={{ color: "var(--text-secondary-ds)" }}
           >
             {item.description}
           </span>
         </div>
       </div>
-      <div className="flex items-center justify-between mt-2">
-        <span
-          className="text-[11px] uppercase tracking-wider whitespace-nowrap"
-          style={{ color: "var(--text-tertiary)" }}
-        >
-          {item.count}
-        </span>
-        <span
-          className="text-[12px] font-medium shrink-0"
-          style={{ color: "var(--gold-primary)" }}
-        >
-          Try this →
-        </span>
-      </div>
+      <span
+        className="text-[11px] font-light"
+        style={{ color: "var(--text-tertiary)" }}
+      >
+        {item.count}
+      </span>
     </button>
   );
 }

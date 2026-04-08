@@ -67,14 +67,20 @@ export function DiscoverTab({
           </p>
         </div>
 
-        {/* Stats bar — subtle trust strip */}
-        <div className="mb-4 text-center">
-          <p
-            className="text-[11px] uppercase tracking-wider font-medium"
-            style={{ color: "var(--text-tertiary)" }}
+        {/* Stats bar — pill badge */}
+        <div className="my-6 flex justify-center">
+          <span
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[11px] tracking-wide"
+            style={{
+              border: "1px solid rgba(212,175,55,0.15)",
+              background: "rgba(212,175,55,0.04)",
+              color: "var(--text-tertiary)",
+            }}
           >
-            12,400+ prospects indexed <span style={{ opacity: 0.5 }}>·</span> Updated 2 hours ago
-          </p>
+            12,400+ prospects indexed
+            <span style={{ opacity: 0.4 }}>·</span>
+            Updated 2 hours ago
+          </span>
         </div>
 
         {/* Search area */}

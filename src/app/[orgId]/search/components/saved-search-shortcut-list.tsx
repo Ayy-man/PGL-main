@@ -7,13 +7,10 @@ import type { Persona } from "@/lib/personas/types";
 
 interface SavedSearchShortcutListProps {
   personas: Persona[];
-  /** Map of persona id -> prospect count. Optional; unknown ids render "—". */
   counts?: Record<string, number>;
   onSelectSavedSearch: (id: string) => void;
   onViewAllSaved?: () => void;
-  /** Pre-fill NLSearchBar textarea without submitting. */
   onPrefillSearch?: (query: string) => void;
-  /** Maximum cards to render before the "View all" link (default 6). */
   maxItems?: number;
 }
 
@@ -30,6 +27,77 @@ function formatRelative(iso: string | null | undefined): string {
   return `${Math.floor(days / 30)}mo ago`;
 }
 
+/** Horizontal row — used when fewer than 3 saved searches */
+function SearchRow({
+  persona,
+  countLabel,
+  onClick,
+}: {
+  persona: Persona;
+  countLabel: string;
+  onClick: () => void;
+}) {
+  const [hovered, setHovered] = useState(false);
+  const lastRun = formatRelative(persona.last_refreshed_at ?? persona.last_used_at);
+  const color = getPersonaColor(persona.id);
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className="flex items-center gap-4 w-full rounded-[12px] px-4 py-3 cursor-pointer transition-all duration-150 text-left"
+      style={{
+        border: `1px solid ${hovered ? "var(--border-gold)" : "var(--border-subtle)"}`,
+        borderLeft: `3px solid ${color}`,
+        background: hovered ? "var(--gold-bg)" : "var(--bg-elevated)",
+        boxShadow: hovered ? "0 2px 12px rgba(0,0,0,0.12)" : "none",
+      }}
+    >
+      {/* Name — full, no truncation */}
+      <span
+        className="flex-1 text-[14px] font-medium"
+        style={{ color: "var(--text-primary-ds)" }}
+      >
+        {persona.name}
+      </span>
+
+      {/* Description if available */}
+      {persona.description && (
+        <span
+          className="hidden sm:block text-[12px] font-light shrink-0 max-w-[200px] truncate"
+          style={{ color: "var(--text-secondary-ds)" }}
+        >
+          {persona.description}
+        </span>
+      )}
+
+      {/* Meta */}
+      <span className="text-[11px] font-light shrink-0" style={{ color: "var(--text-tertiary)" }}>
+        {countLabel}
+      </span>
+      <span className="text-[11px] font-light shrink-0" style={{ color: "var(--text-tertiary)" }}>
+        {lastRun}
+      </span>
+
+      {/* Run button */}
+      <div
+        className="flex items-center gap-1.5 shrink-0 px-3 py-1.5 rounded-[8px] text-[12px] font-medium transition-colors"
+        style={{
+          background: hovered ? "rgba(212,175,55,0.15)" : "rgba(255,255,255,0.04)",
+          color: hovered ? "var(--gold-primary)" : "var(--text-secondary-ds)",
+          border: `1px solid ${hovered ? "rgba(212,175,55,0.3)" : "rgba(255,255,255,0.08)"}`,
+        }}
+      >
+        <Play className="h-3 w-3" style={{ fill: "currentColor" }} />
+        Run
+      </div>
+    </button>
+  );
+}
+
+/** Card — used when 3+ saved searches (grid layout) */
 function SearchCard({
   persona,
   countLabel,
@@ -41,6 +109,7 @@ function SearchCard({
 }) {
   const [hovered, setHovered] = useState(false);
   const lastRun = formatRelative(persona.last_refreshed_at ?? persona.last_used_at);
+
   return (
     <button
       type="button"
@@ -51,24 +120,23 @@ function SearchCard({
       style={{
         border: `1px solid ${hovered ? "var(--border-gold)" : "var(--border-subtle)"}`,
         background: hovered ? "var(--gold-bg)" : "var(--bg-elevated)",
-        transform: hovered ? "translateY(-1px)" : "translateY(0)",
+        transform: hovered ? "translateY(-2px)" : "translateY(0)",
+        boxShadow: hovered ? "0 4px 16px rgba(0,0,0,0.12)" : "none",
       }}
     >
-      {/* Top row: dot + name (full-width, wraps) + play icon */}
       <div className="flex items-start gap-2 mb-2 pr-6">
         <span
           className="h-2 w-2 rounded-full flex-shrink-0 mt-1.5"
           style={{ background: getPersonaColor(persona.id) }}
         />
         <span
-          className="text-[14px] font-medium leading-snug whitespace-normal break-words line-clamp-2"
+          className="text-[14px] font-medium leading-snug"
           style={{ color: "var(--text-primary-ds)" }}
         >
           {persona.name}
         </span>
       </div>
 
-      {/* Play icon — top right corner */}
       <Play
         className="absolute top-4 right-4 h-3.5 w-3.5"
         style={{
@@ -77,11 +145,8 @@ function SearchCard({
         }}
       />
 
-      {/* Metadata row */}
       <div className="flex items-center gap-2 text-[11px]">
-        <span style={{ color: "var(--gold-primary)", opacity: 0.85 }}>
-          {countLabel}
-        </span>
+        <span style={{ color: "var(--gold-primary)", opacity: 0.85 }}>{countLabel}</span>
         <span style={{ color: "var(--text-tertiary)" }}>·</span>
         <span style={{ color: "var(--text-tertiary)" }}>{lastRun}</span>
       </div>
@@ -97,13 +162,11 @@ export function SavedSearchShortcutList({
   onPrefillSearch: _onPrefillSearch,
   maxItems = 6,
 }: SavedSearchShortcutListProps) {
-  if (personas.length === 0) {
-    // SuggestedPersonasSection in DiscoverTab is the canonical suggestion UI — render nothing here
-    return null;
-  }
+  if (personas.length === 0) return null;
 
   const visible = personas.slice(0, maxItems);
   const hasMore = personas.length > maxItems;
+  const useRows = visible.length < 3;
 
   return (
     <section className="mt-10">
@@ -113,21 +176,41 @@ export function SavedSearchShortcutList({
       >
         Saved Searches
       </p>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        {visible.map((persona) => {
-          const count = counts[persona.id];
-          const countLabel =
-            typeof count === "number" ? `${count.toLocaleString()} prospects` : "—";
-          return (
-            <SearchCard
-              key={persona.id}
-              persona={persona}
-              countLabel={countLabel}
-              onClick={() => onSelectSavedSearch(persona.id)}
-            />
-          );
-        })}
-      </div>
+
+      {useRows ? (
+        <div className="flex flex-col gap-2">
+          {visible.map((persona) => {
+            const count = counts[persona.id];
+            const countLabel =
+              typeof count === "number" ? `${count.toLocaleString()} prospects` : "—";
+            return (
+              <SearchRow
+                key={persona.id}
+                persona={persona}
+                countLabel={countLabel}
+                onClick={() => onSelectSavedSearch(persona.id)}
+              />
+            );
+          })}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {visible.map((persona) => {
+            const count = counts[persona.id];
+            const countLabel =
+              typeof count === "number" ? `${count.toLocaleString()} prospects` : "—";
+            return (
+              <SearchCard
+                key={persona.id}
+                persona={persona}
+                countLabel={countLabel}
+                onClick={() => onSelectSavedSearch(persona.id)}
+              />
+            );
+          })}
+        </div>
+      )}
+
       {hasMore && onViewAllSaved && (
         <button
           type="button"
