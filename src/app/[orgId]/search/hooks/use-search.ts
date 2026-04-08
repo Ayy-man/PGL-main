@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, type Dispatch, type SetStateAction } from "react";
 import { useQueryStates, parseAsString, parseAsInteger } from "nuqs";
 import type { ApolloPerson } from "@/lib/apollo/types";
 import type { PersonaFiltersType } from "@/lib/apollo/schemas";
@@ -39,7 +39,7 @@ interface SearchResult {
   cached: boolean;
   executeSearch: () => void;
   filterOverrides: Partial<PersonaFiltersType>;
-  setFilterOverrides: (overrides: Partial<PersonaFiltersType>) => void;
+  setFilterOverrides: Dispatch<SetStateAction<Partial<PersonaFiltersType>>>;
 }
 
 export function useSearch(): SearchResult {

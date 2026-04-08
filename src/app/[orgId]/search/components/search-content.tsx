@@ -327,13 +327,18 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
         title: "Filters changed",
         description: "Changing filters will refresh results. Previously dismissed prospects may reappear if they match the new criteria.",
       });
-      // Clear is_new flags will happen naturally on next refresh
     }
     if (filters.keywords !== undefined) {
       setSearchState({ keywords: filters.keywords });
     }
     const { keywords: _keywords, ...nonKeywordOverrides } = filters;
-    setFilterOverrides(nonKeywordOverrides);
+    setFilterOverrides((prev) => {
+      const next = { ...prev, ...nonKeywordOverrides } as Partial<PersonaFiltersType>;
+      (Object.keys(next) as Array<keyof PersonaFiltersType>).forEach((k) => {
+        if (next[k] === undefined) delete next[k];
+      });
+      return next;
+    });
   };
 
   // ----------------------------------------------------------------
