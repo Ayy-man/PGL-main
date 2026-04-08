@@ -17,32 +17,6 @@ interface SavedSearchShortcutListProps {
   maxItems?: number;
 }
 
-const SUGGESTED_PERSONAS = [
-  {
-    id: "suggestion-finance",
-    label: "Finance Elite",
-    description: "MD+ at investment banks, hedge funds, private equity",
-    query:
-      "Managing Directors at investment banks, hedge funds, and private equity firms with $10M+ investable assets",
-    dotColor: "hsl(45, 70%, 55%)",
-  },
-  {
-    id: "suggestion-tech",
-    label: "Tech Founders",
-    description: "Series B+ founders with liquidity events",
-    query:
-      "Founders of Series B or later startups, or companies with recent acquisition exits, in tech",
-    dotColor: "hsl(210, 60%, 55%)",
-  },
-  {
-    id: "suggestion-realestate",
-    label: "Real Estate Principals",
-    description: "Commercial RE owners with $5M+ portfolios",
-    query: "Commercial real estate owners and principals with portfolios over $5M",
-    dotColor: "hsl(140, 50%, 45%)",
-  },
-];
-
 function formatRelative(iso: string | null | undefined): string {
   if (!iso) return "Not run yet";
   const then = new Date(iso).getTime();
@@ -115,55 +89,6 @@ function SearchCard({
   );
 }
 
-function SuggestionCard({
-  suggestion,
-  onPrefill,
-}: {
-  suggestion: {
-    id: string;
-    label: string;
-    description: string;
-    query: string;
-    dotColor: string;
-  };
-  onPrefill?: (query: string) => void;
-}) {
-  const [hovered, setHovered] = useState(false);
-  return (
-    <button
-      type="button"
-      onClick={() => onPrefill?.(suggestion.query)}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      className="text-left w-full rounded-[14px] p-4 cursor-pointer transition-all duration-150"
-      style={{
-        border: `1px solid ${hovered ? "var(--border-gold)" : "var(--border-subtle)"}`,
-        background: hovered ? "var(--gold-bg)" : "var(--bg-elevated)",
-        transform: hovered ? "translateY(-1px)" : "translateY(0)",
-      }}
-    >
-      <div className="flex items-center gap-2 mb-2">
-        <span
-          className="h-2 w-2 rounded-full flex-shrink-0"
-          style={{ background: suggestion.dotColor }}
-        />
-        <span
-          className="text-[14px] font-medium truncate"
-          style={{ color: "var(--text-primary-ds)" }}
-        >
-          {suggestion.label}
-        </span>
-      </div>
-      <span
-        className="text-[12px] font-light"
-        style={{ color: "var(--text-secondary-ds)" }}
-      >
-        {suggestion.description}
-      </span>
-    </button>
-  );
-}
-
 export function SavedSearchShortcutList({
   personas,
   counts = {},
@@ -173,21 +98,8 @@ export function SavedSearchShortcutList({
   maxItems = 6,
 }: SavedSearchShortcutListProps) {
   if (personas.length === 0) {
-    return (
-      <section className="mt-10">
-        <p
-          className="text-[13px] uppercase tracking-wider font-medium mb-4"
-          style={{ color: "var(--text-tertiary)" }}
-        >
-          Start with a template
-        </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {SUGGESTED_PERSONAS.map((s) => (
-            <SuggestionCard key={s.id} suggestion={s} onPrefill={onPrefillSearch} />
-          ))}
-        </div>
-      </section>
-    );
+    // SuggestedPersonasSection in DiscoverTab is the canonical suggestion UI — render nothing here
+    return null;
   }
 
   const visible = personas.slice(0, maxItems);
