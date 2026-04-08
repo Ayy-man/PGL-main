@@ -32,7 +32,8 @@ type SourceStatus =
   | "complete"
   | "failed"
   | "skipped"
-  | "circuit_open";
+  | "circuit_open"
+  | "no_data";
 
 interface Prospect {
   id: string;
