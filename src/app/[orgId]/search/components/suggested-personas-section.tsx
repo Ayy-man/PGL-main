@@ -113,13 +113,13 @@ function SuggestedCard({
       </div>
       <div className="flex items-center justify-between mt-2">
         <span
-          className="text-[11px] uppercase tracking-wider"
+          className="text-[11px] uppercase tracking-wider whitespace-nowrap"
           style={{ color: "var(--text-tertiary)" }}
         >
           {item.count}
         </span>
         <span
-          className="text-[12px] font-medium"
+          className="text-[12px] font-medium shrink-0"
           style={{ color: "var(--gold-primary)" }}
         >
           Try this →
