@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { NLSearchBar } from "./nl-search-bar";
 import { FilterPillsRow } from "./filter-pills-row";
+import { AdvancedFiltersPanel } from "./advanced-filters-panel";
 import { SavedSearchShortcutList } from "./saved-search-shortcut-list";
 import { SuggestedPersonasSection } from "./suggested-personas-section";
 import type { Persona, PersonaFilters } from "@/lib/personas/types";
@@ -98,6 +99,11 @@ export function DiscoverTab({
 
           {/* Filter pills row */}
           <FilterPillsRow onApplyFilters={onApplyFilters} />
+
+          {/* Advanced filters — collapsible multi-field panel */}
+          <div className="mt-3 flex justify-center">
+            <AdvancedFiltersPanel onApplyFilters={onApplyFilters} />
+          </div>
 
           {/* Ghost save link — only when keywords are present */}
           {keywords.trim() && (
