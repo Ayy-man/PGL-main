@@ -53,7 +53,7 @@ export function FilterPillsRow({ onApplyFilters }: FilterPillsRowProps) {
       filters.locations = locations.split(";").map((s) => s.trim()).filter(Boolean);
     }
     if (key === "networth" && netWorth.trim()) {
-      filters.keywords = netWorth.trim();
+      filters.net_worth_range = netWorth.trim();
     }
     onApplyFilters(filters);
     setOpenPill(null);

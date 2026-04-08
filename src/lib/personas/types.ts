@@ -6,6 +6,7 @@ export interface PersonaFilters {
   locations?: string[];
   companySize?: string[];
   keywords?: string;
+  net_worth_range?: string;
 }
 
 export interface Persona {
