@@ -171,29 +171,70 @@ export async function lookupCompanyCik(companyName: string): Promise<{
     }
   }
 
-  // Pass 4: LLM canonicalization — ask Haiku for the SEC legal entity name when string matching fails
+  // Pass 4: LLM canonicalization — ask Claude Haiku to resolve the SEC legal entity name.
+  // CRITICAL: Only returns a match when the LLM-resolved name can be verified against both
+  // (a) the SEC company tickers list AND (b) a live SEC submissions API ping confirming the CIK exists.
+  // This prevents hallucinated or incorrect CIK associations for private companies.
   try {
     const { text } = await chatCompletion(
-      'You are a SEC EDGAR expert. Given a company name or brand, return ONLY the exact legal entity name used in SEC EDGAR filings (e.g. "Alphabet Inc" not "Google"). If the company is private with no SEC filings, return "PRIVATE". If unknown, return "UNKNOWN". Return nothing else — just the name.',
-      companyName,
-      60,
-      'google/gemini-2.0-flash-lite'
+      `You are an authoritative SEC EDGAR company resolver. Your job is to determine whether a given company name corresponds to a publicly traded company with SEC filings.
+
+RULES:
+1. Return "PRIVATE" if the company is privately held, a startup, a subsidiary, a non-profit, a government entity, or if you are not highly confident it is publicly traded on a US exchange.
+2. Return "UNKNOWN" if you genuinely cannot determine the company's public status.
+3. Only return the exact SEC EDGAR legal entity name (e.g. "Alphabet Inc", "Apple Inc", "JPMorgan Chase & Co") if you are CERTAIN the company is publicly traded on NYSE, NASDAQ, or another US exchange AND you know its SEC-registered legal name precisely.
+4. Do NOT guess or hallucinate. A wrong answer corrupts financial data. If there is any doubt, return "PRIVATE" or "UNKNOWN".
+5. Startups, biotech companies without IPOs, regional firms, and most companies with fewer than 500 employees are almost always private — return "PRIVATE" for these.
+6. Return ONLY one of: the exact SEC legal name, "PRIVATE", or "UNKNOWN". No explanation, no punctuation, nothing else.`,
+      `Company name: "${companyName}"`,
+      80,
     );
-    const llmName = text.trim();
-    if (llmName && llmName !== 'PRIVATE' && llmName !== 'UNKNOWN') {
-      const llmNorm = normalizeCompanyName(llmName);
-      const llmCompact = llmNorm.replace(/\s+/g, '');
-      for (const entry of entries) {
-        const entryNorm = normalizeCompanyName(entry.title);
-        const entryCompact = entryNorm.replace(/\s+/g, '');
-        if (entryNorm === llmNorm || entryNorm.startsWith(llmNorm) || llmNorm.startsWith(entryNorm) ||
-            entryCompact.startsWith(llmCompact) || llmCompact.startsWith(entryCompact)) {
-          console.log(`[Edgar] LLM canonicalized "${companyName}" → "${llmName}" → matched "${entry.title}"`);
-          trackApiUsage('openrouter').catch(() => {});
-          return { cik: String(entry.cik_str), ticker: entry.ticker, companyName: entry.title };
-        }
+    const llmName = text.trim().replace(/^["']|["']$/g, ''); // strip any surrounding quotes
+    if (!llmName || llmName === 'PRIVATE' || llmName === 'UNKNOWN') {
+      console.log(`[Edgar] LLM classified "${companyName}" as ${llmName || 'empty'} — skipping SEC lookup`);
+      return null;
+    }
+
+    // Find matching entry in SEC tickers list
+    const llmNorm = normalizeCompanyName(llmName);
+    const llmCompact = llmNorm.replace(/\s+/g, '');
+    let matchedEntry: CompanyTickerEntry | null = null;
+    for (const entry of entries) {
+      const entryNorm = normalizeCompanyName(entry.title);
+      const entryCompact = entryNorm.replace(/\s+/g, '');
+      if (entryNorm === llmNorm || entryNorm.startsWith(llmNorm) || llmNorm.startsWith(entryNorm) ||
+          entryCompact.startsWith(llmCompact) || llmCompact.startsWith(entryCompact)) {
+        matchedEntry = entry;
+        break;
       }
     }
+
+    if (!matchedEntry) {
+      console.log(`[Edgar] LLM returned "${llmName}" for "${companyName}" but no match in SEC tickers list`);
+      return null;
+    }
+
+    // Validate: ping SEC submissions API to confirm this CIK actually exists before storing it.
+    // This catches cases where string matching produced a wrong entry.
+    const candidateCik = String(matchedEntry.cik_str);
+    try {
+      await waitForRateLimit();
+      const validationRes = await fetch(
+        `https://data.sec.gov/submissions/CIK${candidateCik.padStart(10, '0')}.json`,
+        { headers: { 'User-Agent': userAgent, Accept: 'application/json' } }
+      );
+      if (!validationRes.ok) {
+        console.warn(`[Edgar] CIK ${candidateCik} validation failed (${validationRes.status}) for "${companyName}" → "${llmName}" — discarding match`);
+        return null;
+      }
+    } catch (validationErr) {
+      console.warn(`[Edgar] CIK validation request failed for ${candidateCik}:`, validationErr);
+      return null;
+    }
+
+    console.log(`[Edgar] LLM canonicalized "${companyName}" → "${llmName}" → matched "${matchedEntry.title}" (CIK ${candidateCik}, validated)`);
+    trackApiUsage('openrouter').catch(() => {});
+    return { cik: candidateCik, ticker: matchedEntry.ticker, companyName: matchedEntry.title };
   } catch {
     // LLM call failed — silently fall through, don't block enrichment
   }
