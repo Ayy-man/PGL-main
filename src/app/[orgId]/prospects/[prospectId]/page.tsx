@@ -162,7 +162,7 @@ export default async function ProspectProfilePage({
   >) || {};
   const enrichmentSourceStatus: Record<
     string,
-    "pending" | "in_progress" | "complete" | "failed" | "skipped" | "circuit_open"
+    "pending" | "in_progress" | "complete" | "failed" | "skipped" | "circuit_open" | "no_data"
   > = {
     contactout: "pending",
     exa: "pending",

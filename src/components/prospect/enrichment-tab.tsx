@@ -44,6 +44,7 @@ const STATUS_CONFIG: Record<
   failed: { label: "Failed", colorClass: "text-destructive" },
   skipped: { label: "Skipped", colorClass: "text-muted-foreground" },
   circuit_open: { label: "Paused", colorClass: "text-warning" },
+  no_data: { label: "No Data", colorClass: "text-muted-foreground" },
 };
 
 function EnrichmentIcon({ status }: { status: SourceStatus }): React.ReactElement {
