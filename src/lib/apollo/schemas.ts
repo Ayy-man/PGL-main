@@ -11,6 +11,7 @@ export const PersonaFilters = z.object({
   locations: z.array(z.string()).optional(),
   companySize: z.array(z.string()).optional(),
   keywords: z.string().optional(),
+  net_worth_range: z.string().optional(),
 });
 
 /**
