@@ -34,7 +34,7 @@ export function NLSearchBar({
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      onSearch(value.trim());
+      if (value.trim()) onSearch(value.trim());
     }
   };
 
