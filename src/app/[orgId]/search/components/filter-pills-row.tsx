@@ -17,6 +17,13 @@ const NET_WORTH_OPTIONS = [
   { label: "$100M+", value: "ultra high net worth $100M+" },
 ];
 
+const PILL_FILTER_KEY: Record<PillKey, keyof PersonaFilters> = {
+  industry: "industries",
+  title: "titles",
+  location: "locations",
+  networth: "net_worth_range",
+};
+
 export function FilterPillsRow({ onApplyFilters }: FilterPillsRowProps) {
   const [openPill, setOpenPill] = useState<PillKey | null>(null);
   const [industries, setIndustries] = useState("");
@@ -57,13 +64,6 @@ export function FilterPillsRow({ onApplyFilters }: FilterPillsRowProps) {
     }
     onApplyFilters(filters);
     setOpenPill(null);
-  };
-
-  const PILL_FILTER_KEY: Record<PillKey, keyof PersonaFilters> = {
-    industry: "industries",
-    title: "titles",
-    location: "locations",
-    networth: "net_worth_range",
   };
 
   const clearPill = (key: PillKey) => {
