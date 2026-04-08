@@ -74,9 +74,9 @@ export function SavedSearchesTab({
   const selectedPersona = personas.find((p) => p.id === selectedId) ?? null;
 
   return (
-    <div className="page-enter flex flex-row h-full min-h-[600px] overflow-x-hidden">
+    <div className="page-enter flex flex-row min-h-[calc(100vh-3.5rem)] overflow-x-hidden">
       {/* Left: sidebar rail — hidden on mobile */}
-      <div className="hidden md:flex flex-shrink-0 h-full">
+      <div className="hidden md:flex flex-shrink-0 self-stretch">
       <SearchSidebarRail
         personas={personas}
         selectedId={selectedId}

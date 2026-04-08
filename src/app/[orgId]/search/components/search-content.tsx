@@ -130,6 +130,9 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
   const [showDismissed, setShowDismissed] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isSavedSearchMode, setIsSavedSearchMode] = useState(false);
+  // Saved search pagination
+  const [savedPage, setSavedPage] = useState(1);
+  const [savedPageSize, setSavedPageSize] = useState(50);
   // Dismiss confirmation dialog
   const [dismissDialogOpen, setDismissDialogOpen] = useState(false);
   const [pendingDismissIds, setPendingDismissIds] = useState<string[]>([]);
@@ -138,6 +141,11 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
   useEffect(() => {
     setLocalLists(lists);
   }, [lists]);
+
+  // Reset to page 1 when saved prospects reload or page size changes
+  useEffect(() => {
+    setSavedPage(1);
+  }, [savedProspects, savedPageSize]);
 
   // ----------------------------------------------------------------
   // Saved search helpers
@@ -628,6 +636,14 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
   // Inline results helper — extracted from legacy results block
   // ----------------------------------------------------------------
   const renderSavedSearchResults = () => {
+    const savedTotalPages = Math.ceil(savedProspects.length / savedPageSize);
+    const pagedSavedResults = isSavedSearchMode
+      ? savedProspects
+          .slice((savedPage - 1) * savedPageSize, savedPage * savedPageSize)
+          .map(savedProspectToApolloPerson)
+      : activeResults;
+    const tableResults = isSavedSearchMode ? pagedSavedResults : activeResults;
+
     return (
       <div>
         {/* Bulk actions bar */}
@@ -678,7 +694,7 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
         {/* Prospect results table */}
         {(results.length > 0 || (isSavedSearchMode && savedProspects.length > 0)) && (
           <ProspectResultsTable
-            results={activeResults}
+            results={tableResults}
             selectedIds={selectedIds}
             onSelect={handleSelect}
             onSelectAll={handleSelectAll}
@@ -690,7 +706,90 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
           />
         )}
 
-        {/* Pagination — mockup style (only in Apollo mode) */}
+        {/* Pagination — saved search mode */}
+        {isSavedSearchMode && savedProspects.length > 0 && (
+          <div
+            className="flex items-center justify-between py-4 px-2"
+            style={{ borderTop: "1px solid var(--border-subtle)" }}
+          >
+            <div className="flex items-center gap-3">
+              <p className="text-[13px]" style={{ color: "var(--text-tertiary)" }}>
+                Showing{" "}
+                <span style={{ color: "var(--text-primary-ds)" }} className="font-medium">
+                  {Math.min((savedPage - 1) * savedPageSize + 1, savedProspects.length)}
+                </span>{" "}
+                –{" "}
+                <span style={{ color: "var(--text-primary-ds)" }} className="font-medium">
+                  {Math.min(savedPage * savedPageSize, savedProspects.length)}
+                </span>{" "}
+                of{" "}
+                <span style={{ color: "var(--text-primary-ds)" }} className="font-medium">
+                  {savedProspects.length.toLocaleString()}
+                </span>
+              </p>
+              <select
+                value={savedPageSize}
+                onChange={(e) => setSavedPageSize(Number(e.target.value))}
+                className="text-[13px] rounded-md px-2 py-1 cursor-pointer"
+                style={{
+                  background: "var(--bg-elevated)",
+                  color: "var(--text-primary-ds)",
+                  border: "1px solid var(--border-default)",
+                }}
+              >
+                {[10, 50, 100, 500].map((n) => (
+                  <option key={n} value={n}>{n} per page</option>
+                ))}
+              </select>
+            </div>
+            <nav className="isolate inline-flex -space-x-px rounded-md">
+              <button
+                disabled={savedPage <= 1}
+                onClick={() => setSavedPage((p) => Math.max(1, p - 1))}
+                className="relative inline-flex items-center rounded-l-md px-2 py-2 transition-colors duration-150 disabled:opacity-30 cursor-pointer disabled:cursor-not-allowed"
+                style={{ color: "var(--text-tertiary)", border: "1px solid var(--border-default)" }}
+              >
+                <span className="sr-only">Previous</span>
+                <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" /></svg>
+              </button>
+              {(() => {
+                const maxButtons = 5;
+                let startPage = Math.max(1, savedPage - Math.floor(maxButtons / 2));
+                const endPage = Math.min(savedTotalPages, startPage + maxButtons - 1);
+                if (endPage - startPage < maxButtons - 1) startPage = Math.max(1, endPage - maxButtons + 1);
+                return Array.from({ length: endPage - startPage + 1 }, (_, i) => {
+                  const pageNum = startPage + i;
+                  const isActive = pageNum === savedPage;
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setSavedPage(pageNum)}
+                      className="relative inline-flex items-center px-4 py-2 text-sm font-semibold transition-colors duration-150 cursor-pointer"
+                      style={
+                        isActive
+                          ? { background: "var(--gold-primary)", color: "var(--bg-root)", zIndex: 10 }
+                          : { color: "var(--text-primary-ds)", border: "1px solid var(--border-default)" }
+                      }
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                });
+              })()}
+              <button
+                disabled={savedPage >= savedTotalPages}
+                onClick={() => setSavedPage((p) => Math.min(savedTotalPages, p + 1))}
+                className="relative inline-flex items-center rounded-r-md px-2 py-2 transition-colors duration-150 disabled:opacity-30 cursor-pointer disabled:cursor-not-allowed"
+                style={{ color: "var(--text-tertiary)", border: "1px solid var(--border-default)" }}
+              >
+                <span className="sr-only">Next</span>
+                <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" /></svg>
+              </button>
+            </nav>
+          </div>
+        )}
+
+        {/* Pagination — Apollo discover mode */}
         {!isSavedSearchMode && pagination.totalPages > 1 && (
           <div
             className="flex items-center justify-between py-4 px-2"
