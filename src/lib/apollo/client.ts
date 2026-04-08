@@ -58,8 +58,12 @@ export function translateFiltersToApolloParams(
       s.includes("-") && !s.includes(",") ? s.replace("-", ",") : s
     );
   }
-  if (filters.keywords && filters.keywords.trim().length > 0) {
-    params.q_keywords = filters.keywords;
+  // Combine keywords and net_worth_range into q_keywords
+  const keywordParts: string[] = [];
+  if (filters.keywords?.trim()) keywordParts.push(filters.keywords.trim());
+  if (filters.net_worth_range?.trim()) keywordParts.push(filters.net_worth_range.trim());
+  if (keywordParts.length > 0) {
+    params.q_keywords = keywordParts.join(" ");
   }
 
   return params;
