@@ -94,7 +94,7 @@ export function SavedSearchShortcutList({
   counts = {},
   onSelectSavedSearch,
   onViewAllSaved,
-  onPrefillSearch,
+  onPrefillSearch: _onPrefillSearch,
   maxItems = 6,
 }: SavedSearchShortcutListProps) {
   if (personas.length === 0) {
