@@ -36,6 +36,12 @@ export function AdvancedFiltersPanel({
     setLocations("");
     setIndustries("");
     setSeniorities("");
+    onApplyFilters({
+      titles: undefined,
+      locations: undefined,
+      industries: undefined,
+      seniorities: undefined,
+    });
   };
 
   const handleApply = () => {
