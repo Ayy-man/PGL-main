@@ -262,31 +262,21 @@ export const enrichProspect = inngest.createFunction(
       try {
         const result = await enrichExa({ name, company, title });
 
-        // Determine source status
-        let sourceStatus = "complete";
+        // Bail early for hard failures before running the expensive digest
         if (result.circuitOpen) {
-          sourceStatus = "circuit_open";
-        } else if (result.error || !result.found) {
-          sourceStatus = "failed";
-        }
-
-        // Update source status with structured payload
-        if (sourceStatus === "failed" && result.error) {
-          await updateSourceStatus(prospectId, "exa", {
-            status: "failed",
-            error: result.error,
-            at: new Date().toISOString(),
-          });
-        } else if (sourceStatus === "circuit_open") {
           await updateSourceStatus(prospectId, "exa", {
             status: "circuit_open",
             at: new Date().toISOString(),
           });
-        } else {
+          return { found: false, signals: [] as DigestedSignal[], status: "circuit_open" };
+        }
+        if (result.error || !result.found) {
           await updateSourceStatus(prospectId, "exa", {
-            status: sourceStatus,
+            status: "failed",
+            ...(result.error ? { error: result.error } : {}),
             at: new Date().toISOString(),
           });
+          return { found: false, signals: [] as DigestedSignal[], status: "failed" };
         }
 
         // Digest raw mentions with LLM to get categorized, validated signals
@@ -294,6 +284,15 @@ export const enrichProspect = inngest.createFunction(
         if (result.found && result.mentions.length > 0) {
           digestedSignals = await digestExaResults(name, company, result.mentions);
         }
+
+        // Status reflects whether we actually extracted usable signals:
+        // "complete"  = ≥1 digested signal saved
+        // "no_data"   = Exa found articles but LLM filtered them all as irrelevant
+        const sourceStatus = digestedSignals.length > 0 ? "complete" : "no_data";
+        await updateSourceStatus(prospectId, "exa", {
+          status: sourceStatus,
+          at: new Date().toISOString(),
+        });
 
         // Save web data if found (using digested signals)
         if (result.found && digestedSignals.length > 0) {
