@@ -4,7 +4,7 @@ import { Mail, Phone, Linkedin, UserPlus, MapPin } from "lucide-react";
 import { WealthTierBadge } from "@/components/ui/wealth-tier-badge";
 import { EnrichmentStatusDots } from "@/components/ui/enrichment-status-dots";
 
-type SourceStatus = "pending" | "in_progress" | "complete" | "failed" | "skipped" | "circuit_open";
+type SourceStatus = "pending" | "in_progress" | "complete" | "failed" | "skipped" | "circuit_open" | "no_data";
 
 interface ProspectCardProps {
   id: string;

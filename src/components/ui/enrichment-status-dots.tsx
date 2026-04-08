@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 
-type SourceStatus = "pending" | "in_progress" | "complete" | "failed" | "skipped" | "circuit_open";
+type SourceStatus = "pending" | "in_progress" | "complete" | "failed" | "skipped" | "circuit_open" | "no_data";
 
 interface EnrichmentStatusDotsProps {
   sourceStatus: Record<string, SourceStatus> | null;

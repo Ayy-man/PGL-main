@@ -16,7 +16,8 @@ type SourceStatus =
   | "complete"
   | "failed"
   | "skipped"
-  | "circuit_open";
+  | "circuit_open"
+  | "no_data";
 
 interface EnrichmentTabProps {
   sourceStatus: Record<string, SourceStatus>;
