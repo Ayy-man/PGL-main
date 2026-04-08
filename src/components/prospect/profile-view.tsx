@@ -763,13 +763,16 @@ export function ProfileView({
                       const isComplete = status === "complete";
                       const isFailed = status === "failed";
                       const isInProgress = status === "in_progress";
+                      const isNoData = status === "no_data";
                       const dotColor = isComplete
                         ? "var(--success, #22c55e)"
                         : isFailed
                           ? "var(--destructive, #ef4444)"
                           : isInProgress
                             ? "var(--gold-primary)"
-                            : "rgba(255,255,255,0.2)";
+                            : isNoData
+                              ? "rgba(255,255,255,0.25)"
+                              : "rgba(255,255,255,0.2)";
                       const textColor = isComplete
                         ? "var(--gold-primary)"
                         : isInProgress

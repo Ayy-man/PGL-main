@@ -235,7 +235,7 @@ export default async function ProspectProfilePage({
     .select("*", { count: "exact" })
     .eq("prospect_id", prospectId)
     .eq("tenant_id", tenantId)
-    .order("created_at", { ascending: false })
+    .order("event_date", { ascending: false, nullsFirst: false })
     .limit(10);
 
   // Fetch signal_views for this user to compute is_seen

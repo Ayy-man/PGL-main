@@ -31,6 +31,7 @@ interface LLMDigestItem {
   category: SignalCategory;
   headline: string;
   summary: string;
+  event_date: string | null; // ISO date (YYYY-MM-DD) extracted from content, or null if unknown
 }
 
 /**
@@ -64,9 +65,10 @@ export async function digestExaResults(
     userPrompt += `1. Is this result actually about "${personName}" at "${companyName}"? (relevant: true/false)\n`;
     userPrompt += `2. Category: one of career_move, funding, media, wealth_signal, company_intel, recognition\n`;
     userPrompt += `3. Headline: under 10 words, factual, no fluff\n`;
-    userPrompt += `4. Summary: 1-2 sentences max, plain text only, no markdown, no HTML, no boilerplate phrases like "click here" or "read more"\n\n`;
+    userPrompt += `4. Summary: 1-2 sentences max, plain text only, no markdown, no HTML, no boilerplate phrases like "click here" or "read more"\n`;
+    userPrompt += `5. event_date: the ISO date (YYYY-MM-DD) when the actual event occurred, extracted from the text. Use the most specific date mentioned (e.g. "April 2023" → "2023-04-01", "Q2 2021" → "2021-04-01", "2022" → "2022-01-01"). Return null if no date can be inferred from the content.\n\n`;
     userPrompt += `Return a JSON array with one object per result:\n`;
-    userPrompt += `[{ "index": 0, "relevant": true, "category": "career_move", "headline": "...", "summary": "..." }, ...]\n\n`;
+    userPrompt += `[{ "index": 0, "relevant": true, "category": "career_move", "headline": "...", "summary": "...", "event_date": "2023-04-01" }, ...]\n\n`;
     userPrompt += `Results:\n`;
 
     mentions.forEach((mention, i) => {
@@ -110,7 +112,7 @@ export async function digestExaResults(
         summary: item.summary,
         source_url: mention.url,
         raw_text: mention.snippet,
-        event_date: mention.publishDate || null,
+        event_date: item.event_date || mention.publishDate || null,
       });
     }
 

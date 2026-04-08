@@ -39,7 +39,7 @@ export async function GET(
     .select("*", { count: "exact" })
     .eq("prospect_id", prospectId)
     .eq("tenant_id", tenantId)
-    .order("created_at", { ascending: false })
+    .order("event_date", { ascending: false, nullsFirst: false })
     .range(offset, offset + limit - 1);
 
   if (category) {

@@ -409,7 +409,11 @@ export const enrichProspect = inngest.createFunction(
         }
         try {
           const eftsResult = await enrichEdgarByName({ name });
-          const eftsStatus = eftsResult.found ? "complete" : "failed";
+          const eftsStatus = eftsResult.found && eftsResult.transactions.length > 0
+            ? "complete"
+            : eftsResult.found
+              ? "no_data"
+              : "failed";
           await updateSourceStatus(prospectId, "sec", { status: eftsStatus, at: new Date().toISOString() });
           if (eftsResult.found && eftsResult.transactions.length > 0) {
             await supabase.from("prospects").update({
@@ -450,42 +454,31 @@ export const enrichProspect = inngest.createFunction(
       try {
         let result = await enrichEdgar({ cik: effectiveCik, name });
 
-        // Determine source status
-        let sourceStatus = "complete";
-        if (result.circuitOpen) {
-          sourceStatus = "circuit_open";
-        } else if (result.error || !result.found) {
-          sourceStatus = "failed";
-        }
+        // Determine source status:
+        // "complete"  = found actual Form 4 transactions
+        // "no_data"   = company found in EDGAR but no Form 4 transactions on record
+        // "failed"    = API error or company not found
+        // "circuit_open" = circuit breaker tripped
+        let sourceStatus = result.found && result.transactions.length > 0
+          ? "complete"
+          : result.circuitOpen
+            ? "circuit_open"
+            : result.error || !result.found
+              ? "failed"
+              : "no_data"; // found: true, transactions: [] — company exists but no filings
 
-        // Update source status with structured payload
-        if (sourceStatus === "failed" && result.error) {
-          await updateSourceStatus(prospectId, "sec", {
-            status: "failed",
-            error: result.error,
-            at: new Date().toISOString(),
-          });
-        } else if (sourceStatus === "circuit_open") {
-          await updateSourceStatus(prospectId, "sec", {
-            status: "circuit_open",
-            at: new Date().toISOString(),
-          });
-        } else {
-          await updateSourceStatus(prospectId, "sec", {
-            status: sourceStatus,
-            at: new Date().toISOString(),
-          });
-        }
+        await updateSourceStatus(prospectId, "sec", {
+          status: sourceStatus,
+          ...(sourceStatus === "failed" && result.error ? { error: result.error } : {}),
+          at: new Date().toISOString(),
+        });
 
-        // EFTS fallback: if CIK-based search found no transactions, try person name search
-        if ((!result.found || result.transactions.length === 0) && name) {
+        // EFTS fallback: if no transactions yet, try person name search
+        if (result.transactions.length === 0 && name) {
           try {
             const eftsResult = await enrichEdgarByName({ name });
             if (eftsResult.found && eftsResult.transactions.length > 0) {
-              result = {
-                found: true,
-                transactions: eftsResult.transactions,
-              };
+              result = { found: true, transactions: eftsResult.transactions };
               sourceStatus = "complete";
               await updateSourceStatus(prospectId, "sec", {
                 status: "complete",
@@ -494,7 +487,6 @@ export const enrichProspect = inngest.createFunction(
             }
           } catch (eftsError) {
             console.warn("[Inngest] EFTS name search fallback failed:", eftsError);
-            // Don't override the original result — this is best-effort
           }
         }
 
