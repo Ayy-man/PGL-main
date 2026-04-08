@@ -24,7 +24,10 @@ export default async function TenantLayout({
     ({ orgId } = await params);
     const supabase = await createClient();
 
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError) {
+      console.error("[TenantLayout] Auth error:", authError.message);
+    }
     if (!user) {
       redirect("/login");
     }
