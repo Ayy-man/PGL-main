@@ -88,7 +88,13 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
   const { toast } = useToast();
 
   // Tab state — D-01/D-02 (Discover is default)
-  const [activeTab, setActiveTab] = useState<"discover" | "saved">("discover");
+  // If URL arrives with ?persona=X (e.g. from /personas "Search Prospects" button),
+  // start on the Saved Searches tab so the selected search's results render immediately.
+  const [activeTab, setActiveTab] = useState<"discover" | "saved">(() => {
+    if (typeof window === "undefined") return "discover";
+    const params = new URLSearchParams(window.location.search);
+    return params.get("persona") ? "saved" : "discover";
+  });
 
   // PersonaFormDialog controlled state (shared by Discover "Save as new search"
   // button and sidebar "+ New" button)
@@ -127,8 +133,10 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
   const [dismissedCount, setDismissedCount] = useState(0);
   const [lastRefreshedAt, setLastRefreshedAt] = useState<string | null>(null);
   const [totalApolloResults, setTotalApolloResults] = useState<number | null>(null);
+  const [apolloPagesFetched, setApolloPagesFetched] = useState<number>(0);
   const [showDismissed, setShowDismissed] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isSavedSearchMode, setIsSavedSearchMode] = useState(false);
   // Saved search pagination
   const [savedPage, setSavedPage] = useState(1);
@@ -159,6 +167,7 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
       setDismissedCount(data.dismissedCount);
       setLastRefreshedAt(data.lastRefreshedAt);
       setTotalApolloResults(data.totalApolloResults);
+      setApolloPagesFetched(data.apolloPagesFetched ?? 0);
       setIsSavedSearchMode(true);
     } catch {
       // Fallback to Apollo search
@@ -186,6 +195,29 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
       setIsRefreshing(false);
     }
   }, [searchState.persona, loadSavedProspects, toast]);
+
+  const handleLoadMore = useCallback(async () => {
+    const id = searchState.persona;
+    if (!id) return;
+    setIsLoadingMore(true);
+    try {
+      const resp = await fetch(`/api/search/${id}/extend`, { method: "POST" });
+      if (!resp.ok) throw new Error("Load more failed");
+      const result = await resp.json();
+      toast({
+        title: result.newProspects > 0 ? `+${result.newProspects} new leads loaded` : "No new leads found",
+        description:
+          result.newProspects > 0
+            ? `Now showing ${(result.newProspects + savedProspects.length).toLocaleString()} leads.`
+            : "Apollo returned no additional unique leads for the next page range.",
+      });
+      await loadSavedProspects(id);
+    } catch {
+      toast({ title: "Load more failed", description: "Could not fetch additional leads.", variant: "destructive" });
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [searchState.persona, loadSavedProspects, savedProspects.length, toast]);
 
   const handleDismiss = useCallback(async (apolloPersonIds: string[]) => {
     if (!searchState.persona) return;
@@ -879,12 +911,47 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
           </div>
         )}
 
-        {/* Helpful hint when totalApolloResults > 500 */}
-        {isSavedSearchMode && totalApolloResults !== null && totalApolloResults > 500 && (
-          <p className="text-[12px] mt-2" style={{ color: "var(--text-tertiary)" }}>
-            Showing first 500 of {totalApolloResults.toLocaleString()} matches. Refine your filters for more targeted results.
-          </p>
-        )}
+        {/* "Load 500 more" — appears on the last page of saved results when more leads exist in Apollo */}
+        {isSavedSearchMode &&
+          totalApolloResults !== null &&
+          savedProspects.length < totalApolloResults &&
+          apolloPagesFetched < 500 &&
+          (savedProspects.length === 0 || savedPage === Math.max(1, Math.ceil(savedProspects.length / savedPageSize))) && (
+            <div className="flex flex-col items-center gap-2 py-6">
+              <button
+                onClick={handleLoadMore}
+                disabled={isLoadingMore}
+                className="inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                style={{
+                  background: "var(--gold-primary)",
+                  color: "var(--bg-root)",
+                }}
+              >
+                {isLoadingMore ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Loading 500 more…
+                  </>
+                ) : (
+                  <>
+                    <Plus className="h-4 w-4" />
+                    Load 500 more leads
+                  </>
+                )}
+              </button>
+              <p className="text-[12px]" style={{ color: "var(--text-tertiary)" }}>
+                Showing{" "}
+                <span style={{ color: "var(--text-primary-ds)" }} className="font-medium">
+                  {savedProspects.length.toLocaleString()}
+                </span>{" "}
+                of{" "}
+                <span style={{ color: "var(--text-primary-ds)" }} className="font-medium">
+                  {totalApolloResults.toLocaleString()}
+                </span>{" "}
+                total matches
+              </p>
+            </div>
+          )}
       </div>
     );
   };
