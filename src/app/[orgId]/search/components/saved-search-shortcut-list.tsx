@@ -49,12 +49,16 @@ function SearchRow({
       onMouseLeave={() => setHovered(false)}
       className="flex items-center gap-4 w-full rounded-[12px] px-4 py-3 cursor-pointer transition-all duration-150 text-left"
       style={{
-        border: `1px solid ${hovered ? "var(--border-gold)" : "var(--border-subtle)"}`,
-        borderLeft: `3px solid ${color}`,
+        border: `1px solid ${hovered ? "rgba(212,175,55,0.2)" : "rgba(255,255,255,0.06)"}`,
         background: hovered ? "var(--gold-bg)" : "var(--bg-elevated)",
         boxShadow: hovered ? "0 2px 12px rgba(0,0,0,0.12)" : "none",
       }}
     >
+      {/* Colored dot indicator */}
+      <span
+        className="h-[6px] w-[6px] rounded-full shrink-0"
+        style={{ background: color }}
+      />
       {/* Name — full, no truncation */}
       <span
         className="flex-1 text-[14px] font-medium"

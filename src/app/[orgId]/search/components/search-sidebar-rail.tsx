@@ -80,7 +80,6 @@ export function SearchSidebarRail({
                         isActive
                           ? {
                               background: "var(--gold-bg)",
-                              borderLeft: "3px solid var(--gold-primary)",
                             }
                           : { background: "transparent" }
                       }

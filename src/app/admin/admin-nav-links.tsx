@@ -62,13 +62,9 @@ export function AdminNavLinks({ collapsed = false }: { collapsed?: boolean }) {
                 ? {
                     background: "var(--gold-bg)",
                     color: "var(--gold-primary)",
-                    borderLeft: "3px solid var(--gold-primary)",
-                    paddingLeft: "9px",
                   }
                 : {
                     color: "var(--text-secondary-ds)",
-                    borderLeft: "3px solid transparent",
-                    paddingLeft: "9px",
                   }
             }
             onMouseEnter={(e) => {
@@ -123,13 +119,9 @@ export function AdminNavLinks({ collapsed = false }: { collapsed?: boolean }) {
                 ? {
                     background: "var(--gold-bg)",
                     color: "var(--gold-primary)",
-                    borderLeft: "3px solid var(--gold-primary)",
-                    paddingLeft: "9px",
                   }
                 : {
                     color: "var(--text-secondary-ds)",
-                    borderLeft: "3px solid transparent",
-                    paddingLeft: "9px",
                   }
             }
             onMouseEnter={(e) => {
@@ -159,8 +151,6 @@ export function AdminNavLinks({ collapsed = false }: { collapsed?: boolean }) {
           className="flex items-center gap-3 rounded-[8px] px-3 py-3 text-sm font-medium cursor-default opacity-60 w-full text-left"
           style={{
             color: "var(--text-secondary-ds)",
-            borderLeft: "3px solid transparent",
-            paddingLeft: "9px",
             background: "transparent",
             border: "none",
           }}

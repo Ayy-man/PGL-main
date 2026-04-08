@@ -17,25 +17,25 @@ interface ResearchResultCardProps {
 }
 
 /**
- * Returns the Tailwind left-border color class for a given category.
+ * Returns the category accent color (rgba) for icon/dot usage.
  */
-function getCategoryBorderClass(category: string): string {
+function getCategoryColor(category: string): string {
   switch (category) {
     case "news":
-      return "border-l-blue-500";
+      return "rgba(59,130,246,0.6)";
     case "wealth_signal":
     case "funding":
-      return "border-l-[var(--gold-primary)]";
+      return "rgba(212,175,55,0.6)";
     case "corporate":
     case "company_intel":
-      return "border-l-purple-500";
+      return "rgba(168,85,247,0.6)";
     case "property":
-      return "border-l-emerald-500";
+      return "rgba(34,197,94,0.6)";
     case "career_move":
     case "media":
-      return "border-l-teal-500";
+      return "rgba(20,184,166,0.6)";
     default:
-      return "border-l-zinc-600";
+      return "rgba(161,161,170,0.6)";
   }
 }
 
@@ -91,7 +91,7 @@ function formatEventDate(dateStr: string): string {
 }
 
 export function ResearchResultCard({ result }: ResearchResultCardProps) {
-  const borderClass = getCategoryBorderClass(result.category);
+  const categoryColor = getCategoryColor(result.category);
   const relevanceDotClass = getRelevanceDotClass(result.relevance);
 
   // Resolve channel display name: prefer CHANNEL_DISPLAY_NAMES, fall back to source_name
@@ -101,13 +101,20 @@ export function ResearchResultCard({ result }: ResearchResultCardProps) {
 
   return (
     <div
-      className={`surface-card p-4 rounded-[14px] border-l-2 ${borderClass}`}
+      className="surface-card p-4 rounded-[14px]"
+      style={{ border: "1px solid rgba(255,255,255,0.06)" }}
     >
-      {/* Top row: channel badge + relevance dot + date */}
+      {/* Top row: category dot + channel badge + relevance dot + date */}
       <div className="flex items-center justify-between gap-2 mb-2">
-        <span className="text-[10px] px-1.5 py-0.5 rounded bg-[rgba(255,255,255,0.08)] text-[var(--text-secondary-ds)]">
-          {channelLabel}
-        </span>
+        <div className="flex items-center gap-1.5">
+          <span
+            className="h-[6px] w-[6px] rounded-full shrink-0"
+            style={{ background: categoryColor }}
+          />
+          <span className="text-[10px] px-1.5 py-0.5 rounded bg-[rgba(255,255,255,0.08)] text-[var(--text-secondary-ds)]">
+            {channelLabel}
+          </span>
+        </div>
 
         <div className="flex items-center gap-2 ml-auto">
           {result.event_date && (

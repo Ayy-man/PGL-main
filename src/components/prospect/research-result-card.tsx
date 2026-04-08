@@ -37,9 +37,9 @@ function ExaHighlightQuote({ highlights, scores }: { highlights?: string[]; scor
 
   return (
     <blockquote
-      className="mt-2 pl-3 text-xs font-sans italic leading-relaxed"
+      className="mt-2 px-3 py-1.5 text-xs font-sans italic leading-relaxed rounded-[6px]"
       style={{
-        borderLeft: "2px solid rgba(212,175,55,0.3)",
+        background: "rgba(212,175,55,0.05)",
         color: "var(--text-tertiary, rgba(232,228,220,0.4))",
       }}
     >
@@ -111,10 +111,7 @@ export function ResearchResultCard({
           "0 1px 3px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)",
         border: isPinned
           ? "1px solid rgba(212,175,55,0.2)"
-          : "1px solid var(--border-subtle, rgba(255,255,255,0.08))",
-        borderLeft: isPinned
-          ? "2px solid var(--gold-primary, #d4af37)"
-          : undefined,
+          : "1px solid rgba(255,255,255,0.06)",
         animation: `cardFadeIn 300ms ease forwards`,
         animationDelay: animDelay,
         opacity: 0,

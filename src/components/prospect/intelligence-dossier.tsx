@@ -41,8 +41,8 @@ export function IntelligenceDossier({ dossier, generatedAt, enrichmentComplete }
         )}
       </div>
 
-      {/* Summary — gold left-border accent */}
-      <div className="mb-5 pl-4" style={{ borderLeft: "2px solid var(--border-gold, var(--gold-primary))" }}>
+      {/* Summary */}
+      <div className="mb-5 px-3 py-2 rounded-[8px]" style={{ background: "rgba(212,175,55,0.04)" }}>
         <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary, rgba(232,228,220,0.7))" }}>
           {dossier.summary}
         </p>

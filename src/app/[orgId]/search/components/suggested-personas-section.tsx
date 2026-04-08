@@ -10,7 +10,7 @@ interface SuggestedPersona {
   count: string;
   query: string;
   Icon: typeof TrendingUp;
-  borderColor: string;
+  color: string;
 }
 
 const SUGGESTED: SuggestedPersona[] = [
@@ -21,7 +21,7 @@ const SUGGESTED: SuggestedPersona[] = [
     count: "~8,400 matches",
     query: "Managing Directors and above at Goldman Sachs, Morgan Stanley, JPMorgan, and other top investment banks",
     Icon: TrendingUp,
-    borderColor: "rgba(212,175,55,0.6)",
+    color: "212,175,55",
   },
   {
     id: "sugg-tech-founders",
@@ -30,7 +30,7 @@ const SUGGESTED: SuggestedPersona[] = [
     count: "~3,200 matches",
     query: "Founders and CEOs of Series B or later tech startups, or founders with recent acquisition exits",
     Icon: Briefcase,
-    borderColor: "rgba(20,184,166,0.6)",
+    color: "20,184,166",
   },
   {
     id: "sugg-biglaw",
@@ -39,7 +39,7 @@ const SUGGESTED: SuggestedPersona[] = [
     count: "~1,900 matches",
     query: "Partners at Am Law 100 firms — equity partners with 10+ years tenure",
     Icon: Scale,
-    borderColor: "rgba(34,197,94,0.6)",
+    color: "34,197,94",
   },
   {
     id: "sugg-realestate",
@@ -48,7 +48,7 @@ const SUGGESTED: SuggestedPersona[] = [
     count: "~5,100 matches",
     query: "Principals and owners of commercial real estate firms and family-office-backed real estate holdings",
     Icon: Building2,
-    borderColor: "rgba(59,130,246,0.6)",
+    color: "59,130,246",
   },
   {
     id: "sugg-family-office",
@@ -57,7 +57,7 @@ const SUGGESTED: SuggestedPersona[] = [
     count: "~2,700 matches",
     query: "Managing directors, CIOs, and principals at single-family and multi-family offices",
     Icon: Wallet,
-    borderColor: "rgba(168,85,247,0.6)",
+    color: "168,85,247",
   },
 ];
 
@@ -83,26 +83,20 @@ function SuggestedCard({
       onMouseLeave={() => setHovered(false)}
       className="text-left w-full rounded-[14px] p-4 cursor-pointer transition-all duration-150"
       style={{
-        borderTop: `1px solid ${hovered ? "rgba(255,255,255,0.1)" : "var(--border-subtle)"}`,
-        borderRight: `1px solid ${hovered ? "rgba(255,255,255,0.1)" : "var(--border-subtle)"}`,
-        borderBottom: `1px solid ${hovered ? "rgba(255,255,255,0.1)" : "var(--border-subtle)"}`,
-        borderLeft: `3px solid ${item.borderColor}`,
+        border: `1px solid ${hovered ? "rgba(212,175,55,0.2)" : "rgba(255,255,255,0.06)"}`,
         background: hovered ? "var(--bg-elevated)" : "var(--bg-card-gradient)",
         transform: hovered ? "translateY(-2px)" : "translateY(0)",
-        boxShadow: hovered
-          ? `0 6px 20px rgba(0,0,0,0.2), 0 0 0 1px ${item.borderColor}30`
-          : "none",
+        boxShadow: hovered ? "0 6px 20px rgba(0,0,0,0.2)" : "none",
       }}
     >
       <div className="flex items-start gap-3 mb-3">
         <div
           className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px]"
           style={{
-            background: `${item.borderColor}18`,
-            border: `1px solid ${item.borderColor}40`,
+            background: `rgba(${item.color},0.10)`,
           }}
         >
-          <Icon className="h-4 w-4" style={{ color: item.borderColor }} />
+          <Icon className="h-4 w-4" style={{ color: `rgba(${item.color},0.6)` }} />
         </div>
         <div className="flex flex-col min-w-0 flex-1">
           <span
