@@ -4,8 +4,10 @@ import type { ApolloSearchParams } from "@/lib/apollo/types";
 import { translateFiltersToApolloParams } from "@/lib/apollo/client";
 import { apolloBreaker } from "@/lib/circuit-breaker/apollo-breaker";
 
-const MAX_PAGES_PER_REFRESH = 5;
+const PAGES_PER_REFRESH = 5;
 const PER_PAGE = 100;
+// Apollo API hard cap — page * per_page cannot exceed 50,000.
+const MAX_APOLLO_PAGE = 500;
 
 export interface RefreshResult {
   newProspects: number;
@@ -14,30 +16,44 @@ export interface RefreshResult {
   totalDismissed: number;
   resurfaced: number;
   totalFromApollo: number;
+  apolloPagesFetched: number;
 }
 
-export async function refreshSavedSearchProspects(params: {
+type ApolloPreview = {
+  id: string;
+  first_name: string;
+  last_name_obfuscated?: string;
+  title?: string;
+  organization?: { name?: string };
+  organization_name?: string;
+};
+
+/**
+ * Fetches a contiguous page range from Apollo and upserts into saved_search_prospects.
+ * Shared by refresh (pages 1..N) and extend (pages N+1..N+5).
+ */
+async function fetchAndUpsertApolloRange(params: {
   searchId: string;
   tenantId: string;
   filters: PersonaFilters;
   supabase: SupabaseClient;
+  startPage: number;
+  endPage: number;
+  /** If true, also writes total_apollo_results and last_refreshed_at. Refresh = true, extend = false. */
+  updateRefreshTimestamp: boolean;
+  /** Existing apollo_pages_fetched value — final value will be max(this, endPage). */
+  previousPagesFetched: number;
 }): Promise<RefreshResult> {
-  const { searchId, tenantId, filters, supabase } = params;
+  const { searchId, tenantId, filters, supabase, startPage, updateRefreshTimestamp, previousPagesFetched } = params;
+  const endPage = Math.min(params.endPage, MAX_APOLLO_PAGE);
   const now = new Date().toISOString();
 
-  // a. Fetch Apollo results with pagination cap (max 5 pages × 100 = 500 results)
   const translatedParams = translateFiltersToApolloParams(filters);
-  const allApolloResults: Array<{
-    id: string;
-    first_name: string;
-    last_name_obfuscated?: string;
-    title?: string;
-    organization?: { name?: string };
-    organization_name?: string;
-  }> = [];
+  const allApolloResults: ApolloPreview[] = [];
   let totalEntries = 0;
+  let lastPageReached = startPage - 1;
 
-  for (let page = 1; page <= MAX_PAGES_PER_REFRESH; page++) {
+  for (let page = startPage; page <= endPage; page++) {
     const apolloParams: ApolloSearchParams = {
       ...translatedParams,
       page,
@@ -45,13 +61,14 @@ export async function refreshSavedSearchProspects(params: {
     };
 
     const response = await apolloBreaker.fire(apolloParams);
-    const people = response.people || [];
+    const people = (response.people || []) as ApolloPreview[];
 
-    if (page === 1) {
+    if (page === startPage) {
       totalEntries = response.total_entries ?? response.pagination?.total_entries ?? people.length;
     }
 
     allApolloResults.push(...people);
+    lastPageReached = page;
 
     // Break early if Apollo returned fewer than PER_PAGE results (last page)
     if (people.length < PER_PAGE) {
@@ -59,7 +76,7 @@ export async function refreshSavedSearchProspects(params: {
     }
   }
 
-  // Deduplicate by apollo_person_id — Apollo can return the same person across pages
+  // Deduplicate by apollo_person_id
   const seenIds = new Set<string>();
   const deduped = allApolloResults.filter((p) => {
     if (seenIds.has(p.id)) return false;
@@ -67,14 +84,19 @@ export async function refreshSavedSearchProspects(params: {
     return true;
   });
 
-  // f. Edge case — empty Apollo results: do NOT clear existing rows
-  if (deduped.length === 0) {
-    await supabase
-      .from("personas")
-      .update({ last_refreshed_at: now, total_apollo_results: 0 })
-      .eq("id", searchId);
+  const newApolloPagesFetched = Math.max(previousPagesFetched, lastPageReached);
 
-    // Count existing rows for result
+  // Edge case — empty Apollo results: do NOT clear existing rows
+  if (deduped.length === 0) {
+    const personaUpdate: Record<string, unknown> = {
+      apollo_pages_fetched: newApolloPagesFetched,
+    };
+    if (updateRefreshTimestamp) {
+      personaUpdate.last_refreshed_at = now;
+      personaUpdate.total_apollo_results = 0;
+    }
+    await supabase.from("personas").update(personaUpdate).eq("id", searchId);
+
     const { data: existingRows } = await supabase
       .from("saved_search_prospects")
       .select("status")
@@ -88,10 +110,11 @@ export async function refreshSavedSearchProspects(params: {
       totalDismissed: rows.filter((r) => r.status === "dismissed").length,
       resurfaced: 0,
       totalFromApollo: 0,
+      apolloPagesFetched: newApolloPagesFetched,
     };
   }
 
-  // b. Fetch all existing rows from saved_search_prospects
+  // Fetch all existing rows from saved_search_prospects
   const { data: existingRows } = await supabase
     .from("saved_search_prospects")
     .select("*")
@@ -109,7 +132,7 @@ export async function refreshSavedSearchProspects(params: {
     existingMap.set(row.apollo_person_id, row);
   }
 
-  // c. Build upsert rows
+  // Build upsert rows
   const upsertRows: Array<Record<string, unknown>> = [];
   let newProspects = 0;
   let existingActive = 0;
@@ -131,7 +154,6 @@ export async function refreshSavedSearchProspects(params: {
     };
 
     if (!existing) {
-      // New prospect
       newProspects++;
       upsertRows.push({
         saved_search_id: searchId,
@@ -144,7 +166,6 @@ export async function refreshSavedSearchProspects(params: {
         last_seen_at: now,
       });
     } else if (existing.status === "dismissed") {
-      // Check for job/company changes
       const storedData = existing.apollo_data as Record<string, unknown>;
       const storedTitle = (storedData.title as string | undefined) ?? "";
       const storedOrgName =
@@ -157,9 +178,8 @@ export async function refreshSavedSearchProspects(params: {
       const companyChanged = storedOrgName !== orgName;
 
       if (jobChanged || companyChanged) {
-        // Resurface: job or company changed
         resurfaced++;
-        totalDismissed--; // Will be counted as active below
+        totalDismissed--;
         upsertRows.push({
           saved_search_id: searchId,
           tenant_id: tenantId,
@@ -172,7 +192,6 @@ export async function refreshSavedSearchProspects(params: {
           last_seen_at: now,
         });
       } else {
-        // Stay dismissed — only update last_seen_at and apollo_data
         totalDismissed++;
         upsertRows.push({
           saved_search_id: searchId,
@@ -209,7 +228,7 @@ export async function refreshSavedSearchProspects(params: {
     }
   }
 
-  // d. Batch upsert (split to preserve first_seen_at on existing rows)
+  // Batch upsert (split to preserve first_seen_at on existing rows)
   const newRows = upsertRows.filter((r) => "first_seen_at" in r);
   const existingUpsertRows = upsertRows.filter((r) => !("first_seen_at" in r));
 
@@ -233,13 +252,16 @@ export async function refreshSavedSearchProspects(params: {
     }
   }
 
-  // e. Update personas table
-  await supabase
-    .from("personas")
-    .update({ last_refreshed_at: now, total_apollo_results: totalEntries })
-    .eq("id", searchId);
+  // Update personas table
+  const personaUpdate: Record<string, unknown> = {
+    apollo_pages_fetched: newApolloPagesFetched,
+  };
+  if (updateRefreshTimestamp) {
+    personaUpdate.last_refreshed_at = now;
+    personaUpdate.total_apollo_results = totalEntries;
+  }
+  await supabase.from("personas").update(personaUpdate).eq("id", searchId);
 
-  // g. Return RefreshResult
   return {
     newProspects,
     existingActive,
@@ -247,5 +269,82 @@ export async function refreshSavedSearchProspects(params: {
     totalDismissed: totalDismissed < 0 ? 0 : totalDismissed,
     resurfaced,
     totalFromApollo: deduped.length,
+    apolloPagesFetched: newApolloPagesFetched,
   };
+}
+
+/**
+ * Refreshes a saved search — re-fetches pages 1..max(5, previousPagesFetched)
+ * so previously extended results stay tracked. Updates last_refreshed_at.
+ */
+export async function refreshSavedSearchProspects(params: {
+  searchId: string;
+  tenantId: string;
+  filters: PersonaFilters;
+  supabase: SupabaseClient;
+}): Promise<RefreshResult> {
+  const { searchId, supabase } = params;
+
+  // Read existing apollo_pages_fetched so refresh re-scans any pages previously extended.
+  const { data: personaRow } = await supabase
+    .from("personas")
+    .select("apollo_pages_fetched")
+    .eq("id", searchId)
+    .single();
+
+  const previousPagesFetched = (personaRow?.apollo_pages_fetched as number | null) ?? 0;
+  const endPage = Math.max(PAGES_PER_REFRESH, previousPagesFetched);
+
+  return fetchAndUpsertApolloRange({
+    ...params,
+    startPage: 1,
+    endPage,
+    updateRefreshTimestamp: true,
+    previousPagesFetched,
+  });
+}
+
+/**
+ * Extends a saved search — fetches the next PAGES_PER_REFRESH pages beyond
+ * what's already been pulled. Does NOT touch last_refreshed_at.
+ * Caps at Apollo's hard page limit (500).
+ */
+export async function extendSavedSearchProspects(params: {
+  searchId: string;
+  tenantId: string;
+  filters: PersonaFilters;
+  supabase: SupabaseClient;
+  currentPagesFetched: number;
+}): Promise<RefreshResult> {
+  const startPage = params.currentPagesFetched + 1;
+  const endPage = params.currentPagesFetched + PAGES_PER_REFRESH;
+
+  if (startPage > MAX_APOLLO_PAGE) {
+    // Already at Apollo's ceiling — return current state unchanged.
+    const { data: existingRows } = await params.supabase
+      .from("saved_search_prospects")
+      .select("status")
+      .eq("saved_search_id", params.searchId);
+    const rows = existingRows ?? [];
+    return {
+      newProspects: 0,
+      existingActive: rows.filter((r) => r.status === "active").length,
+      existingEnriched: rows.filter((r) => r.status === "enriched").length,
+      totalDismissed: rows.filter((r) => r.status === "dismissed").length,
+      resurfaced: 0,
+      totalFromApollo: 0,
+      apolloPagesFetched: params.currentPagesFetched,
+    };
+  }
+
+  return fetchAndUpsertApolloRange({
+    searchId: params.searchId,
+    tenantId: params.tenantId,
+    filters: params.filters,
+    supabase: params.supabase,
+    startPage,
+    endPage,
+    updateRefreshTimestamp: false,
+    previousPagesFetched: params.currentPagesFetched,
+  });
 }

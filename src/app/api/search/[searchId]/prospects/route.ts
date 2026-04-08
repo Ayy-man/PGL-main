@@ -21,7 +21,7 @@ export async function GET(
   // Validate ownership
   const { data: persona } = await supabase
     .from("personas")
-    .select("id, last_refreshed_at, total_apollo_results")
+    .select("id, last_refreshed_at, total_apollo_results, apollo_pages_fetched")
     .eq("id", searchId)
     .eq("tenant_id", tenantId)
     .single();
@@ -101,5 +101,6 @@ export async function GET(
     dismissedCount: dismissedCount ?? 0,
     lastRefreshedAt: persona.last_refreshed_at,
     totalApolloResults: persona.total_apollo_results,
+    apolloPagesFetched: persona.apollo_pages_fetched ?? 0,
   });
 }
