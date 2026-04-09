@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 Phase: 32 (discover-tab-v2-layout-tightening-search-depth-filter-pills-suggested-personas) — COMPLETE
 Plan: 3 of 3
 Status: Phase 32 complete — all 3 plans executed
-Last activity: 2026-04-08 -- Phase 32 execution completed
+Last activity: 2026-04-09 -- Completed quick task 260409-jiz: Harden enrich-prospect: idempotency guard + batched signal inserts
 
 Progress: [████████████████████] 100% (20/20 phases complete)
 
@@ -399,6 +399,7 @@ Recent decisions affecting current work:
 | 260404-uia | Redesign prospect slide-over: dual state (preview vs enriched), fix broken buttons | 2026-04-04 | c0155bb | [260404-uia-redesign-prospect-slide-over-dual-state-](./quick/260404-uia-redesign-prospect-slide-over-dual-state-/) |
 | 260406-wbo | Fix SEC EDGAR filings enrichment for more matches and accurate results | 2026-04-06 | aa2cb18 | [260406-wbo-fix-sec-edgar-filings-enrichment-for-mor](./quick/260406-wbo-fix-sec-edgar-filings-enrichment-for-mor/) |
 | 260407-02n | Fix activity log showing empty — diagnose and fix all root causes | 2026-04-06 | ba74964 | [260407-02n-fix-activity-log-showing-empty-diagnose-](./quick/260407-02n-fix-activity-log-showing-empty-diagnose-/) |
+| 260409-jiz | Harden enrich-prospect: idempotency guard + batched signal inserts | 2026-04-09 | 924f5c3 | [260409-jiz-harden-enrich-prospect-idempotency-guard](./quick/260409-jiz-harden-enrich-prospect-idempotency-guard/) |
 
 ### Blockers/Concerns
 
