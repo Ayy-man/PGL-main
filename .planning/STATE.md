@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 Phase: 32 (discover-tab-v2-layout-tightening-search-depth-filter-pills-suggested-personas) — COMPLETE
 Plan: 3 of 3
 Status: Phase 32 complete — all 3 plans executed
-Last activity: 2026-04-09 -- Completed quick task 260409-su1: Promote New Search action — move sidebar button to top header row, add inline button to Discover SAVED SEARCHES heading
+Last activity: 2026-04-09 -- Completed quick task 260409-trp: Apollo search extend UX fixes — button label, toast copy, refresh window cap
 
 Progress: [████████████████████] 100% (20/20 phases complete)
 
@@ -402,6 +402,7 @@ Recent decisions affecting current work:
 | 260409-jiz | Harden enrich-prospect: idempotency guard + batched signal inserts | 2026-04-09 | 924f5c3 | [260409-jiz-harden-enrich-prospect-idempotency-guard](./quick/260409-jiz-harden-enrich-prospect-idempotency-guard/) |
 | 260409-rzz | Apollo safety: rate-limit bulk-enrich + enrich endpoints, wrap bulkEnrichPeople in circuit breaker | 2026-04-09 | d4332bd | [260409-rzz-apollo-safety-retry-on-4xx-fix-rate-limi](./quick/260409-rzz-apollo-safety-retry-on-4xx-fix-rate-limi/) |
 | 260409-su1 | Promote New Search action — move sidebar button to top header row, add inline button to Discover SAVED SEARCHES heading | 2026-04-09 | ec836fe | [260409-su1-promote-new-search-action-move-sidebar-b](./quick/260409-su1-promote-new-search-action-move-sidebar-b/) |
+| 260409-trp | Apollo search extend UX fixes: button label, toast copy, refresh window cap | 2026-04-09 | 281962c | [260409-trp-apollo-search-extend-ux-fixes-button-lab](./quick/260409-trp-apollo-search-extend-ux-fixes-button-lab/) |
 
 ### Blockers/Concerns
 
