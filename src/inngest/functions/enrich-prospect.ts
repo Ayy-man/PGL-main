@@ -324,13 +324,13 @@ export const enrichProspect = inngest.createFunction(
             raw_source: "exa" as const,
             is_new: true,
           }));
-          // Insert signals — ignore duplicates (partial unique index on source_url)
-          for (const row of signalRows) {
-            await supabase.from("prospect_signals").insert(row).then(({ error: insertErr }) => {
-              if (insertErr && !insertErr.message.includes("duplicate")) {
-                console.error("[enrich] signal insert error:", insertErr.message);
-              }
-            });
+          // Batched insert — single round-trip, ignore duplicates (partial unique index on source_url).
+          // Failure here is logged once and swallowed so the rest of the enrichment continues.
+          const { error: exaSignalInsertErr } = await supabase
+            .from("prospect_signals")
+            .insert(signalRows);
+          if (exaSignalInsertErr && !exaSignalInsertErr.message.includes("duplicate")) {
+            console.error("[enrich] exa signal batch insert error:", exaSignalInsertErr.message);
           }
 
           logProspectActivity({
@@ -428,22 +428,23 @@ export const enrichProspect = inngest.createFunction(
                 enriched_at: new Date().toISOString(),
               },
             }).eq("id", prospectId);
-            for (const tx of eftsResult.transactions) {
-              await supabase.from("prospect_signals").insert({
-                prospect_id: prospectId,
-                tenant_id: tenantId,
-                category: "sec_filing",
-                headline: `${tx.transactionType} ${tx.shares.toLocaleString()} shares ($${tx.totalValue.toLocaleString()})`,
-                summary: `SEC Form 4: ${tx.transactionType} of ${tx.shares.toLocaleString()} shares at $${tx.pricePerShare.toFixed(2)}/share, total value $${tx.totalValue.toLocaleString()}. Filed ${tx.filingDate}.`,
-                source_url: null,
-                event_date: tx.filingDate || null,
-                raw_source: "sec-edgar",
-                is_new: true,
-              }).then(({ error: insertErr }) => {
-                if (insertErr && !insertErr.message.includes("duplicate")) {
-                  console.error("[enrich] SEC EFTS signal insert error:", insertErr.message);
-                }
-              });
+            // Batched insert — single round-trip. Row shape unchanged from the prior per-row loop.
+            const eftsSignalRows = eftsResult.transactions.map((tx) => ({
+              prospect_id: prospectId,
+              tenant_id: tenantId,
+              category: "sec_filing",
+              headline: `${tx.transactionType} ${tx.shares.toLocaleString()} shares ($${tx.totalValue.toLocaleString()})`,
+              summary: `SEC Form 4: ${tx.transactionType} of ${tx.shares.toLocaleString()} shares at $${tx.pricePerShare.toFixed(2)}/share, total value $${tx.totalValue.toLocaleString()}. Filed ${tx.filingDate}.`,
+              source_url: null,
+              event_date: tx.filingDate || null,
+              raw_source: "sec-edgar",
+              is_new: true,
+            }));
+            const { error: eftsSignalInsertErr } = await supabase
+              .from("prospect_signals")
+              .insert(eftsSignalRows);
+            if (eftsSignalInsertErr && !eftsSignalInsertErr.message.includes("duplicate")) {
+              console.error("[enrich] SEC EFTS signal batch insert error:", eftsSignalInsertErr.message);
             }
             logProspectActivity({ prospectId, tenantId, userId: null, category: "data", eventType: "sec_updated", title: "SEC filings updated (EFTS)", metadata: { transactionCount: eftsResult.transactions.length } }).catch(() => {});
           }
@@ -521,12 +522,12 @@ export const enrichProspect = inngest.createFunction(
             is_new: true,
           }));
           if (secSignalRows.length > 0) {
-            for (const row of secSignalRows) {
-              await supabase.from("prospect_signals").insert(row).then(({ error: insertErr }) => {
-                if (insertErr && !insertErr.message.includes("duplicate")) {
-                  console.error("[enrich] SEC signal insert error:", insertErr.message);
-                }
-              });
+            // Batched insert — single round-trip.
+            const { error: secSignalInsertErr } = await supabase
+              .from("prospect_signals")
+              .insert(secSignalRows);
+            if (secSignalInsertErr && !secSignalInsertErr.message.includes("duplicate")) {
+              console.error("[enrich] SEC signal batch insert error:", secSignalInsertErr.message);
             }
           }
 
