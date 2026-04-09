@@ -979,12 +979,12 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
                 {isLoadingMore ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Loading 500 more…
+                    Loading next 500…
                   </>
                 ) : (
                   <>
                     <Plus className="h-4 w-4" />
-                    Load 500 more leads
+                    Load next 500 from Apollo
                   </>
                 )}
               </button>
