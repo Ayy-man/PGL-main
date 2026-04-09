@@ -73,7 +73,19 @@ export async function generateProspectSummary(
         (sum, tx) => sum + tx.totalValue,
         0
       );
-      userMessage += `\n\nSEC Insider Transactions: ${insiderData.transactions.length} transactions, total value: $${totalValue.toLocaleString()}`;
+      const cashTxCount = insiderData.transactions.filter(
+        (tx) => tx.totalValue > 0
+      ).length;
+      const grantTxCount = insiderData.transactions.length - cashTxCount;
+      // Render separately: cash transactions (with aggregate $) and
+      // grants/vests (no cash value — RSUs, option awards). Before this
+      // we reported "30 transactions, total value: $0" for a prospect whose
+      // 30 filings were all quarterly RSU vests, which made the LLM think
+      // nothing had happened.
+      const parts: string[] = [];
+      if (cashTxCount > 0) parts.push(`${cashTxCount} cash transactions aggregating $${totalValue.toLocaleString()}`);
+      if (grantTxCount > 0) parts.push(`${grantTxCount} grant/vest events (RSU/options)`);
+      userMessage += `\n\nSEC Insider Transactions: ${parts.join(", ")}`;
     }
 
     const response = await chatCompletion(SYSTEM_PROMPT, userMessage, 500);
@@ -93,7 +105,14 @@ export interface DossierInput {
   workEmail?: string | null;
   contactData?: { personalEmail?: string; phone?: string } | null;
   webSignals?: Array<{ category: string; headline: string; summary: string }> | null;
-  insiderTransactions?: Array<{ filingDate: string; transactionType: string; shares: number; totalValue: number }> | null;
+  insiderTransactions?: Array<{
+    filingDate: string;
+    transactionType: string;
+    securityTitle?: string;
+    shares: number;
+    pricePerShare?: number;
+    totalValue: number;
+  }> | null;
   stockSnapshot?: { ticker: string } | null;
 }
 
@@ -142,10 +161,30 @@ export async function generateIntelligenceDossier(
 
     if (insiderTransactions && insiderTransactions.length > 0) {
       const totalValue = insiderTransactions.reduce((sum, tx) => sum + tx.totalValue, 0);
-      userMessage += `\nSEC Insider Transactions (${insiderTransactions.length} total, $${totalValue.toLocaleString()}):\n`;
-      insiderTransactions.slice(0, 5).forEach((tx) => {
-        userMessage += `- ${tx.filingDate}: ${tx.transactionType} ${tx.shares.toLocaleString()} shares ($${tx.totalValue.toLocaleString()})\n`;
+      // Sort by filing date DESC so the top 5 rendered are the MOST RECENT
+      // transactions, not whatever order they arrived in. Without this sort
+      // we'd show the 5 oldest filings — which is the opposite of what the
+      // dossier LLM needs to build a current wealth narrative.
+      const sortedTx = [...insiderTransactions].sort((a, b) =>
+        b.filingDate.localeCompare(a.filingDate),
+      );
+      userMessage += `\nSEC Insider Transactions (${insiderTransactions.length} total, aggregate value $${totalValue.toLocaleString()}):\n`;
+      sortedTx.slice(0, 5).forEach((tx) => {
+        // Render zero-price awards/grants as qualitative rather than "$0" —
+        // RSU vests and option grants have totalValue=0 on the filing but
+        // represent real compensation the LLM should reason about.
+        const valueStr =
+          tx.totalValue > 0
+            ? `($${tx.totalValue.toLocaleString()})`
+            : `(grant/vest, no cash value reported)`;
+        const security = tx.securityTitle ? ` ${tx.securityTitle}` : '';
+        userMessage += `- ${tx.filingDate}: ${tx.transactionType}${security} — ${tx.shares.toLocaleString()} shares ${valueStr}\n`;
       });
+    } else if (stockSnapshot?.ticker) {
+      // Only note "no filings" when we actually looked (ie. the company IS public).
+      // Otherwise we'd tell the LLM "no SEC data" for every private-company
+      // prospect which just adds noise.
+      userMessage += `\nSEC Insider Transactions: No Form 4 filings on record for this person at ${stockSnapshot.ticker}.\n`;
     }
 
     const response = await chatCompletion(DOSSIER_SYSTEM_PROMPT, userMessage, 1800);

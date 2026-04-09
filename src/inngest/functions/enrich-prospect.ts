@@ -441,14 +441,16 @@ export const enrichProspect = inngest.createFunction(
                 enriched_at: new Date().toISOString(),
               },
             }).eq("id", prospectId);
-            // Batched insert — single round-trip. Row shape unchanged from the prior per-row loop.
+            // Batched insert — single round-trip. source_url carries the EDGAR
+            // filing URL so the unique index on (prospect_id, source_url)
+            // actually dedups re-enrichments and the UI can link back to SEC.
             const eftsSignalRows = eftsResult.transactions.map((tx) => ({
               prospect_id: prospectId,
               tenant_id: tenantId,
               category: "sec_filing",
               headline: `${tx.transactionType} ${tx.shares.toLocaleString()} shares ($${tx.totalValue.toLocaleString()})`,
               summary: `SEC Form 4: ${tx.transactionType} of ${tx.shares.toLocaleString()} shares at $${tx.pricePerShare.toFixed(2)}/share, total value $${tx.totalValue.toLocaleString()}. Filed ${tx.filingDate}.`,
-              source_url: null,
+              source_url: tx.sourceUrl ?? null,
               event_date: tx.filingDate || null,
               raw_source: "sec-edgar",
               is_new: true,
@@ -522,14 +524,17 @@ export const enrichProspect = inngest.createFunction(
             })
             .eq("id", prospectId);
 
-          // Write SEC transactions to prospect_signals table (dual-write — insider_data kept)
+          // Write SEC transactions to prospect_signals table (dual-write — insider_data kept).
+          // source_url carries the EDGAR filing URL so the partial unique index
+          // on (prospect_id, source_url) dedups re-enrichments, and the UI can
+          // link back to the original SEC filing.
           const secSignalRows = result.transactions.map((tx) => ({
             prospect_id: prospectId,
             tenant_id: tenantId,
             category: "sec_filing" as const,
             headline: `${tx.transactionType} ${tx.shares.toLocaleString()} shares ($${tx.totalValue.toLocaleString()})`,
             summary: `SEC Form 4: ${tx.transactionType} of ${tx.shares.toLocaleString()} shares at $${tx.pricePerShare.toFixed(2)}/share, total value $${tx.totalValue.toLocaleString()}. Filed ${tx.filingDate}.`,
-            source_url: null,
+            source_url: tx.sourceUrl ?? null,
             event_date: tx.filingDate || null,
             raw_source: "sec-edgar" as const,
             is_new: true,

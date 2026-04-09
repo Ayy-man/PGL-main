@@ -101,16 +101,32 @@ export async function fetchMarketSnapshot(
   // Keep full 1-year sparkline (Yahoo returns ~251 trading days)
   const sparkline = closes;
 
-  // Estimate equity position from insiderData if available
+  // Estimate equity position from insiderData if available.
+  //
+  // Only COMMON STOCK movements count toward the estimated share position:
+  //
+  //   + Purchase          (open-market buy)
+  //   + Grant/Award       (A code — shares awarded to insider)
+  //   + Exercise          (M code — derivative converted to common stock)
+  //   − Sale              (open-market sell)
+  //   − Sale to Issuer    (D code — sell-back)
+  //   − Tax Withholding   (F code — shares surrendered to cover taxes)
+  //
+  // Derivative transactions (suffix "(Derivative)") are EXCLUDED because
+  // they represent grants of rights (options, RSUs) that haven't settled
+  // to common stock yet — including them would inflate the position with
+  // unvested securities the insider doesn't actually own.
   let equity: StockSnapshot["equity"] = null;
 
   if (insiderData?.transactions && insiderData.transactions.length > 0) {
     let netShares = 0;
     for (const tx of insiderData.transactions) {
-      const t = tx.transactionType.toLowerCase();
-      if (t === "purchase" || t === "award") {
+      const type = tx.transactionType || "";
+      if (type.includes("(Derivative)")) continue; // skip unsettled derivative legs
+      const t = type.toLowerCase();
+      if (t.startsWith("purchase") || t.startsWith("grant/award") || t.startsWith("exercise")) {
         netShares += tx.shares;
-      } else if (t === "sale") {
+      } else if (t.startsWith("sale") || t.startsWith("tax withholding") || t === "sale to issuer") {
         netShares -= tx.shares;
       }
     }

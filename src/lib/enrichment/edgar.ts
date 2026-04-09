@@ -16,6 +16,14 @@ export type EdgarResult = {
     shares: number;
     pricePerShare: number;
     totalValue: number;
+    /**
+     * Stable SEC EDGAR URL for the underlying Form 4 filing. Populated when
+     * the parser is called with a source URL — used to (a) enable the
+     * prospect_signals unique index to dedup on re-enrichment, and (b) give
+     * the UI a clickable source link. Optional because historical callers
+     * didn't pass URLs.
+     */
+    sourceUrl?: string;
   }>;
   error?: string;
   circuitOpen?: boolean;
@@ -525,7 +533,8 @@ async function enrichEdgarInternal(params: {
         const xmlContent = await documentResponse.text();
         const parsedTransactions = parseForm4Xml(xmlContent, params.name);
 
-        // Add filing date and calculate total value
+        // Add filing date, calculate total value, and attach the filing URL
+        // so downstream dedup + UI click-through works.
         for (const tx of parsedTransactions) {
           allTransactions.push({
             filingDate,
@@ -534,6 +543,7 @@ async function enrichEdgarInternal(params: {
             shares: tx.shares,
             pricePerShare: tx.pricePerShare,
             totalValue: tx.shares * tx.pricePerShare,
+            sourceUrl: documentUrl,
           });
         }
       } catch (error) {
@@ -719,6 +729,7 @@ async function enrichEdgarByNameInternal(params: { name: string }): Promise<Edga
             shares: tx.shares,
             pricePerShare: tx.pricePerShare,
             totalValue: tx.shares * tx.pricePerShare,
+            sourceUrl: xmlUrl,
           });
         }
       } catch (error) {
