@@ -61,6 +61,11 @@ export const enrichProspect = inngest.createFunction(
     id: "enrich-prospect",
     retries: 3,
     concurrency: [{ limit: 5 }], // Max 5 concurrent enrichments to manage API rate limits
+    // Suppress duplicate triggers for the same prospectId within the retention window.
+    // Prevents double-charging ContactOut/Exa/SEC credits when two enrich events for
+    // the same prospect arrive concurrently (the existing step-0 dedup only catches
+    // AFTER a prior run has already written `enriched` to saved_search_prospects).
+    idempotency: "event.data.prospectId",
     onFailure: async ({ error, event }) => {
       console.error("[Inngest] Enrichment workflow failed:", error);
 
