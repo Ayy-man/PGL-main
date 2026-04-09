@@ -72,7 +72,8 @@ const COMPANY_ALIASES: Record<string, string | null> = {
   'google': 'alphabet inc',
   'facebook': 'meta platforms inc',
   'meta': 'meta platforms inc',
-  'twitter': 'x corp',
+  'twitter': null, // X Corp went private Oct 2022 — no SEC filings
+  'x corp': null,  // same reason, direct hit
   'ibm': 'international business machines corp',
   'hewlett packard': 'hp inc',
   'hp enterprise': 'hewlett packard enterprise co',
@@ -235,22 +236,74 @@ RULES:
     console.log(`[Edgar] LLM canonicalized "${companyName}" → "${llmName}" → matched "${matchedEntry.title}" (CIK ${candidateCik}, validated)`);
     trackApiUsage('openrouter').catch(() => {});
     return { cik: candidateCik, ticker: matchedEntry.ticker, companyName: matchedEntry.title };
-  } catch {
-    // LLM call failed — silently fall through, don't block enrichment
+  } catch (llmErr) {
+    // LLM call failed — don't block the rest of enrichment, but surface the
+    // failure to logs so we can tell "every enrichment skipped SEC because
+    // OpenRouter was down" apart from "every company was genuinely private".
+    console.warn(
+      `[Edgar] LLM canonicalization failed for "${companyName}":`,
+      llmErr instanceof Error ? llmErr.message : llmErr,
+    );
   }
 
   return null;
 }
 
 /**
+ * SEC Form 4 transaction codes → human-readable labels.
+ *
+ * Source: https://www.sec.gov/about/forms/form4.pdf (Table II codes)
+ *
+ * Before this map existed the parser shipped codes like "F", "M", "X" directly
+ * to the UI — users had no idea what they meant. Now the raw code is preserved
+ * only as a fallback for codes we haven't mapped yet (or new SEC additions).
+ */
+const TRANSACTION_CODE_LABELS: Record<string, string> = {
+  // Section 16 (b)(3) exempt transactions
+  A: 'Grant/Award',
+  D: 'Sale to Issuer',
+  F: 'Tax Withholding', // Payment of exercise price or tax via share surrender
+  I: 'Discretionary',
+  M: 'Exercise', // Exercise/conversion of derivative
+  // Open-market / private transactions
+  P: 'Purchase',
+  S: 'Sale',
+  V: 'Voluntary Report',
+  // Derivative-specific
+  C: 'Conversion',
+  E: 'Expiration (short)',
+  H: 'Expiration (long)',
+  O: 'Exercise (OOM)',
+  X: 'Exercise (ITM)',
+  // Other
+  G: 'Gift',
+  L: 'Small Acquisition',
+  W: 'Will/Inheritance',
+  Z: 'Trust Deposit',
+  J: 'Other',
+  K: 'Equity Swap',
+  U: 'Tender',
+};
+
+function labelForCode(code: string): string {
+  return TRANSACTION_CODE_LABELS[code] ?? code;
+}
+
+/**
  * Parse Form 4 XML for transaction details.
- * Simplified version - extracts key fields using regex.
  *
- * When ownerName is provided, filters filings by rptOwnerName using
- * token overlap (>= 2 matching tokens required — first + last name).
+ * Extracts BOTH non-derivative (common stock purchases/sales) AND derivative
+ * (options, RSUs, warrants) transactions. For tech execs derivative grants
+ * are often the primary compensation vehicle — prior to this, we were silently
+ * dropping every RSU vest and option grant because we only parsed
+ * <nonDerivativeTransaction> blocks.
  *
- * Note: Full XML parsing would be more robust but adds dependencies.
- * This approach handles common Form 4 structures.
+ * When ownerName is provided, filters filings by <rptOwnerName> using a
+ * prefix-aware token overlap to handle nicknames (Tim↔Timothy, etc).
+ *
+ * Note: Full XML parsing would be more robust but adds dependencies. This
+ * regex approach handles the common Form 4 structures as of the X0508 and
+ * X0609 schema versions.
  */
 function parseForm4Xml(xml: string, ownerName?: string): Array<{
   transactionType: string;
@@ -305,39 +358,52 @@ function parseForm4Xml(xml: string, ownerName?: string): Array<{
       if (!ownerMatches) return []; // Not this person's filing
     }
 
-    // Extract all nonDerivativeTransaction blocks
-    const transactionRegex = /<nonDerivativeTransaction>([\s\S]*?)<\/nonDerivativeTransaction>/g;
-    const transactionMatches = Array.from(xml.matchAll(transactionRegex));
-
-    for (const match of transactionMatches) {
-      const txBlock = match[1];
-
-      // Extract transaction code (P = Purchase, S = Sale, A = Award, etc.)
-      const codeMatch = txBlock.match(/<transactionCode>([A-Z])<\/transactionCode>/);
+    // Extract a single transaction block (used for both derivative and
+    // non-derivative variants). The shares and price regexes accept optional
+    // whitespace and negative/scientific-notation numbers defensively — SEC
+    // schemas are mostly boring positive decimals but some filings have
+    // whitespace around the <value> contents.
+    const extractBlock = (txBlock: string, isDerivative: boolean) => {
+      const codeMatch = txBlock.match(/<transactionCode>\s*([A-Z])\s*<\/transactionCode>/);
       const code = codeMatch?.[1];
 
-      // Extract security title
-      const titleMatch = txBlock.match(/<securityTitle>(.*?)<\/securityTitle>/);
+      const titleMatch = txBlock.match(/<securityTitle>[\s\S]*?<value>\s*([\s\S]*?)\s*<\/value>/);
       const title = titleMatch?.[1]?.trim();
 
-      // Extract shares
-      const sharesMatch = txBlock.match(/<transactionShares>\s*<value>([\d.]+)<\/value>/);
+      const sharesMatch = txBlock.match(/<transactionShares>\s*<value>\s*([-\d.eE+]+)\s*<\/value>/);
       const shares = sharesMatch?.[1] ? parseFloat(sharesMatch[1]) : 0;
 
-      // Extract price per share
-      const priceMatch = txBlock.match(/<transactionPricePerShare>\s*<value>([\d.]+)<\/value>/);
+      const priceMatch = txBlock.match(/<transactionPricePerShare>\s*<value>\s*([-\d.eE+]+)\s*<\/value>/);
       const price = priceMatch?.[1] ? parseFloat(priceMatch[1]) : 0;
 
-      if (code && title && shares > 0) {
-        const transactionType = code === 'P' ? 'Purchase' : code === 'S' ? 'Sale' : code === 'A' ? 'Award' : code;
+      if (!code || !title || !(shares > 0)) return;
 
-        transactions.push({
-          transactionType,
-          securityTitle: title,
-          shares,
-          pricePerShare: price,
-        });
-      }
+      // Suffix derivative transactions with their security title so the UI
+      // distinguishes e.g. "Exercise — Employee Stock Option" from
+      // "Exercise — Common Stock".
+      const label = labelForCode(code);
+      const transactionType = isDerivative ? `${label} (Derivative)` : label;
+
+      transactions.push({
+        transactionType,
+        securityTitle: title,
+        shares,
+        pricePerShare: price,
+      });
+    };
+
+    // Non-derivative transactions (common stock purchases/sales)
+    const nonDerivRegex = /<nonDerivativeTransaction>([\s\S]*?)<\/nonDerivativeTransaction>/g;
+    for (const match of Array.from(xml.matchAll(nonDerivRegex))) {
+      extractBlock(match[1], false);
+    }
+
+    // Derivative transactions (stock options, RSUs, warrants, convertibles).
+    // For tech execs this is the PRIMARY compensation path — without this
+    // branch we silently drop every RSU vest and every option exercise.
+    const derivRegex = /<derivativeTransaction>([\s\S]*?)<\/derivativeTransaction>/g;
+    for (const match of Array.from(xml.matchAll(derivRegex))) {
+      extractBlock(match[1], true);
     }
   } catch (error) {
     // If parsing fails, return empty array
@@ -577,9 +643,27 @@ async function enrichEdgarByNameInternal(params: { name: string }): Promise<Edga
       return { found: false, transactions: [] };
     }
 
-    // For Form 4 hits, try to fetch and parse XML (up to 5 filings)
-    // EFTS uses _source.form (not form_type); _id has ":filename" suffix — use _source.adsh for accession
-    const form4Hits = hits.filter(h => h._source.form === '4' || h._source.root_forms?.includes('4')).slice(0, 5);
+    // For Form 4 hits, try to fetch and parse XML (up to 5 filings).
+    //
+    // EXCLUDE Form 4/A amendments — including both the base filing and its
+    // amendment double-counts every transaction in the amended block. SEC
+    // stores these with `form === "4/A"` while the base filing is `"4"`, but
+    // both share `root_forms: ["4"]`. We only want the exact base form.
+    //
+    // Prefer `_source.form` when present (exact form name); fall back to
+    // `root_forms` only when `form` is missing (rare — legacy records).
+    const form4Hits = hits
+      .filter(h => {
+        const exactForm = h._source.form;
+        if (exactForm) return exactForm === '4';
+        // Fallback: treat as base Form 4 only if root_forms has '4' and
+        // there's no amendment variant in the array.
+        return (
+          h._source.root_forms?.includes('4') === true &&
+          !h._source.root_forms?.some(f => f === '4/A')
+        );
+      })
+      .slice(0, 5);
     const allTransactions: EdgarResult['transactions'] = [];
 
     for (const hit of form4Hits) {
