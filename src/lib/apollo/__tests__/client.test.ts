@@ -21,15 +21,44 @@ describe('translateFiltersToApolloParams', () => {
 
     const result = translateFiltersToApolloParams(filters);
 
+    // `keywords` dual-routes to both person-text (q_keywords) and
+    // company-tag (q_organization_keyword_tags) search, matching Apollo's
+    // own UI "Keywords" filter which hits both simultaneously.
     expect(result).toEqual({
       organization_names: ['Jane Street', 'Citadel Securities'],
       person_titles: ['CEO', 'CFO'],
       person_seniorities: ['c_suite'],
-      q_organization_keyword_tags: ['Finance'],
+      q_organization_keyword_tags: ['Finance', 'private equity'],
       person_locations: ['New York'],
       organization_num_employees_ranges: ['51,200'],
       q_keywords: 'private equity',
     });
+  });
+
+  it('routes keywords-only to both q_keywords and q_organization_keyword_tags', () => {
+    const filters: PersonaFilters = {
+      keywords: 'yacht rentals',
+    };
+
+    const result = translateFiltersToApolloParams(filters);
+
+    expect(result).toEqual({
+      q_keywords: 'yacht rentals',
+      q_organization_keyword_tags: ['yacht rentals'],
+    });
+  });
+
+  it('keeps industries only in q_organization_keyword_tags when no keywords', () => {
+    const filters: PersonaFilters = {
+      industries: ['Venture Capital', 'Private Equity'],
+    };
+
+    const result = translateFiltersToApolloParams(filters);
+
+    expect(result).toEqual({
+      q_organization_keyword_tags: ['Venture Capital', 'Private Equity'],
+    });
+    expect(result).not.toHaveProperty('q_keywords');
   });
 
   it('maps organization_names directly to Apollo params', () => {

@@ -46,9 +46,6 @@ export function translateFiltersToApolloParams(
   if (filters.seniorities && filters.seniorities.length > 0) {
     params.person_seniorities = filters.seniorities;
   }
-  if (filters.industries && filters.industries.length > 0) {
-    params.q_organization_keyword_tags = filters.industries;
-  }
   if (filters.locations && filters.locations.length > 0) {
     params.person_locations = filters.locations;
   }
@@ -58,7 +55,31 @@ export function translateFiltersToApolloParams(
       s.includes("-") && !s.includes(",") ? s.replace("-", ",") : s
     );
   }
-  // Combine keywords and net_worth_range into q_keywords
+
+  // Organization keyword tags — merge `industries` and free-text `keywords`.
+  //
+  // Apollo's own UI "Keywords" search matches broadly across BOTH person
+  // text AND company keyword tags (industry, specialties, business
+  // descriptors). Previously we only routed `filters.keywords` to
+  // `q_keywords`, which is person-text only — so a query like
+  // "yacht rentals" would miss companies whose Apollo keyword tags
+  // contain those terms. Routing to `q_organization_keyword_tags` in
+  // addition matches Apollo's actual UI behavior.
+  const orgKeywordTags: string[] = [];
+  if (filters.industries && filters.industries.length > 0) {
+    orgKeywordTags.push(...filters.industries);
+  }
+  if (filters.keywords?.trim()) {
+    orgKeywordTags.push(filters.keywords.trim());
+  }
+  if (orgKeywordTags.length > 0) {
+    params.q_organization_keyword_tags = orgKeywordTags;
+  }
+
+  // Person-text search (q_keywords) — matches person titles, descriptions,
+  // and current employer name. Combines free-text `keywords` with the
+  // wealth signal from `net_worth_range` (which is a person-level
+  // attribute, not a company tag, so it stays out of org keyword tags).
   const keywordParts: string[] = [];
   if (filters.keywords?.trim()) keywordParts.push(filters.keywords.trim());
   if (filters.net_worth_range?.trim()) keywordParts.push(filters.net_worth_range.trim());
@@ -157,9 +178,11 @@ export async function searchApollo(
   }
 
   // 2. Check cache (uses normalized filters so old dash-format keys are invalidated)
+  // v4: filters.keywords now dual-routes to q_organization_keyword_tags,
+  // so old v3 cache entries would return stale results — invalidate them.
   const cacheKey = {
     tenantId,
-    resource: "apollo:search:v3",
+    resource: "apollo:search:v4",
     identifier: { personaId, page, pageSize: cappedPageSize, filters: normalizedFilters },
   };
 
