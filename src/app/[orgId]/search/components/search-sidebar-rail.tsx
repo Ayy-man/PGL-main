@@ -36,27 +36,54 @@ export function SearchSidebarRail({
         }}
         aria-label="Saved searches sidebar"
       >
-        {/* Toggle button */}
-        <div
-          className={collapsed ? "flex justify-center pt-3 pb-2" : "flex justify-end pt-3 pb-2 pr-2"}
-        >
-          <button
-            onClick={onToggleCollapse}
-            className="h-9 w-9 rounded-md flex items-center justify-center cursor-pointer transition-colors"
-            style={{ color: "var(--text-secondary-ds)" }}
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "var(--gold-bg)";
-              e.currentTarget.style.color = "var(--gold-primary)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "transparent";
-              e.currentTarget.style.color = "var(--text-secondary-ds)";
-            }}
+        {/* Header row — create button + collapse/expand chevron */}
+        {collapsed ? (
+          <div
+            className="flex flex-col items-center gap-1 pt-3 pb-2"
+            style={{ borderBottom: "1px solid var(--border-subtle)" }}
           >
-            {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-          </button>
-        </div>
+            {createButtonCollapsed}
+            <button
+              onClick={onToggleCollapse}
+              className="h-9 w-9 rounded-md flex items-center justify-center cursor-pointer transition-colors"
+              style={{ color: "var(--text-secondary-ds)" }}
+              aria-label="Expand sidebar"
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "var(--gold-bg)";
+                e.currentTarget.style.color = "var(--gold-primary)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "transparent";
+                e.currentTarget.style.color = "var(--text-secondary-ds)";
+              }}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </button>
+          </div>
+        ) : (
+          <div
+            className="flex items-center justify-between px-3 pt-3 pb-2"
+            style={{ borderBottom: "1px solid var(--border-subtle)" }}
+          >
+            {createButton}
+            <button
+              onClick={onToggleCollapse}
+              className="h-9 w-9 rounded-md flex items-center justify-center cursor-pointer transition-colors flex-shrink-0 ml-2"
+              style={{ color: "var(--text-secondary-ds)" }}
+              aria-label="Collapse sidebar"
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "var(--gold-bg)";
+                e.currentTarget.style.color = "var(--gold-primary)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "transparent";
+                e.currentTarget.style.color = "var(--text-secondary-ds)";
+              }}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </button>
+          </div>
+        )}
 
         {/* Saved searches list */}
         <div className="flex-1 overflow-y-auto">
@@ -132,10 +159,7 @@ export function SearchSidebarRail({
           })}
         </div>
 
-        {/* + New button anchored at bottom */}
-        <div className={collapsed ? "flex justify-center pb-4" : "p-3"}>
-          {collapsed ? createButtonCollapsed : createButton}
-        </div>
+
       </aside>
     </TooltipProvider>
   );
