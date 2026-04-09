@@ -401,6 +401,20 @@ Plans:
 Plans:
 - [x] TBD (run /gsd-plan-phase 32 to break down) (completed 2026-04-07)
 
+### Phase 33: Tenant issue reporting system
+
+**Goal:** Build an in-product tenant reporting system: tenants click contextual "Report an issue" buttons on prospect dossiers, list detail, search, and personas pages; the system captures a JSON snapshot of the target entity, the page URL, and a client-rendered screenshot (via html2canvas-pro for oklch CSS color support); reports land in a new private issue_reports table + issue-reports storage bucket; super admins triage reports at /admin/reports with status workflow, signed-URL screenshot previews, and a polled unread badge on the admin nav — all without needing cross-tenant data access.
+**Requirements**: REQ-33-01 through REQ-33-30 (internal phase IDs derived from LOCKED CONTEXT.md decisions; see 33-CONTEXT.md for the full decision list)
+**Depends on:** Phase 32
+**Plans:** 5 plans
+
+Plans:
+- [ ] 33-01-schema-types-foundation-PLAN.md — issue_reports migration (with set_updated_at fn) + TS types + activity_logger union + [BLOCKING] supabase db push + manual bucket/RLS setup
+- [ ] 33-02-tenant-ui-api-PLAN.md — html2canvas-pro install + capture helpers + ReportIssueButton/Dialog (capture-before-open) + POST /api/issues/report route
+- [ ] 33-03-tenant-mount-points-PLAN.md — mount ReportIssueButton on prospect dossier, list detail, personas index, and search (SearchContent client)
+- [ ] 33-04-admin-triage-ui-api-PLAN.md — 3 admin API routes (list, [id] GET/PATCH, unread-count) + /admin/reports list page + ReportsTable + detail page with signed URL + ReportDetail
+- [ ] 33-05-admin-nav-badge-PLAN.md — add Issue Reports entry to ADMIN_NAV_PLATFORM + convert nav to client polling (30s interval) + red badge pill with 99+ overflow
+
 ---
 
 ### Phase 19: Admin Automations Dashboard — Inngest Monitoring

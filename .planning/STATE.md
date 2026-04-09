@@ -376,6 +376,7 @@ Recent decisions affecting current work:
 - Phase 27 added: Research Chat UX Polish — Streaming indicators, Exa response surfacing, chat UI templates
 - Phase 26 added: Targeted Multi-Source Search — Intent-routed channels (SEC EDGAR, ATTOM property, NewsAPI, Proxycurl, FAA Registry, Crunchbase) alongside Exa. LLM classifies query intent → fires specialized APIs in parallel → merges/deduplicates/ranks results into unified scrapbook feed.
 - Phase 28 added: Saved Search Incremental Refresh, Dismiss, and Delete
+- Phase 33 added: Tenant issue reporting system — contextual "Report an issue" buttons on dossier/list/search pages, captures target snapshot + screenshot (html2canvas) + deep link, new `issue_reports` table, admin triage page at `/admin/reports` with status workflow and in-app unread badge
 
 ### Pending Todos
 
