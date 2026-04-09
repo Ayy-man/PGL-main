@@ -5,6 +5,8 @@ import { logError } from "@/lib/error-logger";
 import { z } from "zod";
 import type { ApolloPerson } from "@/lib/apollo/types";
 import { isApolloMockMode } from "@/lib/platform-config";
+import { apolloRateLimiter } from "@/lib/rate-limit/limiters";
+import { withRateLimit, rateLimitResponse } from "@/lib/rate-limit/middleware";
 
 /**
  * Apollo mock mode — controlled via platform_config.apollo_mock_enrichment (DB)
@@ -101,6 +103,16 @@ export async function POST(request: Request) {
 
     if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const tenantId = user.app_metadata?.tenant_id as string | undefined;
+    if (!tenantId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const rateLimit = await withRateLimit(apolloRateLimiter, `tenant:${tenantId}`);
+    if (!rateLimit.success) {
+      return rateLimitResponse(rateLimit);
     }
 
     const body = await request.json();
