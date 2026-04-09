@@ -274,8 +274,12 @@ async function fetchAndUpsertApolloRange(params: {
 }
 
 /**
- * Refreshes a saved search — re-fetches pages 1..max(5, previousPagesFetched)
- * so previously extended results stay tracked. Updates last_refreshed_at.
+ * Refreshes a saved search — re-fetches the top PAGES_PER_REFRESH pages
+ * (regardless of how deep extend has pulled) to check for newly-ranked
+ * results. Extend depth is preserved via apollo_pages_fetched, which is
+ * computed as max(previousPagesFetched, lastPageReached) at the upsert
+ * step, so future extends still start from the correct page.
+ * Updates last_refreshed_at.
  */
 export async function refreshSavedSearchProspects(params: {
   searchId: string;
@@ -293,7 +297,7 @@ export async function refreshSavedSearchProspects(params: {
     .single();
 
   const previousPagesFetched = (personaRow?.apollo_pages_fetched as number | null) ?? 0;
-  const endPage = Math.max(PAGES_PER_REFRESH, previousPagesFetched);
+  const endPage = PAGES_PER_REFRESH;
 
   return fetchAndUpsertApolloRange({
     ...params,
