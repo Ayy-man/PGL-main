@@ -58,7 +58,7 @@ async function apolloSearchRequest(
  * Bulk enrich people by Apollo IDs (costs ~1 credit each).
  * Returns fully revealed contact data.
  */
-export async function bulkEnrichPeople(
+async function bulkEnrichPeopleImpl(
   apolloIds: string[]
 ): Promise<ApolloPerson[]> {
   if (apolloIds.length === 0) return [];
@@ -133,3 +133,32 @@ apolloBreaker.on("halfOpen", () => {
 apolloBreaker.on("close", () => {
   console.info("[Circuit Breaker] CLOSED — Apollo API recovered, normal operation resumed.");
 });
+
+/**
+ * Circuit breaker for Apollo bulk enrichment.
+ * Shares the same threshold/timeout config as apolloBreaker.
+ * NO fallback — errors propagate so callers can return proper HTTP status codes.
+ */
+const apolloBulkEnrichBreaker = new CircuitBreaker(bulkEnrichPeopleImpl, options);
+
+apolloBulkEnrichBreaker.on("open", () => {
+  console.error("[Bulk Enrich Circuit Breaker] OPEN — Apollo bulk enrich tripped. Will retry after 30s.");
+});
+
+apolloBulkEnrichBreaker.on("halfOpen", () => {
+  console.warn("[Bulk Enrich Circuit Breaker] HALF-OPEN — Testing if Apollo bulk enrich has recovered...");
+});
+
+apolloBulkEnrichBreaker.on("close", () => {
+  console.info("[Bulk Enrich Circuit Breaker] CLOSED — Apollo bulk enrich recovered, normal operation resumed.");
+});
+
+/**
+ * Public bulkEnrichPeople — wraps the implementation in a dedicated circuit breaker.
+ * Signature unchanged from before: (apolloIds: string[]) => Promise<ApolloPerson[]>.
+ */
+export async function bulkEnrichPeople(
+  apolloIds: string[]
+): Promise<ApolloPerson[]> {
+  return apolloBulkEnrichBreaker.fire(apolloIds);
+}
