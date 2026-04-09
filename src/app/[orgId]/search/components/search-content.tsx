@@ -141,6 +141,9 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
   // Saved search pagination
   const [savedPage, setSavedPage] = useState(1);
   const [savedPageSize, setSavedPageSize] = useState(50);
+  // Discover pagination — "jump to page" input
+  const [jumpPageOpen, setJumpPageOpen] = useState(false);
+  const [jumpPageValue, setJumpPageValue] = useState("");
   // Dismiss confirmation dialog
   const [dismissDialogOpen, setDismissDialogOpen] = useState(false);
   const [pendingDismissIds, setPendingDismissIds] = useState<string[]>([]);
@@ -855,10 +858,13 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
                 <span className="sr-only">Previous</span>
                 <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" /></svg>
               </button>
-              {Array.from(
-                { length: Math.min(pagination.totalPages, 5) },
-                (_, i) => {
-                  const pageNum = i + 1;
+              {(() => {
+                const maxButtons = 5;
+                let startPage = Math.max(1, searchState.page - Math.floor(maxButtons / 2));
+                const endPage = Math.min(pagination.totalPages, startPage + maxButtons - 1);
+                if (endPage - startPage < maxButtons - 1) startPage = Math.max(1, endPage - maxButtons + 1);
+                return Array.from({ length: endPage - startPage + 1 }, (_, i) => {
+                  const pageNum = startPage + i;
                   const isActive = pageNum === searchState.page;
                   return (
                     <button
@@ -882,18 +888,61 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
                       {pageNum}
                     </button>
                   );
-                }
-              )}
+                });
+              })()}
               {pagination.totalPages > 5 && (
-                <span
-                  className="relative inline-flex items-center px-4 py-2 text-sm font-semibold"
-                  style={{
-                    color: "var(--text-tertiary)",
-                    border: "1px solid var(--border-default)",
-                  }}
-                >
-                  ...
-                </span>
+                jumpPageOpen ? (
+                  <input
+                    type="number"
+                    min={1}
+                    max={pagination.totalPages}
+                    autoFocus
+                    value={jumpPageValue}
+                    onChange={(e) => setJumpPageValue(e.target.value)}
+                    onBlur={() => {
+                      setJumpPageOpen(false);
+                      setJumpPageValue("");
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        const n = parseInt(jumpPageValue, 10);
+                        if (!isNaN(n) && n >= 1 && n <= pagination.totalPages) {
+                          setSearchState({ page: n });
+                        }
+                        setJumpPageOpen(false);
+                        setJumpPageValue("");
+                      } else if (e.key === "Escape") {
+                        setJumpPageOpen(false);
+                        setJumpPageValue("");
+                      }
+                    }}
+                    placeholder={`1-${pagination.totalPages}`}
+                    className="relative inline-flex items-center px-2 py-2 text-sm font-semibold w-20 text-center outline-none focus:ring-2 focus:ring-[var(--gold-primary)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    style={{
+                      background: "var(--bg-elevated)",
+                      color: "var(--text-primary-ds)",
+                      border: "1px solid var(--border-default)",
+                    }}
+                  />
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setJumpPageValue(String(searchState.page));
+                      setJumpPageOpen(true);
+                    }}
+                    disabled={isLoading}
+                    aria-label="Jump to page"
+                    title="Jump to page"
+                    className="relative inline-flex items-center px-4 py-2 text-sm font-semibold transition-colors duration-150 cursor-pointer hover:text-[var(--text-primary-ds)]"
+                    style={{
+                      color: "var(--text-tertiary)",
+                      border: "1px solid var(--border-default)",
+                    }}
+                  >
+                    ...
+                  </button>
+                )
               )}
               <button
                 disabled={searchState.page >= pagination.totalPages || isLoading}
