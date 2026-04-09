@@ -57,7 +57,11 @@ export async function digestExaResults(
 
   try {
     const systemPrompt =
-      "You are a wealth intelligence analyst. For each search result about a person, determine if it is relevant to the target individual, categorize it, and generate a clean headline and summary. Return valid JSON only.";
+      "You are a wealth intelligence analyst. For each search result about a person, determine if it is relevant to the target individual, categorize it, and generate a clean headline and summary. " +
+      "CRITICAL: Your response MUST be ONLY a JSON array starting with `[` and ending with `]`. " +
+      "Do NOT include any prose, preamble, explanation, apology, or markdown fences. " +
+      "If no results are relevant, return an empty JSON array `[]` — never refuse or apologize. " +
+      "If a person's name looks garbled or incomplete, still return an array with every result marked `relevant: false`.";
 
     // Build user prompt with all mentions
     let userPrompt = `Target person: "${personName}" at "${companyName}"\n\n`;
@@ -79,18 +83,33 @@ export async function digestExaResults(
 
     const response = await chatCompletion(systemPrompt, userPrompt, 1500);
 
-    // Extract JSON from response (may be wrapped in markdown code fences)
-    let jsonText = response.text.trim();
+    // Extract JSON from response. Claude Haiku occasionally wraps the JSON
+    // array in markdown fences or prose ("Here's the analysis in JSON
+    // format: [...]"), so we strip both defensively before parsing.
+    const rawText = response.text.trim();
+    let jsonText = rawText;
     const fenceMatch = jsonText.match(/```(?:json)?\s*([\s\S]*?)```/);
     if (fenceMatch) {
       jsonText = fenceMatch[1].trim();
+    }
+    // Fall back to slicing from the first `[` to the last `]` when the model
+    // adds prose preamble/postamble. Greedy match on a flat array is safe
+    // because responses never contain nested top-level brackets.
+    const arrayMatch = jsonText.match(/\[[\s\S]*\]/);
+    if (arrayMatch) {
+      jsonText = arrayMatch[0];
     }
 
     let parsed: LLMDigestItem[];
     try {
       parsed = JSON.parse(jsonText) as LLMDigestItem[];
     } catch {
-      console.error("[exa-digest] Failed to parse LLM JSON response:", jsonText.slice(0, 200));
+      // Log the raw response (not the post-extraction slice) so we can see
+      // whether the model refused outright vs. produced malformed JSON.
+      console.error(
+        "[exa-digest] Failed to parse LLM JSON response:",
+        rawText.slice(0, 300)
+      );
       return [];
     }
 
