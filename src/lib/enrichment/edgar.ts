@@ -274,13 +274,32 @@ function parseForm4Xml(xml: string, ownerName?: string): Array<{
       ownerNames.push(m[1].trim().toLowerCase());
     }
 
-    // If ownerName filter is provided and no owner in this filing matches, skip all transactions
+    // If ownerName filter is provided and no owner in this filing matches, skip all transactions.
+    //
+    // SEC Form 4 stores owner names as "LAST FIRST MIDDLE" (e.g. "COOK TIMOTHY D"),
+    // while prospect names come in as "First Last" (e.g. "Tim Cook"). Token overlap
+    // must handle (a) either token ordering and (b) nicknames vs formal first names
+    // like Tim↔Timothy, Jeff↔Jeffrey, Bill↔William.
+    //
+    // Strategy: require at least 2 prospect tokens to match ANY owner token, where a
+    // "match" is exact equality OR one token is a ≥3-char prefix of the other. The
+    // length guard prevents single-letter initials from matching everything.
     if (ownerName && ownerNames.length > 0) {
-      const normalizedOwner = ownerName.toLowerCase().split(/\s+/);
+      const normalizedOwner = ownerName
+        .toLowerCase()
+        .split(/\s+/)
+        .filter(t => t.length > 0);
+      const matchesToken = (a: string, b: string): boolean => {
+        if (a === b) return true;
+        if (a.length >= 3 && b.startsWith(a)) return true;
+        if (b.length >= 3 && a.startsWith(b)) return true;
+        return false;
+      };
       const ownerMatches = ownerNames.some(on => {
-        const onTokens = on.split(/\s+/);
-        // Token overlap: at least 2 tokens must match (first + last name)
-        const overlap = normalizedOwner.filter(t => onTokens.includes(t));
+        const onTokens = on.split(/\s+/).filter(t => t.length > 0);
+        const overlap = normalizedOwner.filter(t =>
+          onTokens.some(o => matchesToken(t, o))
+        );
         return overlap.length >= 2;
       });
       if (!ownerMatches) return []; // Not this person's filing
@@ -530,10 +549,18 @@ async function enrichEdgarByNameInternal(params: { name: string }): Promise<Edga
   try {
     await waitForRateLimit();
 
-    // Search EFTS for person name in Form 4 filings
+    // Search EFTS for Form 4/3/5 filings filed by this person as an insider.
+    //
+    // CRITICAL: use `entityName=` (not `q=`). Full-text search on doc_text is
+    // unreliable for insider filings — Form 4 XML has no prose body, so the
+    // insider's name rarely appears in the searchable plaintext. `entityName`
+    // searches the `display_names` field which is explicitly indexed from the
+    // filer's registered name ("LAST FIRST MIDDLE" in SEC's format). It's
+    // order-independent per token, so passing "First Last" as-is works.
     const url = new URL('https://efts.sec.gov/LATEST/search-index');
-    url.searchParams.set('q', `"${params.name}"`);
+    url.searchParams.set('q', '');
     url.searchParams.set('forms', '4,3,5');
+    url.searchParams.set('entityName', params.name);
 
     const response = await fetch(url.toString(), {
       headers: { 'User-Agent': userAgent, Accept: 'application/json' },
@@ -596,7 +623,9 @@ async function enrichEdgarByNameInternal(params: { name: string }): Promise<Edga
         if (!xmlResponse.ok) continue;
 
         const xmlContent = await xmlResponse.text();
-        const parsedTransactions = parseForm4Xml(xmlContent, params.name);
+        // No owner filter here — EFTS already matched by entityName, so every
+        // filing in this loop is already known to be filed by the prospect.
+        const parsedTransactions = parseForm4Xml(xmlContent);
 
         for (const tx of parsedTransactions) {
           allTransactions.push({
