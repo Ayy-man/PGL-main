@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Play } from "lucide-react";
+import { Play, Plus } from "lucide-react";
 import { getPersonaColor } from "../lib/persona-color";
 import type { Persona } from "@/lib/personas/types";
 
@@ -12,6 +12,7 @@ interface SavedSearchShortcutListProps {
   onViewAllSaved?: () => void;
   onPrefillSearch?: (query: string) => void;
   maxItems?: number;
+  onCreateNew?: () => void;
 }
 
 function formatRelative(iso: string | null | undefined): string {
@@ -165,6 +166,7 @@ export function SavedSearchShortcutList({
   onViewAllSaved,
   onPrefillSearch: _onPrefillSearch,
   maxItems = 6,
+  onCreateNew,
 }: SavedSearchShortcutListProps) {
   if (personas.length === 0) return null;
 
@@ -174,12 +176,37 @@ export function SavedSearchShortcutList({
 
   return (
     <section className="mt-10">
-      <p
-        className="text-[13px] uppercase tracking-wider font-medium mb-4"
-        style={{ color: "var(--text-tertiary)" }}
-      >
-        Saved Searches
-      </p>
+      <div className="flex items-center justify-between mb-4">
+        <p
+          className="text-[13px] uppercase tracking-wider font-medium"
+          style={{ color: "var(--text-tertiary)" }}
+        >
+          Saved Searches
+        </p>
+        {onCreateNew && (
+          <button
+            type="button"
+            onClick={onCreateNew}
+            className="flex items-center gap-1.5 text-[12px] font-medium cursor-pointer transition-colors px-2.5 py-1 rounded-full"
+            style={{
+              background: "transparent",
+              border: "1px dashed var(--border-default)",
+              color: "var(--text-tertiary)",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = "var(--gold-primary)";
+              e.currentTarget.style.borderColor = "var(--border-gold)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = "var(--text-tertiary)";
+              e.currentTarget.style.borderColor = "var(--border-default)";
+            }}
+          >
+            <Plus className="h-3 w-3" />
+            New Search
+          </button>
+        )}
+      </div>
 
       {useRows ? (
         <div className="flex flex-col gap-2">

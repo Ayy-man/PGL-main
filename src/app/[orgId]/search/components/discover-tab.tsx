@@ -138,6 +138,7 @@ export function DiscoverTab({
         onSelectSavedSearch={onSelectSavedSearch}
         onViewAllSaved={onViewAllSaved}
         onPrefillSearch={handlePrefill}
+        onCreateNew={onSaveAsNewSearch}
       />
 
       {/* Suggested Searches — static persona templates */}
