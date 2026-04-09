@@ -4,6 +4,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { inngest } from "@/inngest/client";
 import { logError } from "@/lib/error-logger";
 import { ApiError, handleApiError } from "@/lib/api-error";
+import { apolloRateLimiter } from "@/lib/rate-limit/limiters";
+import { withRateLimit, rateLimitResponse } from "@/lib/rate-limit/middleware";
 
 /**
  * POST /api/prospects/[prospectId]/enrich
@@ -37,6 +39,11 @@ export async function POST(
     const tenantId = user.app_metadata?.tenant_id as string | undefined;
     if (!tenantId) {
       throw new ApiError("No tenant ID found in session", "UNAUTHORIZED", 401);
+    }
+
+    const rateLimit = await withRateLimit(apolloRateLimiter, `tenant:${tenantId}`);
+    if (!rateLimit.success) {
+      return rateLimitResponse(rateLimit);
     }
 
     // Extract prospectId from route params
