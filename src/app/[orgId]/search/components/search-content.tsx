@@ -516,6 +516,11 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
             organization_name: p.organization_name,
           }));
 
+        // Hard-abort on enrich failure: previously we would fall through to
+        // upserting the raw preview data, which always 400'd against the
+        // OBFUSCATED_PROSPECT guard in /api/prospects/upsert and left users
+        // with an unexplained "Partial success" toast. Now we surface the
+        // real Apollo error and keep the selection intact so they can retry.
         try {
           const enrichResp = await fetch("/api/apollo/bulk-enrich", {
             method: "POST",
@@ -523,39 +528,48 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
             body: JSON.stringify({ apolloIds: previewIds, previews }),
           });
 
-          if (enrichResp.ok) {
-            const enrichData = await enrichResp.json();
-            const enrichedPeople = enrichData.people;
-            if (enrichData.mock) {
-              toast({
-                title: "Using mock Apollo data",
-                description: "Apollo credits exhausted — fake names/emails generated for testing. Disable APOLLO_MOCK_ENRICHMENT when credits renew.",
-              });
-            }
-            // Merge enriched data back — replace preview entries with full data
-            const enrichedMap = new Map<string, (typeof enrichedPeople)[number]>();
-            for (const p of enrichedPeople) {
-              if (p.id) enrichedMap.set(p.id, p);
-            }
-            prospectsToUpsert = selectedProspects.map((p) => {
-              const enriched = enrichedMap.get(p.id);
-              return enriched ? { ...enriched, _enriched: true } : p;
-            });
-          } else {
+          if (!enrichResp.ok) {
             const err = await enrichResp.json().catch(() => ({}));
             toast({
               title: "Apollo enrichment failed",
-              description: err.error || "Proceeding with preview data",
+              description:
+                err.error ||
+                `Apollo returned ${enrichResp.status}. Your selection was not added to the list — please try again.`,
               variant: "destructive",
             });
-            // Continue with preview data — Exa/Claude can still try
+            setIsBulkSubmitting(false);
+            setBulkListDialogOpen(false);
+            return;
           }
+
+          const enrichData = await enrichResp.json();
+          const enrichedPeople = enrichData.people;
+          if (enrichData.mock) {
+            toast({
+              title: "Using mock Apollo data",
+              description:
+                "Apollo credits exhausted — fake names/emails generated for testing. Disable APOLLO_MOCK_ENRICHMENT when credits renew.",
+            });
+          }
+          // Merge enriched data back — replace preview entries with full data
+          const enrichedMap = new Map<string, (typeof enrichedPeople)[number]>();
+          for (const p of enrichedPeople) {
+            if (p.id) enrichedMap.set(p.id, p);
+          }
+          prospectsToUpsert = selectedProspects.map((p) => {
+            const enriched = enrichedMap.get(p.id);
+            return enriched ? { ...enriched, _enriched: true } : p;
+          });
         } catch {
           toast({
             title: "Apollo enrichment failed",
-            description: "Proceeding with preview data",
+            description:
+              "Network error while contacting Apollo. Your selection was not added to the list — please try again.",
             variant: "destructive",
           });
+          setIsBulkSubmitting(false);
+          setBulkListDialogOpen(false);
+          return;
         }
       }
     }

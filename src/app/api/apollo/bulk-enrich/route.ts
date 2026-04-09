@@ -16,6 +16,12 @@ import { withRateLimit, rateLimitResponse } from "@/lib/rate-limit/middleware";
  * See src/lib/platform-config/index.ts for the resolution order.
  */
 
+// Apollo's /people/bulk_match caps at 10 records per request, so a full
+// 25-record enrich is chunked into 3 sequential Apollo calls. Allow up to
+// 60 seconds of wall time so the chunked flow doesn't get killed by
+// Vercel's default serverless function timeout.
+export const maxDuration = 60;
+
 const previewSchema = z.object({
   id: z.string(),
   first_name: z.string().optional(),

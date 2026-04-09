@@ -55,22 +55,22 @@ async function apolloSearchRequest(
 }
 
 /**
- * Bulk enrich people by Apollo IDs (costs ~1 credit each).
- * Returns fully revealed contact data.
+ * Apollo's `/people/bulk_match` endpoint caps each request at 10 records.
+ * Exceeding this returns a 400 with `RECORD_LIMIT_EXCEEDED`. Callers pass
+ * arbitrary batch sizes, so we chunk internally and aggregate results.
  */
-async function bulkEnrichPeopleImpl(
-  apolloIds: string[]
-): Promise<ApolloPerson[]> {
-  if (apolloIds.length === 0) return [];
+const APOLLO_BULK_MATCH_MAX_PER_REQUEST = 10;
 
-  const apiKey = process.env.APOLLO_API_KEY;
-  if (!apiKey) {
-    throw new Error("APOLLO_API_KEY is not set in environment variables");
-  }
-
+/**
+ * Enrich a single batch of ≤10 Apollo IDs against /people/bulk_match.
+ * Throws on non-2xx; caller handles retry/error classification.
+ */
+async function bulkEnrichBatch(
+  apolloIds: string[],
+  apiKey: string
+): Promise<ApolloBulkMatchResponse> {
   const enrichUrl = "https://api.apollo.io/api/v1/people/bulk_match?reveal_personal_emails=true";
-  console.info(`[Apollo] ── Bulk enrich ${apolloIds.length} people ──`, enrichUrl);
-  const enrichStart = Date.now();
+  const batchStart = Date.now();
 
   const response = await fetch(enrichUrl, {
     method: "POST",
@@ -83,27 +83,80 @@ async function bulkEnrichPeopleImpl(
     }),
   });
 
-  const enrichMs = Date.now() - enrichStart;
+  const batchMs = Date.now() - batchStart;
 
   if (response.status === 429) {
-    console.error(`[Apollo] Bulk enrich 429 Rate Limited (${enrichMs}ms)`);
+    console.error(`[Apollo] Bulk enrich batch 429 Rate Limited (${batchMs}ms)`);
     throw new Error("APOLLO_RATE_LIMIT_HIT");
   }
 
   if (!response.ok) {
     const text = await response.text();
-    console.error(`[Apollo] Bulk enrich HTTP ${response.status} (${enrichMs}ms):`, text.slice(0, 500));
+    console.error(`[Apollo] Bulk enrich batch HTTP ${response.status} (${batchMs}ms):`, text.slice(0, 500));
     throw new Error(`Apollo bulk enrich error: ${response.status} — ${text.slice(0, 200)}`);
   }
 
   const data = (await response.json()) as ApolloBulkMatchResponse;
-  console.info(`[Apollo] ── Bulk enrich complete (${enrichMs}ms) ──`, {
+  console.info(`[Apollo] Bulk enrich batch OK (${batchMs}ms)`, {
     requested: apolloIds.length,
     enriched: data.unique_enriched_records ?? "?",
     credits: data.credits_consumed ?? "?",
     missing: data.missing_records ?? 0,
   });
-  return (data.matches || []).map((p) => ({ ...p, _enriched: true as const }));
+  return data;
+}
+
+/**
+ * Bulk enrich people by Apollo IDs (costs ~1 credit each).
+ * Returns fully revealed contact data.
+ *
+ * Chunks into batches of ≤10 to respect Apollo's `/people/bulk_match`
+ * per-request record limit (`RECORD_LIMIT_EXCEEDED` otherwise). Batches
+ * run sequentially to stay within the single circuit-breaker timeout
+ * budget and avoid hammering Apollo in parallel.
+ */
+async function bulkEnrichPeopleImpl(
+  apolloIds: string[]
+): Promise<ApolloPerson[]> {
+  if (apolloIds.length === 0) return [];
+
+  const apiKey = process.env.APOLLO_API_KEY;
+  if (!apiKey) {
+    throw new Error("APOLLO_API_KEY is not set in environment variables");
+  }
+
+  console.info(
+    `[Apollo] ── Bulk enrich ${apolloIds.length} people (chunked in batches of ${APOLLO_BULK_MATCH_MAX_PER_REQUEST}) ──`
+  );
+  const totalStart = Date.now();
+
+  const batches: string[][] = [];
+  for (let i = 0; i < apolloIds.length; i += APOLLO_BULK_MATCH_MAX_PER_REQUEST) {
+    batches.push(apolloIds.slice(i, i + APOLLO_BULK_MATCH_MAX_PER_REQUEST));
+  }
+
+  const allMatches: ApolloPerson[] = [];
+  let totalEnriched = 0;
+  let totalCredits = 0;
+  let totalMissing = 0;
+
+  for (const batch of batches) {
+    const data = await bulkEnrichBatch(batch, apiKey);
+    if (data.matches?.length) allMatches.push(...data.matches);
+    totalEnriched += data.unique_enriched_records ?? 0;
+    totalCredits += data.credits_consumed ?? 0;
+    totalMissing += data.missing_records ?? 0;
+  }
+
+  const totalMs = Date.now() - totalStart;
+  console.info(`[Apollo] ── Bulk enrich complete (${totalMs}ms, ${batches.length} batch${batches.length !== 1 ? "es" : ""}) ──`, {
+    requested: apolloIds.length,
+    enriched: totalEnriched,
+    credits: totalCredits,
+    missing: totalMissing,
+  });
+
+  return allMatches.map((p) => ({ ...p, _enriched: true as const }));
 }
 
 /**
@@ -136,10 +189,22 @@ apolloBreaker.on("close", () => {
 
 /**
  * Circuit breaker for Apollo bulk enrichment.
- * Shares the same threshold/timeout config as apolloBreaker.
+ *
+ * Uses a longer timeout than `apolloBreaker` because bulk enrichment now
+ * chunks into sequential batches of 10 (Apollo's per-request cap). A full
+ * 25-record enrich is 3 sequential Apollo calls; allow headroom for each
+ * to take several seconds without tripping the breaker.
+ *
  * NO fallback — errors propagate so callers can return proper HTTP status codes.
  */
-const apolloBulkEnrichBreaker = new CircuitBreaker(bulkEnrichPeopleImpl, options);
+const bulkEnrichOptions = {
+  timeout: 45000,
+  errorThresholdPercentage: 50,
+  resetTimeout: 30000,
+  volumeThreshold: 5,
+};
+
+const apolloBulkEnrichBreaker = new CircuitBreaker(bulkEnrichPeopleImpl, bulkEnrichOptions);
 
 apolloBulkEnrichBreaker.on("open", () => {
   console.error("[Bulk Enrich Circuit Breaker] OPEN — Apollo bulk enrich tripped. Will retry after 30s.");
