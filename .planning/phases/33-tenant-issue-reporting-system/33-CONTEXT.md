@@ -17,7 +17,7 @@ Build an in-product reporting system for tenants. Tenants click a contextual "Re
 - `/admin/reports` list + `/admin/reports/[id]` detail pages
 - Admin API routes (GET list, GET detail, PATCH, GET unread-count)
 - In-app unread badge on admin nav "Issue Reports" entry
-- `html2canvas` dynamic import for client-rendered screenshots
+- `html2canvas-pro` dynamic import for client-rendered screenshots (NOT plain `html2canvas` — the project's `oklch()` CSS tokens crash the un-suffixed package)
 
 **What does NOT ship in v1** (deferred to v2):
 - Tenant-visible history of their own past reports
@@ -45,7 +45,7 @@ Build an in-product reporting system for tenants. Tenants click a contextual "Re
 - Every report captures ALL THREE signals:
   1. **JSON snapshot** of key target fields (e.g., prospect name/company/title/linkedin) — frozen at report time so admins see what the tenant saw even if data changes later
   2. **Deep link** — full tenant URL (`page_url`) stored as informational reference
-  3. **Client-rendered screenshot** — via `html2canvas` dynamic import, uploaded to private Supabase storage bucket `issue-reports`, served to admins via signed URLs
+  3. **Client-rendered screenshot** — via `html2canvas-pro` dynamic import (NOT plain `html2canvas` — see Research finding #1), uploaded to private Supabase storage bucket `issue-reports`, served to admins via signed URLs
 - Plus: `user_agent`, `viewport {w, h}`, `page_path`
 
 ### Categories (LOCKED)
@@ -164,10 +164,10 @@ Edit `src/app/admin/admin-nav-links.tsx`:
 - Submit button label transitions "Send report" → "Sending..." during `useTransition` pending
 - Success: close dialog, reset state, toast via `useToast` ("Thanks — we'll take a look")
 - Error: red banner (mirror persona dialog pattern)
-- If `html2canvas` throws or the 2-second soft timeout fires → submit proceeds with `screenshot_path = null` (graceful fallback)
+- If `html2canvas-pro` throws or the 2-second soft timeout fires → submit proceeds with `screenshot_path = null` (graceful fallback)
 
 ### Dependencies (LOCKED)
-- **New dependency:** `html2canvas` (~200KB gzipped). Loaded dynamically via `await import('html2canvas')` inside `src/lib/issues/capture-screenshot.ts` so the tenant bundle does not pay for it unless a user opens the report dialog.
+- **New dependency:** `html2canvas-pro@^2.0.2` (~56KB gzipped). Loaded dynamically via `await import('html2canvas-pro')` inside `src/lib/issues/capture-screenshot.ts` so the tenant bundle does not pay for it unless a user opens the report dialog. **IMPORTANT:** NOT the plain `html2canvas` package — that version has no oklch() color parser and crashes on every capture because the project uses oklch tokens throughout `globals.css`. Use the `-pro` fork exclusively.
 - **Reused, no new deps:** `zod`, `@radix-ui/react-dialog`, `useToast` hook, `createClient`/`createAdminClient`, `requireSuperAdmin`, `logActivity`.
 
 ### Type definitions (LOCKED)
@@ -273,7 +273,7 @@ Items the PRD leaves to the implementer:
 
 **Edge cases:**
 - Submit without screenshot → `screenshot_path = null`, detail view hides screenshot block
-- `html2canvas` throws → form still submits with `screenshot_path = null`
+- `html2canvas-pro` throws → form still submits with `screenshot_path = null`
 - 5000-char description accepted; 5001 rejected with 400 from zod
 - Browser-console verify: tenant cannot `from('issue_reports').select()` via user-scoped supabase client
 - PATCH to `resolved` populates `resolved_by` + `resolved_at`
