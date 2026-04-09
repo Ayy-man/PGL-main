@@ -208,15 +208,8 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
       if (!resp.ok) throw new Error("Load more failed");
       const result = await resp.json();
       const total = result.newProspects + savedProspects.length;
-      const duplicates = Math.max(0, (result.totalFromApollo ?? 0) - result.newProspects);
       toast({
-        title: result.newProspects > 0 ? `+${result.newProspects} new leads loaded` : "No new leads found",
-        description:
-          result.newProspects === 0
-            ? "Apollo returned no additional unique leads for the next page range."
-            : duplicates > 0
-            ? `${duplicates.toLocaleString()} already in your list · Now showing ${total.toLocaleString()} leads.`
-            : `Now showing ${total.toLocaleString()} leads.`,
+        title: result.newProspects > 0 ? `${total.toLocaleString()} leads loaded` : "No more leads",
       });
       await loadSavedProspects(id);
     } catch {
