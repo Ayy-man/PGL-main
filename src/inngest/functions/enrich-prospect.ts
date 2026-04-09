@@ -65,7 +65,12 @@ export const enrichProspect = inngest.createFunction(
     // Prevents double-charging ContactOut/Exa/SEC credits when two enrich events for
     // the same prospect arrive concurrently (the existing step-0 dedup only catches
     // AFTER a prior run has already written `enriched` to saved_search_prospects).
-    idempotency: "event.data.prospectId",
+    //
+    // When `event.data.forceRefreshKey` is set (explicit user re-enrich), we append
+    // it to the dedup key so a legitimate retry doesn't get suppressed as a duplicate
+    // of the prior run. Callers generating a force event MUST supply a unique
+    // forceRefreshKey per intended run (a timestamp or UUID).
+    idempotency: "event.data.prospectId + '-' + (event.data.forceRefreshKey ?? '')",
     onFailure: async ({ error, event }) => {
       console.error("[Inngest] Enrichment workflow failed:", error);
 
@@ -106,12 +111,20 @@ export const enrichProspect = inngest.createFunction(
       isPublicCompany: _isPublicCompany,
       companyCik,
       ticker,
+      forceRefresh,
     } = event.data;
 
     const supabase = createAdminClient();
 
-    // Step 0: Duplicate enrichment guard — check if this person is already enriched
+    // Step 0: Duplicate enrichment guard — check if this person is already enriched.
+    // When forceRefresh is set (explicit user re-enrich), skip the guard entirely
+    // so we actually re-run enrichment against the current code (e.g. after shipping
+    // a SEC/Exa/ContactOut fix, backfilling existing leads).
     const shouldSkip = await step.run("check-duplicate-enrichment", async () => {
+      if (forceRefresh) {
+        console.info(`[Inngest] forceRefresh=true for prospect ${prospectId} — bypassing duplicate guard`);
+        return false;
+      }
       // Look up the Apollo ID for this prospect
       const { data: prospectRow } = await supabase
         .from('prospects')

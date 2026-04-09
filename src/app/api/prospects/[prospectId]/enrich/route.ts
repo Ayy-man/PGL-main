@@ -121,8 +121,10 @@ export async function POST(
       );
     }
 
-    // Check if already in progress
-    if (prospect.enrichment_status === "in_progress") {
+    // Check if already in progress. force=true bypasses this too — if a prior
+    // enrichment is stuck in `in_progress` (crashed step, retry exhaustion,
+    // etc.), the user needs a way to kick off a fresh run.
+    if (!force && prospect.enrichment_status === "in_progress") {
       return NextResponse.json(
         {
           status: "in_progress",
@@ -132,7 +134,18 @@ export async function POST(
       );
     }
 
-    // Send Inngest event to trigger enrichment workflow
+    // Send Inngest event to trigger enrichment workflow.
+    //
+    // When force=true is set on the request, pass the flag through to Inngest
+    // so the step-0 duplicate guard is bypassed, and attach a unique
+    // forceRefreshKey nonce so Inngest's own idempotency dedup (which is keyed
+    // off `prospectId + '-' + forceRefreshKey`) doesn't suppress the retry as
+    // a stale duplicate. Without the nonce, hitting `?force=true` twice would
+    // silently no-op on the second call.
+    const forceRefreshKey = force
+      ? `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+      : undefined;
+
     const sendResult = await inngest.send({
       name: "prospect/enrich.requested",
       data: {
@@ -147,6 +160,7 @@ export async function POST(
         isPublicCompany: !!prospect.publicly_traded_symbol,
         companyCik: prospect.company_cik || undefined,
         ticker: prospect.publicly_traded_symbol || undefined,
+        ...(force ? { forceRefresh: true, forceRefreshKey } : {}),
       },
     });
 
