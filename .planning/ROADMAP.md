@@ -417,6 +417,22 @@ Plans:
 - [x] 36-03-PLAN.md -- Discover tab + NL search bar: auto-submit on prefill, loading guard, spinner, hide discovery sections, width, clear button
 - [x] 36-04-PLAN.md -- Search orchestrator: save dialog pre-fill, mode guards, auto-scroll, pagination display, currentFilters wiring
 
+### Phase 37: LLM Prompt Overhaul — fix hallucination, model selection, weak prompting across all 10 LLM layers
+
+**Goal:** Swap all 10 LLM prompts from Claude 3.5 Haiku to GPT-4o-mini, add anti-hallucination guardrails to prospect summary and dossier, add defined categories with negative_signal to Exa digest, add few-shot examples to NLP parser, add companySize validation, rewrite query reformulator with Exa-specific rules, add relevance filtering to scrapbook digest, simplify intent classifier, and fix lookalike hallucination amplification.
+**Requirements**: D-01, D-02, D-03, D-04, D-05, D-06, D-07, D-08, D-09, D-10
+**Depends on:** Phase 36
+**Status:** PLANNED — 5 plans ready for execution
+
+**Plans:** 5 plans
+
+Plans:
+- [ ] 37-01-PLAN.md — Model swap to GPT-4o-mini + 25s timeout + SEC resolver heuristic cleanup
+- [ ] 37-02-PLAN.md — Exa digest defined categories + negative_signal type + Signal Timeline UI
+- [ ] 37-03-PLAN.md — Summary anti-hallucination rules + lookalike input cleanup + dossier range tightening
+- [ ] 37-04-PLAN.md — NLP parser few-shot examples + companySize validation + query reformulator rewrite
+- [ ] 37-05-PLAN.md — Scrapbook digest relevance filtering + intent classifier entityType cleanup
+
 ---
 
 ### Phase 19: Admin Automations Dashboard — Inngest Monitoring
