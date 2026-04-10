@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
-status: completed
+status: executing
 stopped_at: Completed 27-03-PLAN.md
-last_updated: "2026-04-10T13:16:03.744Z"
+last_updated: "2026-04-10T16:15:02.616Z"
 last_activity: 2026-04-10
 progress:
-  total_phases: 27
-  completed_phases: 9
+  total_phases: 28
+  completed_phases: 10
   total_plans: 55
-  completed_plans: 50
-  percent: 91
+  completed_plans: 56
+  percent: 100
 ---
 
 # Project State
@@ -22,13 +22,13 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** Real estate teams can quickly find and qualify wealthy prospects by searching structured lead databases, enriching profiles with personal contact info and wealth signals, and organizing prospects into actionable lists.
 
-**Current focus:** Phase 32 — discover-tab-v2 layout tightening complete
+**Current focus:** Phase 35 — team-tenant-operations
 
 ## Current Position
 
-Phase: 35
+Phase: 36
 Plan: Not started
-Status: Phase 32 complete — all 3 plans executed
+Status: Executing Phase 35
 Last activity: 2026-04-10
 
 Progress: [████████████████████] 100% (20/20 phases complete)
@@ -37,7 +37,7 @@ Progress: [████████████████████] 100% (2
 
 **Velocity:**
 
-- Total plans completed: 28
+- Total plans completed: 34
 - Average duration: ~7 min
 - Total execution time: ~2.9 hours (~175 min)
 
@@ -108,6 +108,7 @@ Progress: [████████████████████] 100% (2
 | Phase 27-research-chat-ux-polish P02 | 12 | 2 tasks | 3 files |
 | Phase 27 P03 | 189 | 1 tasks | 5 files |
 | 34 | 5 | - | - |
+| 35 | 6 | - | - |
 
 ### Phase 3 Plan Completion
 
@@ -377,6 +378,7 @@ Recent decisions affecting current work:
 - Phase 27 added: Research Chat UX Polish — Streaming indicators, Exa response surfacing, chat UI templates
 - Phase 26 added: Targeted Multi-Source Search — Intent-routed channels (SEC EDGAR, ATTOM property, NewsAPI, Proxycurl, FAA Registry, Crunchbase) alongside Exa. LLM classifies query intent → fires specialized APIs in parallel → merges/deduplicates/ranks results into unified scrapbook feed.
 - Phase 28 added: Saved Search Incremental Refresh, Dismiss, and Delete
+- Phase 36 added: Fix NLP search flow issues (25 bugs from 5-agent audit)
 
 ### Pending Todos
 

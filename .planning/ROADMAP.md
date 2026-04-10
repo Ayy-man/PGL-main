@@ -401,6 +401,16 @@ Plans:
 Plans:
 - [x] TBD (run /gsd-plan-phase 32 to break down) (completed 2026-04-07)
 
+### Phase 36: Fix NLP search flow issues (25 bugs from 5-agent audit)
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 35
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 36 to break down)
+
 ---
 
 ### Phase 19: Admin Automations Dashboard — Inngest Monitoring
@@ -501,12 +511,12 @@ Plans:
 **Depends on:** Phase 34
 **Status:** PLANNED — 6 plans ready for execution
 
-**Plans:** 0/6 complete
+**Plans:** 6/6 plans complete
 
 Plans:
-- [ ] 35-01-PLAN.md — Tenant Settings Page (org name, slug, logo, theme for tenant admins)
-- [ ] 35-02-PLAN.md — Seat Limits / Usage Quotas (max_seats column, invite enforcement, admin config)
-- [ ] 35-03-PLAN.md — Pending Invite Visibility (status badges, resend/revoke actions)
-- [ ] 35-04-PLAN.md — Role Change by Tenant Admin (agent <-> assistant role switching)
-- [ ] 35-05-PLAN.md — User Removal (full delete, not just deactivate)
-- [ ] 35-06-PLAN.md — Non-Admin Onboarding (simplified set-password page for agents/assistants)
+- [x] 35-01-PLAN.md — Tenant Settings Page (org name, slug, logo, theme for tenant admins)
+- [x] 35-02-PLAN.md — Seat Limits / Usage Quotas (max_seats column, invite enforcement, admin config)
+- [x] 35-03-PLAN.md — Pending Invite Visibility (status badges, resend/revoke actions)
+- [x] 35-04-PLAN.md — Role Change by Tenant Admin (agent <-> assistant role switching)
+- [x] 35-05-PLAN.md — User Removal (full delete, not just deactivate)
+- [x] 35-06-PLAN.md — Non-Admin Onboarding (simplified set-password page for agents/assistants)
