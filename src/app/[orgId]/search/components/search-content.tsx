@@ -14,7 +14,6 @@ import { BulkActionsBar } from "./bulk-actions-bar";
 import { ProspectResultsTable } from "./prospect-results-table";
 import { ProspectSlideOver } from "@/components/prospect/prospect-slide-over";
 import { Search, AlertCircle, RefreshCw, Loader2, Plus, X } from "lucide-react";
-import { ReportIssueButton } from "@/components/issues/report-issue-button";
 import { PersonaFormDialog } from "../../personas/components/persona-form-dialog";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -1055,18 +1054,6 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
                 </button>
               );
             })}
-            <div className="ml-auto">
-              <ReportIssueButton
-                target={{
-                  type: "search",
-                  snapshot: {
-                    query: searchState.keywords ?? null,
-                    filters: searchState.persona ?? null,
-                    result_count: activeResultCount,
-                  },
-                }}
-              />
-            </div>
           </div>
 
           {/* ============ TAB PANELS ============ */}

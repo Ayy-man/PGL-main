@@ -4,7 +4,6 @@ import { NextResponse } from "next/server";
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const type = searchParams.get("type");
   const rawNext = searchParams.get("next") ?? "/";
 
   // Sanitize redirect path: must be a relative path, no protocol, no path traversal
@@ -21,11 +20,6 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      // Recovery tokens must land on the reset-password page, not the dashboard
-      if (type === "recovery") {
-        return NextResponse.redirect(`${origin}/reset-password`);
-      }
-
       const { data: { user } } = await supabase.auth.getUser();
       const tenantId = user?.app_metadata?.tenant_id;
       const role = user?.app_metadata?.role;

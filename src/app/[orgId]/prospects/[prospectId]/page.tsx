@@ -5,7 +5,6 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { logActivity } from "@/lib/activity-logger";
 import { logProspectActivity, isDuplicateActivity } from "@/lib/activity";
 import { ProfileView } from "@/components/prospect/profile-view";
-import { ReportIssueButton } from "@/components/issues/report-issue-button";
 import { ROLE_PERMISSIONS } from "@/types/auth";
 import type { UserRole } from "@/types/auth";
 
@@ -287,39 +286,22 @@ export default async function ProspectProfilePage({
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex justify-end">
-        <ReportIssueButton
-          target={{
-            type: "prospect",
-            id: prospect.id,
-            snapshot: {
-              name: prospect.name ?? null,
-              title: prospect.title ?? null,
-              company: prospect.company ?? null,
-              linkedin_url: prospect.linkedin_url ?? null,
-              email: prospect.email ?? null,
-            },
-          }}
-        />
-      </div>
-      <ProfileView
-        prospect={prospect}
-        enrichmentSourceStatus={enrichmentSourceStatus}
-        listMemberships={formattedListMemberships}
-        isStale={isStale}
-        orgId={orgId}
-        activityEntries={activityEntries ?? []}
-        activityUsers={activityUsers}
-        allLists={allLists ?? []}
-        canEdit={canEdit}
-        teamMembers={teamMembers}
-        tags={tags}
-        tagSuggestions={tagSuggestions}
-        initialSignals={signalsWithSeen}
-        signalCount={signalCount || 0}
-        researchNotes={researchNotes ?? []}
-      />
-    </div>
+    <ProfileView
+      prospect={prospect}
+      enrichmentSourceStatus={enrichmentSourceStatus}
+      listMemberships={formattedListMemberships}
+      isStale={isStale}
+      orgId={orgId}
+      activityEntries={activityEntries ?? []}
+      activityUsers={activityUsers}
+      allLists={allLists ?? []}
+      canEdit={canEdit}
+      teamMembers={teamMembers}
+      tags={tags}
+      tagSuggestions={tagSuggestions}
+      initialSignals={signalsWithSeen}
+      signalCount={signalCount || 0}
+      researchNotes={researchNotes ?? []}
+    />
   );
 }
