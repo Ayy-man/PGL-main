@@ -193,7 +193,7 @@ RULES:
 2. Return "UNKNOWN" if you genuinely cannot determine the company's public status.
 3. Only return the exact SEC EDGAR legal entity name (e.g. "Alphabet Inc", "Apple Inc", "JPMorgan Chase & Co") if you are CERTAIN the company is publicly traded on NYSE, NASDAQ, or another US exchange AND you know its SEC-registered legal name precisely.
 4. Do NOT guess or hallucinate. A wrong answer corrupts financial data. If there is any doubt, return "PRIVATE" or "UNKNOWN".
-5. Startups, biotech companies without IPOs, regional firms, and most companies with fewer than 500 employees are almost always private — return "PRIVATE" for these.
+5. Evaluate each company individually. Do not apply blanket rules by industry — some biotech, fintech, and energy companies ARE publicly traded. Base your answer on whether you specifically know THIS company to be listed on a US exchange.
 6. Return ONLY one of: the exact SEC legal name, "PRIVATE", or "UNKNOWN". No explanation, no punctuation, nothing else.`,
       `Company name: "${companyName}"`,
       80,
