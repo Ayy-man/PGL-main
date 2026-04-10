@@ -56,27 +56,6 @@ export async function inviteTeamMember(formData: FormData) {
   const admin = createAdminClient();
 
   try {
-    // 3.5. Check seat limit
-    const { data: tenant } = await admin
-      .from("tenants")
-      .select("max_seats")
-      .eq("id", tenantId)
-      .single();
-
-    if (tenant?.max_seats) {
-      const { count } = await admin
-        .from("users")
-        .select("id", { count: "exact", head: true })
-        .eq("tenant_id", tenantId)
-        .eq("is_active", true);
-
-      if (count !== null && count >= tenant.max_seats) {
-        return {
-          error: `Seat limit reached (${count} of ${tenant.max_seats} seats used). Contact your administrator to upgrade.`,
-        };
-      }
-    }
-
     // 4. Invite user via Supabase Auth
     const redirectTo = `${getSiteUrl()}/api/auth/callback`;
 
