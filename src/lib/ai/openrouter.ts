@@ -2,11 +2,11 @@
  * OpenRouter AI client — replaces direct Anthropic SDK usage.
  * Uses OpenAI-compatible chat completions endpoint.
  *
- * Model: anthropic/claude-3.5-haiku (cost-efficient for high-volume calls)
+ * Model: openai/gpt-4o-mini (cost-efficient for high-volume calls)
  */
 
 const OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1/chat/completions";
-const DEFAULT_MODEL = "anthropic/claude-3.5-haiku";
+const DEFAULT_MODEL = "openai/gpt-4o-mini";
 
 interface ChatMessage {
   role: "system" | "user" | "assistant";
@@ -34,7 +34,7 @@ interface OpenRouterResponse {
  * @param system - System prompt
  * @param userMessage - User message
  * @param maxTokens - Max output tokens (default 500)
- * @param model - Model override (default anthropic/claude-3.5-haiku)
+ * @param model - Model override (default openai/gpt-4o-mini)
  * @returns The assistant's text response
  */
 export async function chatCompletion(
@@ -66,7 +66,7 @@ export async function chatCompletion(
       messages,
       max_tokens: maxTokens,
     }),
-    signal: AbortSignal.timeout(15_000),
+    signal: AbortSignal.timeout(25_000),
   });
 
   if (!response.ok) {
