@@ -475,3 +475,38 @@ Plans:
 - [ ] 24-03-PLAN.md -- (pending)
 - [ ] 24-04-PLAN.md -- (pending)
 - [ ] 24-05-PLAN.md -- (pending)
+
+### Phase 34: SaaS Critical — Auth, Security & Audit Fix
+
+**Goal:** Fix critical SaaS delivery gaps: activity_log CHECK constraint blocking 13 action types, password reset flow, user profile/settings page, deactivated tenant enforcement, and session expiry handling.
+
+**Requirements:** AUTH-01 extension, SA-04 enforcement, multi-tenant operational readiness
+**Depends on:** Phase 33
+**Status:** COMPLETE — All 5 plans executed (2026-04-10)
+
+**Plans:** 5/5 complete
+
+Plans:
+- [x] 34-01-PLAN.md — Fix activity_log CHECK constraint (DB migration to allow all 24 action types)
+- [x] 34-02-PLAN.md — Password Reset / Forgot Password (forgot-password + reset-password pages + auth callback)
+- [x] 34-03-PLAN.md — User Profile / Account Settings page (name, password, account info)
+- [x] 34-04-PLAN.md — Deactivated Tenant Gate (middleware check + /suspended page + API guard)
+- [x] 34-05-PLAN.md — Session/Token Expiry Handling (SessionGuard component + root layout mount)
+
+### Phase 35: Team & Tenant Operations
+
+**Goal:** Complete multi-tenant team management: tenant settings page, seat limits/quotas, pending invite visibility, role changes, user removal, and simplified non-admin onboarding.
+
+**Requirements:** Multi-tenant operational readiness, team self-management
+**Depends on:** Phase 34
+**Status:** PLANNED — 6 plans ready for execution
+
+**Plans:** 0/6 complete
+
+Plans:
+- [ ] 35-01-PLAN.md — Tenant Settings Page (org name, slug, logo, theme for tenant admins)
+- [ ] 35-02-PLAN.md — Seat Limits / Usage Quotas (max_seats column, invite enforcement, admin config)
+- [ ] 35-03-PLAN.md — Pending Invite Visibility (status badges, resend/revoke actions)
+- [ ] 35-04-PLAN.md — Role Change by Tenant Admin (agent <-> assistant role switching)
+- [ ] 35-05-PLAN.md — User Removal (full delete, not just deactivate)
+- [ ] 35-06-PLAN.md — Non-Admin Onboarding (simplified set-password page for agents/assistants)
