@@ -37,3 +37,23 @@ export const edgarRateLimiter = new Ratelimit({
   analytics: true,
   prefix: "ratelimit:edgar",
 });
+
+/**
+ * NLP parse-query rate limiter — 20 requests per minute per tenant
+ *
+ * Prevents cost amplification via unlimited LLM calls (H4).
+ *
+ * Usage:
+ * ```ts
+ * const { success, reset } = await parseQueryRateLimiter.limit(`tenant:${tenantId}`);
+ * if (!success) {
+ *   return new Response("Rate limit exceeded", { status: 429 });
+ * }
+ * ```
+ */
+export const parseQueryRateLimiter = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(20, "1 m"),
+  analytics: true,
+  prefix: "ratelimit:parse-query",
+});

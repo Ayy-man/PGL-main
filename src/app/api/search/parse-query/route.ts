@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { chatCompletion } from "@/lib/ai/openrouter";
+import { parseQueryRateLimiter } from "@/lib/rate-limit/limiters";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +32,51 @@ Rules:
 - Only include fields the user actually mentioned or implied
 - If the query is very short or vague, put it in "keywords" and leave other fields empty`;
 
+const VALID_SENIORITIES = new Set([
+  "owner", "founder", "c_suite", "partner", "vp", "head",
+  "director", "manager", "senior", "entry", "intern",
+]);
+
+const VALID_INDUSTRIES = new Set([
+  "Financial Services", "Banking", "Insurance", "Investment Management",
+  "Private Equity", "Venture Capital", "Real Estate", "Technology",
+  "Software", "Information Technology", "Healthcare", "Pharmaceuticals",
+  "Biotechnology", "Manufacturing", "Retail", "E-Commerce",
+  "Telecommunications", "Energy", "Oil & Gas", "Mining", "Construction",
+  "Automotive", "Aerospace & Defense", "Media & Entertainment",
+  "Hospitality", "Legal Services", "Consulting", "Education",
+  "Government", "Nonprofit", "Transportation & Logistics",
+  "Computer Software", "Internet", "Hospital & Health Care",
+  "Marketing & Advertising", "Accounting", "Human Resources",
+  "Staffing & Recruiting", "Food & Beverages", "Consumer Goods",
+  "Mechanical or Industrial Engineering", "Civil Engineering",
+  "Electrical & Electronic Manufacturing", "Chemicals", "Textiles",
+  "Plastics", "Environmental Services", "Utilities",
+  "Renewables & Environment", "Warehousing", "Aviation & Aerospace",
+  "Defense & Space", "Luxury Goods & Jewelry", "Sporting Goods",
+  "Wine & Spirits", "Farming", "Fishery", "Dairy", "Tobacco",
+  "Packaging & Containers", "Glass, Ceramics & Concrete",
+  "Paper & Forest Products", "Printing", "Publishing",
+  "Writing & Editing", "Libraries", "Museums & Institutions",
+  "Fine Art", "Performing Arts", "Recreational Facilities & Services",
+  "Gambling & Casinos", "Leisure, Travel & Tourism",
+  "Airlines & Aviation", "Maritime", "Railroad Manufacture",
+  "Shipbuilding", "Military", "Judiciary", "Legislative Office",
+  "Political Organization", "Public Policy", "Public Safety",
+  "International Affairs", "Think Tanks", "Philanthropy",
+  "Civic & Social Organization", "Religious Institutions", "Research",
+  "Veterinary", "Security & Investigations", "Law Enforcement",
+  "Capital Markets", "Investment Banking", "Fund-Raising",
+  "Program Development", "Events Services", "Design", "Graphic Design",
+  "Architecture & Planning", "Industrial Design", "Animation",
+  "Apparel & Fashion", "Cosmetics", "Furniture",
+  "Health, Wellness & Fitness", "Sports", "Music", "Broadcast Media",
+  "Motion Pictures & Film", "Photography", "Semiconductors",
+  "Nanotechnology", "Computer Networking", "Computer Hardware",
+  "Information Services", "Computer Games", "Online Media",
+  "Computer & Network Security", "Wireless", "Consumer Electronics",
+]);
+
 /**
  * POST /api/search/parse-query
  *
@@ -46,6 +92,14 @@ export async function POST(request: NextRequest) {
     query = body.query;
 
     console.info("[parse-query] ── Received ──", { query, wordCount: query?.trim().split(/\s+/).length });
+
+    if (query && query.length > 1000) {
+      console.warn("[parse-query] Query too long:", query.length);
+      return NextResponse.json(
+        { error: "Query too long (max 1000 characters)" },
+        { status: 400 }
+      );
+    }
 
     if (!query || typeof query !== "string" || query.trim().length === 0) {
       console.warn("[parse-query] Empty query, returning 400");
@@ -68,6 +122,20 @@ export async function POST(request: NextRequest) {
 
     console.info("[parse-query] User:", user.email);
 
+    // Rate limit by tenant — 20 requests per minute (H4: prevent cost amplification)
+    const tenantId = user.app_metadata?.tenant_id;
+    if (tenantId) {
+      const { success, reset } = await parseQueryRateLimiter.limit(`tenant:${tenantId}`);
+      if (!success) {
+        const retryAfter = Math.ceil((reset - Date.now()) / 1000);
+        console.warn("[parse-query] Rate limited tenant:", tenantId);
+        return NextResponse.json(
+          { error: "Too many parse requests. Try again shortly." },
+          { status: 429, headers: { "Retry-After": String(retryAfter) } }
+        );
+      }
+    }
+
     // Short queries (1-2 words) — just use as keywords, skip LLM
     const wordCount = query.trim().split(/\s+/).length;
     if (wordCount <= 2) {
@@ -82,7 +150,7 @@ export async function POST(request: NextRequest) {
     console.info("[parse-query] Calling OpenRouter for NL parsing...");
     const llmStart = Date.now();
 
-    const response = await chatCompletion(SYSTEM_PROMPT, query.trim(), 500);
+    const response = await chatCompletion(SYSTEM_PROMPT, query.trim(), 1000);
 
     const llmMs = Date.now() - llmStart;
     console.info(`[parse-query] AI response received (${llmMs}ms)`, {
@@ -100,6 +168,26 @@ export async function POST(request: NextRequest) {
     }
 
     const filters = JSON.parse(jsonStr);
+
+    // Validate seniorities against Apollo enum (M12: strip invalid values)
+    if (Array.isArray(filters.seniorities)) {
+      const original = filters.seniorities.length;
+      filters.seniorities = filters.seniorities.filter((s: string) => VALID_SENIORITIES.has(s));
+      if (filters.seniorities.length === 0) delete filters.seniorities;
+      if (filters.seniorities?.length !== original) {
+        console.warn("[parse-query] Filtered invalid seniorities:", original - (filters.seniorities?.length ?? 0));
+      }
+    }
+    // Validate industries against Apollo enum (M12: strip invalid values)
+    if (Array.isArray(filters.industries)) {
+      const original = filters.industries.length;
+      filters.industries = filters.industries.filter((s: string) => VALID_INDUSTRIES.has(s));
+      if (filters.industries.length === 0) delete filters.industries;
+      if (filters.industries?.length !== original) {
+        console.warn("[parse-query] Filtered invalid industries:", original - (filters.industries?.length ?? 0));
+      }
+    }
+
     const totalMs = Date.now() - start;
 
     console.info(`[parse-query] ── Parse complete (${totalMs}ms, LLM: ${llmMs}ms) ──`, {
