@@ -66,6 +66,7 @@ export async function chatCompletion(
       messages,
       max_tokens: maxTokens,
     }),
+    signal: AbortSignal.timeout(15_000),
   });
 
   if (!response.ok) {
