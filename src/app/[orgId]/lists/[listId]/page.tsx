@@ -5,6 +5,7 @@ import { getListById, getListMembers } from "@/lib/lists/queries";
 import { ListMemberTable } from "../components/list-member-table";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ReportIssueButton } from "@/components/issues/report-issue-button";
 import { ArrowLeft, Users } from "lucide-react";
 
 interface PageProps {
@@ -60,6 +61,17 @@ export default async function ListDetailPage({ params }: PageProps) {
         <div className="text-sm text-muted-foreground">
           {members.length} {members.length === 1 ? "member" : "members"}
         </div>
+        <ReportIssueButton
+          target={{
+            type: "list",
+            id: list.id,
+            snapshot: {
+              name: list.name ?? null,
+              description: list.description ?? null,
+              member_count: members.length,
+            },
+          }}
+        />
       </div>
 
       {members.length === 0 ? (
