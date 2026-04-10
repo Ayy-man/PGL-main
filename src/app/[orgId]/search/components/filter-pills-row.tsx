@@ -8,6 +8,7 @@ type PillKey = "industry" | "title" | "location" | "networth";
 
 interface FilterPillsRowProps {
   onApplyFilters: (filters: Partial<PersonaFilters>) => void;
+  currentFilters?: Partial<PersonaFilters>;
 }
 
 const NET_WORTH_OPTIONS = [
@@ -24,13 +25,23 @@ const PILL_FILTER_KEY: Record<PillKey, keyof PersonaFilters> = {
   networth: "net_worth_range",
 };
 
-export function FilterPillsRow({ onApplyFilters }: FilterPillsRowProps) {
+export function FilterPillsRow({ onApplyFilters, currentFilters }: FilterPillsRowProps) {
   const [openPill, setOpenPill] = useState<PillKey | null>(null);
   const [industries, setIndustries] = useState("");
   const [titles, setTitles] = useState("");
   const [locations, setLocations] = useState("");
   const [netWorth, setNetWorth] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Sync from parent when currentFilters changes (L4 shared state)
+  useEffect(() => {
+    if (currentFilters) {
+      setIndustries(currentFilters.industries?.join("; ") ?? "");
+      setTitles(currentFilters.titles?.join("; ") ?? "");
+      setLocations(currentFilters.locations?.join("; ") ?? "");
+      setNetWorth(typeof currentFilters.net_worth_range === "string" ? currentFilters.net_worth_range : "");
+    }
+  }, [currentFilters]);
 
   // Click-outside closes any open pill
   useEffect(() => {
