@@ -7,11 +7,11 @@ stopped_at: Completed 32-03-PLAN.md
 last_updated: "2026-04-08T00:00:00.000Z"
 last_activity: 2026-04-08 -- Completed Phase 32 (discover-tab-v2-layout-tightening-search-depth-filter-pills-suggested-personas) — 3/3 plans
 progress:
-  total_phases: 25
+  total_phases: 27
   completed_phases: 8
-  total_plans: 41
+  total_plans: 52
   completed_plans: 46
-  percent: 100
+  percent: 88
 ---
 
 # Project State
