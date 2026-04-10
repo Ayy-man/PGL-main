@@ -33,7 +33,6 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "csv-stringify": "^6.6.0",
-    "html2canvas-pro": "2.0.2",
     "inngest": "^3.52.6",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.563.0",
