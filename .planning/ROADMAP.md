@@ -424,14 +424,14 @@ Plans:
 **Depends on:** Phase 36
 **Status:** PLANNED — 5 plans ready for execution
 
-**Plans:** 5 plans
+**Plans:** 5/5 plans complete
 
 Plans:
-- [ ] 37-01-PLAN.md — Model swap to GPT-4o-mini + 25s timeout + SEC resolver heuristic cleanup
-- [ ] 37-02-PLAN.md — Exa digest defined categories + negative_signal type + Signal Timeline UI
-- [ ] 37-03-PLAN.md — Summary anti-hallucination rules + lookalike input cleanup + dossier range tightening
-- [ ] 37-04-PLAN.md — NLP parser few-shot examples + companySize validation + query reformulator rewrite
-- [ ] 37-05-PLAN.md — Scrapbook digest relevance filtering + intent classifier entityType cleanup
+- [x] 37-01-PLAN.md — Model swap to GPT-4o-mini + 25s timeout + SEC resolver heuristic cleanup
+- [x] 37-02-PLAN.md — Exa digest defined categories + negative_signal type + Signal Timeline UI
+- [x] 37-03-PLAN.md — Summary anti-hallucination rules + lookalike input cleanup + dossier range tightening
+- [x] 37-04-PLAN.md — NLP parser few-shot examples + companySize validation + query reformulator rewrite
+- [x] 37-05-PLAN.md — Scrapbook digest relevance filtering + intent classifier entityType cleanup
 
 ---
 
