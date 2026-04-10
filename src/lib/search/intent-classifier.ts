@@ -22,17 +22,10 @@ Channel selection rules:
 - Always include "exa" (general web search — always on)
 - Add "edgar-efts" for queries about SEC filings, insider trading, Form 4, 13F, 8-K, 10-K, regulatory disclosures
 
-Entity type rules:
-- "person" — query is about an individual (default for most prospect queries)
-- "company" — query is primarily about a company/organization
-- "property" — query is about real estate or property ownership
-- "general" — mixed or unclear
-
 Return ONLY valid JSON in this exact format:
 {
   "channels": ["exa", "edgar-efts"],
   "reformulatedQuery": "reformulated search query optimized for the selected channels",
-  "entityType": "person",
   "reasoning": "brief explanation of channel selection"
 }
 
@@ -85,13 +78,7 @@ Public ticker: ${prospect.publicly_traded_symbol || "None"}`;
         typeof parsed.reformulatedQuery === "string"
           ? parsed.reformulatedQuery
           : query,
-      entityType:
-        parsed.entityType === "person" ||
-        parsed.entityType === "company" ||
-        parsed.entityType === "property" ||
-        parsed.entityType === "general"
-          ? parsed.entityType
-          : "general",
+      entityType: "general" as const,
       reasoning:
         typeof parsed.reasoning === "string" ? parsed.reasoning : "",
     };
