@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { NLSearchBar } from "./nl-search-bar";
 import { FilterPillsRow } from "./filter-pills-row";
 import { AdvancedFiltersPanel } from "./advanced-filters-panel";
@@ -13,12 +13,14 @@ interface DiscoverTabProps {
   savedSearchCounts?: Record<string, number>;
   keywords: string;
   isLoading: boolean;
+  hasResults: boolean;
   onNLSearch: (keywords: string) => void;
   onApplyFilters: (filters: Partial<PersonaFilters>) => void;
   onSubmitSearch: () => void;
   onSaveAsNewSearch: () => void;
   onSelectSavedSearch: (id: string) => void;
   onViewAllSaved?: () => void;
+  onClearSearch?: () => void;
 }
 
 export function DiscoverTab({
@@ -26,21 +28,31 @@ export function DiscoverTab({
   savedSearchCounts,
   keywords,
   isLoading,
+  hasResults,
   onNLSearch,
   onApplyFilters,
   onSubmitSearch,
   onSaveAsNewSearch,
   onSelectSavedSearch,
   onViewAllSaved,
+  onClearSearch,
 }: DiscoverTabProps) {
   const [prefillValue, setPrefillValue] = useState(keywords);
 
+  // Sync prefillValue when keywords changes externally (L3)
+  useEffect(() => {
+    setPrefillValue(keywords);
+  }, [keywords]);
+
   const handlePrefill = (query: string) => {
     setPrefillValue(query);
+    // Auto-submit the prefilled query (M7)
+    onNLSearch(query);
+    onSubmitSearch();
   };
 
   return (
-    <div className="page-enter max-w-[680px] mx-auto px-4 pt-12 pb-8">
+    <div className="page-enter max-w-[960px] mx-auto px-4 pt-12 pb-8">
       <div className="relative">
         {/* Radial gold glow — decorative, pointer-events-none */}
         <div
@@ -95,6 +107,7 @@ export function DiscoverTab({
               onSubmitSearch();
             }}
             isLoading={isLoading}
+            onClear={onClearSearch}
           />
 
           {/* Filter pills row */}
@@ -131,18 +144,22 @@ export function DiscoverTab({
         </div>
       </div>
 
-      {/* Shortcut list */}
-      <SavedSearchShortcutList
-        personas={personas}
-        counts={savedSearchCounts}
-        onSelectSavedSearch={onSelectSavedSearch}
-        onViewAllSaved={onViewAllSaved}
-        onPrefillSearch={handlePrefill}
-        onCreateNew={onSaveAsNewSearch}
-      />
+      {/* Shortcut list — hidden when results are showing */}
+      {!hasResults && (
+        <SavedSearchShortcutList
+          personas={personas}
+          counts={savedSearchCounts}
+          onSelectSavedSearch={onSelectSavedSearch}
+          onViewAllSaved={onViewAllSaved}
+          onPrefillSearch={handlePrefill}
+          onCreateNew={onSaveAsNewSearch}
+        />
+      )}
 
-      {/* Suggested Searches — static persona templates */}
-      <SuggestedPersonasSection onPrefillSearch={handlePrefill} />
+      {/* Suggested Searches — hidden when results are showing */}
+      {!hasResults && (
+        <SuggestedPersonasSection onPrefillSearch={handlePrefill} />
+      )}
     </div>
   );
 }

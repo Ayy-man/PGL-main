@@ -1077,6 +1077,7 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
               savedSearchCounts={{}}
               keywords={searchState.keywords}
               isLoading={isLoading}
+              hasResults={results.length > 0}
               onNLSearch={handleNLSearch}
               onApplyFilters={handleApplyFilters}
               onSubmitSearch={() => {
@@ -1088,6 +1089,7 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
               onSaveAsNewSearch={() => setCreateDialogOpen(true)}
               onSelectSavedSearch={handleSelectSavedSearch}
               onViewAllSaved={() => setActiveTab("saved")}
+              onClearSearch={() => setSearchState({ keywords: "", persona: "" })}
             />
           ) : (
             <SavedSearchesTab
