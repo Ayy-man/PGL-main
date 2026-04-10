@@ -5,6 +5,8 @@ import { useQueryStates, parseAsString, parseAsInteger } from "nuqs";
 import type { ApolloPerson } from "@/lib/apollo/types";
 import type { PersonaFiltersType } from "@/lib/apollo/schemas";
 
+export const PAGE_SIZE = 25;
+
 interface PaginationState {
   page: number;
   pageSize: number;
@@ -55,7 +57,7 @@ export function useSearch(): SearchResult {
   const [results, setResults] = useState<ApolloPerson[]>([]);
   const [pagination, setPagination] = useState<PaginationState>({
     page: 1,
-    pageSize: 10,
+    pageSize: PAGE_SIZE,
     totalPages: 0,
     totalEntries: 0,
     hasMore: false,
@@ -66,6 +68,7 @@ export function useSearch(): SearchResult {
   const [filterOverrides, setFilterOverrides] = useState<Partial<PersonaFiltersType>>({});
 
   const abortControllerRef = useRef<AbortController | null>(null);
+  const parseCacheRef = useRef<Map<string, Partial<PersonaFiltersType>>>(new Map());
 
   const executeSearch = useCallback(async () => {
     const hasPersona = Boolean(searchState.persona);
@@ -75,7 +78,7 @@ export function useSearch(): SearchResult {
       setResults([]);
       setPagination({
         page: 1,
-        pageSize: 10,
+        pageSize: PAGE_SIZE,
         totalPages: 0,
         totalEntries: 0,
         hasMore: false,
@@ -105,33 +108,41 @@ export function useSearch(): SearchResult {
     });
 
     try {
-      // ── Step 1: NL parse ──
+      // ── Step 1: NL parse (with cache) ──
       let nlFilters: Partial<PersonaFiltersType> = {};
       if (searchState.keywords?.trim()) {
-        const parseStart = performance.now();
-        console.info("[useSearch] [1/3] Parsing NL query:", searchState.keywords);
-        try {
-          const parseRes = await fetch("/api/search/parse-query", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ query: searchState.keywords }),
-            signal: controller.signal,
-          });
-          if (parseRes.ok) {
-            const parsed = await parseRes.json();
-            console.info(`[useSearch] [1/3] NL parse complete (${Math.round(performance.now() - parseStart)}ms):`, {
-              parsed: parsed.parsed,
-              filters: parsed.filters,
+        const cacheKey = searchState.keywords.trim();
+        const cached = parseCacheRef.current.get(cacheKey);
+        if (cached) {
+          console.info("[useSearch] [1/3] NL parse cache hit for:", cacheKey);
+          nlFilters = cached;
+        } else {
+          const parseStart = performance.now();
+          console.info("[useSearch] [1/3] Parsing NL query:", searchState.keywords);
+          try {
+            const parseRes = await fetch("/api/search/parse-query", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ query: searchState.keywords }),
+              signal: controller.signal,
             });
-            if (parsed.parsed && parsed.filters) {
-              nlFilters = parsed.filters;
+            if (parseRes.ok) {
+              const parsed = await parseRes.json();
+              console.info(`[useSearch] [1/3] NL parse complete (${Math.round(performance.now() - parseStart)}ms):`, {
+                parsed: parsed.parsed,
+                filters: parsed.filters,
+              });
+              if (parsed.parsed && parsed.filters) {
+                nlFilters = parsed.filters;
+                parseCacheRef.current.set(cacheKey, nlFilters);
+              }
+            } else {
+              console.warn(`[useSearch] [1/3] NL parse failed: ${parseRes.status} (${Math.round(performance.now() - parseStart)}ms)`);
             }
-          } else {
-            console.warn(`[useSearch] [1/3] NL parse failed: ${parseRes.status} (${Math.round(performance.now() - parseStart)}ms)`);
+          } catch (parseErr) {
+            if (parseErr instanceof DOMException && parseErr.name === "AbortError") throw parseErr;
+            console.warn("[useSearch] [1/3] NL parse error (falling back to keywords):", parseErr);
           }
-        } catch (parseErr) {
-          if (parseErr instanceof DOMException && parseErr.name === "AbortError") throw parseErr;
-          console.warn("[useSearch] [1/3] NL parse error (falling back to keywords):", parseErr);
         }
       } else {
         console.info("[useSearch] [1/3] NL parse skipped (persona-based search)");
@@ -149,7 +160,7 @@ export function useSearch(): SearchResult {
 
       const body: Record<string, unknown> = {
         page: searchState.page,
-        pageSize: 25,
+        pageSize: PAGE_SIZE,
       };
       if (searchState.persona) {
         body.personaId = searchState.persona;
@@ -202,7 +213,7 @@ export function useSearch(): SearchResult {
       setResults(data.people || []);
       setPagination({
         page: data.pagination?.page ?? searchState.page,
-        pageSize: data.pagination?.pageSize ?? 50,
+        pageSize: data.pagination?.pageSize ?? PAGE_SIZE,
         totalPages: data.pagination?.totalPages ?? 0,
         totalEntries: data.pagination?.totalResults ?? 0,
         hasMore: data.pagination?.hasMore ?? false,
@@ -250,11 +261,15 @@ export function useSearch(): SearchResult {
       if (personaChanged || keywordsChanged) {
         // Reset page to 1 when persona or keywords changes
         setSearchState({ ...update, page: 1 });
+        // Clear NLP-parsed filter overrides when keywords change (M2)
+        if (keywordsChanged) {
+          setFilterOverrides({});
+        }
       } else {
         setSearchState(update);
       }
     },
-    [searchState.persona, searchState.keywords, setSearchState]
+    [searchState.persona, searchState.keywords, setSearchState, setFilterOverrides]
   );
 
   return {

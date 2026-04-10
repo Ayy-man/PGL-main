@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SlidersHorizontal, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { PersonaFilters } from "@/lib/personas/types";
@@ -8,11 +8,13 @@ import type { PersonaFilters } from "@/lib/personas/types";
 interface AdvancedFiltersPanelProps {
   onApplyFilters: (filters: Partial<PersonaFilters>) => void;
   initialFilters?: Partial<PersonaFilters>;
+  currentFilters?: Partial<PersonaFilters>;
 }
 
 export function AdvancedFiltersPanel({
   onApplyFilters,
   initialFilters,
+  currentFilters,
 }: AdvancedFiltersPanelProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -31,6 +33,16 @@ export function AdvancedFiltersPanel({
     initialFilters?.seniorities?.join("; ") ?? ""
   );
 
+  // Sync from parent when currentFilters changes (L4 shared state)
+  useEffect(() => {
+    if (currentFilters) {
+      setTitles(currentFilters.titles?.join("; ") ?? "");
+      setLocations(currentFilters.locations?.join("; ") ?? "");
+      setIndustries(currentFilters.industries?.join("; ") ?? "");
+      setSeniorities(currentFilters.seniorities?.join("; ") ?? "");
+    }
+  }, [currentFilters]);
+
   const handleClear = () => {
     setTitles("");
     setLocations("");
@@ -41,6 +53,7 @@ export function AdvancedFiltersPanel({
       locations: undefined,
       industries: undefined,
       seniorities: undefined,
+      net_worth_range: undefined,
     });
   };
 
