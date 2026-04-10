@@ -517,6 +517,14 @@ async function enrichEdgarInternal(params: {
       const rawDocument = primaryDocument.replace(/^xsl[^/]+\//, '');
       const documentUrl = `https://www.sec.gov/Archives/edgar/data/${params.cik}/${accessionNoSlash}/${rawDocument}`;
 
+      // User-facing URL: use the ORIGINAL primaryDocument path (with the
+      // xslF345X05/ prefix). SEC renders this as a styled HTML table —
+      // much nicer than raw XML. Falls back to filing index page if no
+      // XSLT prefix exists.
+      const viewUrl = primaryDocument.startsWith('xsl')
+        ? `https://www.sec.gov/Archives/edgar/data/${params.cik}/${accessionNoSlash}/${primaryDocument}`
+        : `https://www.sec.gov/Archives/edgar/data/${params.cik}/${accessionNoSlash}/`;
+
       try {
         const documentResponse = await fetch(documentUrl, {
           headers: {
@@ -533,8 +541,8 @@ async function enrichEdgarInternal(params: {
         const xmlContent = await documentResponse.text();
         const parsedTransactions = parseForm4Xml(xmlContent, params.name);
 
-        // Add filing date, calculate total value, and attach the filing URL
-        // so downstream dedup + UI click-through works.
+        // Add filing date, calculate total value, and attach the
+        // human-readable SEC viewer URL (not the raw XML we parsed).
         for (const tx of parsedTransactions) {
           allTransactions.push({
             filingDate,
@@ -543,7 +551,7 @@ async function enrichEdgarInternal(params: {
             shares: tx.shares,
             pricePerShare: tx.pricePerShare,
             totalValue: tx.shares * tx.pricePerShare,
-            sourceUrl: documentUrl,
+            sourceUrl: viewUrl,
           });
         }
       } catch (error) {
@@ -698,12 +706,16 @@ async function enrichEdgarByNameInternal(params: { name: string }): Promise<Edga
 
         const indexHtml = await indexResponse.text();
 
-        // Find the Form 4 XML document. Prefer form4.xml explicitly; fall back to first .xml
-        // that isn't a filing-summary or an XSLT-rendered path.
+        // Find the Form 4 XML document for parsing AND any XSLT-rendered
+        // version for the user-facing "View Source" link.
         const xmlMatch =
           indexHtml.match(/href="([^"]*form4[^"]*\.xml)"/i) ||
           indexHtml.match(/href="((?![^"]*(?:filing-summary|xsl[A-Z]))[^"]+\.xml)"/i);
         if (!xmlMatch) continue;
+
+        // Also look for the XSLT-rendered HTML version (e.g. xslF345X05/form4.xml)
+        // which SEC displays as a styled table — much nicer than raw XML.
+        const xslMatch = indexHtml.match(/href="([^"]*xsl[^"]*\.xml)"/i);
 
         // Hrefs from the index page are absolute paths (/Archives/...) — prepend origin
         const rawHref = xmlMatch[1];
@@ -715,6 +727,11 @@ async function enrichEdgarByNameInternal(params: { name: string }): Promise<Edga
           headers: { 'User-Agent': userAgent, Accept: 'application/xml,text/xml,*/*' },
         });
         if (!xmlResponse.ok) continue;
+
+        // User-facing URL: prefer XSLT-rendered HTML, fall back to filing index
+        const viewUrl = xslMatch
+          ? `https://www.sec.gov${xslMatch[1].startsWith('/') ? xslMatch[1] : `/${xslMatch[1]}`}`
+          : indexUrl;
 
         const xmlContent = await xmlResponse.text();
         // No owner filter here — EFTS already matched by entityName, so every
@@ -729,7 +746,7 @@ async function enrichEdgarByNameInternal(params: { name: string }): Promise<Edga
             shares: tx.shares,
             pricePerShare: tx.pricePerShare,
             totalValue: tx.shares * tx.pricePerShare,
-            sourceUrl: xmlUrl,
+            sourceUrl: viewUrl,
           });
         }
       } catch (error) {
