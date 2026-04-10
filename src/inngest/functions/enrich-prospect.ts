@@ -727,7 +727,7 @@ export const enrichProspect = inngest.createFunction(
           await supabase.from("prospects").update({
             intelligence_dossier: dossier,
             dossier_generated_at: new Date().toISOString(),
-            dossier_model: "anthropic/claude-3.5-haiku",
+            dossier_model: "openai/gpt-4o-mini",
           }).eq("id", prospectId);
 
           // Log dossier output + inputs so we can trace where fields like

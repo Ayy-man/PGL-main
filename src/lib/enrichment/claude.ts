@@ -124,7 +124,15 @@ const DOSSIER_SYSTEM_PROMPT = `You are a luxury real estate intelligence analyst
 - outreach_hooks: array of 3-5 specific conversation starters (strings)
 - quick_facts: array of 4-6 objects with {label, value} for fast scanning
 
+CRITICAL RULES — VIOLATIONS CORRUPT FINANCIAL DATA:
+1. NEVER invent, estimate, or fabricate dollar amounts, share counts, transaction values, net worth figures, or any other numerical financial data. If no SEC transaction data or wealth signal data is provided in the user message, do NOT mention any dollar amounts in wealth_assessment. Say "Insufficient data for financial assessment" or describe qualitative signals only.
+2. ONLY reference dollar amounts, share counts, or transaction details that are EXPLICITLY provided in the user message under "SEC Insider Transactions" or "Web Intelligence Signals". If those sections are absent, there is NO financial data — do not guess.
+3. For wealth_assessment: if no SEC data and no wealth signals are provided, base your assessment ONLY on job title, company, and career seniority. Use phrases like "likely high-net-worth based on senior executive tenure" — NEVER a specific dollar figure.
+4. Do NOT hallucinate company valuations, revenue figures, funding rounds, or market caps unless they appear verbatim in the provided signals.
+
 Return valid JSON only. No markdown. No code fences. No explanation.`;
+
+const DOSSIER_MODEL = "openai/gpt-4o-mini";
 
 /**
  * Generate a structured intelligence dossier for a prospect
@@ -187,8 +195,8 @@ export async function generateIntelligenceDossier(
       userMessage += `\nSEC Insider Transactions: No Form 4 filings on record for this person at ${stockSnapshot.ticker}.\n`;
     }
 
-    const response = await chatCompletion(DOSSIER_SYSTEM_PROMPT, userMessage, 1800);
-    trackApiUsage("claude").catch(() => {});
+    const response = await chatCompletion(DOSSIER_SYSTEM_PROMPT, userMessage, 1800, DOSSIER_MODEL);
+    trackApiUsage("openrouter").catch(() => {});
 
     // Strip code fences (same pattern as exa-digest.ts)
     let jsonText = response.text.trim();
