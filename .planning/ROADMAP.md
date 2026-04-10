@@ -401,20 +401,6 @@ Plans:
 Plans:
 - [x] TBD (run /gsd-plan-phase 32 to break down) (completed 2026-04-07)
 
-### Phase 33: Tenant issue reporting system
-
-**Goal:** Build an in-product tenant reporting system: tenants click contextual "Report an issue" buttons on prospect dossiers, list detail, search, and personas pages; the system captures a JSON snapshot of the target entity, the page URL, and a client-rendered screenshot (via html2canvas-pro for oklch CSS color support); reports land in a new private issue_reports table + issue-reports storage bucket; super admins triage reports at /admin/reports with status workflow, signed-URL screenshot previews, and a polled unread badge on the admin nav — all without needing cross-tenant data access.
-**Requirements**: REQ-33-01 through REQ-33-30 (internal phase IDs derived from LOCKED CONTEXT.md decisions; see 33-CONTEXT.md for the full decision list)
-**Depends on:** Phase 32
-**Plans:** 1/5 plans executed
-
-Plans:
-- [x] 33-01-schema-types-foundation-PLAN.md — issue_reports migration (with set_updated_at fn) + TS types + activity_logger union + [BLOCKING] supabase db push + manual bucket/RLS setup
-- [ ] 33-02-tenant-ui-api-PLAN.md — html2canvas-pro install + capture helpers + ReportIssueButton/Dialog (capture-before-open) + POST /api/issues/report route
-- [ ] 33-03-tenant-mount-points-PLAN.md — mount ReportIssueButton on prospect dossier, list detail, personas index, and search (SearchContent client)
-- [ ] 33-04-admin-triage-ui-api-PLAN.md — 3 admin API routes (list, [id] GET/PATCH, unread-count) + /admin/reports list page + ReportsTable + detail page with signed URL + ReportDetail
-- [ ] 33-05-admin-nav-badge-PLAN.md — add Issue Reports entry to ADMIN_NAV_PLATFORM + convert nav to client polling (30s interval) + red badge pill with 99+ overflow
-
 ---
 
 ### Phase 19: Admin Automations Dashboard — Inngest Monitoring
@@ -489,38 +475,3 @@ Plans:
 - [ ] 24-03-PLAN.md -- (pending)
 - [ ] 24-04-PLAN.md -- (pending)
 - [ ] 24-05-PLAN.md -- (pending)
-
-### Phase 34: SaaS Critical — Auth, Security & Audit Fix
-
-**Goal:** Fix critical SaaS delivery gaps: activity_log CHECK constraint blocking 13 action types, password reset flow, user profile/settings page, deactivated tenant enforcement, and session expiry handling.
-
-**Requirements:** AUTH-01 extension, SA-04 enforcement, multi-tenant operational readiness
-**Depends on:** Phase 33
-**Status:** PLANNED — 5 plans ready for execution
-
-**Plans:** 0/5 complete
-
-Plans:
-- [ ] 34-01-PLAN.md — Fix activity_log CHECK constraint (DB migration to allow all 24 action types)
-- [ ] 34-02-PLAN.md — Password Reset / Forgot Password (forgot-password + reset-password pages + auth callback)
-- [ ] 34-03-PLAN.md — User Profile / Account Settings page (name, password, account info)
-- [ ] 34-04-PLAN.md — Deactivated Tenant Gate (middleware check + /suspended page + API guard)
-- [ ] 34-05-PLAN.md — Session/Token Expiry Handling (SessionGuard component + root layout mount)
-
-### Phase 35: Team & Tenant Operations
-
-**Goal:** Complete multi-tenant team management: tenant settings page, seat limits/quotas, pending invite visibility, role changes, user removal, and simplified non-admin onboarding.
-
-**Requirements:** Multi-tenant operational readiness, team self-management
-**Depends on:** Phase 34
-**Status:** PLANNED — 6 plans ready for execution
-
-**Plans:** 0/6 complete
-
-Plans:
-- [ ] 35-01-PLAN.md — Tenant Settings Page (org name, slug, logo, theme for tenant admins)
-- [ ] 35-02-PLAN.md — Seat Limits / Usage Quotas (max_seats column, invite enforcement, admin config)
-- [ ] 35-03-PLAN.md — Pending Invite Visibility (status badges, resend/revoke actions)
-- [ ] 35-04-PLAN.md — Role Change by Tenant Admin (agent <-> assistant role switching)
-- [ ] 35-05-PLAN.md — User Removal (full delete, not just deactivate)
-- [ ] 35-06-PLAN.md — Non-Admin Onboarding (simplified set-password page for agents/assistants)

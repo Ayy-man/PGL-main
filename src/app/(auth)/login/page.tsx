@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import { TENANT_THEMES, isValidTheme } from "@/lib/tenant-theme";
 
 interface TenantBranding {
@@ -170,7 +171,15 @@ function LoginForm() {
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="password">Password</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="password">Password</Label>
+            <Link
+              href="/forgot-password"
+              className="text-xs text-muted-foreground hover:text-gold transition-colors"
+            >
+              Forgot your password?
+            </Link>
+          </div>
           <Input
             id="password"
             type="password"

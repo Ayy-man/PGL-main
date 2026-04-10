@@ -7,11 +7,11 @@ stopped_at: Completed 32-03-PLAN.md
 last_updated: "2026-04-08T00:00:00.000Z"
 last_activity: 2026-04-08 -- Completed Phase 32 (discover-tab-v2-layout-tightening-search-depth-filter-pills-suggested-personas) — 3/3 plans
 progress:
-  total_phases: 27
+  total_phases: 25
   completed_phases: 8
-  total_plans: 52
+  total_plans: 41
   completed_plans: 46
-  percent: 88
+  percent: 100
 ---
 
 # Project State
@@ -376,7 +376,6 @@ Recent decisions affecting current work:
 - Phase 27 added: Research Chat UX Polish — Streaming indicators, Exa response surfacing, chat UI templates
 - Phase 26 added: Targeted Multi-Source Search — Intent-routed channels (SEC EDGAR, ATTOM property, NewsAPI, Proxycurl, FAA Registry, Crunchbase) alongside Exa. LLM classifies query intent → fires specialized APIs in parallel → merges/deduplicates/ranks results into unified scrapbook feed.
 - Phase 28 added: Saved Search Incremental Refresh, Dismiss, and Delete
-- Phase 33 added: Tenant issue reporting system — contextual "Report an issue" buttons on dossier/list/search pages, captures target snapshot + screenshot (html2canvas) + deep link, new `issue_reports` table, admin triage page at `/admin/reports` with status workflow and in-app unread badge
 
 ### Pending Todos
 

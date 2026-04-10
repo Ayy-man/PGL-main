@@ -26,8 +26,7 @@ export type ActionType =
   | "tag_added"
   | "tag_removed"
   | "photo_uploaded"
-  | "lead_owner_assigned"
-  | "issue_reported";
+  | "lead_owner_assigned";
 
 /**
  * Array of all valid action types for validation
@@ -56,7 +55,6 @@ export const ACTION_TYPES: ActionType[] = [
   "tag_removed",
   "photo_uploaded",
   "lead_owner_assigned",
-  "issue_reported",
 ];
 
 /**
