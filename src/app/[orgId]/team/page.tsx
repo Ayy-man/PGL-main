@@ -45,8 +45,6 @@ export default async function TeamPage({
     redirect(`/${orgId}/dashboard`);
   }
 
-  const tenantId = user.app_metadata?.tenant_id as string;
-
   // Fetch users for this tenant (RLS auto-scopes to tenant)
   const { data: users, error } = await supabase
     .from("users")
