@@ -403,13 +403,19 @@ Plans:
 
 ### Phase 36: Fix NLP search flow issues (25 bugs from 5-agent audit)
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** Fix 25 bugs identified by a 5-agent audit of the NLP search flow. Server-side hardening (rate limiting, query length guard, timeout, enum validation), core hook fixes (double API call, parse cache, stale filter clearing, pageSize mismatch), Discover tab UX (auto-submit, loading states, width consistency, clear button), and search orchestrator fixes (save dialog pre-fill, mode guards, auto-scroll, pagination).
+
+**Requirements**: PHASE-36
 **Depends on:** Phase 35
-**Plans:** 0 plans
+**Status:** PLANNED -- 4 plans ready for execution
+
+**Plans:** 0/4 complete
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 36 to break down)
+- [ ] 36-01-PLAN.md -- Server-side hardening: rate limiter, query length guard, OpenRouter timeout, enum validation, max_tokens increase
+- [ ] 36-02-PLAN.md -- Core hook + filter panel fixes: single-fire search, parse cache, filter clearing, pageSize constant, net_worth clear
+- [ ] 36-03-PLAN.md -- Discover tab + NL search bar: auto-submit on prefill, loading guard, spinner, hide discovery sections, width, clear button
+- [ ] 36-04-PLAN.md -- Search orchestrator: save dialog pre-fill, mode guards, auto-scroll, pagination display, currentFilters wiring
 
 ---
 
