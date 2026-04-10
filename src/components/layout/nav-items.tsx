@@ -10,6 +10,7 @@ import {
   BarChart3,
   LayoutDashboard,
   FileDown,
+  Settings,
 } from "lucide-react";
 
 interface NavItemsProps {
@@ -38,6 +39,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Activity",       href: "/dashboard/activity",  icon: Activity,        exact: false },
   { label: "Analytics",      href: "/dashboard/analytics", icon: BarChart3,       exact: false },
   { label: "Team",           href: "/team",                icon: Users,           exact: false, roles: ["tenant_admin", "super_admin"] },
+  { label: "Settings",      href: "/settings",            icon: Settings,        exact: false },
 ];
 
 export function NavItems({ orgId, userRole, collapsed, savedSearchCount, listsCount }: NavItemsProps) {
