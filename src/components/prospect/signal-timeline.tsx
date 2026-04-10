@@ -13,6 +13,7 @@ import {
   TrendingUp,
   ExternalLink,
   Search,
+  AlertTriangle,
 } from "lucide-react";
 import type { ProspectSignal, SignalCategory } from "@/types/database";
 
@@ -34,6 +35,7 @@ function getCategoryIcon(category: SignalCategory) {
     case "recognition": return Trophy;
     case "sec_filing": return Landmark;
     case "market_event": return TrendingUp;
+    case "negative_signal": return AlertTriangle;
     default: return Diamond;
   }
 }
@@ -48,6 +50,7 @@ function getCategoryLabel(category: SignalCategory): string {
     case "recognition": return "Recognition";
     case "sec_filing": return "SEC Filing";
     case "market_event": return "Market Event";
+    case "negative_signal": return "Negative Signal";
     default: return "Signal";
   }
 }
@@ -62,6 +65,7 @@ function getCategoryColor(category: string): { bg: string; text: string; border:
     case "company_intel": return { bg: "rgba(6,182,212,0.1)", text: "#06b6d4", border: "rgba(6,182,212,0.2)" };
     case "recognition": return { bg: "rgba(245,158,11,0.1)", text: "#f59e0b", border: "rgba(245,158,11,0.2)" };
     case "market_event": return { bg: "rgba(59,130,246,0.1)", text: "#3b82f6", border: "rgba(59,130,246,0.2)" };
+    case "negative_signal": return { bg: "rgba(239,68,68,0.1)", text: "#ef4444", border: "rgba(239,68,68,0.2)" };
     default: return { bg: "rgba(212,175,55,0.08)", text: "var(--gold-primary)", border: "rgba(212,175,55,0.15)" };
   }
 }
@@ -75,6 +79,7 @@ const ALL_CATEGORIES: SignalCategory[] = [
   "recognition",
   "sec_filing",
   "market_event",
+  "negative_signal",
 ];
 
 export function SignalTimeline({
