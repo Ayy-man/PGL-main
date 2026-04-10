@@ -8,11 +8,11 @@ const PersonaSchema = z.object({
   name: z.string().describe("Generated persona name"),
   jobTitles: z.array(z.string()).describe("Similar job titles"),
   seniorities: z.array(
-    z.enum(["owner", "founder", "c_suite", "partner", "vp", "head", "director", "manager", "senior", "entry", "intern"])
+    z.enum(["owner", "founder", "c_suite", "partner", "vp", "head", "director", "manager", "senior", "entry", "intern", "training"])
   ).describe("Seniority levels"),
   industries: z.array(z.string()).describe("Target industries"),
   companySizes: z.array(
-    z.enum(["1,10", "11,50", "51,200", "201,500", "501,1000", "1001,5000", "5001,10000", "10001,"])
+    z.enum(["1,10", "11,20", "21,50", "51,100", "101,200", "201,500", "501,1000", "1001,2000", "2001,5000", "5001,10000", "10001,"])
   ).describe("Employee count ranges"),
   locations: z.array(z.string()).optional().describe("Target locations"),
   keywords: z.array(z.string()).describe("Keywords for this persona"),
@@ -82,14 +82,16 @@ CRITICAL RULES:
 - Only include locations if the prospect's location is known. Omit locations entirely if unknown.
 - Keep keywords short and general (2-3 max). Avoid overly specific terms.
 - Company size should cover a range — include 2-3 ranges.
+- Seniority values MUST be from this exact list: owner, founder, c_suite, partner, vp, director, manager, senior, entry, intern, training
+- Company size ranges MUST be from this exact list: "1,10", "11,20", "21,50", "51,100", "101,200", "201,500", "501,1000", "1001,2000", "2001,5000", "5001,10000", "10001,"
 
 Return ONLY a valid JSON object with this exact structure:
 {
   "name": "Descriptive persona label (NEVER the prospect's name)",
   "jobTitles": ["3-5 related title variations"],
-  "seniorities": ["include 2-3 levels to cast a wider net"],
+  "seniorities": ["2-3 from ONLY: owner, founder, c_suite, partner, vp, director, manager, senior, entry, intern, training"],
   "industries": ["1-2 broad industries"],
-  "companySizes": ["2-3 ranges from ONLY: 1,10 | 11,50 | 51,200 | 201,500 | 501,1000 | 1001,5000 | 5001,10000 | 10001,"],
+  "companySizes": ["2-3 ranges from ONLY: 1,10 | 11,20 | 21,50 | 51,100 | 101,200 | 201,500 | 501,1000 | 1001,2000 | 2001,5000 | 5001,10000 | 10001,"],
   "locations": ["omit or leave empty if location unknown"],
   "keywords": ["2-3 broad keywords"],
   "reasoning": "Brief explanation"
@@ -115,9 +117,8 @@ export async function generateLookalikePersona(
     userMessage += `LinkedIn: ${prospect.linkedin}\n`;
   }
 
-  if (prospect.ai_summary) {
-    userMessage += `\nAI Summary: ${prospect.ai_summary}\n`;
-  }
+  // ai_summary intentionally excluded: feeding a potentially hallucinated summary
+  // back into the LLM amplifies errors. Raw signals are passed instead.
 
   if (prospect.webData?.wealthSignals && prospect.webData.wealthSignals.length > 0) {
     userMessage += `\nWealth Signals:\n`;
@@ -185,7 +186,7 @@ export async function generateLookalikePersona(
     "executive": "c_suite", "chief": "c_suite", "principal": "director",
     "lead": "head", "associate": "entry", "analyst": "entry", "junior": "entry",
   };
-  const VALID_SENIORITIES = new Set(["owner","founder","c_suite","partner","vp","head","director","manager","senior","entry","intern"]);
+  const VALID_SENIORITIES = new Set(["owner","founder","c_suite","partner","vp","head","director","manager","senior","entry","intern","training"]);
   if (Array.isArray(personaData.seniorities)) {
     personaData.seniorities = personaData.seniorities
       .map((s: string) => SENIORITY_MAP[s.toLowerCase()] || s.toLowerCase())
