@@ -43,6 +43,14 @@ export default async function TeamPage({
     redirect(`/${orgId}/dashboard`);
   }
 
+  // Fetch tenant for seat limit info
+  const tenantId = user.app_metadata?.tenant_id as string;
+  const { data: tenant } = await supabase
+    .from("tenants")
+    .select("max_seats")
+    .eq("id", tenantId)
+    .single();
+
   // Fetch users for this tenant (RLS auto-scopes to tenant)
   const { data: users, error } = await supabase
     .from("users")
@@ -54,6 +62,8 @@ export default async function TeamPage({
   }
 
   const teamMembers = users || [];
+  const activeCount = teamMembers.filter((m) => m.is_active).length;
+  const maxSeats = tenant?.max_seats ?? null;
 
   return (
     <div className="space-y-6">
@@ -66,7 +76,14 @@ export default async function TeamPage({
             Manage your team members and send invitations
           </p>
         </div>
-        <InviteDialog orgId={orgId} />
+        <div className="flex items-center gap-3">
+          {maxSeats && (
+            <span className="text-sm text-muted-foreground">
+              {activeCount} of {maxSeats} seats used
+            </span>
+          )}
+          <InviteDialog orgId={orgId} />
+        </div>
       </div>
 
       <div className="surface-admin-card rounded-[14px] overflow-hidden">
