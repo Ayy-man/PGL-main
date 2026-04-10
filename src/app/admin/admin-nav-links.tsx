@@ -1,16 +1,18 @@
 "use client";
 
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Building2,
-  LayoutDashboard,
+  AlertTriangle,
   BarChart3,
-  Zap,
-  Key,
+  Building2,
   Database,
-  Shield,
+  Key,
+  LayoutDashboard,
   Plug,
+  Shield,
+  Zap,
 } from "lucide-react";
 
 const ADMIN_NAV_PLATFORM = [
@@ -18,6 +20,7 @@ const ADMIN_NAV_PLATFORM = [
   { label: "Tenant Registry", href: "/admin/tenants",    icon: Building2,       exact: false },
   { label: "Usage Metrics",   href: "/admin/analytics",  icon: BarChart3,       exact: false },
   { label: "Automations",     href: "/admin/automations", icon: Zap,            exact: false },
+  { label: "Issue Reports",   href: "/admin/reports",    icon: AlertTriangle,   exact: false },
 ];
 
 const ADMIN_NAV_SYSTEM_ACTIVE = [
@@ -32,6 +35,24 @@ const ADMIN_NAV_SYSTEM_STUBS = [
 
 export function AdminNavLinks({ collapsed = false }: { collapsed?: boolean }) {
   const pathname = usePathname();
+  const [openCount, setOpenCount] = useState(0);
+
+  const fetchUnreadCount = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/reports/unread-count", { cache: "no-store" });
+      if (!res.ok) return;
+      const data = (await res.json()) as { open?: number };
+      setOpenCount(data.open ?? 0);
+    } catch {
+      // silently ignore — badge stays at previous value
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchUnreadCount(); // immediate fetch on mount
+    const interval = setInterval(fetchUnreadCount, 30_000); // 30s polling
+    return () => clearInterval(interval);
+  }, [fetchUnreadCount]);
 
   return (
     <div className="flex flex-col gap-1">
@@ -56,7 +77,7 @@ export function AdminNavLinks({ collapsed = false }: { collapsed?: boolean }) {
           <Link
             key={item.href}
             href={item.href}
-            className="flex items-center gap-3 rounded-[8px] px-3 py-3 text-sm font-medium transition-all duration-200 cursor-pointer"
+            className="relative flex items-center gap-3 rounded-[8px] px-3 py-3 text-sm font-medium transition-all duration-200 cursor-pointer"
             style={
               isActive
                 ? {
@@ -81,7 +102,23 @@ export function AdminNavLinks({ collapsed = false }: { collapsed?: boolean }) {
             }}
           >
             <item.icon className="h-4 w-4 shrink-0" />
-            {!collapsed && item.label}
+            {!collapsed && <span className="flex-1">{item.label}</span>}
+            {!collapsed && item.href === "/admin/reports" && openCount > 0 && (
+              <span
+                className="ml-auto inline-flex items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold text-white"
+                style={{ background: "rgb(220, 38, 38)" }}
+                aria-label={`${openCount} open report${openCount === 1 ? "" : "s"}`}
+              >
+                {openCount > 99 ? "99+" : openCount}
+              </span>
+            )}
+            {collapsed && item.href === "/admin/reports" && openCount > 0 && (
+              <span
+                className="absolute top-1 right-1 inline-block h-2 w-2 rounded-full"
+                style={{ background: "rgb(220, 38, 38)" }}
+                aria-label={`${openCount} open reports`}
+              />
+            )}
           </Link>
         );
       })}
