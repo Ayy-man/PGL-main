@@ -364,8 +364,6 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
     // Saved search mode shows stored DB prospects; keyword search hits Apollo live.
     // For filtering within a saved search, use the Advanced Filters panel instead.
     setSearchState({ keywords, persona: "" });
-    // D-19: submitting a search always navigates to Saved Searches tab
-    setActiveTab("saved");
     // M9: Clear stale saved search state so previous results don't leak through
     setSavedProspects([]);
     setIsSavedSearchMode(false);
