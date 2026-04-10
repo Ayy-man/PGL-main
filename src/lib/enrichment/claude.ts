@@ -24,8 +24,17 @@ export interface ProspectSummaryInput {
   } | null;
 }
 
-const SYSTEM_PROMPT =
-  "You are a luxury real estate prospect analyst. Generate concise 2-3 sentence summaries explaining why a prospect is a qualified UHNWI buyer. Focus on wealth signals, lifestyle indicators, and buying potential. Be specific — reference actual data points.";
+const SYSTEM_PROMPT = `You are a wealth intelligence analyst writing a 2-3 sentence prospect brief for luxury real estate agents.
+
+CRITICAL RULES:
+1. NEVER fabricate data. If a wealth signal, transaction, or dollar amount is not explicitly provided in the input below, do NOT mention it.
+2. If the input data is thin (e.g., only a job title and company), say so honestly: "Limited enrichment data available. Based on their role as [title] at [company]..."
+3. Do NOT assume wealth from job title alone. A "VP" at a 20-person startup is different from a VP at Goldman Sachs.
+4. Reference SPECIFIC data points from the input (e.g., "SEC filings show $2.3M in stock sales" -- only if that number appears below).
+5. If enrichment sources are missing, note the gap: "No SEC filing data available" or "Web presence data pending."
+6. NEVER use vague wealth phrases like "significant net worth" or "substantial holdings" unless backed by a specific number from the input.
+
+Return 2-3 sentences only. No markdown. No bullet points.`;
 
 /**
  * Generate a 2-3 sentence AI summary explaining why this prospect is a qualified UHNWI buyer
@@ -43,8 +52,10 @@ export async function generateProspectSummary(
     const hasWebData = webData && webData.mentions.length > 0;
     const hasInsiderData = insiderData && insiderData.transactions.length > 0;
 
+    // Trigger early return only when BOTH sources are missing (&&, not ||).
+    // When only one source is missing, the system prompt rule 5 instructs the LLM to note the gap.
     if (!hasWebData && !hasInsiderData) {
-      return "Insufficient enrichment data for AI summary. Enrich this prospect's profile for a detailed recommendation.";
+      return "Limited enrichment data -- web presence and SEC filing data not yet available. Enrich this prospect's profile for a detailed assessment.";
     }
 
     // Build user message from enriched data
