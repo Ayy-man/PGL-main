@@ -54,9 +54,12 @@ export async function middleware(request: NextRequest) {
     !pathname.startsWith("/onboarding/set-password") &&
     !pathname.startsWith("/api/auth/callback")
   ) {
-    return NextResponse.redirect(
-      new URL("/onboarding/confirm-tenant", request.url)
-    );
+    // Tenant admins see full org setup; agents/assistants just set password
+    const onboardingPath =
+      role === "tenant_admin"
+        ? "/onboarding/confirm-tenant"
+        : "/onboarding/set-password";
+    return NextResponse.redirect(new URL(onboardingPath, request.url));
   }
 
   // Skip tenant resolution for onboarding routes (user is authenticated but
