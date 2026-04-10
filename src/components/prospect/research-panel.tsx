@@ -838,7 +838,7 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
         }}
       >
         <div
-          className="flex items-end gap-2 rounded-xl px-3 py-2 transition-all duration-200"
+          className="flex items-center gap-2 rounded-xl px-3 py-2 transition-all duration-200"
           style={{
             background: "var(--bg-card, rgba(255,255,255,0.04))",
             border: "1px solid var(--border-subtle, rgba(255,255,255,0.08))",
