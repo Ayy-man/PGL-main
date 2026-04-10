@@ -409,13 +409,13 @@ Plans:
 **Depends on:** Phase 35
 **Status:** PLANNED -- 4 plans ready for execution
 
-**Plans:** 0/4 complete
+**Plans:** 4/4 plans complete
 
 Plans:
-- [ ] 36-01-PLAN.md -- Server-side hardening: rate limiter, query length guard, OpenRouter timeout, enum validation, max_tokens increase
-- [ ] 36-02-PLAN.md -- Core hook + filter panel fixes: single-fire search, parse cache, filter clearing, pageSize constant, net_worth clear
-- [ ] 36-03-PLAN.md -- Discover tab + NL search bar: auto-submit on prefill, loading guard, spinner, hide discovery sections, width, clear button
-- [ ] 36-04-PLAN.md -- Search orchestrator: save dialog pre-fill, mode guards, auto-scroll, pagination display, currentFilters wiring
+- [x] 36-01-PLAN.md -- Server-side hardening: rate limiter, query length guard, OpenRouter timeout, enum validation, max_tokens increase
+- [x] 36-02-PLAN.md -- Core hook + filter panel fixes: single-fire search, parse cache, filter clearing, pageSize constant, net_worth clear
+- [x] 36-03-PLAN.md -- Discover tab + NL search bar: auto-submit on prefill, loading guard, spinner, hide discovery sections, width, clear button
+- [x] 36-04-PLAN.md -- Search orchestrator: save dialog pre-fill, mode guards, auto-scroll, pagination display, currentFilters wiring
 
 ---
 
