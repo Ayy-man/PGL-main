@@ -229,7 +229,7 @@ Return ONLY the optimized search query string. Nothing else.`,
         transient: true,
       } as Parameters<typeof writer.write>[0]);
 
-      const cards = await digestForScrapbook(
+      const { cards, hasDirectResults } = await digestForScrapbook(
         prospect.full_name ?? `${prospect.first_name} ${prospect.last_name}`,
         prospect.company ?? "",
         query,
@@ -243,6 +243,14 @@ Return ONLY the optimized search query string. Nothing else.`,
         data: { active: false },
         transient: true,
       } as Parameters<typeof writer.write>[0]);
+
+      // Stream relevance quality signal to client
+      if (!hasDirectResults && cards.length > 0) {
+        writer.write({
+          type: "data-reasoning",
+          data: { status: "no_direct_results", message: "Results are contextual background -- no direct answers found for your specific question." },
+        } as Parameters<typeof writer.write>[0]);
+      }
 
       // Phase 4: Stream cards one by one
       for (const card of cards) {
@@ -274,6 +282,7 @@ Return ONLY the optimized search query string. Nothing else.`,
             reformulated_query: reformulatedQuery,
             exa_result_count: exaResults.length,
             card_count: cards.length,
+            has_direct_results: hasDirectResults,
           },
         })
         .select("id")

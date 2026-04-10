@@ -86,6 +86,7 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
   const [lowRelevanceCollapsed, setLowRelevanceCollapsed] = useState(true);
   const [streamingCards, setStreamingCards] = useState<ScrapbookCard[]>([]);
   const [reformulatedQuery, setReformulatedQuery] = useState<string>("");
+  const [noDirectResultsMsg, setNoDirectResultsMsg] = useState<string>("");
   const [searchExpanded, setSearchExpanded] = useState(true);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -186,6 +187,7 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
       setToolStatus("");
       setExaResultCount(null);
       setStreamingCards([]);
+      setNoDirectResultsMsg("");
       setSuggestions([]); // hide after first query
       setInputValue("");
       if (textareaRef.current) {
@@ -266,6 +268,8 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
               } else if (type === "data-reasoning") {
                 if (eventData.status === "complete" && eventData.reformulated) {
                   setReformulatedQuery(eventData.reformulated);
+                } else if (eventData.status === "no_direct_results" && eventData.message) {
+                  setNoDirectResultsMsg(eventData.message);
                 }
                 setStreamPhase("reasoning");
               } else if (type === "data-tool") {
@@ -769,6 +773,20 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
                           {toolStatus}
                         </span>
                       )}
+                    </div>
+                  )}
+
+                  {/* No direct results quality signal */}
+                  {noDirectResultsMsg && (
+                    <div
+                      className="text-xs px-3 py-2 rounded-md mb-2"
+                      style={{
+                        backgroundColor: "rgba(234, 179, 8, 0.08)",
+                        color: "var(--text-secondary, rgba(232,228,220,0.6))",
+                        border: "1px solid rgba(234, 179, 8, 0.15)",
+                      }}
+                    >
+                      {noDirectResultsMsg}
                     </div>
                   )}
 

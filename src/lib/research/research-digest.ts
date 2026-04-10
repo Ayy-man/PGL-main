@@ -17,15 +17,18 @@ export async function digestForScrapbook(
   companyName: string,
   query: string,
   results: ExaSearchResult[]
-): Promise<ScrapbookCard[]> {
-  if (!results || results.length === 0) return [];
+): Promise<{ cards: ScrapbookCard[]; hasDirectResults: boolean }> {
+  if (!results || results.length === 0) return { cards: [], hasDirectResults: false };
 
   try {
     const systemPrompt = `You are a wealth intelligence research analyst. You are helping a luxury real estate agent research a prospect.
 
 For each search result, determine:
 1. Is this result actually about "${personName}" at "${companyName}"? (is_about_target)
-2. How relevant is it to the user's question: "${query}"? (answer_relevance: direct/tangential/background)
+2. How relevant is it to the user's question: "${query}"? Use these STRICT definitions:
+   - "direct": Directly answers the user's question with specific information (e.g., user asks "net worth" -> article states a dollar figure or asset)
+   - "tangential": Related to the topic but doesn't directly answer (e.g., user asks "net worth" -> article about their company's funding round)
+   - "background": General information about the person/company not related to the question (e.g., user asks "net worth" -> article is their LinkedIn profile summary)
 3. Overall signal relevance (relevance: high/medium/low)
 4. A clean headline (under 10 words)
 5. A 1-2 sentence summary (no markdown, no HTML, no boilerplate)
@@ -60,7 +63,7 @@ Return ONLY the JSON array. No markdown fences. No explanation.`;
       })
       .join("\n\n---\n\n");
 
-    const response = await chatCompletion(systemPrompt, userMessage, 4000);
+    const response = await chatCompletion(systemPrompt, userMessage, 6000);
 
     // Parse JSON — strip markdown fences if present
     const cleaned = response.text
@@ -81,7 +84,7 @@ Return ONLY the JSON array. No markdown fences. No explanation.`;
       confidence_note: string;
     }> = JSON.parse(cleaned);
 
-    if (!Array.isArray(parsed)) return [];
+    if (!Array.isArray(parsed)) return { cards: [], hasDirectResults: false };
 
     // Map to ScrapbookCard, filter out not-about-target, sort by answer_relevance
     const validCategories = new Set([
@@ -161,9 +164,18 @@ Return ONLY the JSON array. No markdown fences. No explanation.`;
           (relevanceOrder[b.answer_relevance] ?? 2)
       );
 
-    return cards;
+    // Post-processing: filter background results when direct results exist
+    const directCards = cards.filter(c => c.answer_relevance === "direct");
+    const hasDirectResults = directCards.length > 0;
+
+    // If direct results exist, drop background-only results to reduce noise
+    const filteredCards = hasDirectResults
+      ? cards.filter(c => c.answer_relevance !== "background")
+      : cards;
+
+    return { cards: filteredCards, hasDirectResults };
   } catch (err) {
     console.error("[research/research-digest] Digest failed:", err);
-    return [];
+    return { cards: [], hasDirectResults: false };
   }
 }
