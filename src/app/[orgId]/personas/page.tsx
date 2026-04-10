@@ -4,6 +4,7 @@ import { getPersonas } from "@/lib/personas/queries";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { PersonasLayout } from "./components/personas-layout";
+import { ReportIssueButton } from "@/components/issues/report-issue-button";
 import { Users } from "lucide-react";
 
 export default async function PersonasPage({
@@ -50,20 +51,31 @@ export default async function PersonasPage({
       <Breadcrumbs items={[{ label: "Saved Searches" }]} />
 
       {/* Page header */}
-      <div>
-        <h1
-          className="font-serif text-2xl sm:text-[32px] md:text-[38px] font-medium"
-          style={{ color: "var(--text-primary)", letterSpacing: "-0.5px" }}
-        >
-          Saved Searches & Living Data
-        </h1>
-        <p
-          className="mt-1 text-[14px] font-light"
-          style={{ color: "var(--text-tertiary)" }}
-        >
-          Your active data streams. These saved searches are constantly updated with
-          new leads matching your criteria.
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1
+            className="font-serif text-2xl sm:text-[32px] md:text-[38px] font-medium"
+            style={{ color: "var(--text-primary)", letterSpacing: "-0.5px" }}
+          >
+            Saved Searches & Living Data
+          </h1>
+          <p
+            className="mt-1 text-[14px] font-light"
+            style={{ color: "var(--text-tertiary)" }}
+          >
+            Your active data streams. These saved searches are constantly updated with
+            new leads matching your criteria.
+          </p>
+        </div>
+        <ReportIssueButton
+          target={{
+            type: "persona",
+            snapshot: {
+              scope: "personas_index",
+              persona_count: personas?.length ?? 0,
+            },
+          }}
+        />
       </div>
 
       {/* Main content */}
