@@ -110,9 +110,11 @@ interface PersonaFormDialogProps {
   trigger: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  initialKeywords?: string;
+  initialFilterOverrides?: Record<string, unknown>;
 }
 
-export function PersonaFormDialog({ mode, persona, trigger, open: controlledOpen, onOpenChange }: PersonaFormDialogProps) {
+export function PersonaFormDialog({ mode, persona, trigger, open: controlledOpen, onOpenChange, initialKeywords, initialFilterOverrides }: PersonaFormDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = onOpenChange || setInternalOpen;
@@ -138,7 +140,29 @@ export function PersonaFormDialog({ mode, persona, trigger, open: controlledOpen
   const [locations, setLocations] = useState<string[]>(
     persona?.filters.locations ?? []
   );
-  const [keywords, setKeywords] = useState(persona?.filters.keywords ?? "");
+  const [keywords, setKeywords] = useState(persona?.filters.keywords ?? initialKeywords ?? "");
+
+  // Pre-fill from NLP-parsed filters when opening "Save this search" in create mode (H3)
+  useEffect(() => {
+    if (open && mode === "create" && !persona && initialFilterOverrides) {
+      const f = initialFilterOverrides as Record<string, unknown>;
+      if (Array.isArray(f.titles)) setTitles(f.titles as string[]);
+      if (Array.isArray(f.industries)) setIndustries(f.industries as string[]);
+      if (Array.isArray(f.locations)) setLocations(f.locations as string[]);
+      if (Array.isArray(f.seniorities)) setSeniorities(f.seniorities as string[]);
+      if (Array.isArray(f.companySize)) setCompanySizes(f.companySize as string[]);
+      if (Array.isArray(f.organization_names)) setOrganizationNames(f.organization_names as string[]);
+      if (typeof f.keywords === "string") setKeywords(f.keywords);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, mode]);
+
+  // Sync keywords when initialKeywords changes (e.g. user types more in the NL bar)
+  useEffect(() => {
+    if (mode === "create" && !persona && initialKeywords !== undefined) {
+      setKeywords(initialKeywords);
+    }
+  }, [initialKeywords, mode, persona]);
 
   // Lead count from Apollo
   const [leadCount, setLeadCount] = useState<number | null>(null);

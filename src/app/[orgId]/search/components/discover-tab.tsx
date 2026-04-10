@@ -14,6 +14,7 @@ interface DiscoverTabProps {
   keywords: string;
   isLoading: boolean;
   hasResults: boolean;
+  currentFilters?: Partial<PersonaFilters>;
   onNLSearch: (keywords: string) => void;
   onApplyFilters: (filters: Partial<PersonaFilters>) => void;
   onSubmitSearch: () => void;
@@ -29,6 +30,7 @@ export function DiscoverTab({
   keywords,
   isLoading,
   hasResults,
+  currentFilters,
   onNLSearch,
   onApplyFilters,
   onSubmitSearch,
@@ -111,11 +113,11 @@ export function DiscoverTab({
           />
 
           {/* Filter pills row */}
-          <FilterPillsRow onApplyFilters={onApplyFilters} />
+          <FilterPillsRow onApplyFilters={onApplyFilters} currentFilters={currentFilters} />
 
           {/* Advanced filters — collapsible multi-field panel */}
           <div className="mt-3 flex justify-center">
-            <AdvancedFiltersPanel onApplyFilters={onApplyFilters} />
+            <AdvancedFiltersPanel onApplyFilters={onApplyFilters} currentFilters={currentFilters} />
           </div>
 
           {/* Ghost save link — only when keywords are present */}

@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import type { Persona } from "@/lib/personas/types";
 import type { SavedSearchProspect } from "@/lib/personas/types";
 import type { List } from "@/lib/lists/types";
 import type { PersonaFiltersType } from "@/lib/apollo/schemas";
 import type { ApolloPerson } from "@/lib/apollo/types";
-import { useSearch } from "../hooks/use-search";
+import { useSearch, PAGE_SIZE } from "../hooks/use-search";
 import { DiscoverTab } from "./discover-tab";
 import { SavedSearchesTab } from "./saved-searches-tab";
 import { BulkActionsBar } from "./bulk-actions-bar";
@@ -145,6 +145,8 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
   // Discover pagination — "jump to page" input
   const [jumpPageOpen, setJumpPageOpen] = useState(false);
   const [jumpPageValue, setJumpPageValue] = useState("");
+  // Ref for auto-scroll to results (M3)
+  const resultsRef = useRef<HTMLDivElement>(null);
   // Dismiss confirmation dialog
   const [dismissDialogOpen, setDismissDialogOpen] = useState(false);
   const [pendingDismissIds, setPendingDismissIds] = useState<string[]>([]);
@@ -279,6 +281,7 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
     if (!selectedPersona) return;
 
     if (selectedPersona.last_refreshed_at) {
+      setIsSavedSearchMode(true);  // L5: Set immediately to prevent stale results flash
       loadSavedProspects(selectedPersona.id);
       // Check staleness (>7 days)
       const daysSinceRefresh = (Date.now() - new Date(selectedPersona.last_refreshed_at).getTime()) / (1000 * 60 * 60 * 24);
@@ -299,6 +302,16 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showDismissed]);
+
+  // Auto-scroll to results when they arrive (M3)
+  useEffect(() => {
+    if ((results.length > 0 || savedProspects.length > 0) && resultsRef.current) {
+      const timer = setTimeout(() => {
+        resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+  }, [results.length, savedProspects.length]);
 
   // ----------------------------------------------------------------
   // Selection handlers
@@ -352,6 +365,9 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
     setSearchState({ keywords, persona: "" });
     // D-19: submitting a search always navigates to Saved Searches tab
     setActiveTab("saved");
+    // M9: Clear stale saved search state so previous results don't leak through
+    setSavedProspects([]);
+    setIsSavedSearchMode(false);
   };
 
   const handleSelectSavedSearch = (id: string) => {
@@ -646,7 +662,7 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
     ? savedProspects.find((p) => p.apollo_person_id === searchState.prospect)
     : null;
   const slideOverProspectId =
-    (savedSearchEntry?.prospect_id ?? searchState.prospect) || null;
+    (savedSearchEntry?.prospect_id ?? (isSavedSearchMode ? searchState.prospect : null)) || null;
 
   const slideOverProspect = selectedProspect
     ? {
@@ -683,6 +699,10 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
   // Inline results helper — extracted from legacy results block
   // ----------------------------------------------------------------
   const renderSavedSearchResults = () => {
+    // M8: Only render results when a persona is selected (saved search mode or persona fallback)
+    if (!isSavedSearchMode && !searchState.persona) {
+      return null;
+    }
     const savedTotalPages = Math.ceil(savedProspects.length / savedPageSize);
     const pagedSavedResults = isSavedSearchMode
       ? savedProspects
@@ -692,9 +712,9 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
     const tableResults = isSavedSearchMode ? pagedSavedResults : activeResults;
 
     return (
-      <div>
+      <div ref={resultsRef}>
         {/* Bulk actions bar */}
-        {(results.length > 0 || (isSavedSearchMode && savedProspects.length > 0)) && (
+        {((isSavedSearchMode && savedProspects.length > 0) || (!isSavedSearchMode && searchState.persona && results.length > 0)) && (
           <BulkActionsBar
             selectedCount={selectedIds.size}
             totalCount={activeResultCount}
@@ -739,18 +759,20 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
         )}
 
         {/* Prospect results table */}
-        {(results.length > 0 || (isSavedSearchMode && savedProspects.length > 0)) && (
-          <ProspectResultsTable
-            results={tableResults}
-            selectedIds={selectedIds}
-            onSelect={handleSelect}
-            onSelectAll={handleSelectAll}
-            onProspectClick={handleProspectClick}
-            savedSearchMode={isSavedSearchMode}
-            onDismiss={isSavedSearchMode ? (id) => handleDismiss([id]) : undefined}
-            onUndoDismiss={handleUndoDismiss}
-            lastRefreshedAt={lastRefreshedAt}
-          />
+        {((isSavedSearchMode && savedProspects.length > 0) || (!isSavedSearchMode && searchState.persona && results.length > 0)) && (
+          <div style={{ opacity: isLoading && !isRefreshing ? 0.5 : 1, transition: "opacity 0.2s ease" }}>
+            <ProspectResultsTable
+              results={tableResults}
+              selectedIds={selectedIds}
+              onSelect={handleSelect}
+              onSelectAll={handleSelectAll}
+              onProspectClick={handleProspectClick}
+              savedSearchMode={isSavedSearchMode}
+              onDismiss={isSavedSearchMode ? (id) => handleDismiss([id]) : undefined}
+              onUndoDismiss={handleUndoDismiss}
+              lastRefreshedAt={lastRefreshedAt}
+            />
+          </div>
         )}
 
         {/* Pagination — saved search mode */}
@@ -845,11 +867,11 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
             <p className="text-[13px]" style={{ color: "var(--text-tertiary)" }}>
               Showing{" "}
               <span style={{ color: "var(--text-primary-ds)" }} className="font-medium">
-                {(searchState.page - 1) * 10 + 1}
+                {(searchState.page - 1) * PAGE_SIZE + 1}
               </span>{" "}
               to{" "}
               <span style={{ color: "var(--text-primary-ds)" }} className="font-medium">
-                {Math.min(searchState.page * 10, pagination.totalEntries)}
+                {Math.min(searchState.page * PAGE_SIZE, pagination.totalEntries)}
               </span>{" "}
               of{" "}
               <span style={{ color: "var(--text-primary-ds)" }} className="font-medium">
@@ -1078,13 +1100,13 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
               keywords={searchState.keywords}
               isLoading={isLoading}
               hasResults={results.length > 0}
+              currentFilters={filterOverrides}
               onNLSearch={handleNLSearch}
               onApplyFilters={handleApplyFilters}
               onSubmitSearch={() => {
-                // Submit the NL bar with whatever is currently in searchState.keywords
-                // (or empty keywords + filterOverrides). Navigate to Saved Searches tab.
-                setActiveTab("saved");
-                executeSearch();
+                // No-op: search is triggered by keyword state change via useEffect.
+                // Tab navigation is handled by handleNLSearch.
+                // Calling executeSearch() here caused double API call (H1/H2).
               }}
               onSaveAsNewSearch={() => setCreateDialogOpen(true)}
               onSelectSavedSearch={handleSelectSavedSearch}
@@ -1159,6 +1181,8 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
         open={createDialogOpen}
         onOpenChange={setCreateDialogOpen}
         trigger={null}
+        initialKeywords={searchState.keywords}
+        initialFilterOverrides={filterOverrides}
       />
 
       {/* Bulk list selection dialog */}
