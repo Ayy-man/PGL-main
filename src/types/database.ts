@@ -309,3 +309,50 @@ export interface UsageMetricsDaily {
   created_at: string;
   updated_at: string;
 }
+
+// Phase 33: Issue Reports — mirrors issue_reports table schema
+// See supabase/migrations/20260410_issue_reports.sql
+
+export type IssueCategory =
+  | "incorrect_data"
+  | "missing_data"
+  | "bad_source"
+  | "bug"
+  | "other";
+
+export type IssueStatus =
+  | "open"
+  | "investigating"
+  | "resolved"
+  | "wontfix"
+  | "duplicate";
+
+export type TargetType = "prospect" | "list" | "persona" | "search" | "none";
+
+export interface IssueReport {
+  id: string;
+  tenant_id: string;
+  user_id: string | null;
+
+  category: IssueCategory;
+  description: string;
+
+  page_url: string;
+  page_path: string;
+  user_agent: string | null;
+  viewport: { w: number; h: number } | null;
+
+  target_type: TargetType | null;
+  target_id: string | null;
+  target_snapshot: Record<string, unknown> | null;
+
+  screenshot_path: string | null;
+
+  status: IssueStatus;
+  admin_notes: string | null;
+  resolved_by: string | null;
+  resolved_at: string | null;
+
+  created_at: string;
+  updated_at: string;
+}
