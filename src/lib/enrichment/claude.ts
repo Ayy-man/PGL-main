@@ -132,8 +132,8 @@ const DOSSIER_SYSTEM_PROMPT = `You are a luxury real estate intelligence analyst
 - career_narrative: 2-3 sentences about their career arc and current role
 - wealth_assessment: 2-3 sentences about wealth signals and estimated tier
 - company_context: 2-3 sentences about their company's health and position
-- outreach_hooks: array of 3-5 specific conversation starters (strings)
-- quick_facts: array of 4-6 objects with {label, value} for fast scanning
+- outreach_hooks: array of 1-5 specific conversation starters (strings) -- only include hooks grounded in the provided data. If data is thin, 1-2 hooks is fine.
+- quick_facts: array of 2-6 objects with {label, value} for fast scanning -- only include facts that are explicitly stated or directly derivable from the input.
 
 CRITICAL RULES — VIOLATIONS CORRUPT FINANCIAL DATA:
 1. NEVER invent, estimate, or fabricate dollar amounts, share counts, transaction values, net worth figures, or any other numerical financial data. If no SEC transaction data or wealth signal data is provided in the user message, do NOT mention any dollar amounts in wealth_assessment. Say "Insufficient data for financial assessment" or describe qualitative signals only.
@@ -228,6 +228,15 @@ export async function generateIntelligenceDossier(
       !Array.isArray(parsed.quick_facts)
     ) {
       console.error("[dossier] Missing required fields in parsed response");
+      return null;
+    }
+
+    // Enforce minimum array lengths (D-08: relaxed from 3/4 to 1/2)
+    if (parsed.outreach_hooks.length < 1 || parsed.quick_facts.length < 2) {
+      console.error("[dossier] Array lengths below minimum:", {
+        outreach_hooks: parsed.outreach_hooks.length,
+        quick_facts: parsed.quick_facts.length,
+      });
       return null;
     }
 
