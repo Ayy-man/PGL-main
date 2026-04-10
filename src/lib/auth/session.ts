@@ -35,6 +35,19 @@ export async function requireTenantUser(orgId: string): Promise<SessionUser> {
   if (user.tenantId !== orgId) {
     redirect("/login");
   }
+
+  // Check tenant is active
+  const supabase = await createClient();
+  const { data: tenant } = await supabase
+    .from("tenants")
+    .select("is_active")
+    .eq("id", user.tenantId!)
+    .single();
+
+  if (tenant && !tenant.is_active) {
+    redirect("/suspended");
+  }
+
   return user;
 }
 

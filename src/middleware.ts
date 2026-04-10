@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/middleware";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const PUBLIC_ROUTES = ["/login", "/signup", "/auth/callback", "/forgot-password", "/reset-password"];
+const PUBLIC_ROUTES = ["/login", "/signup", "/auth/callback", "/forgot-password", "/reset-password", "/suspended"];
 
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next({
@@ -122,6 +122,19 @@ export async function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL("/login", request.url));
       }
     }
+    // Check if tenant is active — redirect suspended tenants
+    if (role !== "super_admin") {
+      const { data: tenantStatus } = await supabase
+        .from("tenants")
+        .select("is_active")
+        .eq("id", resolvedTenantId)
+        .single();
+
+      if (tenantStatus && !tenantStatus.is_active) {
+        return NextResponse.redirect(new URL("/suspended", request.url));
+      }
+    }
+
     response.headers.set("x-tenant-id", resolvedTenantId);
   }
 
