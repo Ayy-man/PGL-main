@@ -181,7 +181,8 @@ export type SignalCategory =
   | "company_intel"
   | "recognition"
   | "sec_filing"
-  | "market_event";
+  | "market_event"
+  | "negative_signal";
 
 // prospect_signals table row
 export interface ProspectSignal {
