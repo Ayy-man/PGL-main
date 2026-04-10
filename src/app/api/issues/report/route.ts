@@ -1,0 +1,180 @@
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { createClient } from "@/lib/supabase/server";
+import { logActivity } from "@/lib/activity-logger";
+import type { IssueReport } from "@/types/database";
+
+export const dynamic = "force-dynamic";
+
+const issuePayloadSchema = z.object({
+  category: z.enum([
+    "incorrect_data",
+    "missing_data",
+    "bad_source",
+    "bug",
+    "other",
+  ]),
+  description: z.string().min(1).max(5000),
+  page_url: z.string().url(),
+  page_path: z.string().min(1),
+  user_agent: z.string().optional(),
+  viewport: z
+    .object({ w: z.number(), h: z.number() })
+    .optional(),
+  target_type: z
+    .enum(["prospect", "list", "persona", "search", "none"])
+    .optional(),
+  target_id: z.string().uuid().optional(),
+  target_snapshot: z.record(z.string(), z.unknown()).optional(),
+});
+
+const MAX_SCREENSHOT_BYTES = 5 * 1024 * 1024; // 5 MB
+const ALLOWED_SCREENSHOT_TYPES = ["image/png", "image/jpeg"];
+
+export async function POST(request: Request) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+  if (userError || !user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  const tenantId = user.app_metadata?.tenant_id as string | undefined;
+  if (!tenantId) {
+    return NextResponse.json({ error: "No tenant context" }, { status: 403 });
+  }
+
+  // Parse multipart/form-data
+  let formData: FormData;
+  try {
+    formData = await request.formData();
+  } catch {
+    return NextResponse.json(
+      { error: "Invalid multipart body" },
+      { status: 400 }
+    );
+  }
+
+  const payloadRaw = formData.get("payload");
+  if (typeof payloadRaw !== "string" || !payloadRaw) {
+    return NextResponse.json(
+      { error: "Missing payload field" },
+      { status: 400 }
+    );
+  }
+
+  let payloadParsed: unknown;
+  try {
+    payloadParsed = JSON.parse(payloadRaw);
+  } catch {
+    return NextResponse.json(
+      { error: "Invalid JSON payload" },
+      { status: 400 }
+    );
+  }
+
+  const validation = issuePayloadSchema.safeParse(payloadParsed);
+  if (!validation.success) {
+    return NextResponse.json(
+      {
+        error: "Invalid request",
+        details: validation.error.issues,
+      },
+      { status: 400 }
+    );
+  }
+  const payload = validation.data;
+
+  // Validate optional screenshot file
+  const screenshotField = formData.get("screenshot");
+  const screenshot =
+    screenshotField && typeof screenshotField !== "string"
+      ? (screenshotField as File)
+      : null;
+
+  if (screenshot) {
+    if (screenshot.size > MAX_SCREENSHOT_BYTES) {
+      return NextResponse.json(
+        { error: "Screenshot exceeds 5MB" },
+        { status: 400 }
+      );
+    }
+    if (!ALLOWED_SCREENSHOT_TYPES.includes(screenshot.type)) {
+      return NextResponse.json(
+        { error: "Screenshot must be PNG or JPEG" },
+        { status: 400 }
+      );
+    }
+  }
+
+  // Insert row first WITHOUT screenshot_path to get the generated id,
+  // then upload screenshot using that id, then UPDATE screenshot_path.
+  // Rationale: we need the row id for the storage path.
+  const insertRow: Omit<IssueReport, "id" | "created_at" | "updated_at" | "status" | "admin_notes" | "resolved_by" | "resolved_at"> & { screenshot_path: string | null } = {
+    tenant_id: tenantId,
+    user_id: user.id,
+    category: payload.category,
+    description: payload.description,
+    page_url: payload.page_url,
+    page_path: payload.page_path,
+    user_agent: payload.user_agent ?? null,
+    viewport: payload.viewport ?? null,
+    target_type: payload.target_type ?? "none",
+    target_id: payload.target_id ?? null,
+    target_snapshot: payload.target_snapshot ?? null,
+    screenshot_path: null,
+  };
+
+  const { data: inserted, error: insertError } = await supabase
+    .from("issue_reports")
+    .insert(insertRow)
+    .select("id")
+    .single();
+
+  if (insertError || !inserted) {
+    return NextResponse.json(
+      { error: "Failed to create report", details: insertError?.message },
+      { status: 500 }
+    );
+  }
+  const reportId = inserted.id as string;
+
+  // Upload screenshot if provided; fall back to null on failure
+  let screenshotPath: string | null = null;
+  if (screenshot) {
+    try {
+      const path = `${tenantId}/${reportId}.png`;
+      const arrayBuffer = await screenshot.arrayBuffer();
+      const { error: uploadError } = await supabase.storage
+        .from("issue-reports")
+        .upload(path, arrayBuffer, {
+          contentType: "image/png",
+          upsert: false,
+        });
+      if (!uploadError) {
+        screenshotPath = path;
+        await supabase
+          .from("issue_reports")
+          .update({ screenshot_path: path })
+          .eq("id", reportId);
+      }
+    } catch {
+      // swallow — screenshot is optional, report already inserted
+    }
+  }
+
+  // Fire-and-forget activity log (must NOT block response)
+  logActivity({
+    tenantId,
+    userId: user.id,
+    actionType: "issue_reported",
+    targetType: "issue_report",
+    targetId: reportId,
+    metadata: { category: payload.category, screenshot: screenshotPath !== null },
+  }).catch(() => {
+    /* ignore */
+  });
+
+  return NextResponse.json({ id: reportId }, { status: 201 });
+}
