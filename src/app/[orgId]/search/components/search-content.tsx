@@ -109,6 +109,7 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
     isLoading,
     error,
     executeSearch,
+    filterOverrides,
     setFilterOverrides,
   } = useSearch();
 
