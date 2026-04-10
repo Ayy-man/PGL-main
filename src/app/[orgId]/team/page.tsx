@@ -1,7 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import { InviteDialog } from "./invite-dialog";
 import { UserStatusToggle } from "./user-status-toggle";
+import { TeamMemberActions } from "./team-member-actions";
 
 export const dynamic = "force-dynamic";
 
@@ -64,6 +66,16 @@ export default async function TeamPage({
   const teamMembers = users || [];
   const activeCount = teamMembers.filter((m) => m.is_active).length;
   const maxSeats = tenant?.max_seats ?? null;
+
+  // Detect pending invites via auth.users last_sign_in_at
+  const admin = createAdminClient();
+  const pendingUserIds = new Set<string>();
+  for (const member of teamMembers) {
+    const { data: authData } = await admin.auth.admin.getUserById(member.id);
+    if (authData?.user && !authData.user.last_sign_in_at) {
+      pendingUserIds.add(member.id);
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -168,15 +180,21 @@ export default async function TeamPage({
                       </span>
                     </td>
                     <td className="px-3 py-3 md:px-6 md:py-4">
-                      <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                          member.is_active
-                            ? "bg-[var(--success-muted)] text-[var(--success)]"
-                            : "bg-destructive/10 text-destructive"
-                        }`}
-                      >
-                        {member.is_active ? "Active" : "Inactive"}
-                      </span>
+                      {pendingUserIds.has(member.id) ? (
+                        <span className="inline-flex items-center rounded-full bg-amber-500/10 px-2.5 py-0.5 text-xs font-medium text-amber-500">
+                          Pending
+                        </span>
+                      ) : (
+                        <span
+                          className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                            member.is_active
+                              ? "bg-[var(--success-muted)] text-[var(--success)]"
+                              : "bg-destructive/10 text-destructive"
+                          }`}
+                        >
+                          {member.is_active ? "Active" : "Inactive"}
+                        </span>
+                      )}
                     </td>
                     <td
                       className="px-3 py-3 md:px-6 md:py-4 text-sm"
@@ -185,11 +203,21 @@ export default async function TeamPage({
                       {relativeTime(member.updated_at)}
                     </td>
                     <td className="px-3 py-3 md:px-6 md:py-4">
-                      <UserStatusToggle
-                        userId={member.id}
-                        isActive={member.is_active}
-                        orgId={orgId}
-                      />
+                      <div className="flex items-center gap-2">
+                        <UserStatusToggle
+                          userId={member.id}
+                          isActive={member.is_active}
+                          orgId={orgId}
+                        />
+                        <TeamMemberActions
+                          userId={member.id}
+                          orgId={orgId}
+                          currentUserId={user.id}
+                          memberRole={member.role}
+                          isPending={pendingUserIds.has(member.id)}
+                          isActive={member.is_active}
+                        />
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -229,21 +257,35 @@ export default async function TeamPage({
                   >
                     {member.role}
                   </span>
-                  <span
-                    className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-                      member.is_active
-                        ? "bg-[var(--success-muted)] text-[var(--success)]"
-                        : "bg-destructive/10 text-destructive"
-                    }`}
-                  >
-                    {member.is_active ? "Active" : "Inactive"}
-                  </span>
+                  {pendingUserIds.has(member.id) ? (
+                    <span className="inline-flex items-center rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-500">
+                      Pending
+                    </span>
+                  ) : (
+                    <span
+                      className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                        member.is_active
+                          ? "bg-[var(--success-muted)] text-[var(--success)]"
+                          : "bg-destructive/10 text-destructive"
+                      }`}
+                    >
+                      {member.is_active ? "Active" : "Inactive"}
+                    </span>
+                  )}
                   {member.updated_at && (
                     <span style={{ color: "var(--text-tertiary)" }}>
                       {relativeTime(member.updated_at)}
                     </span>
                   )}
                 </div>
+                <TeamMemberActions
+                  userId={member.id}
+                  orgId={orgId}
+                  currentUserId={user.id}
+                  memberRole={member.role}
+                  isPending={pendingUserIds.has(member.id)}
+                  isActive={member.is_active}
+                />
               </div>
             ))
           )}

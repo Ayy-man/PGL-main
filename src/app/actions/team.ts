@@ -223,3 +223,214 @@ export async function toggleTeamMemberStatus(userId: string, orgId: string) {
   revalidatePath(`/${orgId}/team`);
   return { success: true };
 }
+
+/**
+ * Resend an invite to a pending team member.
+ */
+export async function resendInvite(userId: string, orgId: string) {
+  const supabase = await createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) return { error: "Not authenticated" };
+
+  const userRole = user.app_metadata?.role as string | undefined;
+  if (userRole !== "tenant_admin" && userRole !== "super_admin") {
+    return { error: "Insufficient permissions" };
+  }
+
+  const admin = createAdminClient();
+
+  // Get target user email
+  const { data: targetUser } = await admin
+    .from("users")
+    .select("email, tenant_id")
+    .eq("id", userId)
+    .single();
+
+  if (!targetUser) return { error: "User not found" };
+  if (targetUser.tenant_id !== user.app_metadata?.tenant_id) {
+    return { error: "Cannot modify users outside your organization" };
+  }
+
+  const redirectTo = `${getSiteUrl()}/api/auth/callback`;
+  const { error: inviteError } = await admin.auth.admin.inviteUserByEmail(
+    targetUser.email,
+    { redirectTo }
+  );
+
+  if (inviteError) {
+    return { error: `Failed to resend: ${inviteError.message}` };
+  }
+
+  revalidatePath(`/${orgId}/team`);
+  return { success: true };
+}
+
+/**
+ * Revoke a pending invite — deletes both public.users and auth.users records.
+ */
+export async function revokeInvite(userId: string, orgId: string) {
+  const supabase = await createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) return { error: "Not authenticated" };
+
+  const userRole = user.app_metadata?.role as string | undefined;
+  if (userRole !== "tenant_admin" && userRole !== "super_admin") {
+    return { error: "Insufficient permissions" };
+  }
+
+  const admin = createAdminClient();
+
+  // Verify target belongs to same tenant
+  const { data: targetUser } = await admin
+    .from("users")
+    .select("tenant_id")
+    .eq("id", userId)
+    .single();
+
+  if (!targetUser) return { error: "User not found" };
+  if (targetUser.tenant_id !== user.app_metadata?.tenant_id) {
+    return { error: "Cannot modify users outside your organization" };
+  }
+
+  // Delete public.users row first
+  await admin.from("users").delete().eq("id", userId);
+  // Delete auth.users record
+  await admin.auth.admin.deleteUser(userId);
+
+  revalidatePath(`/${orgId}/team`);
+  return { success: true };
+}
+
+/**
+ * Change a team member's role (agent <-> assistant). Tenant admin only.
+ */
+export async function changeUserRole(
+  userId: string,
+  newRole: "agent" | "assistant",
+  orgId: string
+) {
+  const supabase = await createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) return { error: "Not authenticated" };
+
+  const userRole = user.app_metadata?.role as string | undefined;
+  if (userRole !== "tenant_admin" && userRole !== "super_admin") {
+    return { error: "Insufficient permissions" };
+  }
+
+  if (userId === user.id) {
+    return { error: "Cannot change your own role" };
+  }
+
+  const tenantId = user.app_metadata?.tenant_id as string | undefined;
+  if (!tenantId) return { error: "No tenant assigned" };
+
+  const admin = createAdminClient();
+
+  // Verify target belongs to same tenant and isn't a tenant_admin
+  const { data: targetUser } = await admin
+    .from("users")
+    .select("role, tenant_id")
+    .eq("id", userId)
+    .single();
+
+  if (!targetUser) return { error: "User not found" };
+  if (targetUser.tenant_id !== tenantId) {
+    return { error: "Cannot modify users outside your organization" };
+  }
+  if (targetUser.role === "tenant_admin") {
+    return { error: "Cannot change a tenant admin's role" };
+  }
+
+  // Update public.users
+  const { error: updateError } = await admin
+    .from("users")
+    .update({ role: newRole })
+    .eq("id", userId);
+
+  if (updateError) {
+    return { error: `Failed to update role: ${updateError.message}` };
+  }
+
+  // Update auth.users app_metadata
+  const { data: authUser } = await admin.auth.admin.getUserById(userId);
+  if (authUser?.user) {
+    await admin.auth.admin.updateUserById(userId, {
+      app_metadata: { ...authUser.user.app_metadata, role: newRole },
+    });
+  }
+
+  revalidatePath(`/${orgId}/team`);
+  return { success: true };
+}
+
+/**
+ * Fully remove a team member (delete from both public.users and auth.users).
+ */
+export async function removeTeamMember(userId: string, orgId: string) {
+  const supabase = await createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || !user) return { error: "Not authenticated" };
+
+  const userRole = user.app_metadata?.role as string | undefined;
+  if (userRole !== "tenant_admin" && userRole !== "super_admin") {
+    return { error: "Insufficient permissions" };
+  }
+
+  if (userId === user.id) {
+    return { error: "Cannot remove yourself" };
+  }
+
+  const tenantId = user.app_metadata?.tenant_id as string | undefined;
+  if (!tenantId) return { error: "No tenant assigned" };
+
+  const admin = createAdminClient();
+
+  // Verify target belongs to same tenant
+  const { data: targetUser } = await admin
+    .from("users")
+    .select("role, tenant_id, email, full_name")
+    .eq("id", userId)
+    .single();
+
+  if (!targetUser) return { error: "User not found" };
+  if (targetUser.tenant_id !== tenantId) {
+    return { error: "Cannot modify users outside your organization" };
+  }
+
+  // Cannot remove the last tenant_admin
+  if (targetUser.role === "tenant_admin") {
+    const { count } = await admin
+      .from("users")
+      .select("id", { count: "exact", head: true })
+      .eq("tenant_id", tenantId)
+      .eq("role", "tenant_admin")
+      .eq("is_active", true);
+
+    if (count !== null && count <= 1) {
+      return { error: "Cannot remove the last tenant admin" };
+    }
+  }
+
+  // Log before deletion
+  await logActivity({
+    tenantId,
+    userId: user.id,
+    actionType: "user_invited", // reuse closest action type
+    targetType: "user",
+    targetId: userId,
+    metadata: {
+      action: "removed",
+      removed_email: targetUser.email,
+      removed_name: targetUser.full_name,
+    },
+  });
+
+  // Delete public.users row
+  await admin.from("users").delete().eq("id", userId);
+  // Delete auth.users record
+  await admin.auth.admin.deleteUser(userId);
+
+  revalidatePath(`/${orgId}/team`);
+  return { success: true };
+}
