@@ -698,10 +698,6 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
   // Inline results helper — extracted from legacy results block
   // ----------------------------------------------------------------
   const renderSavedSearchResults = () => {
-    // M8: Only render results when a persona is selected (saved search mode or persona fallback)
-    if (!isSavedSearchMode && !searchState.persona) {
-      return null;
-    }
     const savedTotalPages = Math.ceil(savedProspects.length / savedPageSize);
     const pagedSavedResults = isSavedSearchMode
       ? savedProspects
@@ -1185,7 +1181,8 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
               }
             >
               {/* Results panel children: bulk actions + table + loading + empty states */}
-              {renderSavedSearchResults()}
+              {/* M8: Only render results in saved tab when a persona is selected */}
+              {(isSavedSearchMode || searchState.persona) && renderSavedSearchResults()}
             </SavedSearchesTab>
           )}
           </div>
