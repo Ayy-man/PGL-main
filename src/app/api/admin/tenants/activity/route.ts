@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 25;
 
 interface TenantRow {
   id: string;
@@ -65,34 +66,50 @@ export async function GET() {
 
     const tenantIds = tenants.map((t: TenantRow) => t.id);
 
-    // 2. Fetch users for active tenants
-    const { data: users, error: usersError } = await admin
-      .from("users")
-      .select("id, full_name, tenant_id")
-      .in("tenant_id", tenantIds);
-
-    if (usersError) {
-      throw new Error(`Users query failed: ${usersError.message}`);
-    }
-
-    // 3. Fetch 7d usage metrics at TENANT level
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     const sevenDaysAgoStr = sevenDaysAgo.toISOString().split("T")[0];
+    const ninetyDaysAgo = new Date();
+    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
 
-    const { data: tenantMetrics, error: tenantMetricsError } = await admin
-      .from("usage_metrics_daily")
-      .select("tenant_id, searches_executed, profiles_enriched, csv_exports")
-      .in("tenant_id", tenantIds)
-      .gte("date", sevenDaysAgoStr);
+    // Parallel: fetch users, tenant metrics, and last activity in one round
+    const [usersResult, tenantMetricsResult, lastActivityResult] =
+      await Promise.all([
+        admin
+          .from("users")
+          .select("id, full_name, tenant_id")
+          .in("tenant_id", tenantIds),
+        admin
+          .from("usage_metrics_daily")
+          .select("tenant_id, searches_executed, profiles_enriched, csv_exports")
+          .in("tenant_id", tenantIds)
+          .gte("date", sevenDaysAgoStr),
+        admin
+          .from("activity_log")
+          .select("tenant_id, created_at")
+          .in("tenant_id", tenantIds)
+          .gte("created_at", ninetyDaysAgo.toISOString()),
+      ]);
 
-    if (tenantMetricsError) {
+    if (usersResult.error) {
+      throw new Error(`Users query failed: ${usersResult.error.message}`);
+    }
+    if (tenantMetricsResult.error) {
       throw new Error(
-        `Tenant metrics query failed: ${tenantMetricsError.message}`
+        `Tenant metrics query failed: ${tenantMetricsResult.error.message}`
+      );
+    }
+    if (lastActivityResult.error) {
+      throw new Error(
+        `Activity log query failed: ${lastActivityResult.error.message}`
       );
     }
 
-    // 4. Fetch 7d usage metrics at USER level
+    const users = usersResult.data;
+    const tenantMetrics = tenantMetricsResult.data;
+    const lastActivity = lastActivityResult.data;
+
+    // Sequential: user metrics depends on user IDs from above
     const userIds = (users ?? []).map((u: UserRow) => u.id);
 
     const { data: userMetrics, error: userMetricsError } =
@@ -107,22 +124,6 @@ export async function GET() {
     if (userMetricsError) {
       throw new Error(
         `User metrics query failed: ${userMetricsError.message}`
-      );
-    }
-
-    // 5. Fetch last active per tenant (limit to 90 days to avoid full partition scan)
-    const ninetyDaysAgo = new Date();
-    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
-
-    const { data: lastActivity, error: lastActivityError } = await admin
-      .from("activity_log")
-      .select("tenant_id, created_at")
-      .in("tenant_id", tenantIds)
-      .gte("created_at", ninetyDaysAgo.toISOString());
-
-    if (lastActivityError) {
-      throw new Error(
-        `Activity log query failed: ${lastActivityError.message}`
       );
     }
 

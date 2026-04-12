@@ -7,10 +7,10 @@ import type { Persona } from "@/lib/personas/types";
 import { Badge } from "@/components/ui/badge";
 import { Search, Pencil, Trash2, Briefcase, MapPin, Users, Tag } from "lucide-react";
 import { PersonaFormDialog } from "./persona-form-dialog";
-import { deletePersonaAction } from "../actions";
 
 interface PersonaCardProps {
   persona: Persona;
+  onDelete?: (personaId: string) => void;
 }
 
 interface FilterSection {
@@ -19,28 +19,19 @@ interface FilterSection {
   values: string[];
 }
 
-export function PersonaCard({ persona }: PersonaCardProps) {
+export function PersonaCard({ persona, onDelete }: PersonaCardProps) {
   const params = useParams();
   const orgId = params.orgId as string;
-  const [isDeleting, setIsDeleting] = useState(false);
   const [cardStyle, setCardStyle] = useState({
     background: "var(--bg-card-gradient)",
     borderColor: "var(--border-default)",
   });
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!window.confirm(`Are you sure you want to delete "${persona.name}"?`)) {
       return;
     }
-    setIsDeleting(true);
-    try {
-      await deletePersonaAction(persona.id);
-    } catch (error) {
-      alert(
-        `Failed to delete persona: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-      setIsDeleting(false);
-    }
+    onDelete?.(persona.id);
   };
 
   const filterSections = useMemo(() => {
@@ -257,7 +248,6 @@ export function PersonaCard({ persona }: PersonaCardProps) {
               className="flex items-center gap-1.5 text-[12px] px-3 py-2 rounded-[8px] cursor-pointer transition-all ml-auto"
               style={ghostButtonStyle}
               onClick={handleDelete}
-              disabled={isDeleting}
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLButtonElement).style.color =
                   "var(--destructive)";
@@ -268,7 +258,7 @@ export function PersonaCard({ persona }: PersonaCardProps) {
               }}
             >
               <Trash2 className="h-3.5 w-3.5" />
-              {isDeleting ? "..." : "Delete"}
+              Delete
             </button>
           </>
         )}

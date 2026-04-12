@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { chatCompletion } from "@/lib/ai/openrouter";
 import { parseQueryRateLimiter } from "@/lib/rate-limit/limiters";
 
+export const maxDuration = 30;
+
 export const dynamic = "force-dynamic";
 
 const SYSTEM_PROMPT = `You are a search query parser for a lead generation platform. Convert natural language queries into structured Apollo.io search filters.

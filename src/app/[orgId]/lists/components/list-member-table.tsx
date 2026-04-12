@@ -139,19 +139,27 @@ function CopyButton({ text, icon: Icon }: { text: string; icon: typeof Mail }) {
   );
 }
 
-export function ListMemberTable({ members }: ListMemberTableProps) {
+export function ListMemberTable({ members: serverMembers }: ListMemberTableProps) {
   const params = useParams();
   const orgId = params.orgId as string;
-  const [removingId, setRemovingId] = useState<string | null>(null);
+  const [members, setMembers] = useState(serverMembers);
   const [enrichingId, setEnrichingId] = useState<string | null>(null);
   const { toast } = useToast();
 
+  useEffect(() => { setMembers(serverMembers); }, [serverMembers]);
+
   const handleRemove = async (memberId: string) => {
     if (!confirm("Remove this prospect from the list?")) return;
-    setRemovingId(memberId);
+
+    const previousMembers = members;
+    setMembers(prev => prev.filter(m => m.id !== memberId));
+    toast({ title: "Prospect removed from list" });
+
     const result = await removeFromListAction(memberId);
-    if (!result.success) alert(result.error || "Failed to remove from list");
-    setRemovingId(null);
+    if (!result.success) {
+      setMembers(previousMembers);
+      toast({ title: "Remove failed", description: result.error || "Could not remove prospect.", variant: "destructive" });
+    }
   };
 
   const handleReEnrich = async (prospectId: string) => {
@@ -306,7 +314,6 @@ export function ListMemberTable({ members }: ListMemberTableProps) {
                       size="icon"
                       className="h-7 w-7"
                       onClick={() => handleRemove(member.id)}
-                      disabled={removingId === member.id}
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
@@ -379,7 +386,6 @@ export function ListMemberTable({ members }: ListMemberTableProps) {
                   size="icon"
                   className="h-7 w-7 shrink-0"
                   onClick={() => handleRemove(member.id)}
-                  disabled={removingId === member.id}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>

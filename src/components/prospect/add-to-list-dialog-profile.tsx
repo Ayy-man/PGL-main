@@ -54,12 +54,23 @@ export function AddToListDialogProfile({
 
   const handleSubmit = async () => {
     if (selectedListIds.length === 0) return;
-    setIsSubmitting(true);
+
+    const listCount = selectedListIds.length;
+    const listsToAdd = [...selectedListIds];
+
+    // Close immediately and show optimistic toast
+    setSelectedListIds([]);
+    onOpenChange(false);
+    toast({
+      title: "Adding to list" + (listCount === 1 ? "" : "s"),
+      description: `Adding ${prospectName} to ${listCount} list${listCount === 1 ? "" : "s"}...`,
+    });
+
     try {
       const response = await fetch("/api/prospects/add-to-list", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prospectId, listIds: selectedListIds }),
+        body: JSON.stringify({ prospectId, listIds: listsToAdd }),
       });
       if (!response.ok) {
         const err = await response.json();
@@ -70,8 +81,6 @@ export function AddToListDialogProfile({
         title: "Success",
         description: `Added ${prospectName} to ${result.addedToLists} list${result.addedToLists === 1 ? "" : "s"}`,
       });
-      setSelectedListIds([]);
-      onOpenChange(false);
     } catch (error) {
       toast({
         title: "Error",
@@ -79,8 +88,6 @@ export function AddToListDialogProfile({
           error instanceof Error ? error.message : "Failed to add to lists",
         variant: "destructive",
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 

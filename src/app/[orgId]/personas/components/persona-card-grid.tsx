@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import type { Persona } from "@/lib/personas/types";
 import { PersonaCard } from "./persona-card";
 import { PersonaFormDialog } from "./persona-form-dialog";
+import { deletePersonaAction } from "../actions";
+import { useToast } from "@/hooks/use-toast";
 import { Plus, Sparkles } from "lucide-react";
 
 interface PersonaCardGridProps {
@@ -12,10 +14,27 @@ interface PersonaCardGridProps {
   orgId: string;
 }
 
-export function PersonaCardGrid({ personas, orgId }: PersonaCardGridProps) {
+export function PersonaCardGrid({ personas: serverPersonas, orgId }: PersonaCardGridProps) {
+  const [personas, setPersonas] = useState(serverPersonas);
   const [createOpen, setCreateOpen] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { toast } = useToast();
+
+  useEffect(() => { setPersonas(serverPersonas); }, [serverPersonas]);
+
+  const handleDeletePersona = useCallback(async (personaId: string) => {
+    const previousPersonas = personas;
+    setPersonas(prev => prev.filter(p => p.id !== personaId));
+    toast({ title: "Saved search deleted" });
+
+    try {
+      await deletePersonaAction(personaId);
+    } catch {
+      setPersonas(previousPersonas);
+      toast({ title: "Delete failed", description: "Could not delete saved search.", variant: "destructive" });
+    }
+  }, [personas, toast]);
 
   // Auto-open create dialog from quick action (?create=true)
   useEffect(() => {
@@ -28,7 +47,7 @@ export function PersonaCardGrid({ personas, orgId }: PersonaCardGridProps) {
   return (
     <div className="grid gap-4 md:gap-5 content-start grid-cols-1 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fill,minmax(340px,1fr))]">
       {personas.map((persona) => (
-        <PersonaCard key={persona.id} persona={persona} />
+        <PersonaCard key={persona.id} persona={persona} onDelete={handleDeletePersona} />
       ))}
 
       {/* Create New Persona CTA card */}
