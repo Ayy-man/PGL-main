@@ -73,7 +73,7 @@ function formatRelativeTime(dateStr: string): string {
 
 function StatusBadge({ status }: { status: string }) {
   const colorMap: Record<string, { bg: string; text: string }> = {
-    open: { bg: "bg-amber-500/10", text: "text-amber-400" },
+    open: { bg: "bg-red-500/10", text: "text-red-400" },
     investigating: { bg: "bg-blue-500/10", text: "text-blue-400" },
     resolved: { bg: "bg-[var(--success-muted)]", text: "text-[var(--success)]" },
     wontfix: { bg: "bg-[var(--bg-elevated)]", text: "text-muted-foreground" },

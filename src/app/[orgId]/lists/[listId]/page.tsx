@@ -69,6 +69,19 @@ export default async function ListDetailPage({ params }: PageProps) {
               name: list.name ?? null,
               description: list.description ?? null,
               member_count: members.length,
+              created_at: list.created_at ?? null,
+              updated_at: list.updated_at ?? null,
+              status_breakdown: {
+                new: members.filter((m: { status?: string }) => !m.status || m.status === "new").length,
+                contacted: members.filter((m: { status?: string }) => m.status === "contacted").length,
+                responded: members.filter((m: { status?: string }) => m.status === "responded").length,
+                not_interested: members.filter((m: { status?: string }) => m.status === "not_interested").length,
+              },
+              enrichment_breakdown: {
+                enriched: members.filter((m: { prospects?: { enrichment_status?: string } | null }) => m.prospects?.enrichment_status === "complete").length,
+                pending: members.filter((m: { prospects?: { enrichment_status?: string } | null }) => !m.prospects?.enrichment_status || m.prospects.enrichment_status === "pending").length,
+                failed: members.filter((m: { prospects?: { enrichment_status?: string } | null }) => m.prospects?.enrichment_status === "failed").length,
+              },
             },
           }}
         />

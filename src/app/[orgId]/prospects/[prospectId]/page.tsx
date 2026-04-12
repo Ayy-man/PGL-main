@@ -296,21 +296,50 @@ export default async function ProspectProfilePage({
             type: "prospect",
             id: prospect.id,
             snapshot: {
+              // Identity
               name: prospect.name ?? null,
+              first_name: prospect.first_name ?? null,
+              last_name: prospect.last_name ?? null,
               title: prospect.title ?? null,
               company: prospect.company ?? null,
+              location: prospect.location ?? null,
+              apollo_id: prospect.apollo_id ?? null,
+              // Contact
               linkedin_url: prospect.linkedin_url ?? null,
               email: prospect.email ?? null,
+              work_email: prospect.work_email ?? null,
+              personal_email: prospect.personal_email ?? null,
               phone: prospect.phone ?? null,
-              location: prospect.location ?? null,
+              work_phone: prospect.work_phone ?? null,
+              personal_phone: prospect.personal_phone ?? null,
+              // Enrichment state
               enrichment_status: prospect.enrichment_status ?? null,
               enrichment_source_status: enrichmentSourceStatus,
               last_enriched_at: prospect.last_enriched_at ?? null,
+              enriched_at: prospect.enriched_at ?? null,
+              enrichment_started_at: prospect.enrichment_started_at ?? null,
+              // Dossier
               dossier: prospect.intelligence_dossier ?? null,
+              dossier_generated_at: prospect.dossier_generated_at ?? null,
+              dossier_model: prospect.dossier_model ?? null,
+              ai_summary: prospect.ai_summary ?? null,
+              // Market data
+              publicly_traded_symbol: prospect.publicly_traded_symbol ?? null,
+              company_cik: prospect.company_cik ?? null,
+              // Manual overrides (flags which fields were manually corrected)
+              has_manual_overrides: !!(prospect.manual_display_name || prospect.manual_title || prospect.manual_company || prospect.manual_email || prospect.manual_phone || prospect.manual_linkedin_url),
+              // Aggregates
               signal_count: signalCount ?? 0,
               list_count: formattedListMemberships.length,
               tag_count: tags.length,
-              apollo_id: prospect.apollo_id ?? null,
+              tags,
+              // Recent signals (top 3 headlines for quick context)
+              recent_signals: (signalsWithSeen ?? []).slice(0, 3).map((s: { headline?: string; category?: string; raw_source?: string; event_date?: string }) => ({
+                headline: s.headline,
+                category: s.category,
+                source: s.raw_source,
+                date: s.event_date,
+              })),
             },
           }}
         />

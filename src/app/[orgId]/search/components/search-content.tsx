@@ -1086,7 +1086,13 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
                   snapshot: {
                     query: searchState.keywords ?? null,
                     filters: searchState.persona ?? null,
+                    persona_name: personas.find((p) => p.id === searchState.persona)?.name ?? null,
                     result_count: activeResultCount,
+                    active_tab: activeTab,
+                    page: searchState.page ?? 1,
+                    page_size: PAGE_SIZE,
+                    is_loading: searchState.loading ?? false,
+                    total_personas: personas.length,
                   },
                 }}
               />

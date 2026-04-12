@@ -73,6 +73,9 @@ export default async function PersonasPage({
             snapshot: {
               scope: "personas_index",
               persona_count: personas?.length ?? 0,
+              prospect_count: prospectResult.count ?? 0,
+              has_activity: (activityResult.count ?? 0) > 0,
+              persona_names: (personas ?? []).map((p: { name: string }) => p.name),
             },
           }}
         />
