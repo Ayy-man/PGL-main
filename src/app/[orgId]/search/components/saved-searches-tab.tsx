@@ -22,6 +22,7 @@ interface SavedSearchesTabProps {
   onRefresh: () => void;
   isRefreshing: boolean;
   headerRightSlot?: React.ReactNode;
+  onEditFilters?: () => void;
 
   /** Results panel contents: BulkActionsBar + ProspectResultsTable (+ pagination if any), provided by Plan 04. */
   children?: React.ReactNode;
@@ -38,6 +39,7 @@ export function SavedSearchesTab({
   onRefresh,
   isRefreshing,
   headerRightSlot,
+  onEditFilters,
   children,
 }: SavedSearchesTabProps) {
   // Sidebar collapse state with localStorage persistence
@@ -111,6 +113,8 @@ export function SavedSearchesTab({
               onRefresh={onRefresh}
               isRefreshing={isRefreshing}
               rightSlot={headerRightSlot}
+              filters={selectedPersona.filters}
+              onEditFilters={onEditFilters}
             />
             {children}
           </>

@@ -1184,6 +1184,7 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
               onRefresh={() => handleRefresh()}
               isRefreshing={isRefreshing}
 
+              onEditFilters={() => setEditDialogOpen(true)}
               headerRightSlot={
                 isSavedSearchMode ? (
                   <button

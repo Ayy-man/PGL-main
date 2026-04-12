@@ -1,17 +1,16 @@
 "use client";
 
-import { useState } from "react";
-import { Search, Bell } from "lucide-react";
+import { Bell } from "lucide-react";
+import { CommandSearch } from "./command-search";
 
 interface TopBarProps {
   userName?: string;
   userInitials?: string;
   avatarUrl?: string;
+  orgId?: string;
 }
 
-export function TopBar({ userName, userInitials = "?", avatarUrl }: TopBarProps) {
-  const [searchValue, setSearchValue] = useState("");
-
+export function TopBar({ userName, userInitials = "?", avatarUrl, orgId }: TopBarProps) {
   return (
     <header
       className="sticky top-0 z-20 hidden lg:flex h-14 items-center justify-between px-6"
@@ -22,39 +21,7 @@ export function TopBar({ userName, userInitials = "?", avatarUrl }: TopBarProps)
       }}
     >
       {/* Left: Search input */}
-      <div className="relative w-full max-w-[320px]">
-        <Search
-          className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 shrink-0"
-          style={{ color: "var(--text-tertiary)" }}
-        />
-        <input
-          type="text"
-          placeholder="Search prospects, lists..."
-          value={searchValue}
-          onChange={(e) => setSearchValue(e.target.value)}
-          className="h-9 w-full rounded-[8px] pl-9 pr-16 text-[13px] font-sans text-foreground placeholder:text-muted-foreground outline-none transition-all duration-200"
-          style={{
-            background: "var(--bg-input)",
-            border: "1px solid var(--border-default)",
-          }}
-          onFocus={(e) => {
-            (e.currentTarget as HTMLInputElement).style.borderColor = "var(--border-hover)";
-          }}
-          onBlur={(e) => {
-            (e.currentTarget as HTMLInputElement).style.borderColor = "var(--border-default)";
-          }}
-        />
-        <kbd
-          className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rounded border px-1.5 py-0.5 text-[10px] font-mono"
-          style={{
-            color: "var(--text-ghost)",
-            borderColor: "var(--border-subtle)",
-            background: "rgba(255,255,255,0.02)",
-          }}
-        >
-          Cmd+K
-        </kbd>
-      </div>
+      <CommandSearch orgId={orgId} />
 
       {/* Right: Notification bell + Avatar */}
       <div className="flex items-center gap-3">

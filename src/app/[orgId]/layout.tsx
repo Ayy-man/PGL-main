@@ -101,7 +101,7 @@ export default async function TenantLayout({
         />
 
         <div className="flex flex-1 flex-col min-w-0">
-          <TopBar userName={userName} userInitials={userInitials} />
+          <TopBar userName={userName} userInitials={userInitials} orgId={orgId} />
 
           {/* Page content with fade-in animation */}
           <main className="flex-1 overflow-y-auto">
