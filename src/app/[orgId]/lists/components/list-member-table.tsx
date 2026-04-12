@@ -25,6 +25,7 @@ import { MemberNotesCell } from "./member-notes-cell";
 import { removeFromListAction } from "../actions";
 import type { ListMember } from "@/lib/lists/types";
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 import { ProspectAvatar } from "@/components/prospect/prospect-avatar";
 
 interface ListMemberTableProps {
@@ -143,6 +144,7 @@ export function ListMemberTable({ members }: ListMemberTableProps) {
   const orgId = params.orgId as string;
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [enrichingId, setEnrichingId] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const handleRemove = async (memberId: string) => {
     if (!confirm("Remove this prospect from the list?")) return;
@@ -155,11 +157,15 @@ export function ListMemberTable({ members }: ListMemberTableProps) {
   const handleReEnrich = async (prospectId: string) => {
     setEnrichingId(prospectId);
     try {
-      await fetch(`/api/prospects/${prospectId}/enrich?force=true`, { method: "POST" });
+      const res = await fetch(`/api/prospects/${prospectId}/enrich?force=true`, { method: "POST" });
+      if (res.ok) {
+        toast({ title: "Re-enrichment queued", description: "Data will refresh in the background." });
+      } else {
+        toast({ title: "Re-enrichment failed", description: "Could not queue enrichment.", variant: "destructive" });
+      }
     } catch {
-      // fire-and-forget — Inngest will handle it
+      toast({ title: "Re-enrichment failed", description: "Network error.", variant: "destructive" });
     }
-    // Keep spinner briefly so user sees feedback, then clear
     setTimeout(() => setEnrichingId(null), 2000);
   };
 

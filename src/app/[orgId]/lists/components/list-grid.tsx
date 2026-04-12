@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Trash2, Download } from "lucide-react";
+import { Trash2, Download, Loader2 } from "lucide-react";
 import { deleteListAction } from "../actions";
 import type { List } from "@/lib/lists/types";
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 interface ListGridProps {
   lists: List[];
@@ -16,6 +17,8 @@ export function ListGrid({ lists }: ListGridProps) {
   const params = useParams();
   const orgId = params.orgId as string;
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [exportingId, setExportingId] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const handleDelete = async (listId: string) => {
     if (!confirm("Are you sure you want to delete this list? This cannot be undone.")) {
@@ -30,6 +33,32 @@ export function ListGrid({ lists }: ListGridProps) {
     }
 
     setDeletingId(null);
+  };
+
+  const handleExport = async (listId: string, listName: string) => {
+    setExportingId(listId);
+    try {
+      const response = await fetch(`/api/export/csv?listId=${listId}`);
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({ error: "Export failed" }));
+        toast({ title: "Export failed", description: err.error || "Could not export list.", variant: "destructive" });
+        return;
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${listName.replace(/[^a-zA-Z0-9-_ ]/g, "")}-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+      toast({ title: "Export complete", description: `Downloaded ${listName} as CSV.` });
+    } catch {
+      toast({ title: "Export failed", description: "Network error.", variant: "destructive" });
+    } finally {
+      setExportingId(null);
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -84,8 +113,12 @@ export function ListGrid({ lists }: ListGridProps) {
               size="sm"
               className="text-muted-foreground hover:text-foreground cursor-pointer"
               aria-label="Export list"
+              onClick={() => handleExport(list.id, list.name)}
+              disabled={exportingId === list.id}
             >
-              <Download className="h-4 w-4" />
+              {exportingId === list.id
+                ? <Loader2 className="h-4 w-4 animate-spin" />
+                : <Download className="h-4 w-4" />}
             </Button>
 
             {/* Delete button */}

@@ -767,7 +767,10 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
               onSelectAll={handleSelectAll}
               onProspectClick={handleProspectClick}
               savedSearchMode={isSavedSearchMode}
-              onDismiss={isSavedSearchMode ? (id) => handleDismiss([id]) : undefined}
+              onDismiss={isSavedSearchMode ? (id) => {
+                if (!confirm("Dismiss this prospect? You can undo this later.")) return;
+                handleDismiss([id]);
+              } : undefined}
               onUndoDismiss={handleUndoDismiss}
               lastRefreshedAt={lastRefreshedAt}
             />
@@ -1218,6 +1221,8 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
                         setBulkSelectedListIds((prev) => [...prev, res.list!.id]);
                         setNewListName("");
                         setShowNewListInput(false);
+                      } else {
+                        toast({ title: "Failed to create list", description: res.error || "Please try again.", variant: "destructive" });
                       }
                       setIsCreatingList(false);
                     } else if (e.key === "Escape") {
@@ -1241,6 +1246,8 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
                       setBulkSelectedListIds((prev) => [...prev, res.list!.id]);
                       setNewListName("");
                       setShowNewListInput(false);
+                    } else {
+                      toast({ title: "Failed to create list", description: res.error || "Please try again.", variant: "destructive" });
                     }
                     setIsCreatingList(false);
                   }}
