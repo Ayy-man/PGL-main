@@ -28,9 +28,15 @@ export function LeadOwnerSelect({
 }: LeadOwnerSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [optimisticOwnerId, setOptimisticOwnerId] = useState(currentOwnerId);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const currentOwner = teamMembers.find((m) => m.id === currentOwnerId) ?? null;
+  // Sync with prop when server state arrives
+  useEffect(() => {
+    setOptimisticOwnerId(currentOwnerId);
+  }, [currentOwnerId]);
+
+  const currentOwner = teamMembers.find((m) => m.id === optimisticOwnerId) ?? null;
 
   const handleOpen = useCallback(() => {
     if (!isEditable || isSaving) return;
@@ -43,17 +49,20 @@ export function LeadOwnerSelect({
 
   const handleSelect = useCallback(
     async (ownerId: string | null) => {
+      const previousOwnerId = optimisticOwnerId;
+      setOptimisticOwnerId(ownerId); // Optimistic
       setIsOpen(false);
       setIsSaving(true);
       try {
         await onOwnerChange(ownerId);
       } catch (err) {
+        setOptimisticOwnerId(previousOwnerId); // Rollback
         console.error("[LeadOwnerSelect] Failed to update owner:", err);
       } finally {
         setIsSaving(false);
       }
     },
-    [onOwnerChange]
+    [onOwnerChange, optimisticOwnerId]
   );
 
   // Close on outside click
@@ -123,17 +132,18 @@ export function LeadOwnerSelect({
         <div
           role="listbox"
           aria-label="Select lead owner"
-          className="absolute left-0 top-full mt-1 min-w-[220px] rounded-lg shadow-lg z-50 border overflow-hidden"
+          className="absolute left-0 top-full mt-1 min-w-[220px] rounded-lg z-50 border overflow-hidden"
           style={{
             backgroundColor: "var(--bg-elevated, #1a1a1a)",
-            borderColor: "var(--border-default)",
+            borderColor: "var(--border-gold, rgba(212,175,55,0.3))",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
           }}
         >
           {/* Unassigned option */}
           <button
             type="button"
             role="option"
-            aria-selected={currentOwnerId === null}
+            aria-selected={optimisticOwnerId === null}
             onClick={() => handleSelect(null)}
             className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm transition-colors text-left hover:bg-white/5 text-muted-foreground"
           >
@@ -157,11 +167,11 @@ export function LeadOwnerSelect({
               key={member.id}
               type="button"
               role="option"
-              aria-selected={member.id === currentOwnerId}
+              aria-selected={member.id === optimisticOwnerId}
               onClick={() => handleSelect(member.id)}
               className={[
                 "w-full flex items-center gap-2.5 px-3 py-2.5 text-sm transition-colors text-left hover:bg-white/5",
-                member.id === currentOwnerId ? "bg-white/5" : "",
+                member.id === optimisticOwnerId ? "bg-white/5" : "",
               ]
                 .filter(Boolean)
                 .join(" ")}

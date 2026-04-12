@@ -139,20 +139,24 @@ export default async function TenantDashboard({
     new Set(recentExports.map((e) => e.user_id))
   );
   if (uniqueUserIds.length > 0) {
-    const { data: profiles } = await supabase
-      .from("user_profiles")
-      .select("id, first_name, last_name")
+    const { data: users } = await supabase
+      .from("users")
+      .select("id, full_name")
       .in("id", uniqueUserIds);
-    if (profiles) {
-      for (const p of profiles) {
-        const name = [p.first_name, p.last_name].filter(Boolean).join(" ");
-        userMap[p.id] = name || p.id.slice(0, 8);
+    if (users) {
+      for (const u of users as { id: string; full_name: string }[]) {
+        userMap[u.id] = u.full_name || u.id.slice(0, 8);
       }
     }
   }
 
-  // Compute derived stats
-  const totalExports = analyticsTotals?.csvExports ?? 0;
+  // Count total exports from activity_log (usage_metrics_daily may lag)
+  const { count: actualExportCount } = await supabase
+    .from("activity_log")
+    .select("*", { count: "exact", head: true })
+    .eq("tenant_id", tenantId)
+    .eq("action_type", "csv_exported");
+  const totalExports = actualExportCount ?? 0;
   const downloadsReady = lists.reduce(
     (sum, l) => sum + (l.member_count ?? 0),
     0
@@ -161,7 +165,7 @@ export default async function TenantDashboard({
   const profilesEnriched = analyticsTotals?.profilesEnriched ?? 0;
   const enrichmentRate =
     profilesViewed > 0
-      ? Math.round((profilesEnriched / profilesViewed) * 100)
+      ? Math.min(100, Math.round((profilesEnriched / profilesViewed) * 100))
       : 0;
 
   return (
@@ -214,7 +218,7 @@ export default async function TenantDashboard({
             className="mt-1 text-xs uppercase tracking-[1.5px] font-semibold"
             style={{ color: "var(--text-tertiary)" }}
           >
-            UHNW Lead Scraping & Export Management
+            Prospect Intelligence & Management
           </p>
         </div>
         <div className="flex items-center gap-3 shrink-0">
@@ -249,6 +253,8 @@ export default async function TenantDashboard({
           totalExports={totalExports}
           downloadsReady={downloadsReady}
           enrichmentRate={enrichmentRate}
+          profilesEnriched={profilesEnriched}
+          profilesViewed={profilesViewed}
         />
       )}
 

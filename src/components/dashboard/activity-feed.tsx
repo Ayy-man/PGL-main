@@ -7,6 +7,7 @@ interface ActivityEntry {
   id: string;
   tenant_id: string;
   user_id: string;
+  user_name: string | null;
   action_type: string;
   target_type: string | null;
   target_id: string | null;
@@ -26,7 +27,32 @@ const ACTION_LABELS: Record<string, string> = {
   csv_exported: "Exported CSV",
   persona_created: "Created Saved Search",
   lookalike_search: "Lookalike Search",
+  profile_edited: "Edited Profile",
+  tag_added: "Added Tag",
+  tag_removed: "Removed Tag",
+  photo_uploaded: "Uploaded Photo",
+  lead_owner_assigned: "Assigned Lead Owner",
+  issue_reported: "Reported an Issue",
+  user_invited: "Invited User",
+  user_invite_accepted: "Accepted Invite",
 };
+
+function getActionContext(entry: ActivityEntry): string | null {
+  const meta = entry.metadata;
+  if (!meta) return null;
+  switch (entry.action_type) {
+    case "csv_exported":
+      return meta.listName ? String(meta.listName) : null;
+    case "search_executed":
+      return meta.totalResults != null ? `${meta.totalResults} results` : null;
+    case "add_to_list":
+      return meta.successCount ? `${meta.successCount} prospects` : null;
+    case "issue_reported":
+      return meta.category ? String(meta.category) : null;
+    default:
+      return null;
+  }
+}
 
 function relativeTime(dateStr: string): string {
   const now = Date.now();
@@ -151,11 +177,15 @@ export function ActivityFeed() {
             >
               <div className="flex-1 min-w-0">
                 <p className="text-sm truncate" style={{ color: "var(--text-primary)" }}>
-                  {ACTION_LABELS[entry.action_type] || entry.action_type}
+                  <span className="font-medium">{entry.user_name ?? "Team member"}</span>
+                  {" — "}
+                  {ACTION_LABELS[entry.action_type] || entry.action_type.replace(/_/g, " ")}
                 </p>
-                <p className="text-xs font-mono" style={{ color: "var(--text-tertiary)" }}>
-                  {entry.user_id.slice(0, 8)}...
-                </p>
+                {getActionContext(entry) && (
+                  <p className="text-xs truncate" style={{ color: "var(--text-tertiary)" }}>
+                    {getActionContext(entry)}
+                  </p>
+                )}
               </div>
               <span
                 className="text-xs shrink-0"

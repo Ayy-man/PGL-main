@@ -1,9 +1,11 @@
-import { FileDown, Download, Award } from "lucide-react";
+import { Upload, Download, Award } from "lucide-react";
 
 interface DashboardStatCardsProps {
   totalExports: number;
   downloadsReady: number;
   enrichmentRate: number;
+  profilesEnriched?: number;
+  profilesViewed?: number;
 }
 
 function StatCard({
@@ -12,7 +14,7 @@ function StatCard({
   value,
   subtitle,
 }: {
-  icon: typeof FileDown;
+  icon: typeof Upload;
   label: string;
   value: string;
   subtitle: string;
@@ -63,11 +65,18 @@ export function DashboardStatCards({
   totalExports,
   downloadsReady,
   enrichmentRate,
+  profilesEnriched,
+  profilesViewed,
 }: DashboardStatCardsProps) {
+  const enrichmentSubtitle =
+    profilesEnriched != null && profilesViewed != null
+      ? `${profilesEnriched} of ${profilesViewed} profiles`
+      : "Profiles enriched vs. viewed";
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <StatCard
-        icon={FileDown}
+        icon={Upload}
         label="Total Exports"
         value={totalExports.toLocaleString()}
         subtitle="Files generated this period"
@@ -82,7 +91,7 @@ export function DashboardStatCards({
         icon={Award}
         label="Enrichment Rate"
         value={enrichmentRate > 0 ? `${enrichmentRate}%` : "0%"}
-        subtitle="Profiles enriched vs. viewed"
+        subtitle={enrichmentSubtitle}
       />
     </div>
   );

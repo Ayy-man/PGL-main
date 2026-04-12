@@ -17,8 +17,8 @@ export function PersonaPillRow({ personas, orgId }: PersonaPillRowProps) {
     return (
       <EmptyState
         icon={Users}
-        title="No personas yet"
-        description="Create personas to start finding high-net-worth prospects"
+        title="No saved searches yet"
+        description="Create saved searches to start finding high-net-worth prospects"
       />
     );
   }
@@ -32,7 +32,7 @@ export function PersonaPillRow({ personas, orgId }: PersonaPillRowProps) {
         className="font-serif text-lg sm:text-[22px] font-semibold mb-4"
         style={{ color: "var(--text-primary)" }}
       >
-        Target Personas
+        Saved Searches
       </h3>
       <div className="flex flex-wrap gap-2">
         {visible.map((persona) => (

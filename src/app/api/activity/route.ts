@@ -155,9 +155,30 @@ export async function GET(request: Request) {
       );
     }
 
-    // 6. Return results
+    // 5b. Resolve user names
+    const entries = (data ?? []) as ActivityLogEntry[];
+    const userIds = Array.from(new Set(entries.map((e) => e.user_id)));
+    const usersMap = new Map<string, string>();
+    if (userIds.length > 0) {
+      const { data: users } = await adminSupabase
+        .from("users")
+        .select("id, full_name")
+        .in("id", userIds);
+      if (users) {
+        for (const u of users as { id: string; full_name: string }[]) {
+          usersMap.set(u.id, u.full_name);
+        }
+      }
+    }
+
+    // 6. Return enriched results
+    const enrichedData = entries.map((entry) => ({
+      ...entry,
+      user_name: usersMap.get(entry.user_id) ?? null,
+    }));
+
     return NextResponse.json({
-      data: data as ActivityLogEntry[],
+      data: enrichedData,
       total: count ?? 0,
       page,
       limit,
