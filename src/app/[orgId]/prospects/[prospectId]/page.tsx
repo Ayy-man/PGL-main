@@ -301,6 +301,16 @@ export default async function ProspectProfilePage({
               company: prospect.company ?? null,
               linkedin_url: prospect.linkedin_url ?? null,
               email: prospect.email ?? null,
+              phone: prospect.phone ?? null,
+              location: prospect.location ?? null,
+              enrichment_status: prospect.enrichment_status ?? null,
+              enrichment_source_status: enrichmentSourceStatus,
+              last_enriched_at: prospect.last_enriched_at ?? null,
+              dossier: prospect.intelligence_dossier ?? null,
+              signal_count: signalCount ?? 0,
+              list_count: formattedListMemberships.length,
+              tag_count: tags.length,
+              apollo_id: prospect.apollo_id ?? null,
             },
           }}
         />

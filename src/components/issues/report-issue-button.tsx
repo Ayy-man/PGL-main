@@ -24,18 +24,19 @@ export function ReportIssueButton({
   const [capturedBlob, setCapturedBlob] = useState<Blob | null>(null);
   const [capturing, setCapturing] = useState(false);
 
-  // Open the dialog immediately, capture screenshot in the background.
-  // We capture BEFORE the dialog renders by using requestAnimationFrame
-  // to grab the frame before the portal mounts. If that races, we still
-  // get a usable screenshot (dialog is transparent overlay, main content visible).
+  // Capture screenshot THEN open dialog with a tiny delay.
+  // html2canvas clones the DOM synchronously at invocation, so we start the
+  // capture first, then open the dialog 100ms later — enough for the DOM clone
+  // to complete before the dialog overlay darkens the page. The user sees the
+  // dialog almost instantly (100ms is imperceptible) but gets a clean screenshot.
   const handleOpen = useCallback(() => {
-    // Start capture in background — don't block the dialog from opening
     setCapturing(true);
-    captureScreenshot()
+    const capturePromise = captureScreenshot();
+    // Delay dialog open so html2canvas clones the clean (no-overlay) DOM first
+    setTimeout(() => setOpen(true), 100);
+    capturePromise
       .then((blob) => setCapturedBlob(blob))
       .finally(() => setCapturing(false));
-    // Open dialog immediately so the user isn't waiting
-    setOpen(true);
   }, []);
 
   return (
