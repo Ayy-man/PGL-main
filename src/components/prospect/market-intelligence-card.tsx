@@ -376,7 +376,7 @@ export function MarketIntelligenceCard({
       {/* Interactive Recharts AreaChart */}
       {chartData.length > 1 && (
         <div className="mb-4 rounded-lg overflow-hidden" style={{ width: "100%", height: 220 }}>
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
             <AreaChart
               key={activePeriod}
               data={chartData}

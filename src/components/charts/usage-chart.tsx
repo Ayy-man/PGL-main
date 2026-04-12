@@ -47,7 +47,7 @@ export function UsageChart({ data }: UsageChartProps) {
   return (
     <div className="surface-card rounded-[14px] p-4 md:p-6">
       <div className="h-[200px] md:h-[400px]">
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
         <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
           <XAxis

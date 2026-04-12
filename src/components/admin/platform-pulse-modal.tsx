@@ -4,6 +4,7 @@ import { useState } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -296,6 +297,9 @@ export function PlatformPulseModal({
           <DialogTitle style={{ color: "var(--text-primary-ds)" }}>
             Platform Pulse
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Platform usage metrics and analytics overview
+          </DialogDescription>
         </DialogHeader>
 
         {/* Section 2: Summary stat pills row */}
