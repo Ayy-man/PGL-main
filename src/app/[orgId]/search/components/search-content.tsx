@@ -111,6 +111,7 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
     executeSearch,
     filterOverrides,
     setFilterOverrides,
+    lastParsedFilters,
   } = useSearch();
 
   const hasActiveSearch = Boolean(searchState.persona) || Boolean(searchState.keywords?.trim());
@@ -1196,7 +1197,7 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
         onOpenChange={setCreateDialogOpen}
         trigger={null}
         initialKeywords={searchState.keywords}
-        initialFilterOverrides={filterOverrides}
+        initialFilterOverrides={{ ...lastParsedFilters, ...filterOverrides }}
       />
 
       {/* Bulk list selection dialog */}

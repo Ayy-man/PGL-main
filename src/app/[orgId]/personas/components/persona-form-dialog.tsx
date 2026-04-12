@@ -317,7 +317,8 @@ export function PersonaFormDialog({ mode, persona, trigger, open: controlledOpen
                 id="name"
                 name="name"
                 placeholder="e.g., Finance Elite"
-                defaultValue={persona?.name ?? ""}
+                defaultValue={persona?.name ?? (mode === "create" && initialKeywords ? initialKeywords : "")}
+                key={open ? `name-${initialKeywords ?? ""}` : "name-closed"}
                 maxLength={100}
                 required
               />

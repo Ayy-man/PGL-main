@@ -66,6 +66,7 @@ export function useSearch(): SearchResult {
   const [error, setError] = useState<string | null>(null);
   const [cached, setCached] = useState(false);
   const [filterOverrides, setFilterOverrides] = useState<Partial<PersonaFiltersType>>({});
+  const [lastParsedFilters, setLastParsedFilters] = useState<Partial<PersonaFiltersType>>({});
 
   const abortControllerRef = useRef<AbortController | null>(null);
   const parseCacheRef = useRef<Map<string, Partial<PersonaFiltersType>>>(new Map());
@@ -116,6 +117,7 @@ export function useSearch(): SearchResult {
         if (cached) {
           console.info("[useSearch] [1/3] NL parse cache hit for:", cacheKey);
           nlFilters = cached;
+          setLastParsedFilters(cached);
         } else {
           const parseStart = performance.now();
           console.info("[useSearch] [1/3] Parsing NL query:", searchState.keywords);
@@ -135,6 +137,7 @@ export function useSearch(): SearchResult {
               if (parsed.parsed && parsed.filters) {
                 nlFilters = parsed.filters;
                 parseCacheRef.current.set(cacheKey, nlFilters);
+                setLastParsedFilters(nlFilters);
               }
             } else {
               console.warn(`[useSearch] [1/3] NL parse failed: ${parseRes.status} (${Math.round(performance.now() - parseStart)}ms)`);
@@ -283,5 +286,6 @@ export function useSearch(): SearchResult {
     executeSearch,
     filterOverrides,
     setFilterOverrides,
+    lastParsedFilters,
   };
 }
