@@ -85,9 +85,17 @@ export function translateFiltersToApolloParams(
   // and current employer name. Combines free-text `keywords` with the
   // wealth signal from `net_worth_range` (which is a person-level
   // attribute, not a company tag, so it stays out of org keyword tags).
+  // Also includes organization_names for fuzzy employer matching (Apollo's
+  // organization_names filter is exact-match, so "Kantor Consulting" won't
+  // match "Kantor Consulting LLC" — q_keywords catches the fuzzy case).
   const keywordParts: string[] = [];
   if (filters.keywords?.trim()) keywordParts.push(filters.keywords.trim());
   if (filters.net_worth_range?.trim()) keywordParts.push(filters.net_worth_range.trim());
+  // When searching by person name + company, also put company in q_keywords
+  // for fuzzy employer name matching (supplements exact organization_names filter)
+  if (filters.person_name?.trim() && filters.organization_names?.length) {
+    keywordParts.push(filters.organization_names.join(" "));
+  }
   if (keywordParts.length > 0) {
     params.q_keywords = keywordParts.join(" ");
   }
