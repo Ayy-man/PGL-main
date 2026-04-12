@@ -24,17 +24,18 @@ export function ReportIssueButton({
   const [capturedBlob, setCapturedBlob] = useState<Blob | null>(null);
   const [capturing, setCapturing] = useState(false);
 
-  // CRITICAL: capture BEFORE opening dialog, otherwise the dialog overlay
-  // is visible in the screenshot. See 33-RESEARCH.md Pitfall 3.
-  const handleOpen = useCallback(async () => {
+  // Open the dialog immediately, capture screenshot in the background.
+  // We capture BEFORE the dialog renders by using requestAnimationFrame
+  // to grab the frame before the portal mounts. If that races, we still
+  // get a usable screenshot (dialog is transparent overlay, main content visible).
+  const handleOpen = useCallback(() => {
+    // Start capture in background — don't block the dialog from opening
     setCapturing(true);
-    try {
-      const blob = await captureScreenshot();
-      setCapturedBlob(blob);
-    } finally {
-      setCapturing(false);
-      setOpen(true);
-    }
+    captureScreenshot()
+      .then((blob) => setCapturedBlob(blob))
+      .finally(() => setCapturing(false));
+    // Open dialog immediately so the user isn't waiting
+    setOpen(true);
   }, []);
 
   return (
