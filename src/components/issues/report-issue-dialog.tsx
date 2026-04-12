@@ -84,7 +84,7 @@ export function ReportIssueDialog({
           const formData = new FormData();
           formData.append("payload", JSON.stringify(payload));
           if (includeScreenshot && preCapturedScreenshot) {
-            formData.append("screenshot", preCapturedScreenshot, "screenshot.png");
+            formData.append("screenshot", preCapturedScreenshot, "screenshot.jpg");
           }
 
           const res = await fetch("/api/issues/report", {

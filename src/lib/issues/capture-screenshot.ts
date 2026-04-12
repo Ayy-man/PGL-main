@@ -17,13 +17,13 @@ export async function captureScreenshot(): Promise<Blob | null> {
         useCORS: true,
         allowTaint: false,
         logging: false,
-        scale: window.devicePixelRatio || 1,
+        scale: 1, // 1x — Retina (2x) produces 5-10MB PNGs that exceed Vercel's 4.5MB body limit
       }),
       new Promise<null>((resolve) => setTimeout(() => resolve(null), 2000)),
     ]);
     if (!canvas) return null;
     return await new Promise<Blob | null>((resolve) =>
-      (canvas as HTMLCanvasElement).toBlob(resolve, "image/png")
+      (canvas as HTMLCanvasElement).toBlob(resolve, "image/jpeg", 0.6)
     );
   } catch {
     return null;

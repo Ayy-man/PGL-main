@@ -155,12 +155,13 @@ export async function POST(request: Request) {
   let screenshotPath: string | null = null;
   if (screenshot) {
     try {
-      const path = `${tenantId}/${reportId}.png`;
+      const ext = screenshot.type === "image/jpeg" ? "jpg" : "png";
+      const path = `${tenantId}/${reportId}.${ext}`;
       const arrayBuffer = await screenshot.arrayBuffer();
       const { error: uploadError } = await supabase.storage
         .from("issue-reports")
         .upload(path, arrayBuffer, {
-          contentType: "image/png",
+          contentType: screenshot.type || "image/jpeg",
           upsert: false,
         });
       if (!uploadError) {
