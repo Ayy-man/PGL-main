@@ -398,6 +398,17 @@ export const enrichProspect = inngest.createFunction(
 
     // Step 4: Fetch SEC EDGAR data (public companies via CIK, non-public via EFTS name search)
     const edgarData = await step.run("fetch-edgar", async () => {
+      // Wipe stale sec_filing signals from prior runs so re-enrichment
+      // produces a clean set. Without this, each run appends duplicates
+      // because source_url can change between deploys (raw XML → XSLT
+      // viewer) and the unique index on (prospect_id, source_url) treats
+      // different URLs as distinct rows.
+      await supabase
+        .from("prospect_signals")
+        .delete()
+        .eq("prospect_id", prospectId)
+        .eq("category", "sec_filing");
+
       // Skip only when there is no CIK and no name to search with
       if (!effectiveIsPublic && !name) {
         await updateSourceStatus(prospectId, "sec", {
