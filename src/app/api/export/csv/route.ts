@@ -118,7 +118,11 @@ export async function GET(request: Request) {
                 contact_data,
                 web_data,
                 insider_data,
-                ai_summary
+                ai_summary,
+                intelligence_dossier,
+                enrichment_status,
+                enriched_at,
+                last_enriched_at
               )
             `
             )
