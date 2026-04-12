@@ -147,8 +147,9 @@ export async function updatePersonaAction(id: string, formData: FormData) {
     filters: Object.keys(filters).length > 0 ? filters : undefined
   });
 
-  // Revalidate personas page
+  // Revalidate pages that display persona data
   revalidatePath(`/[orgId]/personas`, "page");
+  revalidatePath(`/[orgId]/search`, "page");
 
   return persona;
 }

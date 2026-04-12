@@ -1228,11 +1228,15 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
             mode="edit"
             persona={editPersona}
             open={editDialogOpen}
-            onOpenChange={(next) => {
-              setEditDialogOpen(next);
-              // After closing edit dialog, refresh to pick up updated filters
-              if (!next && searchState.persona) {
+            onOpenChange={setEditDialogOpen}
+            onUpdated={() => {
+              // Refresh AFTER the DB write completes (onUpdated fires post-await,
+              // unlike onOpenChange which fires on optimistic close before the
+              // server action runs). Also refresh the server component data so
+              // the filter pills update.
+              if (searchState.persona) {
                 handleRefresh(searchState.persona);
+                router.refresh();
               }
             }}
             trigger={null}
