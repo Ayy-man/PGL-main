@@ -93,8 +93,10 @@ export function ReportIssueDialog({
           });
 
           if (!res.ok) {
-            const body = await res.json().catch(() => ({}));
-            setError((body as { error?: string }).error ?? "Failed to submit report. Please try again.");
+            const body = await res.json().catch(() => ({})) as { error?: string; details?: string; code?: string };
+            const msg = [body.error, body.details, body.code].filter(Boolean).join(" — ");
+            console.error("[ReportIssueDialog] Submit failed:", res.status, body);
+            setError(msg || `Failed to submit report (${res.status}). Please try again.`);
             return;
           }
 

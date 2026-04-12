@@ -32,6 +32,7 @@ const MAX_SCREENSHOT_BYTES = 5 * 1024 * 1024; // 5 MB
 const ALLOWED_SCREENSHOT_TYPES = ["image/png", "image/jpeg"];
 
 export async function POST(request: Request) {
+  try {
   const supabase = await createClient();
   const {
     data: { user },
@@ -189,4 +190,11 @@ export async function POST(request: Request) {
   });
 
   return NextResponse.json({ id: reportId }, { status: 201 });
+  } catch (err) {
+    console.error("[issue-report] Unhandled error:", err);
+    return NextResponse.json(
+      { error: "Internal server error", details: err instanceof Error ? err.message : String(err) },
+      { status: 500 }
+    );
+  }
 }
