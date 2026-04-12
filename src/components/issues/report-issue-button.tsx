@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Flag } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { captureScreenshot } from "@/lib/issues/capture-screenshot";
 import { ReportIssueDialog } from "./report-issue-dialog";
 import type { ReportTarget } from "@/lib/issues/capture-context";
 
@@ -20,6 +21,19 @@ export function ReportIssueButton({
   size = "sm",
 }: ReportIssueButtonProps) {
   const [open, setOpen] = useState(false);
+  const [capturedBlob, setCapturedBlob] = useState<Blob | null>(null);
+  const [capturing, setCapturing] = useState(false);
+
+  const handleOpen = useCallback(async () => {
+    setCapturing(true);
+    try {
+      const blob = await captureScreenshot();
+      setCapturedBlob(blob);
+    } finally {
+      setCapturing(false);
+      setOpen(true);
+    }
+  }, []);
 
   return (
     <>
@@ -28,16 +42,20 @@ export function ReportIssueButton({
         variant={variant}
         size={size}
         className={className}
-        onClick={() => setOpen(true)}
+        onClick={handleOpen}
+        disabled={capturing}
       >
         <Flag className="mr-2 h-4 w-4" />
-        Report an issue
+        {capturing ? "Capturing page..." : "Report an issue"}
       </Button>
       <ReportIssueDialog
         open={open}
-        onOpenChange={setOpen}
+        onOpenChange={(next) => {
+          setOpen(next);
+          if (!next) setCapturedBlob(null);
+        }}
         target={target}
-        preCapturedScreenshot={null}
+        preCapturedScreenshot={capturedBlob}
       />
     </>
   );
