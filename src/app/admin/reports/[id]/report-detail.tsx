@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useCallback } from "react";
 import Link from "next/link";
-import { ArrowLeft, ChevronDown, ChevronRight } from "lucide-react";
+import { ArrowLeft, ChevronDown, ChevronRight, Copy, Check } from "lucide-react";
 import type { IssueStatus } from "@/types/database";
 
 interface ResolverUser {
@@ -114,6 +114,55 @@ export function ReportDetail({ report: initialReport, screenshotUrl }: ReportDet
   const [success, setSuccess] = useState<string | null>(null);
   const [contextExpanded, setContextExpanded] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [copied, setCopied] = useState(false);
+
+  const buildFullLog = useCallback(() => {
+    const lines: string[] = [
+      `# Issue Report: ${CATEGORY_LABELS[report.category] ?? report.category}`,
+      `**ID:** ${report.id}`,
+      `**Status:** ${report.status}`,
+      `**Created:** ${report.created_at}`,
+      `**Updated:** ${report.updated_at}`,
+      "",
+      "## Submitter",
+      `- **Tenant:** ${report.tenants?.name ?? "Unknown"} (/${report.tenants?.slug ?? "?"})`,
+      `- **User:** ${report.users?.full_name ?? "Unknown"} (${report.users?.email ?? "?"})`,
+      "",
+      "## Description",
+      report.description,
+      "",
+      "## Target",
+      `- **Type:** ${report.target_type ?? "none"}`,
+      `- **ID:** ${report.target_id ?? "N/A"}`,
+      "",
+      "### Target Snapshot",
+      "```json",
+      JSON.stringify(report.target_snapshot, null, 2),
+      "```",
+      "",
+      "## Page Context",
+      `- **URL:** ${report.page_url}`,
+      `- **Path:** ${report.page_path}`,
+      `- **Viewport:** ${report.viewport ? `${report.viewport.w}x${report.viewport.h}` : "N/A"}`,
+      `- **User Agent:** ${report.user_agent ?? "N/A"}`,
+      "",
+      "## Screenshot",
+      screenshotUrl ? `[Signed URL (60min)](${screenshotUrl})` : "No screenshot captured",
+      "",
+      "## Admin",
+      `- **Status:** ${report.status}`,
+      `- **Notes:** ${report.admin_notes || "(none)"}`,
+      report.resolved_at ? `- **Resolved at:** ${report.resolved_at}` : "",
+      report.resolver ? `- **Resolved by:** ${report.resolver.full_name ?? report.resolver.email}` : "",
+    ];
+    return lines.filter(Boolean).join("\n");
+  }, [report, screenshotUrl]);
+
+  const handleCopy = useCallback(async () => {
+    await navigator.clipboard.writeText(buildFullLog());
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }, [buildFullLog]);
 
   const handleSave = () => {
     setError(null);
@@ -159,7 +208,7 @@ export function ReportDetail({ report: initialReport, screenshotUrl }: ReportDet
         </Link>
       </div>
 
-      {/* 1. Header: category + status + created */}
+      {/* 1. Header: category + status + created + copy */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div className="space-y-2">
           <h1
@@ -175,6 +224,18 @@ export function ReportDetail({ report: initialReport, screenshotUrl }: ReportDet
             </span>
           </div>
         </div>
+        <button
+          onClick={handleCopy}
+          className="inline-flex items-center gap-1.5 h-8 rounded-[8px] px-3 text-xs font-medium transition-colors"
+          style={{
+            background: "var(--bg-elevated)",
+            border: "1px solid var(--border-subtle)",
+            color: copied ? "var(--success)" : "var(--text-secondary-ds)",
+          }}
+        >
+          {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+          {copied ? "Copied!" : "Copy full report"}
+        </button>
       </div>
 
       {/* 2. Submitter */}
