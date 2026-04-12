@@ -42,6 +42,7 @@ interface SearchResult {
   executeSearch: () => void;
   filterOverrides: Partial<PersonaFiltersType>;
   setFilterOverrides: Dispatch<SetStateAction<Partial<PersonaFiltersType>>>;
+  lastParsedFilters: Partial<PersonaFiltersType>;
 }
 
 export function useSearch(): SearchResult {
