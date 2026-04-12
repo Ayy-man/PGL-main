@@ -34,7 +34,7 @@ export function AddToListDialog({
 }: AddToListDialogProps) {
   const [open, setOpen] = useState(false);
   const [selectedListIds, setSelectedListIds] = useState<string[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, _setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const handleToggleList = (listId: string) => {

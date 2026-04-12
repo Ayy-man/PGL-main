@@ -41,7 +41,7 @@ export function AddToListDialogProfile({
   onOpenChange,
 }: AddToListDialogProfileProps) {
   const [selectedListIds, setSelectedListIds] = useState<string[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, _setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const handleToggleList = (listId: string) => {
