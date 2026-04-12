@@ -136,6 +136,8 @@
     --bg-card-hover: rgba(255,255,255,0.06);
     --bg-elevated: rgba(255,255,255,0.04);
     --bg-input: rgba(255,255,255,0.03);
+    --bg-floating: #141416;
+    --bg-floating-elevated: #1a1a1e;
     --border-subtle: rgba(255,255,255,0.06);
     --border-default: rgba(255,255,255,0.10);
     --card-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.2);
