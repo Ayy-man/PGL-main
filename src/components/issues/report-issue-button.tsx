@@ -24,19 +24,18 @@ export function ReportIssueButton({
   const [capturedBlob, setCapturedBlob] = useState<Blob | null>(null);
   const [capturing, setCapturing] = useState(false);
 
-  // Capture screenshot THEN open dialog with a tiny delay.
-  // html2canvas clones the DOM synchronously at invocation, so we start the
-  // capture first, then open the dialog 100ms later — enough for the DOM clone
-  // to complete before the dialog overlay darkens the page. The user sees the
-  // dialog almost instantly (100ms is imperceptible) but gets a clean screenshot.
-  const handleOpen = useCallback(() => {
+  // Capture screenshot fully BEFORE opening the dialog. The button shows
+  // "Capturing..." briefly (~1-2s) so the user knows it's working. This
+  // guarantees html2canvas renders the clean page without the dialog overlay.
+  const handleOpen = useCallback(async () => {
     setCapturing(true);
-    const capturePromise = captureScreenshot();
-    // Delay dialog open so html2canvas clones the clean (no-overlay) DOM first
-    setTimeout(() => setOpen(true), 100);
-    capturePromise
-      .then((blob) => setCapturedBlob(blob))
-      .finally(() => setCapturing(false));
+    try {
+      const blob = await captureScreenshot();
+      setCapturedBlob(blob);
+    } finally {
+      setCapturing(false);
+      setOpen(true);
+    }
   }, []);
 
   return (
@@ -50,7 +49,7 @@ export function ReportIssueButton({
         disabled={capturing}
       >
         <Flag className="mr-2 h-4 w-4" />
-        Report an issue
+        {capturing ? "Capturing page..." : "Report an issue"}
       </Button>
       <ReportIssueDialog
         open={open}
