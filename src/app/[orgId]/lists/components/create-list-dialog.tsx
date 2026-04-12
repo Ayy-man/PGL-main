@@ -16,23 +16,35 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus } from "lucide-react";
 import { createListAction } from "../actions";
+import { useToast } from "@/hooks/use-toast";
+import type { List } from "@/lib/lists/types";
 
-export function CreateListDialog() {
+interface CreateListDialogProps {
+  onCreated?: (list: List) => void;
+}
+
+export function CreateListDialog({ onCreated }: CreateListDialogProps) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     const formData = new FormData(e.currentTarget);
-    const result = await createListAction(formData);
 
-    if (result.success) {
-      setOpen(false);
-      e.currentTarget.reset();
+    // Close dialog optimistically
+    setOpen(false);
+
+    const result = await createListAction(formData);
+    if (result.success && result.list) {
+      onCreated?.(result.list);
+      toast({ title: "List created" });
     } else {
-      alert(result.error || "Failed to create list");
+      // Re-open dialog on failure
+      setOpen(true);
+      toast({ title: "Failed to create list", description: result.error || "An error occurred", variant: "destructive" });
     }
 
     setIsSubmitting(false);

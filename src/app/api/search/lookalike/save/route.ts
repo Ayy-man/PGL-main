@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logActivity } from "@/lib/activity-logger";
+import { revalidatePath } from "next/cache";
 
 export const dynamic = "force-dynamic";
 
@@ -79,6 +80,8 @@ export async function POST(request: NextRequest) {
         generatedFrom: prospectId,
       },
     });
+
+    revalidatePath("/[orgId]/personas", "page");
 
     return NextResponse.json({ personaId: savedPersona.id });
   } catch (error) {

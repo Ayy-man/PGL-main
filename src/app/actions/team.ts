@@ -206,7 +206,7 @@ export async function toggleTeamMemberStatus(userId: string, orgId: string) {
 /**
  * Resend an invite to a pending team member.
  */
-export async function resendInvite(userId: string, orgId: string) {
+export async function resendInvite(userId: string, _orgId: string) {
   const supabase = await createClient();
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) return { error: "Not authenticated" };
@@ -240,7 +240,6 @@ export async function resendInvite(userId: string, orgId: string) {
     return { error: `Failed to resend: ${inviteError.message}` };
   }
 
-  revalidatePath(`/${orgId}/team`);
   return { success: true };
 }
 

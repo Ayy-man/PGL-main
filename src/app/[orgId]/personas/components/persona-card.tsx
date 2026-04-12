@@ -11,6 +11,7 @@ import { PersonaFormDialog } from "./persona-form-dialog";
 interface PersonaCardProps {
   persona: Persona;
   onDelete?: (personaId: string) => void;
+  onUpdated?: (persona: Persona) => void;
 }
 
 interface FilterSection {
@@ -19,7 +20,7 @@ interface FilterSection {
   values: string[];
 }
 
-export function PersonaCard({ persona, onDelete }: PersonaCardProps) {
+export function PersonaCard({ persona, onDelete, onUpdated }: PersonaCardProps) {
   const params = useParams();
   const orgId = params.orgId as string;
   const [cardStyle, setCardStyle] = useState({
@@ -233,6 +234,7 @@ export function PersonaCard({ persona, onDelete }: PersonaCardProps) {
             <PersonaFormDialog
               mode="edit"
               persona={persona}
+              onUpdated={onUpdated}
               trigger={
                 <button
                   className="flex items-center gap-1.5 text-[12px] px-3 py-2 rounded-[8px] cursor-pointer transition-all"

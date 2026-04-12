@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useToast } from "@/hooks/use-toast";
 import {
   Activity,
   Phone,
@@ -169,6 +170,7 @@ function EventRow({ event, users, prospectId, onEventDeleted, onEventUpdated }: 
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const { toast } = useToast();
 
   const Icon = EVENT_ICONS[event.event_type] ?? Activity;
   const iconColor = ICON_COLORS[event.category] ?? "rgba(255,255,255,0.3)";
@@ -182,36 +184,46 @@ function EventRow({ event, users, prospectId, onEventDeleted, onEventUpdated }: 
   const isBackdated = Math.abs(createdAt - eventAt) > 60000;
 
   async function saveEditNote() {
+    const previousNote = event.note;
+    const trimmedNote = editNote.trim() || null;
+    // Optimistic: update parent immediately
+    onEventUpdated({ ...event, note: trimmedNote });
+    setIsEditing(false);
     setIsSaving(true);
     try {
       const res = await fetch(`/api/prospects/${prospectId}/activity/${event.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ note: editNote.trim() || null }),
+        body: JSON.stringify({ note: trimmedNote }),
       });
       if (!res.ok) throw new Error("Failed to update");
       const data = await res.json();
-      onEventUpdated(data.event ?? { ...event, note: editNote.trim() || null });
-      setIsEditing(false);
+      onEventUpdated(data.event ?? { ...event, note: trimmedNote });
     } catch (err) {
       console.error("[TimelineFeed] edit note error:", err);
+      onEventUpdated({ ...event, note: previousNote }); // Rollback
+      setEditNote(previousNote ?? "");
+      setIsEditing(true); // Re-open editor
+      toast({ title: "Save failed", variant: "destructive" });
     } finally {
       setIsSaving(false);
     }
   }
 
   async function deleteEvent() {
-    setIsDeleting(true);
+    // Optimistic: remove from timeline immediately
+    onEventDeleted(event.id);
+    toast({ title: "Activity deleted" });
     try {
       const res = await fetch(`/api/prospects/${prospectId}/activity/${event.id}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("Failed to delete");
-      onEventDeleted(event.id);
     } catch (err) {
       console.error("[TimelineFeed] delete event error:", err);
+      toast({ title: "Delete failed — refresh to restore", variant: "destructive" });
+    } finally {
       setIsDeleting(false);
-      setShowDeleteConfirm(false);
     }
   }
 

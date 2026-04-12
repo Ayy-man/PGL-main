@@ -11,6 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { updateMemberStatusAction } from "../actions";
 import type { ListMemberStatus } from "@/lib/lists/types";
+import { useToast } from "@/hooks/use-toast";
 
 interface MemberStatusSelectProps {
   memberId: string;
@@ -30,6 +31,7 @@ const STATUS_CONFIG: Record<
 export function MemberStatusSelect({ memberId, currentStatus }: MemberStatusSelectProps) {
   const [status, setStatus] = useState<ListMemberStatus>(currentStatus);
   const [isUpdating, setIsUpdating] = useState(false);
+  const { toast } = useToast();
 
   const handleStatusChange = async (newStatus: ListMemberStatus) => {
     setIsUpdating(true);
@@ -38,7 +40,7 @@ export function MemberStatusSelect({ memberId, currentStatus }: MemberStatusSele
     const result = await updateMemberStatusAction(memberId, newStatus);
 
     if (!result.success) {
-      alert(result.error || "Failed to update status");
+      toast({ title: "Failed to update status", description: result.error || "An error occurred", variant: "destructive" });
       setStatus(currentStatus);
     }
 

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { updateMemberNotesAction } from "../actions";
+import { useToast } from "@/hooks/use-toast";
 
 interface MemberNotesCellProps {
   memberId: string;
@@ -12,6 +13,7 @@ export function MemberNotesCell({ memberId, initialNotes }: MemberNotesCellProps
   const [notes, setNotes] = useState(initialNotes);
   const [isSaving, setIsSaving] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout>();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -22,6 +24,7 @@ export function MemberNotesCell({ memberId, initialNotes }: MemberNotesCellProps
         const result = await updateMemberNotesAction(memberId, notes);
         if (!result.success) {
           setNotes(initialNotes);
+          toast({ title: "Failed to save notes", variant: "destructive" });
         }
         setIsSaving(false);
       }, 1000);
@@ -30,7 +33,7 @@ export function MemberNotesCell({ memberId, initialNotes }: MemberNotesCellProps
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, [notes, initialNotes, memberId]);
+  }, [notes, initialNotes, memberId, toast]);
 
   return (
     <input

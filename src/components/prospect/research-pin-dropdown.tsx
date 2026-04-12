@@ -84,8 +84,19 @@ export function ResearchPinDropdown({
 
   const handlePin = async () => {
     if (!editMode) return;
+    const pinnedTarget = editMode;
+    // Optimistic: show pinned state immediately
+    setIsPinned(true);
+    setEditMode(null);
+    setShowUndo(true);
     setIsPinning(true);
     setPinError(null);
+
+    const timeout = setTimeout(() => {
+      setShowUndo(false);
+      setUndoTimeout(null);
+    }, 5000);
+    setUndoTimeout(timeout);
 
     try {
       const res = await fetch(
@@ -95,7 +106,7 @@ export function ResearchPinDropdown({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             card_index: card.index,
-            pin_target: editMode,
+            pin_target: pinnedTarget,
             message_id: messageId,
             edited_headline: editedHeadline,
             edited_summary: editedSummary,
@@ -105,24 +116,23 @@ export function ResearchPinDropdown({
       );
 
       if (res.ok) {
-        setIsPinned(true);
-        setEditMode(null);
-        setShowUndo(true);
-        onPinSuccess?.(card.index, editMode);
-        if (editMode === "note") onNotePinned?.();
-
-        const timeout = setTimeout(() => {
-          setShowUndo(false);
-          setUndoTimeout(null);
-        }, 5000);
-        setUndoTimeout(timeout);
+        onPinSuccess?.(card.index, pinnedTarget);
+        if (pinnedTarget === "note") onNotePinned?.();
       } else {
         const data = await res.json().catch(() => ({}));
         console.error("Pin failed:", data);
+        // Rollback
+        setIsPinned(false);
+        setShowUndo(false);
+        if (undoTimeout) clearTimeout(undoTimeout);
         setPinError(data?.error ?? "Failed to save. Please try again.");
       }
     } catch (err) {
       console.error("Pin request failed:", err);
+      // Rollback
+      setIsPinned(false);
+      setShowUndo(false);
+      if (undoTimeout) clearTimeout(undoTimeout);
       setPinError("Network error. Please try again.");
     } finally {
       setIsPinning(false);

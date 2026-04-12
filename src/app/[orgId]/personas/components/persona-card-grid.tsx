@@ -36,6 +36,16 @@ export function PersonaCardGrid({ personas: serverPersonas, orgId }: PersonaCard
     }
   }, [personas, toast]);
 
+  const handlePersonaCreated = useCallback((persona: Persona) => {
+    setPersonas(prev => [persona, ...prev]);
+    toast({ title: "Saved search created" });
+  }, [toast]);
+
+  const handlePersonaUpdated = useCallback((persona: Persona) => {
+    setPersonas(prev => prev.map(p => p.id === persona.id ? persona : p));
+    toast({ title: "Saved search updated" });
+  }, [toast]);
+
   // Auto-open create dialog from quick action (?create=true)
   useEffect(() => {
     if (searchParams.get("create") === "true") {
@@ -47,7 +57,7 @@ export function PersonaCardGrid({ personas: serverPersonas, orgId }: PersonaCard
   return (
     <div className="grid gap-4 md:gap-5 content-start grid-cols-1 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fill,minmax(340px,1fr))]">
       {personas.map((persona) => (
-        <PersonaCard key={persona.id} persona={persona} onDelete={handleDeletePersona} />
+        <PersonaCard key={persona.id} persona={persona} onDelete={handleDeletePersona} onUpdated={handlePersonaUpdated} />
       ))}
 
       {/* Create New Persona CTA card */}
@@ -55,6 +65,7 @@ export function PersonaCardGrid({ personas: serverPersonas, orgId }: PersonaCard
         mode="create"
         open={createOpen}
         onOpenChange={setCreateOpen}
+        onCreated={handlePersonaCreated}
         trigger={
           <button
             className="rounded-[14px] p-5 md:p-7 w-full cursor-pointer flex flex-col items-center justify-center gap-4 transition-all group card-interactive"

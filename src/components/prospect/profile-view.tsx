@@ -235,7 +235,10 @@ export function ProfileView({
   // Tags state (optimistic)
   const [currentTags, setCurrentTags] = useState<string[]>(tags ?? []);
 
-  // Realtime: refresh page when enrichment data updates
+  // Track when we're making our own edits so Realtime doesn't trigger a redundant refresh
+  const selfEditUntil = useRef<number>(0);
+
+  // Realtime: refresh page when enrichment data updates (but skip our own edits)
   const router = useRouter();
   useEffect(() => {
     const supabase = createClient();
@@ -250,6 +253,8 @@ export function ProfileView({
           filter: `id=eq.${prospect.id}`,
         },
         () => {
+          // Skip refresh if this UPDATE was triggered by our own edit (within last 3s)
+          if (Date.now() < selfEditUntil.current) return;
           router.refresh();
         }
       )
@@ -262,6 +267,8 @@ export function ProfileView({
 
   // Field save handler — PATCH /api/prospects/[id]/profile
   const handleFieldSave = useCallback(async (field: string, value: string | null) => {
+    // Suppress Realtime refresh for our own edit (3s window)
+    selfEditUntil.current = Date.now() + 3000;
     const res = await fetch(`/api/prospects/${prospect.id}/profile`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },

@@ -76,7 +76,7 @@ export async function createPersonaAction(formData: FormData) {
   }
 
   // Create persona
-  await createPersona(tenantId, user.id, {
+  const persona = await createPersona(tenantId, user.id, {
     name: name.trim(),
     description: description?.trim() || undefined,
     filters
@@ -84,6 +84,8 @@ export async function createPersonaAction(formData: FormData) {
 
   // Revalidate personas page
   revalidatePath(`/[orgId]/personas`, "page");
+
+  return persona;
 }
 
 export async function updatePersonaAction(id: string, formData: FormData) {
@@ -139,7 +141,7 @@ export async function updatePersonaAction(id: string, formData: FormData) {
   }
 
   // Update persona
-  await updatePersona(id, tenantId, {
+  const persona = await updatePersona(id, tenantId, {
     name: name?.trim(),
     description: description?.trim() || undefined,
     filters: Object.keys(filters).length > 0 ? filters : undefined
@@ -147,6 +149,8 @@ export async function updatePersonaAction(id: string, formData: FormData) {
 
   // Revalidate personas page
   revalidatePath(`/[orgId]/personas`, "page");
+
+  return persona;
 }
 
 export async function deletePersonaAction(id: string) {

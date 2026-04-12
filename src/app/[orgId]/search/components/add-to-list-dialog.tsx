@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ListPlus } from "lucide-react";
+import { ListPlus } from "lucide-react";
 import Link from "next/link";
 
 interface AddToListDialogProps {
@@ -34,7 +34,6 @@ export function AddToListDialog({
 }: AddToListDialogProps) {
   const [open, setOpen] = useState(false);
   const [selectedListIds, setSelectedListIds] = useState<string[]>([]);
-  const [isSubmitting, _setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   const handleToggleList = (listId: string) => {
@@ -153,15 +152,13 @@ export function AddToListDialog({
             <Button
               variant="outline"
               onClick={() => setOpen(false)}
-              disabled={isSubmitting}
             >
               Cancel
             </Button>
             <Button
               onClick={handleSubmit}
-              disabled={selectedListIds.length === 0 || isSubmitting}
+              disabled={selectedListIds.length === 0}
             >
-              {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               Add to {selectedListIds.length} List{selectedListIds.length === 1 ? "" : "s"}
             </Button>
           </DialogFooter>

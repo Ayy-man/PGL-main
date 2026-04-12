@@ -18,6 +18,7 @@ import {
   EventType,
   EVENT_TITLES,
 } from "@/types/activity";
+import { useToast } from "@/hooks/use-toast";
 
 interface QuickActionBarProps {
   prospectId: string;
@@ -50,6 +51,7 @@ const MENU_ITEMS: {
 ];
 
 export function QuickActionBar({ prospectId, onActivityCreated }: QuickActionBarProps) {
+  const { toast } = useToast();
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeMode, setActiveMode] = useState<ActiveMode>(null);
   const [noteValue, setNoteValue] = useState("");
@@ -98,6 +100,11 @@ export function QuickActionBar({ prospectId, onActivityCreated }: QuickActionBar
 
   async function submit(category: ActivityCategory, eventType: EventType, title: string, note: string | null, eventAt?: string) {
     setIsSubmitting(true);
+    // Optimistic: capture values and reset form immediately
+    const savedNote = noteValue;
+    const savedCustomTitle = customTitle;
+    const savedCustomNote = customNote;
+    setNoteValue("");
     try {
       const res = await fetch(`/api/prospects/${prospectId}/activity`, {
         method: "POST",
@@ -108,8 +115,14 @@ export function QuickActionBar({ prospectId, onActivityCreated }: QuickActionBar
       const data = await res.json();
       onActivityCreated(data.event ?? data);
       handleCancel();
+      toast({ title: "Activity logged" });
     } catch (err) {
       console.error("[QuickActionBar]", err);
+      // Restore form values on failure
+      setNoteValue(savedNote);
+      setCustomTitle(savedCustomTitle);
+      setCustomNote(savedCustomNote);
+      toast({ title: "Failed to log activity", variant: "destructive" });
     } finally {
       setIsSubmitting(false);
     }

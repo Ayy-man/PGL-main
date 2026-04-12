@@ -112,9 +112,11 @@ interface PersonaFormDialogProps {
   onOpenChange?: (open: boolean) => void;
   initialKeywords?: string;
   initialFilterOverrides?: Record<string, unknown>;
+  onCreated?: (persona: Persona) => void;
+  onUpdated?: (persona: Persona) => void;
 }
 
-export function PersonaFormDialog({ mode, persona, trigger, open: controlledOpen, onOpenChange, initialKeywords, initialFilterOverrides }: PersonaFormDialogProps) {
+export function PersonaFormDialog({ mode, persona, trigger, open: controlledOpen, onOpenChange, initialKeywords, initialFilterOverrides, onCreated, onUpdated }: PersonaFormDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
   const setOpen = onOpenChange || setInternalOpen;
@@ -269,15 +271,21 @@ export function PersonaFormDialog({ mode, persona, trigger, open: controlledOpen
 
     const formData = new FormData(e.currentTarget);
 
+    // Close dialog immediately (optimistic)
+    setOpen(false);
+
     startTransition(async () => {
       try {
         if (mode === "create") {
-          await createPersonaAction(formData);
+          const created = await createPersonaAction(formData);
+          onCreated?.(created);
         } else if (persona) {
-          await updatePersonaAction(persona.id, formData);
+          const updated = await updatePersonaAction(persona.id, formData);
+          onUpdated?.(updated);
         }
-        setOpen(false);
       } catch (err) {
+        // Re-open dialog with error since it failed
+        setOpen(true);
         setError(err instanceof Error ? err.message : "An error occurred");
       }
     });
