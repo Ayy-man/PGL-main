@@ -29,10 +29,13 @@ export const dynamic = "force-dynamic";
  */
 export default async function ProspectProfilePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ orgId: string; prospectId: string }>;
+  searchParams: Promise<{ from?: string; listId?: string; listName?: string; searchId?: string; searchName?: string }>;
 }) {
   const { orgId, prospectId } = await params;
+  const { from, listId, listName, searchId, searchName } = await searchParams;
 
   // Validate user session
   const supabase = await createClient();
@@ -360,6 +363,11 @@ export default async function ProspectProfilePage({
         initialSignals={signalsWithSeen}
         signalCount={signalCount || 0}
         researchNotes={researchNotes ?? []}
+        breadcrumbFrom={from}
+        breadcrumbListId={listId}
+        breadcrumbListName={listName}
+        breadcrumbSearchId={searchId}
+        breadcrumbSearchName={searchName}
       />
     </div>
   );

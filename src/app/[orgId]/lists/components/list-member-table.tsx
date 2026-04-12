@@ -30,6 +30,8 @@ import { ProspectAvatar } from "@/components/prospect/prospect-avatar";
 
 interface ListMemberTableProps {
   members: ListMember[];
+  listId?: string;
+  listName?: string;
 }
 
 /** Shorten location: "Boston, MA, United States" → "Boston, MA" */
@@ -139,9 +141,12 @@ function CopyButton({ text, icon: Icon }: { text: string; icon: typeof Mail }) {
   );
 }
 
-export function ListMemberTable({ members: serverMembers }: ListMemberTableProps) {
+export function ListMemberTable({ members: serverMembers, listId, listName }: ListMemberTableProps) {
   const params = useParams();
   const orgId = params.orgId as string;
+  const fromQuery = listId && listName
+    ? `?from=list&listId=${listId}&listName=${encodeURIComponent(listName)}`
+    : "";
   const [members, setMembers] = useState(serverMembers);
   const [enrichingId, setEnrichingId] = useState<string | null>(null);
   const { toast } = useToast();
@@ -213,7 +218,7 @@ export function ListMemberTable({ members: serverMembers }: ListMemberTableProps
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
                         <Link
-                          href={`/${orgId}/prospects/${member.prospect.id}`}
+                          href={`/${orgId}/prospects/${member.prospect.id}${fromQuery}`}
                           className="text-[15px] font-semibold truncate hover:underline transition-colors"
                           style={{ color: "var(--gold-primary)" }}
                         >
@@ -340,7 +345,7 @@ export function ListMemberTable({ members: serverMembers }: ListMemberTableProps
                   />
                   <EnrichmentDot status={enrichingId === member.prospect.id ? "in_progress" : member.prospect.enrichment_status} />
                   <Link
-                    href={`/${orgId}/prospects/${member.prospect.id}`}
+                    href={`/${orgId}/prospects/${member.prospect.id}${fromQuery}`}
                     className="text-sm font-semibold truncate hover:underline"
                     style={{ color: "var(--gold-primary)" }}
                   >

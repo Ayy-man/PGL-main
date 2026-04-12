@@ -100,6 +100,8 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
   // PersonaFormDialog controlled state (shared by Discover "Save as new search"
   // button and sidebar "+ New" button)
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  // Edit dialog for modifying saved search filters (BUG-010)
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   const {
     searchState,
@@ -226,6 +228,19 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
 
   const handleDismiss = useCallback(async (apolloPersonIds: string[]) => {
     if (!searchState.persona) return;
+
+    // Save for rollback
+    const previousProspects = savedProspects;
+    const previousDismissedCount = dismissedCount;
+
+    // Optimistic update
+    setSavedProspects(prev => prev.filter(p => !apolloPersonIds.includes(p.apollo_person_id)));
+    setDismissedCount(prev => prev + apolloPersonIds.length);
+    setSelectedIds(new Set());
+    setDismissDialogOpen(false);
+    setPendingDismissIds([]);
+    toast({ title: `${apolloPersonIds.length} prospect${apolloPersonIds.length > 1 ? "s" : ""} dismissed` });
+
     try {
       const resp = await fetch(`/api/search/${searchState.persona}/dismiss`, {
         method: "POST",
@@ -233,18 +248,20 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
         body: JSON.stringify({ action: apolloPersonIds.length > 1 ? "bulk-dismiss" : "dismiss", apolloPersonIds }),
       });
       if (!resp.ok) throw new Error("Dismiss failed");
-      // Remove dismissed from local state
-      setSavedProspects(prev => prev.filter(p => !apolloPersonIds.includes(p.apollo_person_id)));
-      setDismissedCount(prev => prev + apolloPersonIds.length);
-      setSelectedIds(new Set());
-      toast({ title: `${apolloPersonIds.length} prospect${apolloPersonIds.length > 1 ? "s" : ""} dismissed` });
     } catch {
-      toast({ title: "Dismiss failed", variant: "destructive" });
+      // Rollback
+      setSavedProspects(previousProspects);
+      setDismissedCount(previousDismissedCount);
+      toast({ title: "Dismiss failed", description: "Could not dismiss prospect(s).", variant: "destructive" });
     }
-  }, [searchState.persona, toast]);
+  }, [searchState.persona, savedProspects, dismissedCount, toast]);
 
   const handleUndoDismiss = useCallback(async (apolloPersonId: string) => {
     if (!searchState.persona) return;
+
+    setDismissedCount(prev => Math.max(0, prev - 1));
+    toast({ title: "Prospect restored" });
+
     try {
       const resp = await fetch(`/api/search/${searchState.persona}/dismiss`, {
         method: "POST",
@@ -252,11 +269,11 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
         body: JSON.stringify({ action: "undo", apolloPersonIds: [apolloPersonId] }),
       });
       if (!resp.ok) throw new Error("Undo failed");
-      // Reload to get updated data
+      // Reload in background to get the restored prospect
       await loadSavedProspects(searchState.persona);
-      toast({ title: "Prospect restored" });
     } catch {
-      toast({ title: "Undo failed", variant: "destructive" });
+      setDismissedCount(prev => prev + 1);
+      toast({ title: "Restore failed", variant: "destructive" });
     }
   }, [searchState.persona, loadSavedProspects, toast]);
 
@@ -1166,6 +1183,7 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
               lastRefreshedAt={lastRefreshedAt}
               onRefresh={() => handleRefresh()}
               isRefreshing={isRefreshing}
+
               headerRightSlot={
                 isSavedSearchMode ? (
                   <button
@@ -1199,6 +1217,27 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
         initialKeywords={searchState.keywords}
         initialFilterOverrides={{ ...lastParsedFilters, ...filterOverrides }}
       />
+
+      {/* Edit filters dialog for saved searches (BUG-010) */}
+      {searchState.persona && (() => {
+        const editPersona = personas.find(p => p.id === searchState.persona);
+        if (!editPersona) return null;
+        return (
+          <PersonaFormDialog
+            mode="edit"
+            persona={editPersona}
+            open={editDialogOpen}
+            onOpenChange={(next) => {
+              setEditDialogOpen(next);
+              // After closing edit dialog, refresh to pick up updated filters
+              if (!next && searchState.persona) {
+                handleRefresh(searchState.persona);
+              }
+            }}
+            trigger={null}
+          />
+        );
+      })()}
 
       {/* Bulk list selection dialog */}
       <Dialog open={bulkListDialogOpen} onOpenChange={setBulkListDialogOpen}>
@@ -1411,6 +1450,11 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
           setBulkSelectedListIds([]);
           setBulkListDialogOpen(true);
         }}
+        fromQuery={
+          isSavedSearchMode && searchState.persona
+            ? `?from=saved-search&searchId=${searchState.persona}&searchName=${encodeURIComponent(personas.find(p => p.id === searchState.persona)?.name ?? "")}`
+            : "?from=search"
+        }
       />
     </div>
   );

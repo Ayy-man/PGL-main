@@ -94,7 +94,7 @@ export default async function ListDetailPage({ params }: PageProps) {
           description="Add prospects from the search page to start building your pipeline."
         />
       ) : (
-        <ListMemberTable members={members} />
+        <ListMemberTable members={members} listId={listId} listName={list.name} />
       )}
     </div>
   );

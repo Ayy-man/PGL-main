@@ -27,6 +27,7 @@ interface ProspectSlideOverProps {
   orgId?: string;
   onEnrich?: (prospectId: string) => void;
   onAddToList?: (prospectId: string) => void;
+  fromQuery?: string;
 }
 
 export function ProspectSlideOver({
@@ -37,6 +38,7 @@ export function ProspectSlideOver({
   orgId,
   onEnrich,
   onAddToList,
+  fromQuery = "?from=search",
 }: ProspectSlideOverProps) {
   const [reEnriching, setReEnriching] = useState(false);
   const { toast } = useToast();
@@ -90,7 +92,7 @@ export function ProspectSlideOver({
 
           {isEnriched && prospect && orgId && prospectId ? (
             <Link
-              href={`/${orgId}/prospects/${prospectId}`}
+              href={`/${orgId}/prospects/${prospectId}${fromQuery}`}
               className="cursor-pointer text-sm transition-colors hover:text-[var(--gold-muted)]"
               style={{ color: "var(--gold-primary)" }}
             >

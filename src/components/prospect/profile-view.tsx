@@ -142,6 +142,11 @@ interface ProfileViewProps {
   initialSignals?: Array<import("@/types/database").ProspectSignal & { is_seen: boolean }>;
   signalCount?: number;
   researchNotes?: Array<{ edited_headline: string | null; edited_summary: string | null; created_at: string }>;
+  breadcrumbFrom?: string;
+  breadcrumbListId?: string;
+  breadcrumbListName?: string;
+  breadcrumbSearchId?: string;
+  breadcrumbSearchName?: string;
 }
 
 /**
@@ -170,6 +175,11 @@ export function ProfileView({
   initialSignals,
   signalCount,
   researchNotes = [],
+  breadcrumbFrom,
+  breadcrumbListId,
+  breadcrumbListName,
+  breadcrumbSearchId,
+  breadcrumbSearchName,
 }: ProfileViewProps) {
   const [showLookalikes, setShowLookalikes] = useState(false);
   const [noteText, setNoteText] = useState(prospect.notes ?? "");
@@ -335,10 +345,24 @@ export function ProfileView({
       {/* Breadcrumbs + Find Lookalikes */}
       <div className="flex flex-wrap gap-2 mb-4 items-center justify-between">
         <Breadcrumbs
-          items={[
-            { label: "Search Results", href: `/${orgId}/search` },
-            { label: prospect.full_name },
-          ]}
+          items={
+            breadcrumbFrom === "list" && breadcrumbListId
+              ? [
+                  { label: "Lists", href: `/${orgId}/lists` },
+                  { label: breadcrumbListName || "List", href: `/${orgId}/lists/${breadcrumbListId}` },
+                  { label: prospect.full_name },
+                ]
+              : breadcrumbFrom === "saved-search" && breadcrumbSearchId
+                ? [
+                    { label: "Saved Searches", href: `/${orgId}/search?persona=${breadcrumbSearchId}` },
+                    { label: breadcrumbSearchName || "Saved Search", href: `/${orgId}/search?persona=${breadcrumbSearchId}` },
+                    { label: prospect.full_name },
+                  ]
+                : [
+                    { label: "Search Results", href: `/${orgId}/search` },
+                    { label: prospect.full_name },
+                  ]
+          }
         />
         <button
           className="flex items-center gap-2 rounded-[8px] px-4 py-2 text-sm font-medium transition-all cursor-pointer"

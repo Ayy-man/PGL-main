@@ -69,7 +69,7 @@ function createColumns(lists: List[], orgId: string): ColumnDef<ApolloPerson>[] 
         const name = row.original.name;
         return prospectId ? (
           <Link
-            href={`/${orgId}/prospects/${prospectId}`}
+            href={`/${orgId}/prospects/${prospectId}?from=search`}
             className="font-medium min-w-[140px] text-foreground hover:text-gold transition-colors cursor-pointer"
           >
             {name}
