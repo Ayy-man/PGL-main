@@ -28,14 +28,9 @@ export function ReportIssueButton({
   // "Capturing..." briefly (~1-2s) so the user knows it's working. This
   // guarantees html2canvas renders the clean page without the dialog overlay.
   const handleOpen = useCallback(async () => {
-    setCapturing(true);
-    try {
-      const blob = await captureScreenshot();
-      setCapturedBlob(blob);
-    } finally {
-      setCapturing(false);
-      setOpen(true);
-    }
+    // Screenshot capture disabled — html2canvas-pro can't render oklch() colors,
+    // producing misleading images. The report captures URL + viewport + context instead.
+    setOpen(true);
   }, []);
 
   return (

@@ -41,7 +41,7 @@ export function ReportIssueDialog({
   const { toast } = useToast();
   const [category, setCategory] = useState<IssueCategory>("incorrect_data");
   const [description, setDescription] = useState("");
-  const [includeScreenshot, setIncludeScreenshot] = useState(true);
+  const [includeScreenshot, setIncludeScreenshot] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
