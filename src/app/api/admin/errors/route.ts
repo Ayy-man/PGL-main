@@ -118,7 +118,7 @@ export async function GET(request: NextRequest) {
       // Source 2: API errors from error_log table
       admin
         .from("error_log")
-        .select("*")
+        .select("id, route, method, status_code, error_message, error_code, tenant_id, created_at")
         .gte("created_at", cutoffISO)
         .order("created_at", { ascending: false })
         .limit(200),

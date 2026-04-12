@@ -218,7 +218,8 @@ export default async function ProspectProfilePage({
   const { data: allLists } = await supabase
     .from("lists")
     .select("id, name, description, member_count")
-    .order("name", { ascending: true });
+    .order("name", { ascending: true })
+    .limit(200);
 
   // Fetch prospect tags
   const { data: prospectTags } = await supabase
@@ -280,7 +281,8 @@ export default async function ProspectProfilePage({
       supabase
         .from("prospect_tags")
         .select("tag")
-        .eq("tenant_id", tenantId),
+        .eq("tenant_id", tenantId)
+        .limit(500),
     ]);
     teamMembers = membersResult.data ?? [];
     tagSuggestions = Array.from(new Set(allTagsResult.data?.map((t) => t.tag) ?? []));

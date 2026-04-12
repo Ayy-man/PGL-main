@@ -117,7 +117,7 @@ export async function GET(request: NextRequest) {
 
     let query = queryClient
       .from("usage_metrics_daily")
-      .select("*")
+      .select("date, user_id, total_logins, searches_executed, profiles_viewed, profiles_enriched, csv_exports, lists_created")
       .gte("date", startDateString)
       .lte("date", endDateString)
       .order("date", { ascending: true });

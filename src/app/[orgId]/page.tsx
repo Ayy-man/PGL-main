@@ -76,7 +76,7 @@ export default async function TenantDashboard({
           try {
             const { data: metrics } = await supabase
               .from("usage_metrics_daily")
-              .select("*")
+              .select("total_logins, searches_executed, profiles_viewed, profiles_enriched, csv_exports, lists_created")
               .eq("tenant_id", tenantId)
               .gte("date", startDateStr)
               .lte("date", endDateStr);
@@ -117,7 +117,7 @@ export default async function TenantDashboard({
       try {
         const { data } = await supabase
           .from("activity_log")
-          .select("*")
+          .select("id, user_id, action_type, created_at, metadata")
           .eq("tenant_id", tenantId)
           .eq("action_type", "csv_exported")
           .order("created_at", { ascending: false })

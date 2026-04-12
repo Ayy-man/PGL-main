@@ -61,3 +61,22 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_tenants_slug
 -- ============================================================
 CREATE INDEX IF NOT EXISTS idx_personas_tenant
   ON personas(tenant_id);
+
+-- ============================================================
+-- RPC: atomic JSONB merge for enrichment_source_status
+-- Eliminates read-modify-write cycle (N+1) in enrich-prospect
+-- ============================================================
+CREATE OR REPLACE FUNCTION merge_enrichment_source_status(
+  p_prospect_id UUID,
+  p_source TEXT,
+  p_payload JSONB
+) RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  UPDATE prospects
+  SET enrichment_source_status = COALESCE(enrichment_source_status, '{}'::jsonb) || jsonb_build_object(p_source, p_payload)
+  WHERE id = p_prospect_id;
+END;
+$$;

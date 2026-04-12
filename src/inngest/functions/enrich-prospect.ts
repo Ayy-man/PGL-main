@@ -20,23 +20,12 @@ async function updateSourceStatus(
 ): Promise<void> {
   const supabase = createAdminClient();
 
-  // Fetch current status
-  const { data: currentProspect } = await supabase
-    .from("prospects")
-    .select("enrichment_source_status")
-    .eq("id", prospectId)
-    .single();
-
-  // Update the specific source status
-  const updatedStatus = {
-    ...(currentProspect?.enrichment_source_status || {}),
-    [source]: payload,
-  };
-
-  await supabase
-    .from("prospects")
-    .update({ enrichment_source_status: updatedStatus })
-    .eq("id", prospectId);
+  // Atomic JSONB merge — single write instead of read-modify-write
+  await supabase.rpc("merge_enrichment_source_status", {
+    p_prospect_id: prospectId,
+    p_source: source,
+    p_payload: payload,
+  });
 }
 
 /**
