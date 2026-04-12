@@ -10,6 +10,7 @@ export interface ApolloSearchParams {
   person_locations?: string[];
   organization_num_employees_ranges?: string[];
   q_keywords?: string;
+  q_person_name?: string;
   page: number;
   per_page: number;
 }

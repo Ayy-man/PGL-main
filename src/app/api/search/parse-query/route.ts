@@ -11,6 +11,7 @@ const SYSTEM_PROMPT = `You are a search query parser for a lead generation platf
 
 Return ONLY valid JSON with this structure (omit fields that aren't mentioned in the query):
 {
+  "person_name": "a specific person's name if the query is searching for a particular individual (e.g. 'Andrew Kantor', 'Elon Musk')",
   "organization_names": ["array of specific company names mentioned, e.g. 'Jane Street', 'Goldman Sachs'"],
   "titles": ["array of job titles"],
   "seniorities": ["from ONLY: owner, founder, c_suite, partner, vp, head, director, manager, senior, entry, intern"],
@@ -21,6 +22,7 @@ Return ONLY valid JSON with this structure (omit fields that aren't mentioned in
 }
 
 Rules:
+- If the query is primarily a person's name (e.g. "Andrew Kantor", "find Elon Musk", "John Smith at Goldman"), extract the name into person_name. A person name can be combined with organization_names (e.g. "John Smith at Goldman Sachs" → person_name: "John Smith", organization_names: ["Goldman Sachs"]).
 - If the user mentions specific companies by name, extract them into organization_names. Don't put company names into keywords — use organization_names instead.
 - Map natural language to the EXACT Apollo enum values listed above
 - "C-level", "C-suite", "executive" → seniority "c_suite"
@@ -46,7 +48,19 @@ User: "C-suite biotech executives in Boston with IPO experience"
 Output: {"titles":["CEO","CFO","COO","CTO","Chief Medical Officer","Chief Scientific Officer"],"seniorities":["c_suite"],"industries":["Biotechnology","Pharmaceuticals"],"locations":["Boston, Massachusetts"],"keywords":"IPO"}
 
 User: "VP of sales at SaaS companies with 500+ employees"
-Output: {"titles":["VP of Sales","Vice President of Sales","Head of Sales","SVP Sales"],"seniorities":["vp","director"],"industries":["Computer Software","Internet"],"companySize":["501,1000","1001,2000","2001,5000","5001,10000","10001,"]}`;
+Output: {"titles":["VP of Sales","Vice President of Sales","Head of Sales","SVP Sales"],"seniorities":["vp","director"],"industries":["Computer Software","Internet"],"companySize":["501,1000","1001,2000","2001,5000","5001,10000","10001,"]}
+
+User: "Andrew Kantor"
+Output: {"person_name":"Andrew Kantor"}
+
+User: "find John Smith at Goldman Sachs"
+Output: {"person_name":"John Smith","organization_names":["Goldman Sachs"]}
+
+User: "employees at Tesla"
+Output: {"organization_names":["Tesla"]}
+
+User: "Elon Musk"
+Output: {"person_name":"Elon Musk"}`;
 
 const VALID_SENIORITIES = new Set([
   "owner", "founder", "c_suite", "partner", "vp", "head",
@@ -158,12 +172,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Single-word queries — just use as keywords, skip LLM
+    // Single-word queries — check if it looks like a name (capitalized) or just a keyword
     const wordCount = query.trim().split(/\s+/).length;
-    if (wordCount <= 1) {
+    const trimmed = query.trim();
+    const looksLikeName = wordCount === 1 && /^[A-Z][a-z]+$/.test(trimmed);
+    if (wordCount <= 1 && !looksLikeName) {
       console.info(`[parse-query] Single-word query, skipping LLM -> keywords only (${Date.now() - start}ms)`);
       return NextResponse.json({
-        filters: { keywords: query.trim() },
+        filters: { keywords: trimmed },
         parsed: false,
       });
     }

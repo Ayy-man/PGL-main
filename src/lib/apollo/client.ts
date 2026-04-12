@@ -56,6 +56,11 @@ export function translateFiltersToApolloParams(
     );
   }
 
+  // Person name search — direct name lookup via Apollo's q_person_name
+  if (filters.person_name?.trim()) {
+    params.q_person_name = filters.person_name.trim();
+  }
+
   // Organization keyword tags — merge `industries` and free-text `keywords`.
   //
   // Apollo's own UI "Keywords" search matches broadly across BOTH person
