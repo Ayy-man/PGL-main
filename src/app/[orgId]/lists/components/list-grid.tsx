@@ -6,33 +6,36 @@ import { Button } from "@/components/ui/button";
 import { Trash2, Download, Loader2 } from "lucide-react";
 import { deleteListAction } from "../actions";
 import type { List } from "@/lib/lists/types";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 interface ListGridProps {
   lists: List[];
 }
 
-export function ListGrid({ lists }: ListGridProps) {
+export function ListGrid({ lists: serverLists }: ListGridProps) {
   const params = useParams();
   const orgId = params.orgId as string;
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [lists, setLists] = useState(serverLists);
   const [exportingId, setExportingId] = useState<string | null>(null);
   const { toast } = useToast();
+
+  useEffect(() => { setLists(serverLists); }, [serverLists]);
 
   const handleDelete = async (listId: string) => {
     if (!confirm("Are you sure you want to delete this list? This cannot be undone.")) {
       return;
     }
 
-    setDeletingId(listId);
+    const previousLists = lists;
+    setLists(prev => prev.filter(l => l.id !== listId));
+    toast({ title: "List deleted" });
+
     const result = await deleteListAction(listId);
-
     if (!result.success) {
-      alert(result.error || "Failed to delete list");
+      setLists(previousLists);
+      toast({ title: "Delete failed", description: result.error || "Could not delete list.", variant: "destructive" });
     }
-
-    setDeletingId(null);
   };
 
   const handleExport = async (listId: string, listName: string) => {
@@ -127,7 +130,6 @@ export function ListGrid({ lists }: ListGridProps) {
               size="icon"
               className="h-8 w-8 text-muted-foreground hover:text-destructive cursor-pointer"
               onClick={() => handleDelete(list.id)}
-              disabled={deletingId === list.id}
               aria-label="Delete list"
             >
               <Trash2 className="h-3.5 w-3.5" />

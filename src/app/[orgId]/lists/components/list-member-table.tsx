@@ -24,7 +24,7 @@ import { MemberStatusSelect } from "./member-status-select";
 import { MemberNotesCell } from "./member-notes-cell";
 import { removeFromListAction } from "../actions";
 import type { ListMember } from "@/lib/lists/types";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { ProspectAvatar } from "@/components/prospect/prospect-avatar";
 
@@ -201,7 +201,7 @@ export function ListMemberTable({ members }: ListMemberTableProps) {
                       email={member.prospect.email}
                       size="md"
                     />
-                    <EnrichmentDot status={member.prospect.enrichment_status} />
+                    <EnrichmentDot status={enrichingId === member.prospect.id ? "in_progress" : member.prospect.enrichment_status} />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
                         <Link
@@ -331,7 +331,7 @@ export function ListMemberTable({ members }: ListMemberTableProps) {
                     email={member.prospect.email}
                     size="sm"
                   />
-                  <EnrichmentDot status={member.prospect.enrichment_status} />
+                  <EnrichmentDot status={enrichingId === member.prospect.id ? "in_progress" : member.prospect.enrichment_status} />
                   <Link
                     href={`/${orgId}/prospects/${member.prospect.id}`}
                     className="text-sm font-semibold truncate hover:underline"
