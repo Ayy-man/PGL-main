@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { logActivity } from "@/lib/activity-logger";
-import type { IssueReport } from "@/types/database";
 
 export const dynamic = "force-dynamic";
 
@@ -109,10 +109,13 @@ export async function POST(request: Request) {
     }
   }
 
-  // Insert row first WITHOUT screenshot_path to get the generated id,
-  // then upload screenshot using that id, then UPDATE screenshot_path.
-  // Rationale: we need the row id for the storage path.
-  const insertRow: Omit<IssueReport, "id" | "created_at" | "updated_at" | "status" | "admin_notes" | "resolved_by" | "resolved_at"> & { screenshot_path: string | null } = {
+  // Generate the ID client-side so we don't need .select("id") after insert.
+  // Supabase .insert().select() requires SELECT permission, but tenants have
+  // INSERT-only RLS (no SELECT policy). Using crypto.randomUUID() avoids this.
+  const reportId = crypto.randomUUID();
+
+  const insertRow = {
+    id: reportId,
     tenant_id: tenantId,
     user_id: user.id,
     category: payload.category,
@@ -127,28 +130,25 @@ export async function POST(request: Request) {
     screenshot_path: null,
   };
 
-  const { data: inserted, error: insertError } = await supabase
+  const { error: insertError } = await supabase
     .from("issue_reports")
-    .insert(insertRow)
-    .select("id")
-    .single();
+    .insert(insertRow);
 
-  if (insertError || !inserted) {
+  if (insertError) {
     console.error("[issue-report] INSERT failed:", {
-      code: insertError?.code,
-      message: insertError?.message,
-      details: insertError?.details,
-      hint: insertError?.hint,
+      code: insertError.code,
+      message: insertError.message,
+      details: insertError.details,
+      hint: insertError.hint,
       tenantId,
       userId: user.id,
       category: payload.category,
     });
     return NextResponse.json(
-      { error: "Failed to create report", details: insertError?.message, code: insertError?.code },
+      { error: "Failed to create report", details: insertError.message, code: insertError.code },
       { status: 500 }
     );
   }
-  const reportId = inserted.id as string;
 
   // Upload screenshot if provided; fall back to null on failure
   let screenshotPath: string | null = null;
@@ -164,7 +164,9 @@ export async function POST(request: Request) {
         });
       if (!uploadError) {
         screenshotPath = path;
-        await supabase
+        // Use admin client for UPDATE — tenant has INSERT-only RLS, no UPDATE policy
+        const admin = createAdminClient();
+        await admin
           .from("issue_reports")
           .update({ screenshot_path: path })
           .eq("id", reportId);
