@@ -38,7 +38,8 @@ export async function POST(request: Request) {
     error: userError,
   } = await supabase.auth.getUser();
   if (userError || !user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    console.error("[issue-report] Auth failed:", userError?.message);
+    return NextResponse.json({ error: "Unauthorized", details: userError?.message }, { status: 401 });
   }
   const tenantId = user.app_metadata?.tenant_id as string | undefined;
   if (!tenantId) {
@@ -133,8 +134,17 @@ export async function POST(request: Request) {
     .single();
 
   if (insertError || !inserted) {
+    console.error("[issue-report] INSERT failed:", {
+      code: insertError?.code,
+      message: insertError?.message,
+      details: insertError?.details,
+      hint: insertError?.hint,
+      tenantId,
+      userId: user.id,
+      category: payload.category,
+    });
     return NextResponse.json(
-      { error: "Failed to create report", details: insertError?.message },
+      { error: "Failed to create report", details: insertError?.message, code: insertError?.code },
       { status: 500 }
     );
   }
