@@ -713,7 +713,7 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
     return (
       <div ref={resultsRef}>
         {/* Bulk actions bar */}
-        {((isSavedSearchMode && savedProspects.length > 0) || (!isSavedSearchMode && searchState.persona && results.length > 0)) && (
+        {((isSavedSearchMode && savedProspects.length > 0) || (!isSavedSearchMode && hasActiveSearch && results.length > 0)) && (
           <BulkActionsBar
             selectedCount={selectedIds.size}
             totalCount={activeResultCount}
@@ -758,7 +758,7 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
         )}
 
         {/* Prospect results table */}
-        {((isSavedSearchMode && savedProspects.length > 0) || (!isSavedSearchMode && searchState.persona && results.length > 0)) && (
+        {((isSavedSearchMode && savedProspects.length > 0) || (!isSavedSearchMode && hasActiveSearch && results.length > 0)) && (
           <div style={{ opacity: isLoading && !isRefreshing ? 0.5 : 1, transition: "opacity 0.2s ease" }}>
             <ProspectResultsTable
               results={tableResults}
@@ -1091,7 +1091,6 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
                     active_tab: activeTab,
                     page: searchState.page ?? 1,
                     page_size: PAGE_SIZE,
-                    is_loading: searchState.loading ?? false,
                     total_personas: personas.length,
                   },
                 }}
