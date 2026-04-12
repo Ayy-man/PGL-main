@@ -116,6 +116,165 @@ export function ReportDetail({ report: initialReport, screenshotUrl }: ReportDet
   const [isPending, startTransition] = useTransition();
   const [copied, setCopied] = useState(false);
 
+  const buildDebugPrompt = useCallback(() => {
+    const snap = report.target_snapshot as Record<string, unknown> | null;
+    const cat = report.category;
+    const targetType = report.target_type;
+    const lines: string[] = [
+      "",
+      "## Debugging Guide for Claude Code",
+      "",
+      "You are debugging a tenant-reported issue in the PGL (Phronesis) platform.",
+      "Use the context above to diagnose the root cause.",
+      "",
+      "### Logging & Telemetry",
+      "- **Error log table:** Query `error_log` in Supabase for recent errors matching this tenant/prospect",
+      "- **Activity log:** Query `activity_log` table filtered by `tenant_id` and `target_id` for recent actions",
+      "- **Vercel runtime logs:** Check Vercel dashboard → Functions tab for the relevant API route",
+      "- **Inngest dashboard:** Check `https://app.inngest.com` for `enrich-prospect` function runs if enrichment-related",
+      "- **Admin errors page:** `/admin` dashboard has an error feed aggregating recent failures",
+      "",
+    ];
+
+    // Category-specific guidance
+    if (cat === "incorrect_data") {
+      lines.push(
+        "### Incorrect Data Investigation",
+        "The tenant says data is wrong. Check the enrichment pipeline in this order:",
+        "",
+        "1. **Apollo source data:** `src/lib/apollo/types.ts`, `src/lib/circuit-breaker/apollo-breaker.ts`",
+        "   - Check if Apollo returned bad data: query `prospects` table for `apollo_id` and compare `name`, `title`, `company` against Apollo's API response",
+        "2. **ContactOut enrichment:** `src/lib/enrichment/contactout.ts`",
+        "   - Check `enrichment_source_status.contactout` in the snapshot — if `failed` or `skipped`, ContactOut may have returned garbage",
+        "   - ContactOut sandbox API returns fake \"Example Person\" data — check if `CONTACTOUT_API_KEY` is still sandbox-only",
+        "3. **AI dossier generation:** `src/lib/enrichment/generate-dossier.ts`",
+        "   - If the dossier text is wrong, check the prompt and the Claude model output",
+        "   - Check `dossier_model` and `dossier_generated_at` in snapshot for staleness",
+        "4. **Manual overrides:** If `has_manual_overrides` is true in the snapshot, a user previously corrected this data — check `manual_*` columns on the `prospects` table",
+        "",
+      );
+    } else if (cat === "missing_data") {
+      lines.push(
+        "### Missing Data Investigation",
+        "The tenant says data is incomplete. Check what enrichment sources ran:",
+        "",
+        "1. **Check `enrichment_source_status` in snapshot** — which sources are `pending`, `failed`, `skipped`, or `no_data`?",
+        "2. **Inngest job status:** `src/inngest/functions/enrich-prospect.ts`",
+        "   - If `enrichment_status` is not `complete`, check Inngest for the `enrich-prospect` function run",
+        "   - The function has a step-0 duplicate guard — if this prospect was already enriched, re-enrichment requires `force=true` via `POST /api/prospects/{id}/enrich?force=true`",
+        "3. **SEC EDGAR:** `src/lib/enrichment/sec-edgar.ts`, `src/lib/sec/efts-search.ts`",
+        "   - Check if `company_cik` and `publicly_traded_symbol` are null — if so, SEC lookup was skipped (private company)",
+        "   - EFTS uses `entityName=` not `q=` for insider name searches",
+        "4. **Exa web research:** `src/lib/enrichment/exa-enrichment.ts`",
+        "   - Check if `enrichment_source_status.exa` is `no_data` — Exa may have found no relevant web presence",
+        "5. **Signal count:** If `signal_count` is 0, check `prospect_signals` table — signals may exist but with wrong `tenant_id`",
+        "",
+      );
+    } else if (cat === "bad_source") {
+      lines.push(
+        "### Bad Source Investigation",
+        "The tenant says a source link is broken or cites the wrong content:",
+        "",
+        "1. **Check `prospect_signals` table** for this prospect — look at `source_url` values",
+        "   - SEC filing URLs: should point to `sec.gov/cgi-bin/browse-edgar` or `sec.gov/Archives/edgar`",
+        "   - Exa URLs: web sources from Exa search — verify they're still live",
+        "2. **SEC Form 4 parser:** `src/lib/sec/form4-parser.ts`",
+        "   - Check if `source_url` is populated — the unique index on `(prospect_id, source_url)` requires non-null URLs",
+        "   - If source_url was null, duplicate signals may have been created on re-enrichment",
+        "3. **Dossier citations:** The `intelligence_dossier` may reference source URLs — check if they're still valid",
+        "4. **Research pins:** Check `research_pins` table for any Exa research results pinned to this prospect",
+        "",
+      );
+    } else if (cat === "bug") {
+      lines.push(
+        "### Bug Investigation",
+        "The tenant reports broken functionality. Start with the page they were on:",
+        "",
+        `1. **Page route:** \`${report.page_path}\``,
+        `   - Map to source: \`src/app/${report.page_path.replace(/^\/[^/]+\//, "[orgId]/").replace(/\/[0-9a-f-]{36}/g, "/[id]")}\``,
+        "2. **Check Vercel runtime logs** for 500s on this route around `" + report.created_at + "`",
+        "3. **Check `error_log` table** in Supabase: `SELECT * FROM error_log WHERE created_at > '${report.created_at}'::timestamptz - interval '5 minutes' ORDER BY created_at DESC LIMIT 20`",
+        "4. **Check browser errors:** The screenshot may show a broken UI state — compare against the expected layout",
+        "5. **Common causes:**",
+        "   - RLS policy blocking a query (user gets empty data instead of an error)",
+        "   - Supabase column added in migration but not in TypeScript types (`src/types/database.ts`)",
+        "   - Null prospect join in `list_members` — always null-guard `list_members.prospects`",
+        "   - `APOLLO_MOCK_ENRICHMENT=true` on Vercel returns fake data — check env var",
+        "",
+      );
+    }
+
+    // Target-type-specific file references
+    if (targetType === "prospect") {
+      lines.push(
+        "### Key Files (Prospect)",
+        "- Page: `src/app/[orgId]/prospects/[prospectId]/page.tsx`",
+        "- Profile view: `src/components/prospect/profile-view.tsx`",
+        "- Enrichment pipeline: `src/inngest/functions/enrich-prospect.ts`",
+        "- Dossier generator: `src/lib/enrichment/generate-dossier.ts`",
+        "- ContactOut: `src/lib/enrichment/contactout.ts`",
+        "- Exa: `src/lib/enrichment/exa-enrichment.ts`",
+        "- SEC: `src/lib/enrichment/sec-edgar.ts`, `src/lib/sec/form4-parser.ts`",
+        "- Types: `src/types/database.ts` (Prospect interface)",
+        "- Activity: `src/lib/activity.ts`, `prospect_activity` table",
+        "",
+      );
+    } else if (targetType === "list") {
+      lines.push(
+        "### Key Files (List)",
+        "- Page: `src/app/[orgId]/lists/[listId]/page.tsx`",
+        "- Queries: `src/lib/lists/queries.ts`",
+        "- Types: `src/lib/lists/types.ts`",
+        "- Member table: `src/app/[orgId]/lists/components/list-member-table.tsx`",
+        "- Bulk enrich: `src/app/api/apollo/bulk-enrich/route.ts`",
+        "",
+      );
+    } else if (targetType === "search") {
+      lines.push(
+        "### Key Files (Search)",
+        "- Page: `src/app/[orgId]/search/components/search-content.tsx`",
+        "- Search hook: `src/app/[orgId]/search/hooks/use-search.ts`",
+        "- Apollo API: `src/app/api/search/apollo/route.ts`",
+        "- Apollo client: `src/lib/apollo/client.ts`",
+        "- NL parser: `src/lib/search/nl-parser.ts`",
+        "- Cache: `src/lib/apollo/cache.ts` (Upstash Redis, key version `apollo:search:v3`)",
+        "",
+      );
+    } else if (targetType === "persona") {
+      lines.push(
+        "### Key Files (Personas)",
+        "- Page: `src/app/[orgId]/personas/page.tsx`",
+        "- Queries: `src/lib/personas/queries.ts`",
+        "- Types: `src/lib/personas/types.ts`",
+        "- Saved search refresh: `src/app/api/personas/[id]/refresh/route.ts`",
+        "",
+      );
+    }
+
+    // Enrichment status hints from snapshot
+    if (snap) {
+      const enrichStatus = snap.enrichment_status as string | null;
+      const sourceStatus = snap.enrichment_source_status as Record<string, string> | null;
+      if (enrichStatus && enrichStatus !== "complete") {
+        lines.push(`**Warning:** Enrichment status is \`${enrichStatus}\` (not complete). Check Inngest for stuck/failed jobs.`);
+      }
+      if (sourceStatus) {
+        const failed = Object.entries(sourceStatus).filter(([, v]) => v === "failed");
+        if (failed.length > 0) {
+          lines.push(`**Failed enrichment sources:** ${failed.map(([k]) => k).join(", ")} — check individual source handlers.`);
+        }
+      }
+      if (snap.signal_count === 0 && targetType === "prospect") {
+        lines.push("**Warning:** Zero signals. Check `prospect_signals` table and enrichment pipeline signal insertion.");
+      }
+      if (snap.dossier === null && targetType === "prospect") {
+        lines.push("**Warning:** No intelligence dossier generated. Check `generate-dossier.ts` and whether Claude enrichment ran.");
+      }
+    }
+
+    return lines.join("\n");
+  }, [report]);
+
   const buildFullLog = useCallback(() => {
     const lines: string[] = [
       `# Issue Report: ${CATEGORY_LABELS[report.category] ?? report.category}`,
@@ -155,8 +314,9 @@ export function ReportDetail({ report: initialReport, screenshotUrl }: ReportDet
       report.resolved_at ? `- **Resolved at:** ${report.resolved_at}` : "",
       report.resolver ? `- **Resolved by:** ${report.resolver.full_name ?? report.resolver.email}` : "",
     ];
+    lines.push(buildDebugPrompt());
     return lines.filter(Boolean).join("\n");
-  }, [report, screenshotUrl]);
+  }, [report, screenshotUrl, buildDebugPrompt]);
 
   const handleCopy = useCallback(async () => {
     await navigator.clipboard.writeText(buildFullLog());
