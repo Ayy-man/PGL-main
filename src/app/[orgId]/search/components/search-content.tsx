@@ -1101,6 +1101,7 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
           {/* ============ TAB PANELS ============ */}
           <div className="flex-1 min-h-0 overflow-y-auto">
           {activeTab === "discover" ? (
+            <>
             <DiscoverTab
               personas={personas}
               savedSearchCounts={{}}
@@ -1120,6 +1121,15 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
               onViewAllSaved={() => setActiveTab("saved")}
               onClearSearch={() => setSearchState({ keywords: "", persona: "" })}
             />
+            {/* Live Apollo results — shown inline below the search bar */}
+            {!isSavedSearchMode && hasActiveSearch && (
+              <div className="max-w-[960px] mx-auto px-4 pb-8">
+                <div style={{ opacity: isLoading && results.length > 0 ? 0.5 : 1, transition: "opacity 200ms ease" }}>
+                  {renderSavedSearchResults()}
+                </div>
+              </div>
+            )}
+            </>
           ) : (
             <SavedSearchesTab
               personas={personas}
