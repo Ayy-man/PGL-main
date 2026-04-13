@@ -43,7 +43,7 @@ export default function NewUserPage() {
         await inviteUser(formData);
         router.push("/admin/users");
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to create user");
+        setError(err instanceof Error ? err.message : "Failed to send invitation");
       }
     });
   };
@@ -59,10 +59,10 @@ export default function NewUserPage() {
           Back to Users
         </Link>
         <h1 className="font-serif text-3xl font-bold tracking-tight mt-4">
-          Create User
+          Invite User
         </h1>
         <p className="text-muted-foreground mt-1">
-          Add a new user to the platform
+          Send an invitation to join the platform
         </p>
       </div>
 
@@ -98,21 +98,6 @@ export default function NewUserPage() {
               name="full_name"
               required
               placeholder="John Doe"
-              className="w-full rounded-[8px] border border-[var(--border-default)] bg-[var(--bg-input)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-primary)]/50"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-medium">
-              Password <span className="text-destructive">*</span>
-            </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              required
-              minLength={6}
-              placeholder="Minimum 6 characters"
               className="w-full rounded-[8px] border border-[var(--border-default)] bg-[var(--bg-input)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-primary)]/50"
             />
           </div>
@@ -169,7 +154,7 @@ export default function NewUserPage() {
               disabled={isPending || loading}
               className="inline-flex h-10 items-center justify-center rounded-[8px] border border-[var(--border-gold)] bg-[var(--gold-bg-strong)] px-6 text-sm font-semibold text-[var(--gold-primary)] hover:bg-[var(--gold-bg)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {isPending ? "Creating..." : "Create User"}
+              {isPending ? "Sending..." : "Send Invite"}
             </button>
             <Link
               href="/admin/users"

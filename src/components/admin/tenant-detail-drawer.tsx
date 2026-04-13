@@ -524,7 +524,7 @@ function SeatUtilizationCard({ users, tenantId, onUserInvited }: { users: Tenant
       formData.set("tenant_id", tenantId);
 
       const result = await inviteUser(formData);
-      setInviteSuccess(`Invited ${result.email}`);
+      setInviteSuccess(`Invitation sent to ${result.email}`);
       setInviteEmail("");
       setInviteName("");
       onUserInvited?.();
