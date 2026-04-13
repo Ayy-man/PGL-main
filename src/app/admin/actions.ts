@@ -84,6 +84,7 @@ export async function toggleTenantStatusAction(tenantId: string, isActive: boole
 }
 
 // Create User Action
+// DEPRECATED: Dead code — not imported anywhere. Use inviteUser from @/app/actions/admin instead.
 export async function createUserAction(formData: FormData) {
   try {
     await guardSuperAdmin();

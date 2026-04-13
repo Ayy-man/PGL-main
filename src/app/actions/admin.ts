@@ -143,9 +143,10 @@ export async function createTenant(formData: FormData) {
 }
 
 /**
- * Invite/create a user for a tenant. Super admin only.
- * Uses Supabase Admin API to create user in auth.users
- * and then creates the public.users row.
+ * Invite a user for a tenant. Super admin only.
+ * Uses Supabase inviteUserByEmail to send an actual invite email,
+ * then sets app_metadata and creates the public.users row.
+ * This mirrors the proven pattern in createTenant() above.
  */
 export async function inviteUser(formData: FormData) {
   await requireSuperAdmin();
@@ -158,49 +159,62 @@ export async function inviteUser(formData: FormData) {
   });
 
   const supabase = createAdminClient();
+  const redirectTo = `${getSiteUrl()}/api/auth/callback`;
 
-  // 1. Create user in Supabase Auth with temporary password
-  const tempPassword = `Temp${Date.now()}!`; // User will need to reset
-  const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-    email: validated.email,
-    password: tempPassword,
-    email_confirm: true, // Auto-confirm email
-    app_metadata: {
-      role: validated.role,
-      tenant_id: validated.tenant_id,
-    },
-    user_metadata: {
-      full_name: validated.full_name,
-    },
-  });
+  // 1. Invite user via Supabase Auth (sends actual invite email)
+  const { data: inviteData, error: inviteError } =
+    await supabase.auth.admin.inviteUserByEmail(validated.email, {
+      data: { full_name: validated.full_name },
+      redirectTo,
+    });
 
-  if (authError) {
-    if (authError.message.includes("already been registered")) {
+  if (inviteError) {
+    if (
+      inviteError.message.includes("already been registered") ||
+      inviteError.message.includes("already exists")
+    ) {
       throw new Error("A user with this email already exists");
     }
-    throw new Error(`Failed to create user: ${authError.message}`);
+    throw new Error(`Failed to send invitation: ${inviteError.message}`);
   }
 
-  // 2. Create public.users row
-  const { error: profileError } = await supabase
-    .from("users")
-    .insert({
-      id: authData.user.id,
-      email: validated.email,
-      full_name: validated.full_name,
-      role: validated.role,
-      tenant_id: validated.tenant_id,
-      is_active: true,
-    });
+  const invitedUserId = inviteData.user.id;
+
+  // 2. Set app_metadata (role, tenant_id, onboarding_completed)
+  const { error: metaError } = await supabase.auth.admin.updateUserById(
+    invitedUserId,
+    {
+      app_metadata: {
+        role: validated.role,
+        tenant_id: validated.tenant_id,
+        onboarding_completed: false,
+      },
+    }
+  );
+
+  if (metaError) {
+    // Non-fatal: invite was sent, metadata update failed
+    console.error("Failed to set invited user metadata:", metaError);
+  }
+
+  // 3. Create public.users row
+  const { error: profileError } = await supabase.from("users").insert({
+    id: invitedUserId,
+    email: validated.email,
+    full_name: validated.full_name,
+    role: validated.role,
+    tenant_id: validated.tenant_id,
+    is_active: true,
+  });
 
   if (profileError) {
     // Rollback: delete auth user if profile creation fails
-    await supabase.auth.admin.deleteUser(authData.user.id);
+    await supabase.auth.admin.deleteUser(invitedUserId);
     throw new Error(`Failed to create user profile: ${profileError.message}`);
   }
 
   revalidatePath("/admin/users");
-  return { id: authData.user.id, email: validated.email, tempPassword };
+  return { id: invitedUserId, email: validated.email };
 }
 
 /**

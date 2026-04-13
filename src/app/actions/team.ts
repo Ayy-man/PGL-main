@@ -205,6 +205,9 @@ export async function toggleTeamMemberStatus(userId: string, orgId: string) {
 
 /**
  * Resend an invite to a pending team member.
+ * Uses generateLink({ type: 'invite' }) which works for already-registered
+ * (unconfirmed) users. Falls back to generateLink({ type: 'magiclink' }) for
+ * confirmed-but-never-logged-in users.
  */
 export async function resendInvite(userId: string, _orgId: string) {
   const supabase = await createClient();
@@ -231,13 +234,25 @@ export async function resendInvite(userId: string, _orgId: string) {
   }
 
   const redirectTo = `${getSiteUrl()}/api/auth/callback`;
-  const { error: inviteError } = await admin.auth.admin.inviteUserByEmail(
-    targetUser.email,
-    { redirectTo }
-  );
 
-  if (inviteError) {
-    return { error: `Failed to resend: ${inviteError.message}` };
+  // Try invite link first (works for unconfirmed/pending users)
+  const { error: inviteLinkError } = await admin.auth.admin.generateLink({
+    type: "invite",
+    email: targetUser.email,
+    options: { redirectTo },
+  });
+
+  if (inviteLinkError) {
+    // Fall back to magic link for already-confirmed users who haven't logged in
+    const { error: magicLinkError } = await admin.auth.admin.generateLink({
+      type: "magiclink",
+      email: targetUser.email,
+      options: { redirectTo },
+    });
+
+    if (magicLinkError) {
+      return { error: `Failed to resend: ${magicLinkError.message}` };
+    }
   }
 
   return { success: true };
