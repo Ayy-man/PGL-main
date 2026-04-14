@@ -5,7 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all duration-200 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 cursor-pointer [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all duration-200 ease-out active:scale-[0.97] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 cursor-pointer [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -18,8 +18,8 @@ const buttonVariants = cva(
         secondary:
           "bg-secondary text-secondary-foreground shadow-sm rounded-[8px] hover:bg-secondary/80",
         ghost:
-          "bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] text-foreground/60 rounded-[8px] hover:border-[rgba(255,255,255,0.15)] hover:text-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
+          "bg-bg-elevated border border-border-subtle text-foreground/60 rounded-[8px] hover:border-border-hover hover:text-foreground",
+        link: "text-gold-primary underline-offset-4 hover:underline focus-visible:ring-1 focus-visible:ring-ring focus-visible:rounded-sm",
         gold:
           "bg-[var(--gold-bg)] border border-[var(--border-gold)] text-[var(--gold-primary)] font-semibold rounded-[8px] hover:bg-[var(--gold-bg-strong)]",
         "gold-solid":
