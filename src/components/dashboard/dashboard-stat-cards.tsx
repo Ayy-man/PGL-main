@@ -13,18 +13,21 @@ function StatCard({
   label,
   value,
   subtitle,
+  index,
 }: {
   icon: typeof Upload;
   label: string;
   value: string;
   subtitle: string;
+  index: number;
 }) {
   return (
     <div
-      className="rounded-[14px] px-6 py-5 text-center"
+      className="rounded-[14px] px-6 py-5 text-center row-enter"
       style={{
         background: "var(--bg-card-gradient, rgba(255,255,255,0.03))",
         border: "1px solid var(--border-subtle, rgba(255,255,255,0.06))",
+        animationDelay: `${index * 60}ms`,
       }}
     >
       <div
@@ -73,26 +76,39 @@ export function DashboardStatCards({
       ? `${profilesEnriched} of ${profilesViewed} profiles`
       : "Profiles enriched vs. viewed";
 
+  const cards = [
+    {
+      icon: Upload,
+      label: "Total Exports",
+      value: totalExports.toLocaleString(),
+      subtitle: "Files generated this period",
+    },
+    {
+      icon: Download,
+      label: "Downloads Ready",
+      value: downloadsReady.toLocaleString(),
+      subtitle: "Prospects across all lists",
+    },
+    {
+      icon: Award,
+      label: "Enrichment Rate",
+      value: enrichmentRate > 0 ? `${enrichmentRate}%` : "0%",
+      subtitle: enrichmentSubtitle,
+    },
+  ];
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      <StatCard
-        icon={Upload}
-        label="Total Exports"
-        value={totalExports.toLocaleString()}
-        subtitle="Files generated this period"
-      />
-      <StatCard
-        icon={Download}
-        label="Downloads Ready"
-        value={downloadsReady.toLocaleString()}
-        subtitle="Prospects across all lists"
-      />
-      <StatCard
-        icon={Award}
-        label="Enrichment Rate"
-        value={enrichmentRate > 0 ? `${enrichmentRate}%` : "0%"}
-        subtitle={enrichmentSubtitle}
-      />
+      {cards.map((card, index) => (
+        <StatCard
+          key={card.label}
+          icon={card.icon}
+          label={card.label}
+          value={card.value}
+          subtitle={card.subtitle}
+          index={index}
+        />
+      ))}
     </div>
   );
 }
