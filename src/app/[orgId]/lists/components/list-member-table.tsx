@@ -24,6 +24,7 @@ import { MemberStatusSelect } from "./member-status-select";
 import { MemberNotesCell } from "./member-notes-cell";
 import { removeFromListAction } from "../actions";
 import type { ListMember } from "@/lib/lists/types";
+import { EnrichmentStatusDots } from "@/components/ui/enrichment-status-dots";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { ProspectAvatar } from "@/components/prospect/prospect-avatar";
@@ -62,44 +63,6 @@ function timeAgo(dateStr: string): string {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
-function EnrichmentDot({ status }: { status: string | null }) {
-  switch (status) {
-    case "complete":
-      return (
-        <span
-          className="inline-block h-2 w-2 rounded-full"
-          style={{ background: "var(--success, #22c55e)" }}
-          title="Enriched"
-        />
-      );
-    case "in_progress":
-      return <Loader2 className="h-3 w-3 animate-spin" style={{ color: "var(--gold-primary)" }} />;
-    case "failed":
-      return (
-        <span
-          className="inline-block h-2 w-2 rounded-full"
-          style={{ background: "var(--destructive, #ef4444)" }}
-          title="Failed"
-        />
-      );
-    case "pending":
-      return (
-        <span
-          className="inline-block h-2 w-2 rounded-full"
-          style={{ background: "rgba(255,255,255,0.15)" }}
-          title="Pending"
-        />
-      );
-    default:
-      return (
-        <span
-          className="inline-block h-2 w-2 rounded-full"
-          style={{ background: "rgba(255,255,255,0.08)" }}
-          title="Not enriched"
-        />
-      );
-  }
-}
 
 function CopyButton({ text, icon: Icon }: { text: string; icon: typeof Mail }) {
   const [copied, setCopied] = useState(false);
@@ -214,7 +177,7 @@ export function ListMemberTable({ members: serverMembers, listId, listName }: Li
                       email={member.prospect.email}
                       size="md"
                     />
-                    <EnrichmentDot status={enrichingId === member.prospect.id ? "in_progress" : member.prospect.enrichment_status} />
+                    <EnrichmentStatusDots sourceStatus={null} />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
                         <Link

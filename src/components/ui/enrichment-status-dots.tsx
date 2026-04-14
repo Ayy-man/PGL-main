@@ -39,11 +39,16 @@ export function EnrichmentStatusDots({ sourceStatus, className }: EnrichmentStat
     <div className={cn("flex items-center gap-1.5", className)}>
       {SOURCE_ORDER.map((key) => {
         const status = sourceStatus[key] ?? "pending";
+        const dotClass = cn(
+          "h-2.5 w-2.5 rounded-full shrink-0 transition-shadow",
+          status === "in_progress" && "animate-pulse",
+          status === "pending" && "animate-pulse opacity-60"
+        );
         return (
           <div
             key={key}
             title={`${SOURCE_LABELS[key] ?? key}: ${status}`}
-            className="h-2.5 w-2.5 rounded-full shrink-0"
+            className={dotClass}
             style={getDotStyle(status)}
           />
         );

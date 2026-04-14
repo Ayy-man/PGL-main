@@ -2,6 +2,7 @@
 
 import type { ApolloPerson } from "@/lib/apollo/types";
 import { MapPin, X } from "lucide-react";
+import { EnrichmentStatusDots } from "@/components/ui/enrichment-status-dots";
 
 function formatRelativeDate(dateStr: string | undefined): string {
   if (!dateStr) return "—";
@@ -285,30 +286,12 @@ export function ProspectResultsTable({
                         >
                           Preview Only
                         </span>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <div className="flex gap-1">
-                            <span
-                              className="h-2.5 w-2.5 rounded-full"
-                              style={{ background: "rgba(255,255,255,0.15)" }}
-                            />
-                            <span
-                              className="h-2.5 w-2.5 rounded-full"
-                              style={{ background: "rgba(255,255,255,0.15)" }}
-                            />
-                            <span
-                              className="h-2.5 w-2.5 rounded-full"
-                              style={{ background: "rgba(255,255,255,0.15)" }}
-                            />
-                          </div>
-                          <span
-                            className="text-xs ml-1"
-                            style={{ color: "var(--text-ghost)" }}
-                          >
-                            Not enriched
-                          </span>
-                        </div>
-                      )}
+                      ) : (() => {
+                        const sourceStatus = (prospect as ApolloPerson & { enrichment_source_status?: Record<string, string> | null }).enrichment_source_status ?? null;
+                        return sourceStatus
+                          ? <EnrichmentStatusDots sourceStatus={sourceStatus as Record<string, "pending" | "in_progress" | "complete" | "failed" | "skipped" | "circuit_open" | "no_data">} />
+                          : <span className="text-xs" style={{ color: "var(--text-ghost)" }}>Not enriched</span>;
+                      })()}
                       {savedSearchMode && isDismissed && onUndoDismiss && (
                         <button
                           onClick={(e) => { e.stopPropagation(); onUndoDismiss(prospect.id); }}
