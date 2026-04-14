@@ -43,7 +43,7 @@ export function WealthTierBadge({ tier, className }: WealthTierBadgeProps) {
 
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${className ?? ""}`}
+      className={`relative inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold animate-in fade-in zoom-in-95 duration-300 ${className ?? ""}`}
       style={{
         background: style.bg,
         border: `1px solid ${style.border}`,
@@ -52,6 +52,15 @@ export function WealthTierBadge({ tier, className }: WealthTierBadgeProps) {
     >
       <Shield className="h-3 w-3 shrink-0" />
       {tier}
+      <span
+        className="absolute inset-0 rounded-[inherit] animate-pulse pointer-events-none"
+        style={{
+          boxShadow: `0 0 0 2px ${style.border}`,
+          animationIterationCount: 1,
+          animationDuration: "1s",
+        }}
+        aria-hidden
+      />
     </span>
   );
 }

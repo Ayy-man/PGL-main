@@ -184,6 +184,7 @@ export function ProfileView({
   const [showLookalikes, setShowLookalikes] = useState(false);
   const [noteText, setNoteText] = useState(prospect.notes ?? "");
   const [isSavingNote, setIsSavingNote] = useState(false);
+  const [noteSavedFlash, setNoteSavedFlash] = useState(false);
   const [lastSavedNote, setLastSavedNote] = useState(prospect.notes ?? "");
   const [addToListOpen, setAddToListOpen] = useState(false);
   const { toast } = useToast();
@@ -332,6 +333,8 @@ export function ProfileView({
       const saved = noteText.trim();
       setNoteText(saved);
       setLastSavedNote(saved);
+      setNoteSavedFlash(true);
+      setTimeout(() => setNoteSavedFlash(false), 1500);
       toast({ title: "Note saved" });
     } catch (err) {
       toast({
@@ -372,20 +375,11 @@ export function ProfileView({
           }
         />
         <button
-          className="flex items-center gap-2 rounded-[8px] px-4 py-2 text-sm font-medium transition-all cursor-pointer"
+          className="flex items-center gap-2 rounded-[8px] px-4 py-2 text-sm font-medium transition-colors cursor-pointer hover:border-[var(--border-gold)]"
           style={{
             background: "rgba(255,255,255,0.03)",
-            border:
-              "1px solid var(--border-default, rgba(255,255,255,0.06))",
+            border: "1px solid var(--border-default, rgba(255,255,255,0.06))",
             color: "var(--text-primary-ds, var(--text-primary, #e8e4dc))",
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.borderColor =
-              "rgba(212,175,55,0.15)";
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.borderColor =
-              "var(--border-default, rgba(255,255,255,0.06))";
           }}
           onClick={() => setShowLookalikes((prev) => !prev)}
         >
@@ -482,7 +476,7 @@ export function ProfileView({
                         </span>
                       )}
                       {prospect.contact_data?.enriched_at && (
-                        <span className="text-[10px] text-muted-foreground">
+                        <span className="text-[10px] text-[var(--text-secondary-ds)]">
                           {formatRelative(prospect.contact_data.enriched_at)}
                         </span>
                       )}
@@ -507,7 +501,7 @@ export function ProfileView({
                     <p className="text-sm font-medium text-foreground">
                       {prospect.contact_data?.phone || prospect.work_phone}
                     </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
+                    <p className="text-xs text-[var(--text-secondary-ds)] mt-0.5">
                       {prospect.location
                         ? `Mobile \u00B7 ${prospect.location}`
                         : "Mobile"}
@@ -600,25 +594,17 @@ export function ProfileView({
             />
             <div className="flex justify-end mt-2">
               <button
-                className="text-xs font-medium cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
-                style={{ color: "var(--gold-primary)" }}
-                disabled={!noteHasChanged || isSavingNote}
-                onMouseEnter={(e) => {
-                  if (!e.currentTarget.disabled) {
-                    (e.currentTarget as HTMLButtonElement).style.color =
-                      "var(--gold-muted)";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.color =
-                    "var(--gold-primary)";
-                }}
+                className="text-xs font-medium cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5 hover:opacity-80"
+                style={{ color: noteSavedFlash ? "var(--success, #22c55e)" : "var(--gold-primary)" }}
+                disabled={(!noteHasChanged && !noteSavedFlash) || isSavingNote}
                 onClick={handleSaveNote}
               >
-                {isSavingNote && (
+                {isSavingNote ? (
                   <Loader2 className="h-3 w-3 animate-spin" />
-                )}
-                {isSavingNote ? "Saving..." : "Save Note"}
+                ) : noteSavedFlash ? (
+                  <CheckCircle2 className="h-3 w-3" />
+                ) : null}
+                {isSavingNote ? "Saving..." : noteSavedFlash ? "Saved ✓" : "Save Note"}
               </button>
             </div>
           </div>
