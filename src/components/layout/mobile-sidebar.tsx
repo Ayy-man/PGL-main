@@ -1,5 +1,7 @@
 "use client";
 
+import { Search } from "lucide-react";
+
 interface MobileHeaderProps {
   orgId: string;
   tenantName: string;
@@ -53,17 +55,32 @@ export function MobileHeader({
           </span>
         </div>
 
-        {/* Right: User avatar */}
-        <div
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-medium"
-          title={userName}
-          style={{
-            background: "var(--gold-bg, rgba(212,175,55,0.08))",
-            color: "var(--gold-primary)",
-            border: "1px solid var(--border-gold)",
-          }}
-        >
-          {userInitials}
+        {/* Right: Search button + User avatar */}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            aria-label="Search"
+            className="flex h-8 w-8 items-center justify-center rounded-full transition-colors"
+            style={{
+              background: "rgba(255,255,255,0.03)",
+              border: "1px solid var(--border-subtle)",
+              color: "var(--text-secondary-ds)",
+            }}
+            onClick={() => window.dispatchEvent(new CustomEvent("command-search:open"))}
+          >
+            <Search className="h-4 w-4 shrink-0" />
+          </button>
+          <div
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-medium"
+            title={userName}
+            style={{
+              background: "var(--gold-bg, rgba(212,175,55,0.08))",
+              color: "var(--gold-primary)",
+              border: "1px solid var(--border-gold)",
+            }}
+          >
+            {userInitials}
+          </div>
         </div>
       </div>
 
