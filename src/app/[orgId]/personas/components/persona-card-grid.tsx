@@ -19,9 +19,10 @@ import {
 interface PersonaCardGridProps {
   personas: Persona[];
   orgId: string;
+  canEdit?: boolean;
 }
 
-export function PersonaCardGrid({ personas: serverPersonas, orgId }: PersonaCardGridProps) {
+export function PersonaCardGrid({ personas: serverPersonas, orgId, canEdit = true }: PersonaCardGridProps) {
   const [personas, setPersonas] = useState(serverPersonas);
   const [createOpen, setCreateOpen] = useState(false);
   const [pendingDeletePersona, setPendingDeletePersona] = useState<{ id: string; name: string } | null>(null);
@@ -33,10 +34,11 @@ export function PersonaCardGrid({ personas: serverPersonas, orgId }: PersonaCard
   useEffect(() => { setPersonas(serverPersonas); }, [serverPersonas]);
 
   const handleRequestDeletePersona = useCallback((personaId: string) => {
+    if (!canEdit) return;
     const persona = personas.find(p => p.id === personaId);
     if (!persona) return;
     setPendingDeletePersona({ id: persona.id, name: persona.name });
-  }, [personas]);
+  }, [canEdit, personas]);
 
   const handleConfirmDeletePersona = useCallback(async () => {
     if (!pendingDeletePersona) return;
@@ -78,7 +80,7 @@ export function PersonaCardGrid({ personas: serverPersonas, orgId }: PersonaCard
   return (
     <div className="grid gap-4 md:gap-5 content-start grid-cols-1 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fill,minmax(340px,1fr))]">
       {personas.map((persona) => (
-        <PersonaCard key={persona.id} persona={persona} onDelete={handleRequestDeletePersona} onUpdated={handlePersonaUpdated} />
+        <PersonaCard key={persona.id} persona={persona} onDelete={handleRequestDeletePersona} onUpdated={handlePersonaUpdated} canEdit={canEdit} />
       ))}
 
       {/* Create New Persona CTA card */}

@@ -12,9 +12,10 @@ interface PersonasLayoutProps {
   prospectCount: number;
   hasActivity: boolean;
   orgId: string;
+  canEdit?: boolean;
 }
 
-export function PersonasLayout({ personas, prospectCount, hasActivity, orgId }: PersonasLayoutProps) {
+export function PersonasLayout({ personas, prospectCount, hasActivity, orgId, canEdit = true }: PersonasLayoutProps) {
   const [selectedIndustries, setSelectedIndustries] = useState<string[]>([]);
   const [freshness, setFreshness] = useState<"live" | "past_week">("live");
 
@@ -61,7 +62,7 @@ export function PersonasLayout({ personas, prospectCount, hasActivity, orgId }: 
 
       {/* Center — Persona card grid (filtered) */}
       <Suspense fallback={null}>
-        <PersonaCardGrid personas={filteredPersonas} orgId={orgId} />
+        <PersonaCardGrid personas={filteredPersonas} orgId={orgId} canEdit={canEdit} />
       </Suspense>
 
       {/* Right sidebar — Live Data Stream (only when there's activity, desktop only) */}

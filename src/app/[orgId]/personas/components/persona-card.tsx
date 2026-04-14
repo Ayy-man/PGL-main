@@ -7,11 +7,17 @@ import type { Persona } from "@/lib/personas/types";
 import { Badge } from "@/components/ui/badge";
 import { Search, Pencil, Trash2, Briefcase, MapPin, Users, Tag } from "lucide-react";
 import { PersonaFormDialog } from "./persona-form-dialog";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 
 interface PersonaCardProps {
   persona: Persona;
   onDelete?: (personaId: string) => void;
   onUpdated?: (persona: Persona) => void;
+  canEdit?: boolean;
 }
 
 interface FilterSection {
@@ -20,7 +26,7 @@ interface FilterSection {
   values: string[];
 }
 
-export function PersonaCard({ persona, onDelete, onUpdated }: PersonaCardProps) {
+export function PersonaCard({ persona, onDelete, onUpdated, canEdit = true }: PersonaCardProps) {
   const params = useParams();
   const orgId = params.orgId as string;
   const [cardStyle, setCardStyle] = useState({
@@ -228,37 +234,73 @@ export function PersonaCard({ persona, onDelete, onUpdated }: PersonaCardProps) 
 
         {!persona.is_starter && (
           <>
-            <PersonaFormDialog
-              mode="edit"
-              persona={persona}
-              onUpdated={onUpdated}
-              trigger={
-                <button
-                  className="flex items-center gap-1.5 text-[12px] px-3 py-2 rounded-[8px] cursor-pointer transition-all"
-                  style={ghostButtonStyle}
-                >
-                  <Pencil className="h-3.5 w-3.5" />
-                  Edit
-                </button>
-              }
-            />
+            {canEdit ? (
+              <PersonaFormDialog
+                mode="edit"
+                persona={persona}
+                onUpdated={onUpdated}
+                trigger={
+                  <button
+                    className="flex items-center gap-1.5 text-[12px] px-3 py-2 rounded-[8px] cursor-pointer transition-all"
+                    style={ghostButtonStyle}
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                    Edit
+                  </button>
+                }
+              />
+            ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span tabIndex={0}>
+                    <button
+                      disabled
+                      className="flex items-center gap-1.5 text-[12px] px-3 py-2 rounded-[8px] opacity-40 cursor-not-allowed"
+                      style={ghostButtonStyle}
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                      Edit
+                    </button>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>Assistants cannot edit saved searches.</TooltipContent>
+              </Tooltip>
+            )}
 
-            <button
-              className="flex items-center gap-1.5 text-[12px] px-3 py-2 rounded-[8px] cursor-pointer transition-all ml-auto"
-              style={ghostButtonStyle}
-              onClick={handleDelete}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.color =
-                  "var(--destructive)";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.color =
-                  "rgba(232,228,220,0.6)";
-              }}
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-              Delete
-            </button>
+            {canEdit ? (
+              <button
+                className="flex items-center gap-1.5 text-[12px] px-3 py-2 rounded-[8px] cursor-pointer transition-all ml-auto"
+                style={ghostButtonStyle}
+                onClick={handleDelete}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.color =
+                    "var(--destructive)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.color =
+                    "rgba(232,228,220,0.6)";
+                }}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                Delete
+              </button>
+            ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span tabIndex={0} className="ml-auto">
+                    <button
+                      disabled
+                      className="flex items-center gap-1.5 text-[12px] px-3 py-2 rounded-[8px] opacity-40 cursor-not-allowed"
+                      style={ghostButtonStyle}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                      Delete
+                    </button>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>Assistants cannot delete saved searches.</TooltipContent>
+              </Tooltip>
+            )}
           </>
         )}
       </div>

@@ -6,6 +6,8 @@ import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import { PersonasLayout } from "./components/personas-layout";
 import { ReportIssueButton } from "@/components/issues/report-issue-button";
 import { Users } from "lucide-react";
+import type { UserRole } from "@/types/auth";
+import { ROLE_PERMISSIONS } from "@/types/auth";
 
 export default async function PersonasPage({
   params,
@@ -26,6 +28,9 @@ export default async function PersonasPage({
   if (!tenantId) {
     redirect("/login");
   }
+
+  const role = (user.app_metadata?.role as UserRole) || 'assistant';
+  const canEdit = ROLE_PERMISSIONS[role]?.canEdit ?? false;
 
   const personas = await getPersonas(tenantId);
 
@@ -89,7 +94,7 @@ export default async function PersonasPage({
           description="Create a saved search to define your ideal buyer profile and start searching for qualified prospects."
         />
       ) : (
-        <PersonasLayout personas={personas} prospectCount={prospectCount} hasActivity={hasActivity} orgId={orgId} />
+        <PersonasLayout personas={personas} prospectCount={prospectCount} hasActivity={hasActivity} orgId={orgId} canEdit={canEdit} />
       )}
     </div>
   );
