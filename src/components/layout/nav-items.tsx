@@ -11,6 +11,7 @@ import {
   LayoutDashboard,
   FileDown,
   Settings,
+  Bookmark,
 } from "lucide-react";
 
 interface NavItemsProps {
@@ -33,7 +34,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard",      href: "/",                    icon: LayoutDashboard, exact: true },
   { label: "Lead Discovery", href: "/search",              icon: Search,          exact: false },
-  { label: "Saved Searches",  href: "/personas",            icon: Users,           exact: false },
+  { label: "Saved Searches",  href: "/personas",            icon: Bookmark,        exact: false },
   { label: "Lists",          href: "/lists",               icon: List,            exact: false },
   { label: "Exports",        href: "/exports",             icon: FileDown,        exact: false },
   { label: "Activity",       href: "/dashboard/activity",  icon: Activity,        exact: false },
@@ -68,9 +69,7 @@ export function NavItems({ orgId, userRole, collapsed, savedSearchCount, listsCo
             key={item.href}
             href={fullHref}
             title={collapsed ? item.label : undefined}
-            className={`flex items-center ${collapsed ? "justify-center" : "gap-3"} rounded-[8px] ${collapsed ? "px-0 py-3" : "px-3 py-3"} text-sm font-medium transition-all duration-200 cursor-pointer${
-              !isActive ? " hover:bg-[rgba(255,255,255,0.02)] hover:text-[var(--text-primary-ds)]" : ""
-            }`}
+            className={`relative flex items-center ${collapsed ? "justify-center" : "gap-3"} rounded-[8px] ${collapsed ? "px-0 py-3" : "px-3 py-3"} text-sm font-medium ghost-hover transition-[background-color,color] cursor-pointer`}
             style={
               isActive
                 ? {
@@ -82,6 +81,12 @@ export function NavItems({ orgId, userRole, collapsed, savedSearchCount, listsCo
                   }
             }
           >
+            {isActive && (
+              <span
+                className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-full bg-[var(--gold-primary)] transition-opacity"
+                aria-hidden
+              />
+            )}
             <item.icon className="h-4 w-4 shrink-0" />
             {!collapsed && item.label}
             {!collapsed && (() => {
