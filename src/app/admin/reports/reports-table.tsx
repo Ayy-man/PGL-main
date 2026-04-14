@@ -15,8 +15,13 @@ interface ReportRow {
   screenshot_path: string | null;
   page_path: string;
   created_at: string;
+  resolved_at?: string | null;
   tenants: { id: string; name: string; slug: string } | null;
   users: { id: string; email: string; full_name: string | null } | null;
+}
+
+export interface OverdueClosedRow extends ReportRow {
+  resolved_at: string;
 }
 
 const STATUS_OPTIONS = [
@@ -366,6 +371,101 @@ export function ReportsTable({
             ))
           )}
         </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Lightweight list surface for closed-but-stale tickets (status ∈ closed AND resolved_at > 30d).
+ * Server-component renders this with data pulled at SSR time (no client fetch). Dimmed
+ * visual treatment signals it's an archival/review queue rather than active work.
+ */
+export function OverdueClosedList({ reports }: { reports: OverdueClosedRow[] }) {
+  if (reports.length === 0) return null;
+
+  const thStyle = { color: "var(--admin-text-secondary)" };
+
+  return (
+    <div className="surface-admin-card rounded-[14px] overflow-hidden">
+      {/* Desktop table */}
+      <div className="hidden md:block overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="admin-thead">
+              {["Tenant", "Category", "Closed", "Status", ""].map((col) => (
+                <th
+                  key={col}
+                  className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider"
+                  style={thStyle}
+                >
+                  {col}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y" style={{ borderColor: "var(--admin-row-border)" }}>
+            {reports.map((row) => (
+              <tr key={row.id} className="admin-row-hover">
+                <td
+                  className="px-4 py-3 text-sm font-medium"
+                  style={{ color: "var(--text-secondary-ds)" }}
+                >
+                  {row.tenants?.name ?? "—"}
+                </td>
+                <td className="px-4 py-3">
+                  <CategoryBadge category={row.category} />
+                </td>
+                <td className="px-4 py-3 text-sm text-muted-foreground whitespace-nowrap">
+                  {row.resolved_at ? formatRelativeTime(row.resolved_at) : "—"}
+                </td>
+                <td className="px-4 py-3">
+                  <StatusBadge status={row.status} />
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <Link
+                    href={`/admin/reports/${row.id}`}
+                    aria-label="View report"
+                    className="inline-flex items-center gap-1 text-xs font-medium rounded-[6px] px-2.5 py-1 transition-colors"
+                    style={{
+                      color: "var(--text-secondary-ds)",
+                      border: "1px solid var(--border-subtle)",
+                      background: "var(--bg-elevated)",
+                    }}
+                  >
+                    <ExternalLink className="h-3 w-3" />
+                    View report
+                  </Link>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile card list */}
+      <div className="md:hidden divide-y" style={{ borderColor: "var(--border-subtle)" }}>
+        {reports.map((row) => (
+          <Link
+            key={row.id}
+            href={`/admin/reports/${row.id}`}
+            className="block p-4 space-y-1.5 admin-row-hover"
+          >
+            <div className="flex items-center gap-2 flex-wrap">
+              <CategoryBadge category={row.category} />
+              <StatusBadge status={row.status} />
+            </div>
+            <p
+              className="text-sm font-medium truncate"
+              style={{ color: "var(--text-secondary-ds)" }}
+            >
+              {row.tenants?.name ?? "Unknown tenant"}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Closed {row.resolved_at ? formatRelativeTime(row.resolved_at) : "—"}
+            </p>
+          </Link>
+        ))}
       </div>
     </div>
   );
