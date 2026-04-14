@@ -5,6 +5,8 @@ import { getPersonas } from "@/lib/personas/queries";
 import { getLists } from "@/lib/lists/queries";
 import { SearchContent } from "./components/search-content";
 import { Skeleton } from "@/components/ui/skeleton";
+import type { UserRole } from "@/types/auth";
+import { ROLE_PERMISSIONS } from "@/types/auth";
 
 interface PageProps {
   params: Promise<{ orgId: string }>;
@@ -46,6 +48,9 @@ export default async function SearchPage({ params }: PageProps) {
     redirect("/login");
   }
 
+  const role = (user.app_metadata?.role as UserRole) || 'assistant';
+  const canEdit = ROLE_PERMISSIONS[role]?.canEdit ?? false;
+
   const [personas, lists] = await Promise.all([
     getPersonas(tenantId),
     getLists(tenantId),
@@ -53,7 +58,7 @@ export default async function SearchPage({ params }: PageProps) {
 
   return (
     <Suspense fallback={<SearchFallback />}>
-      <SearchContent personas={personas} lists={lists} orgId={orgId} />
+      <SearchContent personas={personas} lists={lists} orgId={orgId} canEdit={canEdit} />
     </Suspense>
   );
 }

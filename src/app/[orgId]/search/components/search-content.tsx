@@ -42,6 +42,7 @@ interface SearchContentProps {
   personas: Persona[];
   lists: List[];
   orgId: string;
+  canEdit?: boolean;
 }
 
 function SkeletonRow() {
@@ -90,7 +91,7 @@ function savedProspectToApolloPerson(
   };
 }
 
-export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
+export function SearchContent({ personas, lists, orgId, canEdit = true }: SearchContentProps) {
   const router = useRouter();
   const { toast } = useToast();
 
@@ -746,6 +747,7 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
             onEnrich={handleBulkEnrich}
             onDismiss={handleBulkDismissClick}
             showDismiss={isSavedSearchMode}
+            canEdit={canEdit}
           />
         )}
 
@@ -1449,6 +1451,7 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
         prospectId={slideOverProspectId}
         prospect={slideOverProspect}
         orgId={orgId}
+        canEdit={canEdit}
         onEnrich={(id) => {
           setSelectedIds(new Set([id]));
           setBulkMode("enrich");
