@@ -363,7 +363,7 @@ export function ReportDetail({ report: initialReport, screenshotUrl, events }: R
   };
 
   return (
-    <div className="space-y-6 max-w-5xl">
+    <div className="space-y-6 max-w-7xl">
       {/* Back navigation */}
       <div>
         <Link
@@ -376,7 +376,7 @@ export function ReportDetail({ report: initialReport, screenshotUrl, events }: R
         </Link>
       </div>
 
-      {/* 1. Header: category + status + created + copy */}
+      {/* 1. Header: category + status + created + copy (full width above split) */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
         <div className="space-y-2">
           <h1
@@ -406,6 +406,9 @@ export function ReportDetail({ report: initialReport, screenshotUrl, events }: R
         </button>
       </div>
 
+      {/* 2-column split: report content on the left, admin actions + timeline sticky on the right */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
       {/* 2. Submitter */}
       <SectionCard title="Submitter">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
@@ -565,9 +568,9 @@ export function ReportDetail({ report: initialReport, screenshotUrl, events }: R
         )}
       </div>
 
-      {/* 8. Admin actions + Timeline */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
+        </div>
+        {/* Right column: admin actions + timeline, sticky above the fold on lg: */}
+        <div className="lg:col-span-1 space-y-6 lg:sticky lg:top-6 lg:self-start">
           <SectionCard title="Admin Actions">
             {error && (
               <div
@@ -659,8 +662,6 @@ export function ReportDetail({ report: initialReport, screenshotUrl, events }: R
               </button>
             </div>
           </SectionCard>
-        </div>
-        <div className="lg:col-span-1">
           <TimelineCard
             events={events}
             reporterName={report.users?.full_name ?? report.users?.email ?? null}
