@@ -43,17 +43,17 @@ export function FilterPillsRow({ onApplyFilters, currentFilters }: FilterPillsRo
     }
   }, [currentFilters]);
 
-  // Click-outside closes any open pill
+  // Click-outside: auto-apply typed value then close pill
   useEffect(() => {
     function onMouseDown(e: MouseEvent) {
       if (!containerRef.current) return;
-      if (!containerRef.current.contains(e.target as Node)) {
-        setOpenPill(null);
+      if (!containerRef.current.contains(e.target as Node) && openPill) {
+        apply(openPill);
       }
     }
     document.addEventListener("mousedown", onMouseDown);
     return () => document.removeEventListener("mousedown", onMouseDown);
-  }, []);
+  }, [openPill, industries, titles, locations, netWorth]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const togglePill = (key: PillKey) => {
     setOpenPill((prev) => (prev === key ? null : key));
@@ -99,11 +99,22 @@ export function FilterPillsRow({ onApplyFilters, currentFilters }: FilterPillsRo
     { key: "networth", label: "Net Worth" },
   ];
 
+  // Count of active values per pill for suffix display
+  const getCount = (key: PillKey): number => {
+    if (key === "industry") return industries.trim() ? industries.split(";").map(s => s.trim()).filter(Boolean).length : 0;
+    if (key === "title") return titles.trim() ? titles.split(";").map(s => s.trim()).filter(Boolean).length : 0;
+    if (key === "location") return locations.trim() ? locations.split(";").map(s => s.trim()).filter(Boolean).length : 0;
+    if (key === "networth") return netWorth.trim() ? 1 : 0;
+    return 0;
+  };
+
   return (
     <div ref={containerRef} className="relative mt-3 flex flex-wrap items-center justify-center gap-2">
       {PILLS.map((pill) => {
         const isOpen = openPill === pill.key;
         const isActive = isOpen || hasValue[pill.key];
+        const count = getCount(pill.key);
+        const displayLabel = count > 0 ? `${pill.label} · ${count}` : pill.label;
         return (
           <div key={pill.key} className="relative">
             <button
@@ -125,7 +136,7 @@ export function FilterPillsRow({ onApplyFilters, currentFilters }: FilterPillsRo
               }
               aria-expanded={isOpen}
             >
-              {pill.label}
+              {displayLabel}
               <ChevronDown
                 className="h-3 w-3"
                 style={{
