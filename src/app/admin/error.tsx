@@ -1,6 +1,8 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
+import { AlertTriangle } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Button } from "@/components/ui/button";
 
 export default function AdminError({
   error,
@@ -9,25 +11,17 @@ export default function AdminError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  useEffect(() => {
-    console.error("Admin error:", error);
-  }, [error]);
-
   return (
-    <div className="flex min-h-[400px] flex-col items-center justify-center gap-4">
-      <h2 className="font-serif text-2xl font-semibold">Admin Error</h2>
-      <p className="text-muted-foreground">{error.message}</p>
-      <button
-        onClick={reset}
-        className="inline-flex h-10 items-center justify-center rounded-[8px] px-6 text-sm font-semibold transition-all duration-200 cursor-pointer"
-        style={{
-          background: "var(--gold-bg, rgba(212,175,55,0.08))",
-          border: "1px solid var(--border-gold)",
-          color: "var(--gold-primary)",
-        }}
-      >
-        Try Again
-      </button>
-    </div>
+    <EmptyState
+      variant="error"
+      icon={AlertTriangle}
+      title="Something went wrong"
+      description={error.message || "An unexpected error occurred."}
+    >
+      <Button variant="gold" onClick={reset}>Try again</Button>
+      {error.digest && (
+        <p className="text-xs font-mono text-muted-foreground mt-4">Error ID: {error.digest}</p>
+      )}
+    </EmptyState>
   );
 }

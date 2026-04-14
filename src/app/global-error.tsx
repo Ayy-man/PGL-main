@@ -12,7 +12,7 @@ export default function GlobalError({
       <body className="bg-background text-foreground">
         <div className="flex min-h-screen flex-col items-center justify-center gap-6 px-4">
           <div className="space-y-2 text-center">
-            <h2 className="font-serif text-3xl font-bold">
+            <h2 className="font-serif text-3xl font-semibold">
               Something went wrong
             </h2>
             <p className="text-muted-foreground">
