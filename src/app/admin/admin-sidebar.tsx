@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { PanelLeft } from "lucide-react";
 import { AdminNavLinks } from "./admin-nav-links";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
@@ -30,17 +31,20 @@ export function AdminSidebar({ userInitials, userEmail }: AdminSidebarProps) {
 
   return (
     <aside
-      className="hidden lg:flex sticky top-0 h-screen flex-col transition-all duration-200"
+      className="hidden lg:flex sticky top-0 h-screen flex-col transition-[width] duration-200 ease-out"
       style={{
         width: collapsed ? "64px" : "220px",
         background: "var(--bg-sidebar)",
         borderRight: "1px solid var(--border-sidebar)",
       }}
     >
-      {/* Admin header */}
-      <div className={`flex items-center ${collapsed ? "justify-center px-2" : "gap-3 px-5"} py-5`}>
+      {/* Admin header — wrapped in Link to admin dashboard */}
+      <Link
+        href="/admin"
+        className={`flex items-center ${collapsed ? "justify-center px-2" : "gap-3 px-5"} py-5 cursor-pointer hover:bg-white/[0.02] transition-colors rounded-[8px]`}
+      >
         <div
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full font-serif font-bold text-sm"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg font-serif font-bold text-sm"
           style={{
             background: "var(--gold-bg, rgba(212,175,55,0.08))",
             color: "var(--gold-primary)",
@@ -60,7 +64,7 @@ export function AdminSidebar({ userInitials, userEmail }: AdminSidebarProps) {
             </span>
           </div>
         )}
-      </div>
+      </Link>
 
       <nav className="flex-1 overflow-y-auto py-2 px-3">
         <AdminNavLinks collapsed={collapsed} />
