@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Key, Database, Megaphone, Download, Zap, Loader2, CheckCircle2 } from "lucide-react";
+import { Key, Database, Megaphone, Download, Zap, Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -10,6 +10,13 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  Confirmation,
+  ConfirmationIcon,
+  ConfirmationTitle,
+  ConfirmationDescription,
+} from "@/components/ui/confirmation";
+import { useToast } from "@/hooks/use-toast";
 
 interface ActionConfig {
   icon: typeof Key;
@@ -17,6 +24,8 @@ interface ActionConfig {
   description: string;
   confirmLabel: string;
   variant: "danger" | "default";
+  successTitle: string;
+  successDescription: string;
 }
 
 const SYSTEM_ACTIONS: ActionConfig[] = [
@@ -24,17 +33,21 @@ const SYSTEM_ACTIONS: ActionConfig[] = [
     icon: Key,
     label: "Rotate Master Keys",
     description:
-      "This will rotate all master encryption keys across every tenant. Active sessions will be invalidated and users will need to re-authenticate.",
+      "This will rotate all master encryption keys across every tenant. All users will re-authenticate on next request.",
     confirmLabel: "Rotate Keys",
     variant: "danger",
+    successTitle: "Master keys rotated",
+    successDescription: "All active sessions have been invalidated. Users will re-authenticate on next request.",
   },
   {
     icon: Database,
     label: "Flush Cache (Global)",
     description:
-      "Clears all cached data globally including enrichment results, search indexes, and session caches. This may cause temporary slowness as caches rebuild.",
+      "Clears all cached data globally including enrichment results, search indexes, and session caches. Cached Apollo responses will be cleared — next search burns credits.",
     confirmLabel: "Flush Cache",
     variant: "danger",
+    successTitle: "Cache flushed",
+    successDescription: "All cached Apollo responses cleared. Next search will consume credits.",
   },
   {
     icon: Megaphone,
@@ -43,6 +56,8 @@ const SYSTEM_ACTIONS: ActionConfig[] = [
       "Send a system-wide alert banner to all active users across every tenant. Use this for planned maintenance or urgent notices.",
     confirmLabel: "Send Broadcast",
     variant: "default",
+    successTitle: "Broadcast sent",
+    successDescription: "Alert banner delivered to all active users.",
   },
   {
     icon: Download,
@@ -51,22 +66,29 @@ const SYSTEM_ACTIONS: ActionConfig[] = [
       "Export the last 30 days of system logs including API calls, enrichment activity, and error traces as a downloadable archive.",
     confirmLabel: "Export Logs",
     variant: "default",
+    successTitle: "Export started",
+    successDescription: "System logs export has been queued.",
   },
 ];
 
 export function SystemActions() {
   const [openAction, setOpenAction] = useState<string | null>(null);
-  const [actionState, setActionState] = useState<"idle" | "loading" | "done">("idle");
+  const [isRunning, setIsRunning] = useState(false);
+  const { toast } = useToast();
+
+  const selectedAction = SYSTEM_ACTIONS.find((a) => a.label === openAction) ?? null;
 
   function handleConfirm() {
-    setActionState("loading");
+    if (!selectedAction) return;
+    setIsRunning(true);
     // Simulate action — replace with real API calls later
     setTimeout(() => {
-      setActionState("done");
-      setTimeout(() => {
-        setOpenAction(null);
-        setActionState("idle");
-      }, 1200);
+      setIsRunning(false);
+      setOpenAction(null);
+      toast({
+        title: selectedAction.successTitle,
+        description: selectedAction.successDescription,
+      });
     }, 1500);
   }
 
@@ -108,7 +130,6 @@ export function SystemActions() {
               }}
               onClick={() => {
                 setOpenAction(label);
-                setActionState("idle");
               }}
             >
               <Icon
@@ -123,68 +144,75 @@ export function SystemActions() {
         </div>
       </div>
 
-      {/* Action Dialogs */}
+      {/* Action Dialog — single dialog driven by selectedAction */}
       {SYSTEM_ACTIONS.map((action) => (
         <Dialog
           key={action.label}
           open={openAction === action.label}
           onOpenChange={(open) => {
-            if (!open) {
+            if (!open && !isRunning) {
               setOpenAction(null);
-              setActionState("idle");
             }
           }}
         >
           <DialogContent>
-            <DialogHeader>
-              <DialogTitle style={{ color: "var(--text-primary-ds)" }}>
-                <span className="flex items-center gap-2">
-                  <action.icon className="h-5 w-5" style={{ color: "var(--gold-primary)" }} />
-                  {action.label}
-                </span>
-              </DialogTitle>
-              <DialogDescription
-                className="pt-2"
-                style={{ color: "var(--admin-text-secondary)" }}
+            {action.variant === "danger" ? (
+              <Confirmation
+                isDestructive
+                confirmLabel={action.confirmLabel}
+                cancelLabel="Cancel"
+                onConfirm={handleConfirm}
+                onCancel={() => setOpenAction(null)}
+                isLoading={isRunning}
               >
-                {action.description}
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter className="pt-2">
-              <button
-                onClick={() => {
-                  setOpenAction(null);
-                  setActionState("idle");
-                }}
-                disabled={actionState === "loading"}
-                className="px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer disabled:opacity-50"
-                style={{
-                  background: "rgba(255,255,255,0.05)",
-                  color: "var(--text-primary-ds)",
-                  border: "1px solid var(--border-subtle)",
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleConfirm}
-                disabled={actionState !== "idle"}
-                className="px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer disabled:opacity-70 flex items-center gap-2"
-                style={{
-                  background:
-                    actionState === "done"
-                      ? "var(--success)"
-                      : action.variant === "danger"
-                        ? "oklch(0.62 0.19 22)"
-                        : "var(--gold-primary)",
-                  color: actionState === "done" ? "#fff" : action.variant === "danger" ? "#fff" : "#000",
-                }}
-              >
-                {actionState === "loading" && <Loader2 className="h-4 w-4 animate-spin" />}
-                {actionState === "done" && <CheckCircle2 className="h-4 w-4" />}
-                {actionState === "done" ? "Done" : action.confirmLabel}
-              </button>
-            </DialogFooter>
+                <ConfirmationIcon variant="destructive" />
+                <ConfirmationTitle>{action.label}?</ConfirmationTitle>
+                <ConfirmationDescription>{action.description}</ConfirmationDescription>
+              </Confirmation>
+            ) : (
+              <>
+                <DialogHeader>
+                  <DialogTitle style={{ color: "var(--text-primary-ds)" }}>
+                    <span className="flex items-center gap-2">
+                      <action.icon className="h-5 w-5" style={{ color: "var(--gold-primary)" }} />
+                      {action.label}
+                    </span>
+                  </DialogTitle>
+                  <DialogDescription
+                    className="pt-2"
+                    style={{ color: "var(--admin-text-secondary)" }}
+                  >
+                    {action.description}
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter className="pt-2">
+                  <button
+                    onClick={() => setOpenAction(null)}
+                    disabled={isRunning}
+                    className="px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer disabled:opacity-50"
+                    style={{
+                      background: "rgba(255,255,255,0.05)",
+                      color: "var(--text-primary-ds)",
+                      border: "1px solid var(--border-subtle)",
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleConfirm}
+                    disabled={isRunning}
+                    className="px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer disabled:opacity-70 flex items-center gap-2"
+                    style={{
+                      background: "var(--gold-primary)",
+                      color: "#000",
+                    }}
+                  >
+                    {isRunning && <Loader2 className="h-4 w-4 animate-spin" />}
+                    {action.confirmLabel}
+                  </button>
+                </DialogFooter>
+              </>
+            )}
           </DialogContent>
         </Dialog>
       ))}
