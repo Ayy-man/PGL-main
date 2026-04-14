@@ -57,7 +57,27 @@ const STATUS_OPTIONS: { value: IssueStatus; label: string }[] = [
   { value: "duplicate", label: "Duplicate" },
 ];
 
+const STATUS_LABEL: Record<IssueStatus, string> = {
+  open: "Open",
+  investigating: "Investigating",
+  resolved: "Resolved",
+  wontfix: "Won't Fix",
+  duplicate: "Duplicate",
+};
+
 const CLOSED_STATUSES: IssueStatus[] = ["resolved", "wontfix", "duplicate"];
+
+const CLOSE_STATUS_OPTIONS: { value: IssueStatus; label: string }[] = STATUS_OPTIONS.filter((o) =>
+  CLOSED_STATUSES.includes(o.value)
+);
+
+const EVENT_CATEGORY_LABELS: Record<string, string> = {
+  incorrect_data: "Incorrect data",
+  missing_data: "Missing data",
+  bad_source: "Bad source",
+  bug: "Bug",
+  other: "Other",
+};
 
 function formatRelativeTime(dateStr: string): string {
   const diffMs = Date.now() - new Date(dateStr).getTime();
@@ -120,10 +140,15 @@ export function ReportDetail({ report: initialReport, screenshotUrl, events: ini
   const [isPending, startTransition] = useTransition();
   const [copied, setCopied] = useState(false);
   const [events, setEvents] = useState<IssueReportEventWithActor[]>(initialEvents);
+  const [closeDialogOpen, setCloseDialogOpen] = useState(false);
+  const [closeStatus, setCloseStatus] = useState<IssueStatus>("resolved");
+  const [closeNote, setCloseNote] = useState("");
 
   const isClosing = CLOSED_STATUSES.includes(status);
   const notesEmpty = notes.trim().length === 0;
   const blockCloseForEmptyNote = isClosing && notesEmpty;
+  const reportIsClosed = CLOSED_STATUSES.includes(report.status);
+  const closeNoteEmpty = closeNote.trim().length === 0;
 
   const buildDebugPrompt = useCallback(() => {
     const snap = report.target_snapshot as Record<string, unknown> | null;
@@ -284,6 +309,59 @@ export function ReportDetail({ report: initialReport, screenshotUrl, events: ini
     return lines.join("\n");
   }, [report]);
 
+  const buildTimelineSection = useCallback(() => {
+    if (events.length === 0) {
+      return ["", "## Timeline", "_No events recorded._", ""];
+    }
+    const actorFor = (ev: IssueReportEventWithActor): string => {
+      if (ev.actor) return ev.actor.full_name ?? ev.actor.email;
+      if (ev.actor_role === "system") return "System";
+      if (ev.actor_role === "tenant") return "Tenant";
+      return "Unknown";
+    };
+    const labelFor = (ev: IssueReportEventWithActor): string => {
+      switch (ev.event_type) {
+        case "reported": {
+          const cat = EVENT_CATEGORY_LABELS[report.category] ?? report.category;
+          return `reported (${cat})`;
+        }
+        case "status_changed": {
+          const from = ev.from_status ?? "—";
+          const to = ev.to_status ?? "—";
+          const isClose = !!ev.to_status && CLOSED_STATUSES.includes(ev.to_status);
+          const isReopen =
+            !!ev.from_status &&
+            CLOSED_STATUSES.includes(ev.from_status) &&
+            !!ev.to_status &&
+            !CLOSED_STATUSES.includes(ev.to_status);
+          if (isClose && ev.to_status) {
+            return `closed as ${STATUS_LABEL[ev.to_status]} (${from}→${to})`;
+          }
+          if (isReopen) {
+            return `reopened (${from}→${to})`;
+          }
+          return `changed status (${from}→${to})`;
+        }
+        case "note_added":
+          return "added note";
+        case "viewed_by_admin":
+          return "viewed";
+        case "screenshot_expired":
+          return "screenshot expired";
+        default:
+          return String(ev.event_type);
+      }
+    };
+    // Events arrive ASC from the API — no reversal needed for chronological export.
+    const body = events.map((ev) => {
+      const actor = actorFor(ev);
+      const label = labelFor(ev);
+      const note = ev.note && ev.note.trim().length > 0 ? ` — "${ev.note.trim()}"` : "";
+      return `- [${ev.created_at}] ${actor} ${label}${note}`;
+    });
+    return ["", "## Timeline", ...body, ""];
+  }, [events, report.category]);
+
   const buildFullLog = useCallback(() => {
     const lines: string[] = [
       `# Issue Report: ${CATEGORY_LABELS[report.category] ?? report.category}`,
@@ -323,9 +401,11 @@ export function ReportDetail({ report: initialReport, screenshotUrl, events: ini
       report.resolved_at ? `- **Resolved at:** ${report.resolved_at}` : "",
       report.resolver ? `- **Resolved by:** ${report.resolver.full_name ?? report.resolver.email}` : "",
     ];
+    // ## Timeline — chronological audit log of all events (reporter, views, status changes, notes).
+    lines.push(...buildTimelineSection());
     lines.push(buildDebugPrompt());
     return lines.filter(Boolean).join("\n");
-  }, [report, screenshotUrl, buildDebugPrompt]);
+  }, [report, screenshotUrl, buildDebugPrompt, buildTimelineSection]);
 
   const handleCopy = useCallback(async () => {
     await navigator.clipboard.writeText(buildFullLog());
@@ -357,6 +437,89 @@ export function ReportDetail({ report: initialReport, screenshotUrl, events: ini
           setEvents((prev) => [...prev, data.event as IssueReportEventWithActor]);
         }
         setSuccess("Changes saved successfully");
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Unexpected error occurred");
+      }
+    });
+  };
+
+  const handleClose = () => {
+    setError(null);
+    setSuccess(null);
+    const noteTrimmed = closeNote.trim();
+    if (noteTrimmed.length === 0) return;
+    startTransition(async () => {
+      try {
+        const res = await fetch(`/api/admin/reports/${report.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: closeStatus, admin_notes: noteTrimmed }),
+        });
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({})) as { error?: string };
+          setError(body.error ?? "Failed to close ticket");
+          return;
+        }
+        const data = await res.json() as {
+          report: Partial<ReportDetailData>;
+          event: IssueReportEventWithActor | null;
+        };
+        // Merge server response (status, admin_notes, resolved_at, resolved_by).
+        setReport((r) => ({ ...r, ...data.report }));
+        // Sync local status + notes controls so the Save-changes form reflects post-close state.
+        setStatus(closeStatus);
+        setNotes(noteTrimmed);
+        if (data.event) {
+          setEvents((prev) => [...prev, data.event as IssueReportEventWithActor]);
+        }
+        setCloseDialogOpen(false);
+        setCloseNote("");
+        setSuccess(`Ticket closed as ${STATUS_LABEL[closeStatus]}`);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Unexpected error occurred");
+      }
+    });
+  };
+
+  const handleReopen = () => {
+    setError(null);
+    setSuccess(null);
+    // window.prompt returns null on Cancel → abort. Empty string → reopen without reason.
+    const reason = typeof window !== "undefined"
+      ? window.prompt("Reason for reopening (optional)")
+      : "";
+    if (reason === null) return;
+    const reasonTrimmed = reason.trim();
+    startTransition(async () => {
+      try {
+        const payload: { status: IssueStatus; admin_notes?: string } = { status: "open" };
+        if (reasonTrimmed.length > 0) {
+          payload.admin_notes = `Reopened: ${reasonTrimmed}`;
+        }
+        const res = await fetch(`/api/admin/reports/${report.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({})) as { error?: string };
+          setError(body.error ?? "Failed to reopen ticket");
+          return;
+        }
+        const data = await res.json() as {
+          report: Partial<ReportDetailData>;
+          event: IssueReportEventWithActor | null;
+        };
+        // Server clears resolved_at/resolved_by — merge null values into state so Context panel reflects reopen.
+        setReport((r) => ({ ...r, ...data.report, resolver: null }));
+        setStatus("open");
+        if (payload.admin_notes !== undefined) {
+          setNotes(payload.admin_notes);
+        }
+        if (data.event) {
+          setEvents((prev) => [...prev, data.event as IssueReportEventWithActor]);
+        }
+        setSuccess("Ticket reopened");
       } catch (e) {
         setError(e instanceof Error ? e.message : "Unexpected error occurred");
       }
@@ -655,18 +818,138 @@ export function ReportDetail({ report: initialReport, screenshotUrl, events: ini
                 />
               </div>
 
-              <button
-                onClick={handleSave}
-                disabled={isPending || blockCloseForEmptyNote}
-                className="h-9 rounded-[8px] px-4 text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                style={{
-                  background: "var(--gold-bg-strong)",
-                  border: "1px solid var(--border-gold)",
-                  color: "var(--gold-primary)",
-                }}
-              >
-                {isPending ? "Saving…" : "Save changes"}
-              </button>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={handleSave}
+                  disabled={isPending || blockCloseForEmptyNote}
+                  className="h-9 rounded-[8px] px-4 text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                  style={{
+                    background: "var(--gold-bg-strong)",
+                    border: "1px solid var(--border-gold)",
+                    color: "var(--gold-primary)",
+                  }}
+                >
+                  {isPending ? "Saving…" : "Save changes"}
+                </button>
+
+                {!reportIsClosed && (
+                  <button
+                    onClick={() => {
+                      setCloseDialogOpen((v) => !v);
+                      setError(null);
+                      setSuccess(null);
+                    }}
+                    disabled={isPending}
+                    className="h-9 rounded-[8px] px-4 text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                    style={{
+                      background: "var(--bg-elevated)",
+                      border: "1px solid var(--border-gold)",
+                      color: "var(--gold-primary)",
+                    }}
+                  >
+                    {closeDialogOpen ? "Cancel close" : "Close ticket"}
+                  </button>
+                )}
+
+                {reportIsClosed && (
+                  <button
+                    onClick={handleReopen}
+                    disabled={isPending}
+                    className="h-9 rounded-[8px] px-4 text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                    style={{
+                      background: "var(--bg-elevated)",
+                      border: "1px solid var(--destructive)",
+                      color: "var(--destructive, #ef4444)",
+                    }}
+                  >
+                    {isPending ? "Reopening…" : "Reopen ticket"}
+                  </button>
+                )}
+              </div>
+
+              {closeDialogOpen && !reportIsClosed && (
+                <div
+                  className="space-y-3 rounded-[8px] border p-3"
+                  style={{
+                    background: "var(--bg-root)",
+                    borderColor: "var(--border-subtle)",
+                  }}
+                >
+                  <p
+                    className="text-xs font-semibold uppercase tracking-wider"
+                    style={{ color: "var(--admin-text-secondary)" }}
+                  >
+                    Close ticket
+                  </p>
+                  <div className="space-y-1.5">
+                    <label
+                      className="text-xs font-medium text-muted-foreground"
+                      htmlFor="close-status-select"
+                    >
+                      Resolution
+                    </label>
+                    <select
+                      id="close-status-select"
+                      value={closeStatus}
+                      onChange={(e) => setCloseStatus(e.target.value as IssueStatus)}
+                      className="w-full h-9 rounded-[8px] border px-3 text-sm focus:outline-none"
+                      style={inputStyle}
+                    >
+                      {CLOSE_STATUS_OPTIONS.map((o) => (
+                        <option key={o.value} value={o.value}>
+                          {o.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label
+                      className="text-xs font-medium text-muted-foreground"
+                      htmlFor="close-note"
+                    >
+                      Resolution note <span style={{ color: "var(--destructive)" }}>*</span>
+                    </label>
+                    <textarea
+                      id="close-note"
+                      value={closeNote}
+                      onChange={(e) => setCloseNote(e.target.value)}
+                      placeholder="What was done to resolve this? (required)"
+                      rows={3}
+                      className="w-full rounded-[8px] border px-3 py-2 text-sm resize-none focus:outline-none"
+                      style={inputStyle}
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleClose}
+                      disabled={isPending || closeNoteEmpty}
+                      className="h-9 rounded-[8px] px-4 text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                      style={{
+                        background: "var(--gold-bg-strong)",
+                        border: "1px solid var(--border-gold)",
+                        color: "var(--gold-primary)",
+                      }}
+                    >
+                      {isPending ? "Closing…" : "Confirm close"}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setCloseDialogOpen(false);
+                        setCloseNote("");
+                      }}
+                      disabled={isPending}
+                      className="h-9 rounded-[8px] px-4 text-sm font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                      style={{
+                        background: "transparent",
+                        border: "1px solid var(--border-subtle)",
+                        color: "var(--text-secondary-ds)",
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </SectionCard>
           <TimelineCard

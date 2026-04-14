@@ -17,6 +17,8 @@ const STATUS_LABEL: Record<IssueStatus, string> = {
   duplicate: "Duplicate",
 };
 
+const CLOSED_STATUSES: IssueStatus[] = ["resolved", "wontfix", "duplicate"];
+
 const CATEGORY_LABELS: Record<string, string> = {
   incorrect_data: "Incorrect data",
   missing_data: "Missing data",
@@ -79,6 +81,48 @@ function renderVariant(
     case "status_changed": {
       const from = event.from_status ? STATUS_LABEL[event.from_status] : "—";
       const to = event.to_status ? STATUS_LABEL[event.to_status] : "—";
+      const isClose = !!event.to_status && CLOSED_STATUSES.includes(event.to_status);
+      const isReopen =
+        !!event.from_status &&
+        CLOSED_STATUSES.includes(event.from_status) &&
+        !!event.to_status &&
+        !CLOSED_STATUSES.includes(event.to_status);
+
+      const body = event.note
+        ? (
+          <div
+            className="mt-1 rounded-[6px] px-2 py-1.5 text-xs whitespace-pre-wrap"
+            style={{ background: "var(--bg-root)", color: "var(--text-secondary-ds)" }}
+          >
+            {event.note}
+          </div>
+        )
+        : null;
+
+      if (isClose && event.to_status) {
+        return {
+          dotColor: "var(--success, #22c55e)",
+          headline: (
+            <>
+              <span className="font-semibold">{actorName(event.actor)}</span>
+              {" "}closed as {STATUS_LABEL[event.to_status]}
+            </>
+          ),
+          body,
+        };
+      }
+      if (isReopen) {
+        return {
+          dotColor: "var(--destructive, #ef4444)",
+          headline: (
+            <>
+              <span className="font-semibold">{actorName(event.actor)}</span>
+              {" "}reopened ticket
+            </>
+          ),
+          body,
+        };
+      }
       return {
         dotColor: "#3b82f6", // blue-500
         headline: (
@@ -87,16 +131,7 @@ function renderVariant(
             {" "}changed status: {from} → {to}
           </>
         ),
-        body: event.note
-          ? (
-            <div
-              className="mt-1 rounded-[6px] px-2 py-1.5 text-xs"
-              style={{ background: "var(--bg-root)", color: "var(--text-secondary-ds)" }}
-            >
-              {event.note}
-            </div>
-          )
-          : null,
+        body,
       };
     }
     case "note_added":
