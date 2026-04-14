@@ -357,3 +357,36 @@ export interface IssueReport {
   created_at: string;
   updated_at: string;
 }
+
+// Phase 38: Issue Report Event Timeline — mirrors issue_report_events table schema
+// See supabase/migrations/20260414_issue_report_events.sql
+
+export type IssueReportEventType =
+  | "reported"
+  | "status_changed"
+  | "note_added"
+  | "viewed_by_admin"
+  | "screenshot_expired";
+
+export type IssueReportActorRole = "tenant" | "admin" | "system";
+
+export interface IssueReportEvent {
+  id: string;
+  report_id: string;
+  event_type: IssueReportEventType;
+  actor_user_id: string | null;
+  actor_role: IssueReportActorRole;
+  from_status: IssueStatus | null;
+  to_status: IssueStatus | null;
+  note: string | null;
+  created_at: string;
+}
+
+// Shape returned by GET /api/admin/reports/[id] — includes joined actor details for timeline rendering
+export interface IssueReportEventWithActor extends IssueReportEvent {
+  actor: {
+    id: string;
+    email: string;
+    full_name: string | null;
+  } | null;
+}
