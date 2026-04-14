@@ -306,7 +306,7 @@ export function ListMemberTable({ members: serverMembers, listId, listName }: Li
                     email={member.prospect.email}
                     size="sm"
                   />
-                  <EnrichmentDot status={enrichingId === member.prospect.id ? "in_progress" : member.prospect.enrichment_status} />
+                  <EnrichmentStatusDots sourceStatus={null} />
                   <Link
                     href={`/${orgId}/prospects/${member.prospect.id}${fromQuery}`}
                     className="text-sm font-semibold truncate hover:underline"
