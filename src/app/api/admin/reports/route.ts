@@ -22,6 +22,7 @@ export async function GET(request: Request) {
   const status = url.searchParams.get("status");
   const category = url.searchParams.get("category");
   const tenantSearch = url.searchParams.get("tenant");
+  const filter = url.searchParams.get("filter");
   const limit = Math.min(
     parseInt(url.searchParams.get("limit") ?? String(DEFAULT_LIMIT), 10) || DEFAULT_LIMIT,
     MAX_LIMIT
@@ -29,6 +30,7 @@ export async function GET(request: Request) {
   const offset = Math.max(parseInt(url.searchParams.get("offset") ?? "0", 10) || 0, 0);
 
   const admin = createAdminClient();
+  const isOverdueClosed = filter === "overdue_closed";
   let query = admin
     .from("issue_reports")
     .select(
@@ -40,12 +42,24 @@ export async function GET(request: Request) {
       `,
       { count: "exact" }
     )
-    .order("created_at", { ascending: false })
+    // For the overdue_closed view, surface the oldest-resolved tickets first (longest-overdue).
+    // For everything else keep the default newest-first ordering.
+    .order(isOverdueClosed ? "resolved_at" : "created_at", { ascending: isOverdueClosed })
     .range(offset, offset + limit - 1);
 
-  if (status && (VALID_STATUSES as readonly string[]).includes(status)) {
+  if (isOverdueClosed) {
+    const thirtyDaysAgoIso = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    query = query
+      .in("status", ["resolved", "wontfix", "duplicate"])
+      .lt("resolved_at", thirtyDaysAgoIso);
+    // When filter=overdue_closed AND an explicit status is provided, narrow further (e.g. only wontfix).
+    if (status && (["resolved", "wontfix", "duplicate"] as readonly string[]).includes(status)) {
+      query = query.eq("status", status);
+    }
+  } else if (status && (VALID_STATUSES as readonly string[]).includes(status)) {
     query = query.eq("status", status);
   }
+  // Category filter still applies on top of overdue_closed (e.g. overdue_closed bugs only).
   if (category && (VALID_CATEGORIES as readonly string[]).includes(category)) {
     query = query.eq("category", category);
   }

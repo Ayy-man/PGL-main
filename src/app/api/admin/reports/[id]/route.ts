@@ -134,7 +134,16 @@ export async function PATCH(
 
   if (body.status !== undefined) {
     update.status = body.status;
-    if (body.status === "resolved" && current.status !== "resolved") {
+    // Reopen: transitioning FROM a closed status TO a non-closed status — clear resolution metadata.
+    // Covers reopen from resolved/wontfix/duplicate back to open/investigating regardless of which
+    // closed status was set. Evaluated before the resolve branch since the two are mutually exclusive.
+    if (
+      CLOSED_STATUSES.includes(current.status) &&
+      !CLOSED_STATUSES.includes(body.status as string)
+    ) {
+      update.resolved_by = null;
+      update.resolved_at = null;
+    } else if (body.status === "resolved" && current.status !== "resolved") {
       update.resolved_by = user.id;
       update.resolved_at = new Date().toISOString();
     }
