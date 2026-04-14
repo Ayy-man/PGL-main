@@ -60,7 +60,7 @@ export function ChannelStatusBar({ statuses, loading }: ChannelStatusBarProps) {
               : status.error!;
           label = truncated;
         } else if (hasResults) {
-          dotClass += "bg-emerald-500";
+          dotClass += "bg-success";
           label = status.cached
             ? `${status.resultCount} results (cached)`
             : `${status.resultCount} results`;

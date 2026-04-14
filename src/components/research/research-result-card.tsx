@@ -45,7 +45,7 @@ function getCategoryColor(category: string): string {
 function getRelevanceDotClass(relevance: string): string {
   switch (relevance) {
     case "high":
-      return "bg-emerald-500";
+      return "bg-success";
     case "medium":
       return "bg-amber-500";
     default:
