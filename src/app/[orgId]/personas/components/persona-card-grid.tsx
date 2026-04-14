@@ -79,8 +79,10 @@ export function PersonaCardGrid({ personas: serverPersonas, orgId, canEdit = tru
 
   return (
     <div className="grid gap-4 md:gap-5 content-start grid-cols-1 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fill,minmax(340px,1fr))]">
-      {personas.map((persona) => (
-        <PersonaCard key={persona.id} persona={persona} onDelete={handleRequestDeletePersona} onUpdated={handlePersonaUpdated} canEdit={canEdit} />
+      {personas.map((persona, index) => (
+        <div key={persona.id} className="animate-stagger-in" style={{ animationDelay: `${index * 50}ms` }}>
+          <PersonaCard persona={persona} onDelete={handleRequestDeletePersona} onUpdated={handlePersonaUpdated} canEdit={canEdit} />
+        </div>
       ))}
 
       {/* Create New Persona CTA card */}

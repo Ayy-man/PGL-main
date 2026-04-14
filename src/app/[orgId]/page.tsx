@@ -8,6 +8,7 @@ import { DashboardStatCards } from "@/components/dashboard/dashboard-stat-cards"
 import { PersonaPillRow } from "@/components/dashboard/persona-pill-row";
 import { RecentExportsTable } from "@/components/dashboard/recent-exports-table";
 import { ActivityFeed } from "@/components/dashboard/activity-feed";
+import { Button } from "@/components/ui/button";
 import type { ActivityLogEntry } from "@/lib/activity-logger";
 
 export default async function TenantDashboard({
@@ -233,17 +234,12 @@ export default async function TenantDashboard({
             <History className="h-4 w-4" />
             Export History
           </Link>
-          <Link
-            href={`/${orgId}/search`}
-            className="card-interactive inline-flex items-center gap-2 rounded-[8px] px-4 py-2 text-sm font-semibold cursor-pointer transition-colors"
-            style={{
-              background: "var(--gold-primary)",
-              color: "var(--bg-primary)",
-            }}
-          >
-            <Download className="h-4 w-4" />
-            Download New List
-          </Link>
+          <Button asChild variant="gold-solid" className="card-interactive press-effect">
+            <Link href={`/${orgId}/search`}>
+              <Download className="h-4 w-4" />
+              Download New List
+            </Link>
+          </Button>
         </div>
       </div>
 

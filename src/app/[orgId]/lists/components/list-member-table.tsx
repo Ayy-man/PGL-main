@@ -27,6 +27,8 @@ import type { ListMember } from "@/lib/lists/types";
 import { EnrichmentStatusDots } from "@/components/ui/enrichment-status-dots";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
+import { createClient } from "@/lib/supabase/client";
 import { ProspectAvatar } from "@/components/prospect/prospect-avatar";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
@@ -73,10 +75,12 @@ function timeAgo(dateStr: string): string {
 
 function CopyButton({ text, icon: Icon }: { text: string; icon: typeof Mail }) {
   const [copied, setCopied] = useState(false);
+  const { toast } = useToast();
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(text);
     setCopied(true);
+    toast({ title: "Email copied", description: text });
     setTimeout(() => setCopied(false), 1500);
   };
 
@@ -134,8 +138,21 @@ export function ListMemberTable({ members: serverMembers, listId, listName }: Li
     setRemoving(true);
 
     const previousMembers = members;
-    setMembers(prev => prev.filter(m => m.id !== pendingRemoveMember.memberId));
-    toast({ title: "Prospect removed from list" });
+    const memberIdToRemove = pendingRemoveMember.memberId;
+    setMembers(prev => prev.filter(m => m.id !== memberIdToRemove));
+
+    const restoreMember = (prev: ListMember[]) => {
+      return prev.some(m => m.id === memberIdToRemove) ? prev : previousMembers;
+    };
+
+    toast({
+      title: "Prospect removed from list",
+      action: (
+        <ToastAction altText="Undo" onClick={() => setMembers((prev) => restoreMember(prev))}>
+          Undo
+        </ToastAction>
+      ),
+    });
 
     const result = await removeFromListAction(pendingRemoveMember.memberId);
     if (!result.success) {
@@ -155,11 +172,31 @@ export function ListMemberTable({ members: serverMembers, listId, listName }: Li
         toast({ title: "Re-enrichment queued", description: "Data will refresh in the background." });
       } else {
         toast({ title: "Re-enrichment failed", description: "Could not queue enrichment.", variant: "destructive" });
+        setEnrichingId(null);
+        return;
       }
     } catch {
       toast({ title: "Re-enrichment failed", description: "Network error.", variant: "destructive" });
+      setEnrichingId(null);
+      return;
     }
-    setTimeout(() => setEnrichingId(null), 2000);
+
+    // Subscribe to Realtime updates — clear spinner when enrichment completes or fails
+    const supabase = createClient();
+    const channel = supabase
+      .channel(`list-re-enrich-${prospectId}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "prospects", filter: `id=eq.${prospectId}` },
+        (payload) => {
+          const row = payload.new as { enrichment_status?: string };
+          if (row.enrichment_status === "complete" || row.enrichment_status === "failed") {
+            setEnrichingId(null);
+            supabase.removeChannel(channel);
+          }
+        }
+      )
+      .subscribe();
   };
 
   return (
@@ -167,7 +204,7 @@ export function ListMemberTable({ members: serverMembers, listId, listName }: Li
       {/* Desktop table */}
       <div className="hidden md:block">
         <Table>
-          <TableHeader>
+          <TableHeader className="sticky top-0 z-10 bg-background">
             <TableRow>
               <TableHead className="w-[280px]">Prospect</TableHead>
               <TableHead className="w-[120px]">Location</TableHead>

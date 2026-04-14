@@ -7,6 +7,7 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@/components/ui/tooltip";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface BulkActionsBarProps {
   selectedCount: number;
@@ -23,6 +24,7 @@ interface BulkActionsBarProps {
 
 export function BulkActionsBar({
   selectedCount,
+  totalCount,
   allSelected,
   onSelectAll,
   onAddToList,
@@ -32,6 +34,8 @@ export function BulkActionsBar({
   showDismiss,
   canEdit = true,
 }: BulkActionsBarProps) {
+  const someSelected = selectedCount > 0 && selectedCount < totalCount;
+
   return (
     <div
       className="flex items-center justify-between rounded-[10px] px-4 py-3 mb-3 animate-slide-up"
@@ -42,11 +46,9 @@ export function BulkActionsBar({
     >
       {/* Left side: checkbox + label */}
       <div className="flex items-center gap-2.5">
-        <input
-          type="checkbox"
-          checked={allSelected}
-          onChange={onSelectAll}
-          className="h-4 w-4 rounded cursor-pointer accent-[var(--gold-primary)]"
+        <Checkbox
+          checked={someSelected ? "indeterminate" : allSelected}
+          onCheckedChange={onSelectAll}
           aria-label="Select all prospects"
         />
         <span

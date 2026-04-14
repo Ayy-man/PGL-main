@@ -82,21 +82,7 @@ export function DiscoverTab({
           </p>
         </div>
 
-        {/* Stats bar — pill badge */}
-        <div className="my-6 flex justify-center">
-          <span
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-[11px] tracking-wide"
-            style={{
-              border: "1px solid rgba(212,175,55,0.15)",
-              background: "rgba(212,175,55,0.04)",
-              color: "var(--text-tertiary)",
-            }}
-          >
-            12,400+ prospects indexed
-            <span style={{ opacity: 0.4 }}>·</span>
-            Updated 2 hours ago
-          </span>
-        </div>
+        {/* Stats bar pill removed — was hard-coded marketing copy, not real data */}
 
         {/* Search area */}
         <div className="relative">
@@ -122,7 +108,7 @@ export function DiscoverTab({
 
           {/* Ghost save link — only when keywords are present */}
           {keywords.trim() && (
-            <div className="mt-2 text-center">
+            <div className="mt-2 text-center animate-in fade-in slide-in-from-bottom-1 duration-250">
               <button
                 type="button"
                 onClick={onSaveAsNewSearch}

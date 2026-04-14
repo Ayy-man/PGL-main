@@ -56,10 +56,10 @@ export function SECFilingsTable({ transactions, totalValue }: SECFilingsTablePro
     totalValue ?? transactions.reduce((sum, tx) => sum + tx.totalValue, 0);
 
   return (
-    <div className="overflow-hidden rounded-md border">
+    <div className="surface-card overflow-hidden rounded-[14px]">
       <table className="w-full">
         <thead>
-          <tr className="bg-background">
+          <tr className="bg-[var(--bg-elevated)]">
             <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Date
             </th>
