@@ -2,6 +2,7 @@ import { requireSuperAdmin } from "@/lib/auth/rbac";
 import { AdminSidebar } from "./admin-sidebar";
 import { AdminMobileSidebar } from "./admin-mobile-sidebar";
 import { TopBar } from "@/components/layout/top-bar";
+import { Toaster } from "@/components/ui/toaster";
 
 export default async function AdminLayout({
   children,
@@ -38,6 +39,7 @@ export default async function AdminLayout({
           </main>
         </div>
       </div>
+      <Toaster />
     </div>
   );
 }
