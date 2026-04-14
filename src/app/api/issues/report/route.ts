@@ -151,6 +151,21 @@ export async function POST(request: Request) {
     );
   }
 
+  // Phase 38: append reported event to audit log (service-role client bypasses RLS).
+  // Do not block the response on this — swallow errors the same way logActivity does.
+  try {
+    const admin = createAdminClient();
+    await admin.from("issue_report_events").insert({
+      report_id: reportId,
+      event_type: "reported",
+      actor_user_id: user.id,
+      actor_role: "tenant",
+    });
+  } catch (err) {
+    console.error("[issue-report] failed to append reported event:", err);
+    // Do not fail the request — the report row is already persisted.
+  }
+
   // Upload screenshot if provided; fall back to null on failure
   let screenshotPath: string | null = null;
   if (screenshot) {

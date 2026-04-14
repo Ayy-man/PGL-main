@@ -55,8 +55,24 @@ export async function GET(
     screenshotUrl = signedData?.signedUrl ?? null;
   }
 
-  return NextResponse.json({ report, screenshotUrl });
+  // Phase 38: fetch events for consumers of this endpoint (ASC order, joined actor).
+  // NOTE: viewed_by_admin and screenshot_expired writes live in the page.tsx server
+  // loader (Plan 03 Task 2), NOT here — the admin UI does not call this GET, so
+  // writes here would never fire on a real page visit.
+  const { data: events } = await admin
+    .from("issue_report_events")
+    .select(`
+      id, report_id, event_type, actor_user_id, actor_role,
+      from_status, to_status, note, created_at,
+      actor:actor_user_id ( id, email, full_name )
+    `)
+    .eq("report_id", id)
+    .order("created_at", { ascending: true });
+
+  return NextResponse.json({ report, screenshotUrl, events: events ?? [] });
 }
+
+const CLOSED_STATUSES: readonly string[] = ["resolved", "wontfix", "duplicate"];
 
 export async function PATCH(
   request: Request,
@@ -76,20 +92,53 @@ export async function PATCH(
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
+  const admin = createAdminClient();
+
+  // Fetch current row so we can diff and capture from_status/current note.
+  const { data: current, error: readErr } = await admin
+    .from("issue_reports")
+    .select("id, status, admin_notes")
+    .eq("id", id)
+    .single();
+
+  if (readErr || !current) {
+    return NextResponse.json({ error: "Report not found" }, { status: 404 });
+  }
+
+  // Normalize incoming values — treat undefined as "no change".
+  const nextStatus: Status = (body.status ?? current.status) as Status;
+  const nextNotes: string | null =
+    body.admin_notes !== undefined ? body.admin_notes : current.admin_notes;
+
+  // Close-requires-note guard (server-side source of truth).
+  const notesEmpty = !nextNotes || nextNotes.trim().length === 0;
+  const isClosing = CLOSED_STATUSES.includes(nextStatus) && (body.status !== undefined || body.admin_notes !== undefined);
+  const wasAlreadyClosed = CLOSED_STATUSES.includes(current.status);
+  if (isClosing && notesEmpty && !(wasAlreadyClosed && body.status === undefined)) {
+    // Block the close if: target is a closed status AND notes are empty AND this is not a no-op PATCH that leaves the row untouched.
+    return NextResponse.json(
+      { error: "A note is required when closing an issue" },
+      { status: 400 }
+    );
+  }
+
+  // Validate status enum if provided.
+  if (body.status !== undefined && !(VALID_STATUSES as readonly string[]).includes(body.status as string)) {
+    return NextResponse.json({ error: "Invalid status value" }, { status: 400 });
+  }
+
+  // Build the update payload.
   const update: Record<string, unknown> = {};
+  const statusChanged = body.status !== undefined && body.status !== current.status;
+  const notesChanged = body.admin_notes !== undefined && body.admin_notes !== current.admin_notes;
 
   if (body.status !== undefined) {
-    if (!(VALID_STATUSES as readonly string[]).includes(body.status as string)) {
-      return NextResponse.json({ error: "Invalid status value" }, { status: 400 });
-    }
     update.status = body.status;
-    // Auto-populate resolved_by and resolved_at on transition to "resolved"
-    if (body.status === "resolved") {
+    if (body.status === "resolved" && current.status !== "resolved") {
       update.resolved_by = user.id;
       update.resolved_at = new Date().toISOString();
     }
   }
-
   if (body.admin_notes !== undefined) {
     update.admin_notes = body.admin_notes;
   }
@@ -98,7 +147,6 @@ export async function PATCH(
     return NextResponse.json({ error: "No fields to update" }, { status: 400 });
   }
 
-  const admin = createAdminClient();
   const { data, error } = await admin
     .from("issue_reports")
     .update(update)
@@ -111,6 +159,33 @@ export async function PATCH(
       { error: "Failed to update report", details: error?.message },
       { status: 500 }
     );
+  }
+
+  // Append audit event(s). status_changed takes precedence over note_added when both happen.
+  try {
+    if (statusChanged) {
+      await admin.from("issue_report_events").insert({
+        report_id: id,
+        event_type: "status_changed",
+        actor_user_id: user.id,
+        actor_role: "admin",
+        from_status: current.status,
+        to_status: body.status,
+        // Capture the current (post-update) note so triage history reads naturally.
+        note: nextNotes && nextNotes.trim().length > 0 ? nextNotes : null,
+      });
+    } else if (notesChanged) {
+      await admin.from("issue_report_events").insert({
+        report_id: id,
+        event_type: "note_added",
+        actor_user_id: user.id,
+        actor_role: "admin",
+        note: nextNotes && nextNotes.trim().length > 0 ? nextNotes : null,
+      });
+    }
+  } catch (err) {
+    console.error("[admin-reports] failed to append event:", err);
+    // Do not fail the request — the row update already succeeded.
   }
 
   return NextResponse.json({ report: data });
