@@ -1,6 +1,8 @@
 "use client";
 
 import { Building2, LogIn, History, Ban, Filter, Plus } from "lucide-react";
+import Link from "next/link";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 interface TenantUser {
   id: string;
@@ -191,24 +193,42 @@ function TenantRow({ tenant }: { tenant: Tenant }) {
       {/* Column 5: Actions */}
       <td className="px-6 py-4">
         <div className="flex items-center justify-end gap-1">
-          <button
-            title="Impersonate"
-            className="p-2 rounded-lg transition-colors text-[var(--admin-text-secondary)] hover:text-[var(--text-primary-ds)] hover:bg-white/[0.08]"
-          >
-            <LogIn className="h-4 w-4" />
-          </button>
-          <button
-            title="View Logs"
-            className="p-2 rounded-lg transition-colors text-[var(--admin-text-secondary)] hover:text-[var(--text-primary-ds)] hover:bg-white/[0.08]"
-          >
-            <History className="h-4 w-4" />
-          </button>
-          <button
-            title="Suspend Tenant"
-            className="p-2 rounded-lg transition-colors text-[var(--admin-text-secondary)] hover:text-[oklch(0.62_0.19_22)] hover:bg-[rgba(239,68,68,0.08)]"
-          >
-            <Ban className="h-4 w-4" />
-          </button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                disabled
+                aria-disabled="true"
+                className="p-2 rounded-lg transition-colors text-[var(--admin-text-secondary)] opacity-40 cursor-not-allowed"
+              >
+                <LogIn className="h-4 w-4" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>Coming soon</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                disabled
+                aria-disabled="true"
+                className="p-2 rounded-lg transition-colors text-[var(--admin-text-secondary)] opacity-40 cursor-not-allowed"
+              >
+                <History className="h-4 w-4" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>Coming soon</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                disabled
+                aria-disabled="true"
+                className="p-2 rounded-lg transition-colors text-[var(--admin-text-secondary)] opacity-40 cursor-not-allowed"
+              >
+                <Ban className="h-4 w-4" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>Coming soon</TooltipContent>
+          </Tooltip>
         </div>
       </td>
     </tr>
@@ -310,25 +330,25 @@ export function TenantHeatmap({ data }: TenantHeatmapProps) {
           </p>
         </div>
         <div className="flex gap-3">
-          <button
-            className="px-4 py-2 rounded-lg text-xs font-medium flex items-center gap-2 transition-colors"
-            style={{
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.10)",
-              color: "var(--admin-text-secondary)",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "rgba(255,255,255,0.10)";
-              e.currentTarget.style.color = "var(--text-primary-ds)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "rgba(255,255,255,0.05)";
-              e.currentTarget.style.color = "var(--admin-text-secondary)";
-            }}
-          >
-            <Filter className="h-4 w-4" /> Filter View
-          </button>
-          <button
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                disabled
+                aria-disabled="true"
+                className="px-4 py-2 rounded-lg text-xs font-medium flex items-center gap-2 transition-colors opacity-50 cursor-not-allowed"
+                style={{
+                  background: "rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(255,255,255,0.10)",
+                  color: "var(--admin-text-secondary)",
+                }}
+              >
+                <Filter className="h-4 w-4" /> Filter View
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>Coming soon</TooltipContent>
+          </Tooltip>
+          <Link
+            href="/admin/tenants/new"
             className="px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-2 transition-colors"
             style={{
               background: "var(--gold-primary)",
@@ -337,7 +357,7 @@ export function TenantHeatmap({ data }: TenantHeatmapProps) {
             }}
           >
             <Plus className="h-4 w-4" /> Provision New Tenant
-          </button>
+          </Link>
         </div>
       </div>
 

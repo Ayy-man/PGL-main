@@ -60,7 +60,7 @@ function EnrichmentErrorEntry({ record }: { record: ErrorRecord }) {
 
   return (
     <div
-      className="entry-hover flex gap-4 p-4 cursor-pointer"
+      className="entry-hover flex gap-4 p-4"
       style={{ borderBottom: "1px solid var(--border-subtle)" }}
     >
       <div className="mt-0.5 shrink-0">
@@ -101,7 +101,7 @@ function ApiErrorEntry({ record }: { record: ErrorRecord }) {
 
   return (
     <div
-      className="entry-hover flex gap-4 p-4 cursor-pointer"
+      className="entry-hover flex gap-4 p-4"
       style={{ borderBottom: "1px solid var(--border-subtle)" }}
     >
       <div className="mt-0.5 shrink-0">
@@ -207,6 +207,8 @@ export function ErrorFeed({ data, onPageChange }: ErrorFeedProps) {
   }
 
   const totalPages = Math.ceil(data.total / data.limit);
+  const hasErrors = data.data.length > 0;
+  const pulseDotColor = hasErrors ? "oklch(0.62 0.19 22)" : "var(--success)";
 
   return (
     <div className="surface-admin-card rounded-[14px] overflow-hidden flex flex-col h-full">
@@ -227,7 +229,7 @@ export function ErrorFeed({ data, onPageChange }: ErrorFeedProps) {
         <div className="flex items-center gap-2">
           <span
             className="size-2 rounded-full animate-pulse"
-            style={{ background: "oklch(0.62 0.19 22)" }}
+            style={{ background: pulseDotColor }}
           />
           <span
             className="text-[10px] uppercase"
@@ -267,7 +269,7 @@ export function ErrorFeed({ data, onPageChange }: ErrorFeedProps) {
             <button
               onClick={() => onPageChange(data.page - 1)}
               disabled={data.page <= 1}
-              className="px-3 py-1 rounded text-xs disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="px-3 py-1 rounded-[8px] text-xs disabled:opacity-40 disabled:cursor-not-allowed transition-colors hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--gold-primary)]/40"
               style={{
                 background: "rgba(255,255,255,0.05)",
                 color: "var(--text-primary-ds)",
@@ -278,7 +280,7 @@ export function ErrorFeed({ data, onPageChange }: ErrorFeedProps) {
             <button
               onClick={() => onPageChange(data.page + 1)}
               disabled={data.page >= totalPages}
-              className="px-3 py-1 rounded text-xs disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="px-3 py-1 rounded-[8px] text-xs disabled:opacity-40 disabled:cursor-not-allowed transition-colors hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--gold-primary)]/40"
               style={{
                 background: "rgba(255,255,255,0.05)",
                 color: "var(--text-primary-ds)",

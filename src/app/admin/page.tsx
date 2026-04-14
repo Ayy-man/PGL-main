@@ -10,6 +10,7 @@ import { ErrorFeed } from "@/components/admin/error-feed";
 import { SystemActions } from "@/components/admin/system-actions";
 import { PlatformPulseModal } from "@/components/admin/platform-pulse-modal";
 import { RefreshCw } from "lucide-react";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 // --- Types ---
 
@@ -173,9 +174,11 @@ export default function AdminDashboard() {
     fetchAll(false);
   }, [fetchAll]);
 
-  // 60-second background polling
+  // 60-second background polling — pauses when tab hidden
   useEffect(() => {
-    const interval = setInterval(() => fetchAll(true), 60_000);
+    const interval = setInterval(() => {
+      if (document.visibilityState === "visible") fetchAll(true);
+    }, 60_000);
     return () => clearInterval(interval);
   }, [fetchAll]);
 
@@ -222,24 +225,40 @@ export default function AdminDashboard() {
             style={{ color: "var(--admin-text-secondary)" }}
           >
             System Status:{" "}
-            <span
-              className="font-mono tracking-tight"
-              style={{ color: statusCfg.color }}
-            >
-              {statusCfg.label}
-            </span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span
+                  className="font-mono tracking-tight cursor-default"
+                  style={{ color: statusCfg.color }}
+                >
+                  {statusCfg.label}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>
+                Operational: &lt;1 error in last 24h · Degraded: 1–9 · Incident: 10+
+              </TooltipContent>
+            </Tooltip>
             {" "}• v2.5.0 •{" "}
             <span style={{ color: "var(--gold-text)" }}>PGL Core</span>
           </p>
         </div>
-        <div className="flex items-center gap-3 text-sm" style={{ color: "var(--admin-text-secondary)" }}>
-          {isRefreshing && (
-            <RefreshCw className="h-4 w-4 animate-spin" style={{ color: "var(--gold-primary)" }} />
-          )}
-          {lastFetched && (
-            <span className="text-xs">Updated {formatSecondsAgo(secondsAgo)}</span>
-          )}
-        </div>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={() => fetchAll(true)}
+              className="flex items-center gap-2 text-sm rounded-[8px] px-2 py-1 transition-colors hover:bg-[var(--gold-bg)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--gold-primary)]/40"
+              style={{ color: "var(--admin-text-secondary)" }}
+            >
+              {isRefreshing && (
+                <RefreshCw className="h-4 w-4 animate-spin" style={{ color: "var(--gold-primary)" }} />
+              )}
+              {lastFetched && (
+                <span className="text-xs">Updated {formatSecondsAgo(secondsAgo)}</span>
+              )}
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>Force refresh</TooltipContent>
+        </Tooltip>
       </div>
 
       {/* Section 1: 4-column stat cards */}
