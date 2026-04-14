@@ -7,6 +7,8 @@ import { AutomationRunsTable } from "@/components/admin/automation-runs-table";
 import { AutomationDetailDrawer } from "@/components/admin/automation-detail-drawer";
 import { RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { Skeleton } from "@/components/ui/skeleton";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -63,8 +65,6 @@ export default function AutomationsPage() {
   const [selectedRunType, setSelectedRunType] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  const [refreshHovered, setRefreshHovered] = useState(false);
-
   /* ---- fetch ---- */
   const fetchData = useCallback(async () => {
     try {
@@ -86,9 +86,11 @@ export default function AutomationsPage() {
     fetchData();
   }, [fetchData]);
 
-  /* 60-second polling */
+  /* 60-second polling — pauses when tab hidden */
   useEffect(() => {
-    const interval = setInterval(() => fetchData(), 60_000);
+    const interval = setInterval(() => {
+      if (document.visibilityState === "visible") fetchData();
+    }, 60_000);
     return () => clearInterval(interval);
   }, [fetchData]);
 
@@ -112,25 +114,27 @@ export default function AutomationsPage() {
             Monitor background task health, schedule status, and recent run history.
           </p>
         </div>
-        <button
-          onClick={fetchData}
-          className="p-2 rounded-[8px] transition-colors duration-200"
-          style={{
-            color: refreshHovered ? "var(--gold-primary)" : "var(--text-secondary-ds)",
-            background: refreshHovered ? "var(--gold-bg)" : "transparent",
-          }}
-          onMouseEnter={() => setRefreshHovered(true)}
-          onMouseLeave={() => setRefreshHovered(false)}
-          title="Refresh"
-        >
-          <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
-        </button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={fetchData}
+              className={cn(
+                "p-2 rounded-[8px] transition-colors duration-200 text-[var(--text-secondary-ds)]",
+                "hover:text-[var(--gold-primary)] hover:bg-[var(--gold-bg)]",
+                "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--gold-primary)]/40"
+              )}
+            >
+              <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>Refresh</TooltipContent>
+        </Tooltip>
       </div>
 
       {/* Error banner */}
       {error && (
         <div
-          className="surface-card rounded-[14px] p-4 text-sm"
+          className="rounded-[8px] border px-4 py-3 text-sm"
           style={{ color: "oklch(0.62 0.19 22)", borderColor: "oklch(0.62 0.19 22)" }}
         >
           Failed to load automations data: {error}
@@ -153,14 +157,14 @@ export default function AutomationsPage() {
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {loading && !data
-            ? Array.from({ length: 2 }).map((_, i) => (
-                <div key={i} className="surface-card rounded-[14px] p-4 md:p-6 animate-pulse">
-                  <div className="h-4 w-40 bg-white/[0.06] rounded mb-3" />
-                  <div className="h-3 w-full bg-white/[0.06] rounded mb-3" />
+            ? Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="surface-card rounded-[14px] p-4 md:p-6">
+                  <Skeleton className="h-4 w-40 mb-3" />
+                  <Skeleton className="h-3 w-full mb-3" />
                   <div className="space-y-2">
-                    <div className="h-3 w-full bg-white/[0.06] rounded" />
-                    <div className="h-3 w-full bg-white/[0.06] rounded" />
-                    <div className="h-3 w-full bg-white/[0.06] rounded" />
+                    <Skeleton className="h-3 w-full" />
+                    <Skeleton className="h-3 w-full" />
+                    <Skeleton className="h-3 w-full" />
                   </div>
                 </div>
               ))

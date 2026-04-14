@@ -1,4 +1,6 @@
 import { ComingSoonCard } from "@/components/admin/coming-soon-card";
+import { Skeleton } from "@/components/ui/skeleton";
+import Link from "next/link";
 
 export default function AnalyticsPage() {
   return (
@@ -13,20 +15,23 @@ export default function AnalyticsPage() {
       </div>
 
       <ComingSoonCard label="Coming Soon">
+        <p className="text-xs text-muted-foreground mt-2 mb-6">
+          In the meantime, see the{" "}
+          <Link
+            href="/admin"
+            className="underline hover:text-foreground transition-colors"
+          >
+            Command Center
+          </Link>{" "}
+          for real-time metrics.
+        </p>
         <div className="surface-admin-card rounded-[14px] p-8">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div
-                key={i}
-                className="h-28 rounded-xl border bg-card"
-                style={{ borderColor: "var(--admin-row-border)" }}
-              />
+              <Skeleton key={i} className="h-28 rounded-xl" />
             ))}
           </div>
-          <div
-            className="mt-6 h-[300px] rounded-xl border bg-card"
-            style={{ borderColor: "var(--admin-row-border)" }}
-          />
+          <Skeleton className="mt-6 h-[300px] rounded-xl" />
         </div>
       </ComingSoonCard>
     </div>
