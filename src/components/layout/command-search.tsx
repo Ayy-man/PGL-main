@@ -65,11 +65,16 @@ function CommandSearchInner({ orgId }: { orgId: string }) {
     return () => document.removeEventListener("keydown", handler);
   }, []);
 
-  // Focus input when dialog opens
+  // Listen for mobile search:open event
   useEffect(() => {
-    if (open) {
-      setTimeout(() => inputRef.current?.focus(), 50);
-    } else {
+    const handler = () => setOpen(true);
+    window.addEventListener("command-search:open", handler);
+    return () => window.removeEventListener("command-search:open", handler);
+  }, []);
+
+  // Clear state when dialog closes
+  useEffect(() => {
+    if (!open) {
       setQuery("");
       setResults({ prospects: [], lists: [], savedSearches: [] });
       setActiveIndex(0);
@@ -194,7 +199,7 @@ function CommandSearchInner({ orgId }: { orgId: string }) {
             return (
               <button
                 key={`${item.type}-${item.id}`}
-                className="flex w-full items-center gap-3 px-4 py-2 text-left transition-colors cursor-pointer"
+                className="flex w-full items-center gap-3 px-4 py-2 text-left transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--border-gold)] focus-visible:ring-inset"
                 style={{
                   background: idx === activeIndex ? "rgba(212,175,55,0.08)" : "transparent",
                   color: idx === activeIndex ? "var(--gold-primary)" : "var(--text-primary-ds)",
@@ -224,16 +229,9 @@ function CommandSearchInner({ orgId }: { orgId: string }) {
     <DialogPrimitive.Root open={open} onOpenChange={setOpen}>
       {/* Trigger — styled like the old search input */}
       <DialogPrimitive.Trigger asChild>
-        <div
-          className="relative w-full max-w-[320px] cursor-pointer"
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              setOpen(true);
-            }
-          }}
+        <button
+          type="button"
+          className="relative text-left w-full max-w-[320px] cursor-pointer"
         >
           <Search
             className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 shrink-0"
@@ -259,7 +257,7 @@ function CommandSearchInner({ orgId }: { orgId: string }) {
           >
             Cmd+K
           </kbd>
-        </div>
+        </button>
       </DialogPrimitive.Trigger>
 
       <DialogPrimitive.Portal>
@@ -267,12 +265,16 @@ function CommandSearchInner({ orgId }: { orgId: string }) {
           className="fixed inset-0 z-50 bg-black/70 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
         />
         <DialogPrimitive.Content
-          className="fixed left-1/2 top-[20%] z-50 w-full max-w-[520px] -translate-x-1/2 rounded-xl shadow-2xl overflow-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=open]:slide-in-from-left-1/2"
+          className="fixed left-1/2 top-[20%] z-50 w-full max-w-[520px] -translate-x-1/2 rounded-xl shadow-2xl overflow-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95"
           style={{
             background: "var(--bg-card, #141416)",
             border: "1px solid var(--border-default)",
           }}
           onKeyDown={handleKeyDown}
+          onOpenAutoFocus={(e) => {
+            e.preventDefault();
+            inputRef.current?.focus();
+          }}
         >
           <DialogPrimitive.Title className="sr-only">Global Search</DialogPrimitive.Title>
           <DialogPrimitive.Description className="sr-only">
@@ -331,35 +333,8 @@ function CommandSearchInner({ orgId }: { orgId: string }) {
 // ---- Public wrapper ----
 export function CommandSearch({ orgId }: { orgId?: string }) {
   if (!orgId) {
-    // Admin layout — render static placeholder (no hooks called)
-    return (
-      <div className="relative w-full max-w-[320px]">
-        <Search
-          className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 shrink-0"
-          style={{ color: "var(--text-tertiary)" }}
-        />
-        <div
-          className="h-9 w-full rounded-[8px] pl-9 pr-16 text-[13px] font-sans flex items-center"
-          style={{
-            background: "var(--bg-input)",
-            border: "1px solid var(--border-default)",
-            color: "var(--text-tertiary)",
-          }}
-        >
-          Search...
-        </div>
-        <kbd
-          className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rounded border px-1.5 py-0.5 text-[10px] font-mono"
-          style={{
-            color: "var(--text-ghost)",
-            borderColor: "var(--border-subtle)",
-            background: "rgba(255,255,255,0.02)",
-          }}
-        >
-          Cmd+K
-        </kbd>
-      </div>
-    );
+    // Admin layout — return null; no functional search in admin shell
+    return null;
   }
 
   return <CommandSearchInner orgId={orgId} />;
