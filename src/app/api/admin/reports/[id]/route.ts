@@ -162,31 +162,44 @@ export async function PATCH(
   }
 
   // Append audit event(s). status_changed takes precedence over note_added when both happen.
+  // Capture the newly-inserted event with actor join so the client can optimistically prepend
+  // it to the timeline without a second roundtrip.
+  let newEvent: unknown = null;
   try {
     if (statusChanged) {
-      await admin.from("issue_report_events").insert({
-        report_id: id,
-        event_type: "status_changed",
-        actor_user_id: user.id,
-        actor_role: "admin",
-        from_status: current.status,
-        to_status: body.status,
-        // Capture the current (post-update) note so triage history reads naturally.
-        note: nextNotes && nextNotes.trim().length > 0 ? nextNotes : null,
-      });
+      const { data: inserted } = await admin
+        .from("issue_report_events")
+        .insert({
+          report_id: id,
+          event_type: "status_changed",
+          actor_user_id: user.id,
+          actor_role: "admin",
+          from_status: current.status,
+          to_status: body.status,
+          // Capture the current (post-update) note so triage history reads naturally.
+          note: nextNotes && nextNotes.trim().length > 0 ? nextNotes : null,
+        })
+        .select("*, actor:actor_user_id (id, email, full_name)")
+        .single();
+      newEvent = inserted;
     } else if (notesChanged) {
-      await admin.from("issue_report_events").insert({
-        report_id: id,
-        event_type: "note_added",
-        actor_user_id: user.id,
-        actor_role: "admin",
-        note: nextNotes && nextNotes.trim().length > 0 ? nextNotes : null,
-      });
+      const { data: inserted } = await admin
+        .from("issue_report_events")
+        .insert({
+          report_id: id,
+          event_type: "note_added",
+          actor_user_id: user.id,
+          actor_role: "admin",
+          note: nextNotes && nextNotes.trim().length > 0 ? nextNotes : null,
+        })
+        .select("*, actor:actor_user_id (id, email, full_name)")
+        .single();
+      newEvent = inserted;
     }
   } catch (err) {
     console.error("[admin-reports] failed to append event:", err);
     // Do not fail the request — the row update already succeeded.
   }
 
-  return NextResponse.json({ report: data });
+  return NextResponse.json({ report: data, event: newEvent });
 }

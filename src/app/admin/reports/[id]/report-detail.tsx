@@ -110,7 +110,7 @@ function SectionCard({ title, children }: { title: string; children: React.React
   );
 }
 
-export function ReportDetail({ report: initialReport, screenshotUrl, events }: ReportDetailProps) {
+export function ReportDetail({ report: initialReport, screenshotUrl, events: initialEvents }: ReportDetailProps) {
   const [report, setReport] = useState<ReportDetailData>(initialReport);
   const [status, setStatus] = useState<IssueStatus>(initialReport.status);
   const [notes, setNotes] = useState(initialReport.admin_notes ?? "");
@@ -119,6 +119,7 @@ export function ReportDetail({ report: initialReport, screenshotUrl, events }: R
   const [contextExpanded, setContextExpanded] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [copied, setCopied] = useState(false);
+  const [events, setEvents] = useState<IssueReportEventWithActor[]>(initialEvents);
 
   const isClosing = CLOSED_STATUSES.includes(status);
   const notesEmpty = notes.trim().length === 0;
@@ -347,8 +348,14 @@ export function ReportDetail({ report: initialReport, screenshotUrl, events }: R
           setError(body.error ?? "Failed to save changes");
           return;
         }
-        const data = await res.json() as { report: Partial<ReportDetailData> };
+        const data = await res.json() as {
+          report: Partial<ReportDetailData>;
+          event: IssueReportEventWithActor | null;
+        };
         setReport((r) => ({ ...r, ...data.report }));
+        if (data.event) {
+          setEvents((prev) => [...prev, data.event as IssueReportEventWithActor]);
+        }
         setSuccess("Changes saved successfully");
       } catch (e) {
         setError(e instanceof Error ? e.message : "Unexpected error occurred");
