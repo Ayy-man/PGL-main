@@ -220,14 +220,6 @@ export function MobileBottomNav({ orgId, userRole }: MobileBottomNavProps) {
         >
           <SheetTitle className="sr-only">More navigation</SheetTitle>
 
-          {/* Drag handle */}
-          <div className="flex justify-center pt-3 pb-4">
-            <div
-              className="h-1 w-12 rounded-full"
-              style={{ background: "var(--border-default)" }}
-            />
-          </div>
-
           {/* Nav grid */}
           <div className="grid grid-cols-2 gap-3 px-4 pb-6">
             {moreItems.map((item) => (
@@ -262,14 +254,6 @@ export function MobileBottomNav({ orgId, userRole }: MobileBottomNavProps) {
           style={{ background: "var(--bg-sidebar)" }}
         >
           <SheetTitle className="sr-only">Quick actions</SheetTitle>
-
-          {/* Drag handle */}
-          <div className="flex justify-center pt-3 pb-2">
-            <div
-              className="h-1 w-12 rounded-full"
-              style={{ background: "var(--border-default)" }}
-            />
-          </div>
 
           <h2
             className="text-center text-lg font-serif font-semibold pb-3"
