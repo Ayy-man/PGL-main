@@ -25,6 +25,11 @@ import { LookalikeDiscovery } from "./lookalike-discovery";
 import { useToast } from "@/hooks/use-toast";
 import { AddToListDialogProfile } from "./add-to-list-dialog-profile";
 import type { ProspectActivity, ActivityCategory } from "@/types/activity";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 
 type SourceStatus =
   | "pending"
@@ -590,36 +595,58 @@ export function ProfileView({
             <textarea
               value={noteText}
               onChange={(e) => setNoteText(e.target.value)}
+              readOnly={!canEdit}
               className="w-full rounded-[8px] p-3 text-sm text-foreground placeholder:text-muted-foreground min-h-[120px] resize-none focus:outline-none focus:ring-1"
               style={{
                 background: "rgba(255,255,255,0.02)",
                 border:
                   "1px solid var(--border-default, rgba(255,255,255,0.06))",
+                cursor: canEdit ? undefined : "default",
               }}
               placeholder="Add tenant-specific notes regarding this UHNW prospect..."
             />
+            {!canEdit && (
+              <p className="text-[11px] text-muted-foreground mt-1">Notes are read-only for your role.</p>
+            )}
             <div className="flex justify-end mt-2">
-              <button
-                className="text-xs font-medium cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
-                style={{ color: "var(--gold-primary)" }}
-                disabled={!noteHasChanged || isSavingNote}
-                onMouseEnter={(e) => {
-                  if (!e.currentTarget.disabled) {
+              {canEdit ? (
+                <button
+                  className="text-xs font-medium cursor-pointer transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
+                  style={{ color: "var(--gold-primary)" }}
+                  disabled={!noteHasChanged || isSavingNote}
+                  onMouseEnter={(e) => {
+                    if (!e.currentTarget.disabled) {
+                      (e.currentTarget as HTMLButtonElement).style.color =
+                        "var(--gold-muted)";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
                     (e.currentTarget as HTMLButtonElement).style.color =
-                      "var(--gold-muted)";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.color =
-                    "var(--gold-primary)";
-                }}
-                onClick={handleSaveNote}
-              >
-                {isSavingNote && (
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                )}
-                {isSavingNote ? "Saving..." : "Save Note"}
-              </button>
+                      "var(--gold-primary)";
+                  }}
+                  onClick={handleSaveNote}
+                >
+                  {isSavingNote && (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  )}
+                  {isSavingNote ? "Saving..." : "Save Note"}
+                </button>
+              ) : (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span tabIndex={0}>
+                      <button
+                        disabled
+                        className="text-xs font-medium opacity-40 cursor-not-allowed flex items-center gap-1.5"
+                        style={{ color: "var(--gold-primary)" }}
+                      >
+                        Save Note
+                      </button>
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>Assistants cannot edit notes.</TooltipContent>
+                </Tooltip>
+              )}
             </div>
           </div>
         </div>
