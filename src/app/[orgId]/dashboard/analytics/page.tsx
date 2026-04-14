@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { MetricsCards } from "@/components/charts/metrics-cards";
 import { UsageChart } from "@/components/charts/usage-chart";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type DateRange = "7d" | "30d" | "90d";
 
@@ -45,6 +46,7 @@ export default function TenantAnalyticsPage() {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userMap, setUserMap] = useState<Map<string, string>>(new Map());
 
   useEffect(() => {
     async function checkAccess() {
@@ -81,6 +83,26 @@ export default function TenantAnalyticsPage() {
           throw new Error("Failed to fetch analytics");
         }
         setData(json.data);
+
+        // Resolve user IDs to display names
+        const breakdown = json.data.userBreakdown ?? [];
+        if (breakdown.length > 0) {
+          const uniqueIds = Array.from(new Set(breakdown.map((u: { userId: string }) => u.userId)));
+          const supabase = createClient();
+          const { data: users } = await supabase
+            .from("users")
+            .select("id, full_name, email")
+            .in("id", uniqueIds);
+          if (users) {
+            const map = new Map(
+              users.map((u: { id: string; full_name: string | null; email: string | null }) => [
+                u.id,
+                u.full_name || u.email || u.id.slice(0, 8),
+              ])
+            );
+            setUserMap(map);
+          }
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Unknown error");
       } finally {
@@ -141,15 +163,10 @@ export default function TenantAnalyticsPage() {
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div
-                key={i}
-                className="h-28 animate-pulse surface-card rounded-[14px]"
-              />
+              <Skeleton key={i} className="h-28 rounded-[14px]" />
             ))}
           </div>
-          <div
-            className="h-[400px] animate-pulse surface-card rounded-[14px]"
-          />
+          <Skeleton className="h-[400px] rounded-[14px]" />
         </div>
       ) : data ? (
         <>
@@ -200,19 +217,11 @@ export default function TenantAnalyticsPage() {
                     {data.userBreakdown.map((user) => (
                       <tr
                         key={user.userId}
-                        className="transition-colors"
+                        className="hover:bg-[rgba(255,255,255,0.02)] transition-colors"
                         style={{ borderBottom: "1px solid var(--border-subtle)" }}
-                        onMouseEnter={(e) => {
-                          (e.currentTarget as HTMLTableRowElement).style.background =
-                            "rgba(255,255,255,0.02)";
-                        }}
-                        onMouseLeave={(e) => {
-                          (e.currentTarget as HTMLTableRowElement).style.background =
-                            "transparent";
-                        }}
                       >
-                        <td className="px-4 py-3 font-mono text-xs text-foreground">
-                          {user.userId.slice(0, 8)}...
+                        <td className="px-4 py-3 text-sm text-foreground">
+                          {userMap.get(user.userId) ?? `${user.userId.slice(0, 8)}...`}
                         </td>
                         <td className="px-4 py-3 text-sm text-foreground">
                           {user.searchesExecuted}

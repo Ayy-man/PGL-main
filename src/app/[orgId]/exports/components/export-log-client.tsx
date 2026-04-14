@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Download, FileDown, List as ListIcon, X } from "lucide-react";
+import { Download, FileDown, List as ListIcon, X, CalendarSearch } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -210,6 +211,23 @@ export function ExportLogClient({
         >
           <p style={{ color: "var(--text-tertiary)" }}>Loading exports...</p>
         </div>
+      ) : exports.length === 0 && (startDate || endDate) ? (
+        <EmptyState
+          icon={CalendarSearch}
+          title="No exports in this date range"
+          description="Try widening the range or clearing the filter."
+        >
+          <Button
+            variant="ghost"
+            onClick={() => {
+              setPage(1);
+              setStartDate(defaultStart);
+              setEndDate("");
+            }}
+          >
+            Clear filters
+          </Button>
+        </EmptyState>
       ) : exports.length === 0 ? (
         <EmptyState
           icon={FileDown}

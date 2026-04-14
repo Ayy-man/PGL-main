@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { Copy, Activity } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 import { ACTION_TYPES, type ActionType } from "@/lib/activity-logger";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 
 interface ActivityEntry {
   id: string;
@@ -46,12 +50,35 @@ function relativeTime(dateStr: string): string {
 
 const PAGE_SIZE = 50;
 
+// Preset chip date ranges
+type DatePreset = "today" | "7d" | "30d" | "clear";
+
+function getPresetDates(preset: DatePreset): { start: string; end: string } {
+  const now = new Date();
+  const toISO = (d: Date) => d.toISOString().slice(0, 10);
+  if (preset === "today") {
+    return { start: toISO(now), end: toISO(now) };
+  }
+  if (preset === "7d") {
+    const d = new Date(now);
+    d.setDate(d.getDate() - 7);
+    return { start: toISO(d), end: toISO(now) };
+  }
+  if (preset === "30d") {
+    const d = new Date(now);
+    d.setDate(d.getDate() - 30);
+    return { start: toISO(d), end: toISO(now) };
+  }
+  return { start: "", end: "" };
+}
+
 export function ActivityLogViewer() {
   const [entries, setEntries] = useState<ActivityEntry[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [userMap, setUserMap] = useState<Map<string, string>>(new Map());
 
   const [actionType, setActionType] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -70,8 +97,23 @@ export function ActivityLogViewer() {
       const res = await fetch(`/api/activity?${params.toString()}`);
       if (!res.ok) return;
       const json = await res.json();
-      setEntries(json.data || []);
+      const data: ActivityEntry[] = json.data || [];
+      setEntries(data);
       setTotal(json.total || 0);
+
+      // Resolve unique user IDs to names
+      const uniqueIds = Array.from(new Set(data.map((e) => e.user_id)));
+      if (uniqueIds.length > 0) {
+        const supabase = createClient();
+        const { data: users } = await supabase
+          .from("users")
+          .select("id, full_name, email")
+          .in("id", uniqueIds);
+        if (users) {
+          const map = new Map(users.map((u: { id: string; full_name: string | null; email: string | null }) => [u.id, u.full_name || u.email || u.id.slice(0, 8)]));
+          setUserMap(map);
+        }
+      }
     } finally {
       setLoading(false);
     }
@@ -81,12 +123,45 @@ export function ActivityLogViewer() {
     fetchData();
   }, [fetchData]);
 
+  const applyPreset = (preset: DatePreset) => {
+    const { start, end } = getPresetDates(preset);
+    setStartDate(start);
+    setEndDate(end);
+    setPage(1);
+  };
+
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
     <div className="space-y-6">
       {/* Filters */}
       <div className="flex flex-wrap items-end gap-4 rounded-xl border bg-card p-4">
+        {/* Preset date chips */}
+        <div className="flex items-center gap-2 flex-wrap">
+          {(["today", "7d", "30d", "clear"] as DatePreset[]).map((preset) => (
+            <button
+              key={preset}
+              onClick={() => applyPreset(preset)}
+              className="px-3 py-1.5 text-xs font-medium rounded-full transition-colors cursor-pointer"
+              style={{
+                background: "var(--bg-elevated)",
+                border: "1px solid var(--border-subtle)",
+                color: "var(--text-secondary-ds)",
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--border-gold)";
+                (e.currentTarget as HTMLButtonElement).style.color = "var(--gold-primary)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--border-subtle)";
+                (e.currentTarget as HTMLButtonElement).style.color = "var(--text-secondary-ds)";
+              }}
+            >
+              {preset === "clear" ? "Clear" : preset === "today" ? "Today" : preset}
+            </button>
+          ))}
+        </div>
+
         <div>
           <label className="mb-1 block text-xs text-muted-foreground">
             Action Type
@@ -138,13 +213,22 @@ export function ActivityLogViewer() {
       {/* Table */}
       <div className="overflow-x-auto rounded-xl border bg-card">
         {loading ? (
-          <div className="flex h-64 items-center justify-center">
-            <p className="text-muted-foreground">Loading activity log...</p>
+          <div className="p-4 space-y-3">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-4">
+                <Skeleton className="h-4 w-20 rounded" />
+                <Skeleton className="h-4 w-28 rounded" />
+                <Skeleton className="h-4 w-32 rounded" />
+                <Skeleton className="h-4 w-24 rounded" />
+              </div>
+            ))}
           </div>
         ) : entries.length === 0 ? (
-          <div className="flex h-64 items-center justify-center">
-            <p className="text-muted-foreground">No activity found</p>
-          </div>
+          <EmptyState
+            icon={Activity}
+            title="No activity yet"
+            description="Actions your team takes will appear here."
+          />
         ) : (
           <table className="w-full text-sm">
             <thead>
@@ -170,8 +254,8 @@ export function ActivityLogViewer() {
                   >
                     {relativeTime(entry.created_at)}
                   </td>
-                  <td className="px-4 py-2 font-mono text-xs text-muted-foreground">
-                    {entry.user_id.slice(0, 8)}...
+                  <td className="px-4 py-2 text-xs text-muted-foreground">
+                    {userMap.get(entry.user_id) ?? `${entry.user_id.slice(0, 8)}...`}
                   </td>
                   <td className="px-4 py-2 text-foreground">
                     {ACTION_LABELS[entry.action_type] || entry.action_type}
@@ -197,9 +281,18 @@ export function ActivityLogViewer() {
                       <span className="text-xs text-muted-foreground">-</span>
                     )}
                     {expandedId === entry.id && entry.metadata && (
-                      <pre className="mt-2 max-w-xs overflow-auto rounded bg-background p-2 text-xs text-muted-foreground">
-                        {JSON.stringify(entry.metadata, null, 2)}
-                      </pre>
+                      <div className="mt-2 relative">
+                        <button
+                          onClick={() => navigator.clipboard.writeText(JSON.stringify(entry.metadata, null, 2))}
+                          className="absolute top-1 right-1 p-1 rounded hover:bg-muted transition-colors"
+                          title="Copy to clipboard"
+                        >
+                          <Copy className="h-3 w-3 text-muted-foreground" />
+                        </button>
+                        <pre className="max-w-xs overflow-auto rounded bg-background p-2 pr-6 text-xs text-muted-foreground">
+                          {JSON.stringify(entry.metadata, null, 2)}
+                        </pre>
+                      </div>
                     )}
                   </td>
                 </tr>
