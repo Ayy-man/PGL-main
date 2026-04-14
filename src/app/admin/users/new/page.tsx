@@ -1,21 +1,34 @@
 "use client";
 
 import { inviteUser } from "@/app/actions/admin";
-import { useState, useTransition, useEffect } from "react";
+import { useState, useTransition, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
 
 export default function NewUserPage() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [selectedRole, setSelectedRole] = useState<string>("assistant");
+  const [selectedTenantId, setSelectedTenantId] = useState<string>("");
   const [tenants, setTenants] = useState<Array<{ id: string; name: string }>>([]);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
-    // Fetch tenants for the dropdown
     async function fetchTenants() {
       try {
         const response = await fetch("/api/admin/tenants");
@@ -37,10 +50,14 @@ export default function NewUserPage() {
     setError(null);
 
     const formData = new FormData(e.currentTarget);
+    // Ensure controlled select values are included
+    formData.set("role", selectedRole);
+    if (selectedTenantId) formData.set("tenant_id", selectedTenantId);
 
     startTransition(async () => {
       try {
         await inviteUser(formData);
+        toast({ title: "Invite sent", description: `Invitation sent to ${formData.get("email") as string}.` });
         router.push("/admin/users");
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to send invitation");
@@ -48,16 +65,25 @@ export default function NewUserPage() {
     });
   };
 
+  // Cmd/Ctrl+Enter shortcut
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLFormElement>) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+      e.preventDefault();
+      formRef.current?.requestSubmit();
+    }
+  };
+
   return (
     <div className="space-y-6">
+      <Breadcrumbs
+        items={[
+          { label: "Admin", href: "/admin" },
+          { label: "Users", href: "/admin/users" },
+          { label: "Invite" },
+        ]}
+      />
+
       <div>
-        <Link
-          href="/admin/users"
-          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Users
-        </Link>
         <h1 className="font-serif text-3xl font-bold tracking-tight mt-4">
           Invite User
         </h1>
@@ -67,7 +93,7 @@ export default function NewUserPage() {
       </div>
 
       <div className="surface-card rounded-[14px] border border-[var(--border-default)] p-6 max-w-2xl">
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form ref={formRef} onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="space-y-4">
           {error && (
             <div className="rounded-[8px] bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive">
               {error}
@@ -78,13 +104,12 @@ export default function NewUserPage() {
             <label htmlFor="email" className="text-sm font-medium">
               Email <span className="text-destructive">*</span>
             </label>
-            <input
+            <Input
               type="email"
               id="email"
               name="email"
               required
               placeholder="user@example.com"
-              className="w-full rounded-[8px] border border-[var(--border-default)] bg-[var(--bg-input)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-primary)]/50"
             />
           </div>
 
@@ -92,13 +117,12 @@ export default function NewUserPage() {
             <label htmlFor="full_name" className="text-sm font-medium">
               Full Name <span className="text-destructive">*</span>
             </label>
-            <input
+            <Input
               type="text"
               id="full_name"
               name="full_name"
               required
               placeholder="John Doe"
-              className="w-full rounded-[8px] border border-[var(--border-default)] bg-[var(--bg-input)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-primary)]/50"
             />
           </div>
 
@@ -106,19 +130,17 @@ export default function NewUserPage() {
             <label htmlFor="role" className="text-sm font-medium">
               Role <span className="text-destructive">*</span>
             </label>
-            <select
-              id="role"
-              name="role"
-              required
-              value={selectedRole}
-              onChange={(e) => setSelectedRole(e.target.value)}
-              className="w-full rounded-[8px] border border-[var(--border-default)] bg-[var(--bg-input)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-primary)]/50"
-            >
-              <option value="assistant">Assistant</option>
-              <option value="agent">Agent</option>
-              <option value="tenant_admin">Tenant Admin</option>
-              <option value="super_admin">Super Admin</option>
-            </select>
+            <Select value={selectedRole} onValueChange={setSelectedRole}>
+              <SelectTrigger id="role" className="w-full">
+                <SelectValue placeholder="Select a role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="assistant">Assistant</SelectItem>
+                <SelectItem value="agent">Agent</SelectItem>
+                <SelectItem value="tenant_admin">Tenant Admin</SelectItem>
+                <SelectItem value="super_admin">Super Admin</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {selectedRole !== "super_admin" && (
@@ -127,42 +149,45 @@ export default function NewUserPage() {
                 Tenant <span className="text-destructive">*</span>
               </label>
               {loading ? (
-                <div className="w-full rounded-[8px] border border-[var(--border-default)] bg-[var(--bg-input)] px-3 py-2 text-sm text-muted-foreground">
-                  Loading tenants...
-                </div>
+                <Skeleton className="h-9 w-full rounded-[8px]" />
               ) : (
-                <select
-                  id="tenant_id"
-                  name="tenant_id"
-                  required
-                  className="w-full rounded-[8px] border border-[var(--border-default)] bg-[var(--bg-input)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--gold-primary)]/50"
-                >
-                  <option value="">Select a tenant</option>
-                  {tenants.map((tenant) => (
-                    <option key={tenant.id} value={tenant.id}>
-                      {tenant.name}
-                    </option>
-                  ))}
-                </select>
+                <Select value={selectedTenantId} onValueChange={setSelectedTenantId}>
+                  <SelectTrigger id="tenant_id" className="w-full">
+                    <SelectValue placeholder="Select a tenant" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {tenants.map((tenant) => (
+                      <SelectItem key={tenant.id} value={tenant.id}>
+                        {tenant.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               )}
             </div>
           )}
 
           <div className="flex flex-col sm:flex-row gap-3 pt-4">
-            <button
+            <Button
               type="submit"
+              variant="gold"
               disabled={isPending || loading}
-              className="inline-flex h-10 items-center justify-center rounded-[8px] border border-[var(--border-gold)] bg-[var(--gold-bg-strong)] px-6 text-sm font-semibold text-[var(--gold-primary)] hover:bg-[var(--gold-bg)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
+              {isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
               {isPending ? "Sending..." : "Send Invite"}
-            </button>
-            <Link
-              href="/admin/users"
-              className="inline-flex h-10 items-center justify-center rounded-[8px] border border-[var(--border-default)] bg-transparent px-6 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-[var(--border-hover)] transition-colors"
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => router.push("/admin/users")}
+              disabled={isPending}
             >
               Cancel
-            </Link>
+            </Button>
           </div>
+          <p className="text-xs text-muted-foreground">
+            Tip: Press <kbd className="px-1 py-0.5 rounded text-[10px] bg-white/[0.06]">⌘ Enter</kbd> to submit
+          </p>
         </form>
       </div>
     </div>
