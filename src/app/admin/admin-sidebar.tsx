@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { PanelLeft } from "lucide-react";
 import { AdminNavLinks } from "./admin-nav-links";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 const STORAGE_KEY = "pgl-admin-sidebar-collapsed";
 
@@ -71,9 +72,9 @@ export function AdminSidebar({ userInitials, userEmail }: AdminSidebarProps) {
         {!collapsed && (
           <div className="px-4 pb-2">
             <div
-              className="rounded-lg p-3 flex items-center gap-3"
+              className="rounded-[12px] p-3 flex items-center gap-3"
               style={{
-                background: "rgba(255,255,255,0.05)",
+                background: "var(--bg-elevated)",
                 border: "1px solid var(--border-subtle)",
               }}
             >
@@ -106,18 +107,30 @@ export function AdminSidebar({ userInitials, userEmail }: AdminSidebarProps) {
               Admin Console
             </p>
           )}
-          <button
-            onClick={toggle}
-            className="flex items-center justify-center rounded-[6px] p-1.5 transition-colors cursor-pointer"
-            style={{
-              color: "var(--text-secondary-ds, rgba(232,228,220,0.6))",
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid var(--border-default, rgba(255,255,255,0.06))",
-            }}
-            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          >
-            <PanelLeft className="h-4 w-4" />
-          </button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={toggle}
+                className="flex items-center justify-center rounded-[6px] p-1.5 transition-colors cursor-pointer"
+                style={{
+                  color: "var(--text-secondary-ds, rgba(232,228,220,0.6))",
+                  background: "rgba(255,255,255,0.04)",
+                  border: "1px solid var(--border-default, rgba(255,255,255,0.06))",
+                }}
+              >
+                <PanelLeft
+                  className="h-4 w-4"
+                  style={{
+                    transform: collapsed ? "rotate(180deg)" : "none",
+                    transition: "transform 200ms ease",
+                  }}
+                />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              {collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            </TooltipContent>
+          </Tooltip>
         </div>
       </div>
     </aside>

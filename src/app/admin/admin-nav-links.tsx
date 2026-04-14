@@ -14,6 +14,8 @@ import {
   Shield,
   Zap,
 } from "lucide-react";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 const ADMIN_NAV_PLATFORM = [
   { label: "Command Center",  href: "/admin",            icon: LayoutDashboard, exact: true  },
@@ -77,29 +79,14 @@ export function AdminNavLinks({ collapsed = false }: { collapsed?: boolean }) {
           <Link
             key={item.href}
             href={item.href}
-            className="relative flex items-center gap-3 rounded-[8px] px-3 py-3 text-sm font-medium transition-all duration-200 cursor-pointer"
-            style={
+            className={cn(
+              "relative flex items-center gap-3 rounded-[8px] px-3 py-3 text-sm font-medium transition-colors duration-200 cursor-pointer",
+              "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--gold-primary)]/40 focus-visible:ring-offset-0",
               isActive
-                ? {
-                    background: "var(--gold-bg)",
-                    color: "var(--gold-primary)",
-                  }
-                : {
-                    color: "var(--text-secondary-ds)",
-                  }
-            }
-            onMouseEnter={(e) => {
-              if (!isActive) {
-                (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.02)";
-                (e.currentTarget as HTMLElement).style.color = "var(--text-primary-ds)";
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!isActive) {
-                (e.currentTarget as HTMLElement).style.background = "";
-                (e.currentTarget as HTMLElement).style.color = "var(--text-secondary-ds)";
-              }
-            }}
+                ? "text-[var(--gold-primary)]"
+                : "text-[var(--text-secondary-ds)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary-ds)]"
+            )}
+            style={isActive ? { background: "var(--gold-bg)" } : undefined}
           >
             <item.icon className="h-4 w-4 shrink-0" />
             {!collapsed && <span className="flex-1">{item.label}</span>}
@@ -150,29 +137,14 @@ export function AdminNavLinks({ collapsed = false }: { collapsed?: boolean }) {
           <Link
             key={item.href}
             href={item.href}
-            className="flex items-center gap-3 rounded-[8px] px-3 py-3 text-sm font-medium transition-all duration-200 cursor-pointer"
-            style={
+            className={cn(
+              "flex items-center gap-3 rounded-[8px] px-3 py-3 text-sm font-medium transition-colors duration-200 cursor-pointer",
+              "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--gold-primary)]/40 focus-visible:ring-offset-0",
               isActive
-                ? {
-                    background: "var(--gold-bg)",
-                    color: "var(--gold-primary)",
-                  }
-                : {
-                    color: "var(--text-secondary-ds)",
-                  }
-            }
-            onMouseEnter={(e) => {
-              if (!isActive) {
-                (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.02)";
-                (e.currentTarget as HTMLElement).style.color = "var(--text-primary-ds)";
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!isActive) {
-                (e.currentTarget as HTMLElement).style.background = "";
-                (e.currentTarget as HTMLElement).style.color = "var(--text-secondary-ds)";
-              }
-            }}
+                ? "text-[var(--gold-primary)]"
+                : "text-[var(--text-secondary-ds)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary-ds)]"
+            )}
+            style={isActive ? { background: "var(--gold-bg)" } : undefined}
           >
             <item.icon className="h-4 w-4 shrink-0" />
             {!collapsed && item.label}
@@ -181,26 +153,34 @@ export function AdminNavLinks({ collapsed = false }: { collapsed?: boolean }) {
       })}
 
       {ADMIN_NAV_SYSTEM_STUBS.map((item) => (
-        <button
-          key={item.label}
-          onClick={(e) => e.preventDefault()}
-          title="Coming soon"
-          className="flex items-center gap-3 rounded-[8px] px-3 py-3 text-sm font-medium cursor-default opacity-60 w-full text-left"
-          style={{
-            color: "var(--text-secondary-ds)",
-            background: "transparent",
-            border: "none",
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.02)";
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLElement).style.background = "transparent";
-          }}
-        >
-          <item.icon className="h-4 w-4 shrink-0" />
-          {!collapsed && item.label}
-        </button>
+        <Tooltip key={item.label}>
+          <TooltipTrigger asChild>
+            <button
+              aria-disabled="true"
+              tabIndex={-1}
+              className="flex items-center gap-3 rounded-[8px] px-3 py-3 text-sm font-medium cursor-default opacity-60 w-full text-left transition-colors duration-200 hover:bg-[var(--bg-elevated)]"
+              style={{
+                color: "var(--text-secondary-ds)",
+                background: "transparent",
+                border: "none",
+              }}
+            >
+              <item.icon className="h-4 w-4 shrink-0" />
+              {!collapsed && (
+                <>
+                  <span className="flex-1">{item.label}</span>
+                  <span
+                    className="ml-auto text-[9px] uppercase tracking-widest"
+                    style={{ color: "var(--text-ghost)" }}
+                  >
+                    Soon
+                  </span>
+                </>
+              )}
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>Coming soon</TooltipContent>
+        </Tooltip>
       ))}
     </div>
   );
