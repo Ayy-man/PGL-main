@@ -29,7 +29,7 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 Phase: 38
 Plan: Not started
 Status: Ready to execute
-Last activity: 2026-04-14
+Last activity: 2026-04-14 - Completed quick task 260414-u9w: ticket lifecycle close/reopen + overdue section + copy timeline
 
 Progress: [████████████████████] 100% (20/20 phases complete)
 
@@ -411,6 +411,7 @@ Recent decisions affecting current work:
 | 260409-su1 | Promote New Search action — move sidebar button to top header row, add inline button to Discover SAVED SEARCHES heading | 2026-04-09 | ec836fe | [260409-su1-promote-new-search-action-move-sidebar-b](./quick/260409-su1-promote-new-search-action-move-sidebar-b/) |
 | 260409-trp | Apollo search extend UX fixes: button label, toast copy, refresh window cap | 2026-04-09 | 281962c | [260409-trp-apollo-search-extend-ux-fixes-button-lab](./quick/260409-trp-apollo-search-extend-ux-fixes-button-lab/) |
 | 260413-wz9 | Fix broken invite system: inviteUser sends actual email, resendInvite works for existing users | 2026-04-13 | babfe7b | [260413-wz9-fix-broken-invite-system-inviteuser-uses](./quick/260413-wz9-fix-broken-invite-system-inviteuser-uses/) |
+| 260414-u9w | Issue report ticket lifecycle: close/reopen buttons, timeline entries, overdue closed section, copy includes timeline | 2026-04-14 | b138e62 | [260414-u9w-issue-report-ticket-lifecycle-close-reop](./quick/260414-u9w-issue-report-ticket-lifecycle-close-reop/) |
 
 ### Blockers/Concerns
 
