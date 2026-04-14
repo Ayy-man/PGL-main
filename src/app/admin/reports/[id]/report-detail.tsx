@@ -1,10 +1,19 @@
 "use client";
 
 import { useState, useTransition, useCallback } from "react";
-import Link from "next/link";
-import { ArrowLeft, ChevronDown, ChevronRight, Copy, Check } from "lucide-react";
+import { ChevronDown, ChevronRight, Copy, Check } from "lucide-react";
 import type { IssueStatus, IssueReportEventWithActor } from "@/types/database";
 import { TimelineCard } from "./timeline-card";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface ResolverUser {
   id: string;
@@ -135,16 +144,20 @@ export function ReportDetail({ report: initialReport, screenshotUrl, events: ini
   const [status, setStatus] = useState<IssueStatus>(initialReport.status);
   const [notes, setNotes] = useState(initialReport.admin_notes ?? "");
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
   const [contextExpanded, setContextExpanded] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [copied, setCopied] = useState(false);
+  const [snapshotCopied, setSnapshotCopied] = useState(false);
   const [events, setEvents] = useState<IssueReportEventWithActor[]>(initialEvents);
   const [closeDialogOpen, setCloseDialogOpen] = useState(false);
   const [closeStatus, setCloseStatus] = useState<IssueStatus>("resolved");
   const [closeNote, setCloseNote] = useState("");
   const [reopenDialogOpen, setReopenDialogOpen] = useState(false);
   const [reopenReason, setReopenReason] = useState("");
+  const { toast } = useToast();
+
+  // Short ID for breadcrumb
+  const shortReportId = initialReport.id.slice(0, 8);
 
   const isClosing = CLOSED_STATUSES.includes(status);
   const notesEmpty = notes.trim().length === 0;
@@ -417,7 +430,6 @@ export function ReportDetail({ report: initialReport, screenshotUrl, events: ini
 
   const handleSave = () => {
     setError(null);
-    setSuccess(null);
     startTransition(async () => {
       try {
         const res = await fetch(`/api/admin/reports/${report.id}`, {
@@ -438,7 +450,7 @@ export function ReportDetail({ report: initialReport, screenshotUrl, events: ini
         if (data.event) {
           setEvents((prev) => [...prev, data.event as IssueReportEventWithActor]);
         }
-        setSuccess("Changes saved successfully");
+        toast({ title: "Changes saved" });
       } catch (e) {
         setError(e instanceof Error ? e.message : "Unexpected error occurred");
       }
@@ -447,7 +459,6 @@ export function ReportDetail({ report: initialReport, screenshotUrl, events: ini
 
   const handleClose = () => {
     setError(null);
-    setSuccess(null);
     const noteTrimmed = closeNote.trim();
     if (noteTrimmed.length === 0) return;
     startTransition(async () => {
@@ -476,7 +487,7 @@ export function ReportDetail({ report: initialReport, screenshotUrl, events: ini
         }
         setCloseDialogOpen(false);
         setCloseNote("");
-        setSuccess(`Ticket closed as ${STATUS_LABEL[closeStatus]}`);
+        toast({ title: `Ticket closed as ${STATUS_LABEL[closeStatus]}` });
       } catch (e) {
         setError(e instanceof Error ? e.message : "Unexpected error occurred");
       }
@@ -485,7 +496,6 @@ export function ReportDetail({ report: initialReport, screenshotUrl, events: ini
 
   const handleReopen = () => {
     setError(null);
-    setSuccess(null);
     const reasonTrimmed = reopenReason.trim();
     startTransition(async () => {
       try {
@@ -518,7 +528,7 @@ export function ReportDetail({ report: initialReport, screenshotUrl, events: ini
         }
         setReopenDialogOpen(false);
         setReopenReason("");
-        setSuccess("Ticket reopened");
+        toast({ title: "Ticket reopened" });
       } catch (e) {
         setError(e instanceof Error ? e.message : "Unexpected error occurred");
       }
@@ -533,17 +543,14 @@ export function ReportDetail({ report: initialReport, screenshotUrl, events: ini
 
   return (
     <div className="space-y-6 max-w-7xl">
-      {/* Back navigation */}
-      <div>
-        <Link
-          href="/admin/reports"
-          className="inline-flex items-center gap-1.5 text-sm transition-colors"
-          style={{ color: "var(--text-secondary-ds)" }}
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Issue Reports
-        </Link>
-      </div>
+      {/* Breadcrumbs */}
+      <Breadcrumbs
+        items={[
+          { label: "Admin", href: "/admin" },
+          { label: "Issue Reports", href: "/admin/reports" },
+          { label: shortReportId },
+        ]}
+      />
 
       {/* 1. Header: category + status + created + copy (full width above split) */}
       <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -573,6 +580,9 @@ export function ReportDetail({ report: initialReport, screenshotUrl, events: ini
           {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
           {copied ? "Copied!" : "Copy full report"}
         </button>
+        <span aria-live="polite" className="sr-only">
+          {copied ? "Full report copied to clipboard" : ""}
+        </span>
       </div>
 
       {/* 2-column split: report content on the left, admin actions + timeline sticky on the right */}
@@ -615,16 +625,34 @@ export function ReportDetail({ report: initialReport, screenshotUrl, events: ini
       {/* 4. Target snapshot (hidden if null) */}
       {report.target_snapshot && (
         <SectionCard title={`Target: ${report.target_type ?? "unknown"}`}>
-          <pre
-            className="text-xs overflow-auto rounded-[8px] p-3 max-h-64"
-            style={{
-              background: "var(--bg-root)",
-              color: "var(--text-secondary-ds)",
-              border: "1px solid var(--border-subtle)",
-            }}
-          >
-            {JSON.stringify(report.target_snapshot, null, 2)}
-          </pre>
+          <div className="relative">
+            <pre
+              className="text-xs overflow-auto rounded-[8px] p-3 max-h-64 pr-10"
+              style={{
+                background: "var(--bg-root)",
+                color: "var(--text-secondary-ds)",
+                border: "1px solid var(--border-subtle)",
+              }}
+            >
+              {JSON.stringify(report.target_snapshot, null, 2)}
+            </pre>
+            <button
+              onClick={async () => {
+                await navigator.clipboard.writeText(JSON.stringify(report.target_snapshot, null, 2));
+                setSnapshotCopied(true);
+                setTimeout(() => setSnapshotCopied(false), 2000);
+              }}
+              className="absolute top-2 right-2 p-1.5 rounded-[6px] transition-colors"
+              style={{
+                background: "var(--bg-elevated)",
+                border: "1px solid var(--border-subtle)",
+                color: snapshotCopied ? "var(--success)" : "var(--text-secondary-ds)",
+              }}
+              title="Copy snapshot"
+            >
+              {snapshotCopied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+            </button>
+          </div>
         </SectionCard>
       )}
 
@@ -685,7 +713,12 @@ export function ReportDetail({ report: initialReport, screenshotUrl, events: ini
             <ChevronRight className="h-4 w-4 text-muted-foreground" />
           )}
         </button>
-        {contextExpanded && (
+        <div
+          className={cn(
+            "overflow-hidden transition-[max-height] duration-300 ease-in-out",
+            contextExpanded ? "max-h-[800px]" : "max-h-0"
+          )}
+        >
           <div
             className="px-5 pb-5 space-y-2 text-sm border-t"
             style={{ borderColor: "var(--border-subtle)" }}
@@ -734,7 +767,7 @@ export function ReportDetail({ report: initialReport, screenshotUrl, events: ini
               )}
             </div>
           </div>
-        )}
+        </div>
       </div>
 
         </div>
@@ -753,19 +786,6 @@ export function ReportDetail({ report: initialReport, screenshotUrl, events: ini
                 {error}
               </div>
             )}
-            {success && (
-              <div
-                className="rounded-[8px] border px-4 py-3 text-sm"
-                style={{
-                  background: "var(--success-muted)",
-                  borderColor: "var(--success)",
-                  color: "var(--success)",
-                }}
-              >
-                {success}
-              </div>
-            )}
-
             <div className="space-y-4">
               <div className="space-y-1.5">
                 <label
@@ -774,19 +794,18 @@ export function ReportDetail({ report: initialReport, screenshotUrl, events: ini
                 >
                   Status
                 </label>
-                <select
-                  id="status-select"
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value as IssueStatus)}
-                  className="w-full h-9 rounded-[8px] border px-3 text-sm focus:outline-none"
-                  style={inputStyle}
-                >
-                  {STATUS_OPTIONS.map((o) => (
-                    <option key={o.value} value={o.value}>
-                      {o.label}
-                    </option>
-                  ))}
-                </select>
+                <Select value={status} onValueChange={(v) => setStatus(v as IssueStatus)}>
+                  <SelectTrigger id="status-select" className="w-full h-9">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {STATUS_OPTIONS.map((o) => (
+                      <SelectItem key={o.value} value={o.value}>
+                        {o.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 {status === "resolved" && report.status !== "resolved" && (
                   <p className="text-xs text-muted-foreground">
                     Saving as resolved will automatically record your user ID and the timestamp.
@@ -809,12 +828,21 @@ export function ReportDetail({ report: initialReport, screenshotUrl, events: ini
                 <textarea
                   id="admin-notes"
                   value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
+                  onChange={(e) => {
+                    if (e.target.value.length <= 2000) setNotes(e.target.value);
+                  }}
+                  maxLength={2000}
                   placeholder="Internal notes visible only to super admins…"
                   rows={4}
                   className="w-full rounded-[8px] border px-3 py-2 text-sm resize-none focus:outline-none"
                   style={inputStyle}
                 />
+                <p
+                  className="text-[10px] text-right"
+                  style={{ color: "var(--text-ghost)" }}
+                >
+                  {notes.length}/2000
+                </p>
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
@@ -836,7 +864,6 @@ export function ReportDetail({ report: initialReport, screenshotUrl, events: ini
                     onClick={() => {
                       setCloseDialogOpen((v) => !v);
                       setError(null);
-                      setSuccess(null);
                     }}
                     disabled={isPending}
                     className="h-9 rounded-[8px] px-4 text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
@@ -855,7 +882,6 @@ export function ReportDetail({ report: initialReport, screenshotUrl, events: ini
                     onClick={() => {
                       setReopenDialogOpen((v) => !v);
                       setError(null);
-                      setSuccess(null);
                     }}
                     disabled={isPending}
                     className="h-9 rounded-[8px] px-4 text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
@@ -891,19 +917,18 @@ export function ReportDetail({ report: initialReport, screenshotUrl, events: ini
                     >
                       Resolution
                     </label>
-                    <select
-                      id="close-status-select"
-                      value={closeStatus}
-                      onChange={(e) => setCloseStatus(e.target.value as IssueStatus)}
-                      className="w-full h-9 rounded-[8px] border px-3 text-sm focus:outline-none"
-                      style={inputStyle}
-                    >
-                      {CLOSE_STATUS_OPTIONS.map((o) => (
-                        <option key={o.value} value={o.value}>
-                          {o.label}
-                        </option>
-                      ))}
-                    </select>
+                    <Select value={closeStatus} onValueChange={(v) => setCloseStatus(v as IssueStatus)}>
+                      <SelectTrigger id="close-status-select" className="w-full h-9">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {CLOSE_STATUS_OPTIONS.map((o) => (
+                          <SelectItem key={o.value} value={o.value}>
+                            {o.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-1.5">
                     <label

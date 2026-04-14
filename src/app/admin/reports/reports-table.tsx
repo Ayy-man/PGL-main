@@ -1,8 +1,17 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { RefreshCw, ExternalLink } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface ReportRow {
   id: string;
@@ -68,17 +77,24 @@ function formatRelativeTime(dateStr: string): string {
 
 function StatusBadge({ status }: { status: string }) {
   const colorMap: Record<string, { bg: string; text: string }> = {
-    open: { bg: "bg-red-500/10", text: "text-red-400" },
-    investigating: { bg: "bg-blue-500/10", text: "text-blue-400" },
-    resolved: { bg: "bg-[var(--success-muted)]", text: "text-[var(--success)]" },
-    wontfix: { bg: "bg-[var(--bg-elevated)]", text: "text-muted-foreground" },
-    duplicate: { bg: "bg-[var(--bg-elevated)]", text: "text-muted-foreground" },
+    open: {
+      bg: "color-mix(in oklch, oklch(0.62 0.19 22) 10%, transparent)",
+      text: "oklch(0.62 0.19 22)",
+    },
+    investigating: {
+      bg: "color-mix(in oklch, oklch(0.6 0.15 240) 10%, transparent)",
+      text: "oklch(0.6 0.15 240)",
+    },
+    resolved: { bg: "var(--success-muted)", text: "var(--success)" },
+    wontfix: { bg: "var(--bg-elevated)", text: "var(--text-secondary-ds)" },
+    duplicate: { bg: "var(--bg-elevated)", text: "var(--text-secondary-ds)" },
   };
-  const colors = colorMap[status] ?? { bg: "bg-[var(--bg-elevated)]", text: "text-muted-foreground" };
+  const c = colorMap[status] ?? { bg: "var(--bg-elevated)", text: "var(--text-secondary-ds)" };
   const label = STATUS_OPTIONS.find((o) => o.value === status)?.label ?? status;
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${colors.bg} ${colors.text}`}
+      className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
+      style={{ background: c.bg, color: c.text }}
     >
       {label}
     </span>
@@ -112,6 +128,18 @@ function getTargetLabel(row: ReportRow): string {
   return `${row.target_type}${name ? `: ${String(name).slice(0, 30)}` : ""}`;
 }
 
+function SkeletonRow() {
+  return (
+    <tr>
+      {Array.from({ length: 7 }).map((_, i) => (
+        <td key={i} className="px-4 py-3">
+          <Skeleton className="h-4 w-full rounded" />
+        </td>
+      ))}
+    </tr>
+  );
+}
+
 export function ReportsTable({
   initialReports,
   initialStatus,
@@ -126,15 +154,17 @@ export function ReportsTable({
   const [tenantInput, setTenantInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const fetchRows = useCallback(async () => {
+  const fetchRows = useCallback(async (overrideTenant?: string) => {
     setLoading(true);
     setError(null);
     try {
       const searchParams = new URLSearchParams();
       if (status) searchParams.set("status", status);
       if (category) searchParams.set("category", category);
-      if (tenantQuery) searchParams.set("tenant", tenantQuery);
+      const tq = overrideTenant !== undefined ? overrideTenant : tenantQuery;
+      if (tq) searchParams.set("tenant", tq);
       const res = await fetch(`/api/admin/reports?${searchParams.toString()}`);
       if (!res.ok) throw new Error("Failed to fetch reports");
       const data = await res.json();
@@ -148,10 +178,25 @@ export function ReportsTable({
 
   useEffect(() => {
     fetchRows();
-  }, [status, category]); // tenant filter applied on button click only
+  }, [status, category]); // tenant filter applied via debounce
 
-  const handleTenantSearch = () => {
-    setTenantQuery(tenantInput);
+  // Debounced tenant input
+  const handleTenantInputChange = (value: string) => {
+    setTenantInput(value);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      setTenantQuery(value);
+      void fetchRows(value);
+    }, 300);
+  };
+
+  const hasFilters = !!status || !!category || !!tenantQuery;
+
+  const clearAll = () => {
+    setStatus("");
+    setCategory("");
+    setTenantQuery("");
+    setTenantInput("");
   };
 
   const thStyle = {
@@ -162,69 +207,55 @@ export function ReportsTable({
     <div className="space-y-4">
       {/* Filter bar */}
       <div className="flex flex-wrap items-center gap-3">
-        <select
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-          className="h-9 rounded-[8px] border px-3 text-sm focus:outline-none"
+        <Select value={status || "__all__"} onValueChange={(v) => setStatus(v === "__all__" ? "" : v)}>
+          <SelectTrigger className="h-9 w-44">
+            <SelectValue placeholder="All statuses" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__all__">All statuses</SelectItem>
+            {STATUS_OPTIONS.filter((o) => o.value).map((o) => (
+              <SelectItem key={o.value} value={o.value}>
+                {o.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={category || "__all__"} onValueChange={(v) => setCategory(v === "__all__" ? "" : v)}>
+          <SelectTrigger className="h-9 w-44">
+            <SelectValue placeholder="All categories" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__all__">All categories</SelectItem>
+            {CATEGORY_OPTIONS.filter((o) => o.value).map((o) => (
+              <SelectItem key={o.value} value={o.value}>
+                {o.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <input
+          type="text"
+          placeholder="Filter by tenant…"
+          value={tenantInput}
+          onChange={(e) => handleTenantInputChange(e.target.value)}
+          className="h-9 rounded-[8px] border px-3 text-sm focus:outline-none focus:ring-1 focus:ring-[var(--gold-primary)]/40 w-48"
           style={{
             background: "var(--bg-elevated)",
             borderColor: "var(--border-subtle)",
             color: "var(--text-primary-ds)",
           }}
-        >
-          {STATUS_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
+        />
 
-        <select
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className="h-9 rounded-[8px] border px-3 text-sm focus:outline-none"
-          style={{
-            background: "var(--bg-elevated)",
-            borderColor: "var(--border-subtle)",
-            color: "var(--text-primary-ds)",
-          }}
-        >
-          {CATEGORY_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-
-        <div className="flex items-center gap-2">
-          <input
-            type="text"
-            placeholder="Filter by tenant…"
-            value={tenantInput}
-            onChange={(e) => setTenantInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleTenantSearch()}
-            className="h-9 rounded-[8px] border px-3 text-sm focus:outline-none w-48"
-            style={{
-              background: "var(--bg-elevated)",
-              borderColor: "var(--border-subtle)",
-              color: "var(--text-primary-ds)",
-            }}
-          />
-          <button
-            onClick={handleTenantSearch}
-            className="h-9 rounded-[8px] border px-3 text-sm font-medium transition-colors"
-            style={{
-              background: "var(--bg-elevated)",
-              borderColor: "var(--border-subtle)",
-              color: "var(--text-secondary-ds)",
-            }}
-          >
-            Search
-          </button>
-        </div>
+        {hasFilters && (
+          <Button variant="ghost" size="sm" onClick={clearAll}>
+            Clear filters
+          </Button>
+        )}
 
         <button
-          onClick={fetchRows}
+          onClick={() => fetchRows()}
           disabled={loading}
           className="ml-auto flex items-center gap-1.5 h-9 rounded-[8px] border px-3 text-sm font-medium transition-colors disabled:opacity-50"
           style={{
@@ -269,13 +300,15 @@ export function ReportsTable({
               </tr>
             </thead>
             <tbody className="divide-y" style={{ borderColor: "var(--admin-row-border)" }}>
-              {rows.length === 0 ? (
+              {loading ? (
+                Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)
+              ) : rows.length === 0 ? (
                 <tr>
                   <td
                     colSpan={7}
                     className="px-6 py-10 text-center text-sm text-muted-foreground"
                   >
-                    {loading ? "Loading…" : "No reports match these filters."}
+                    No reports match these filters.
                   </td>
                 </tr>
               ) : (
@@ -305,7 +338,7 @@ export function ReportsTable({
                     <td className="px-4 py-3 text-right">
                       <Link
                         href={`/admin/reports/${row.id}`}
-                        className="inline-flex items-center gap-1 text-xs font-medium rounded-[6px] px-2.5 py-1 transition-colors"
+                        className="inline-flex items-center gap-1 text-xs font-medium rounded-[6px] px-2.5 py-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold-primary)]/40"
                         style={{
                           color: "var(--gold-primary)",
                           border: "1px solid var(--border-gold)",
@@ -325,9 +358,15 @@ export function ReportsTable({
 
         {/* Mobile card list */}
         <div className="md:hidden divide-y" style={{ borderColor: "var(--border-subtle)" }}>
-          {rows.length === 0 ? (
+          {loading ? (
+            <div className="p-4 space-y-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <Skeleton key={i} className="h-16 w-full rounded-[8px]" />
+              ))}
+            </div>
+          ) : rows.length === 0 ? (
             <div className="px-6 py-10 text-center text-sm text-muted-foreground">
-              {loading ? "Loading…" : "No reports match these filters."}
+              No reports match these filters.
             </div>
           ) : (
             rows.map((row) => (
@@ -378,8 +417,6 @@ export function ReportsTable({
 
 /**
  * Lightweight list surface for closed-but-stale tickets (status ∈ closed AND resolved_at > 30d).
- * Server-component renders this with data pulled at SSR time (no client fetch). Dimmed
- * visual treatment signals it's an archival/review queue rather than active work.
  */
 export function OverdueClosedList({ reports }: { reports: OverdueClosedRow[] }) {
   if (reports.length === 0) return null;
