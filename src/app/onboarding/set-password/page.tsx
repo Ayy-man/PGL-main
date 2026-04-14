@@ -7,10 +7,19 @@ import { completeUserOnboarding } from "@/app/actions/onboarding";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+function passwordStrength(pwd: string): 1 | 2 | 3 {
+  if (pwd.length < 8) return 1;
+  if (pwd.length >= 8 && /[A-Z]/.test(pwd) && /\d/.test(pwd)) return 3;
+  return 2;
+}
 
 export default function SetPasswordPage() {
   const router = useRouter();
   const [orgName, setOrgName] = useState("");
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -28,14 +37,20 @@ export default function SetPasswordPage() {
       if (tenantId) {
         const { data: tenant } = await supabase
           .from("tenants")
-          .select("name")
+          .select("name, logo_url")
           .eq("id", tenantId)
           .single();
-        if (tenant) setOrgName(tenant.name);
+        if (tenant) {
+          setOrgName(tenant.name);
+          setLogoUrl(tenant.logo_url ?? null);
+        }
       }
     }
     loadContext();
   }, []);
+
+  const strength = password.length > 0 ? passwordStrength(password) : 0;
+  const passwordMismatch = confirmPassword.length > 0 && confirmPassword !== password;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -66,61 +81,103 @@ export default function SetPasswordPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <div className="w-full max-w-md space-y-6">
-        <div className="text-center space-y-2">
-          <h1 className="font-serif text-3xl font-bold tracking-tight">
-            Welcome{orgName ? ` to ${orgName}` : ""}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Set your password to get started
-          </p>
+    <div className="max-w-md mx-auto surface-card rounded-[14px] p-8">
+      {/* Tenant logo / org name */}
+      {logoUrl ? (
+        <div className="flex flex-col items-center gap-2 mb-6">
+          <img
+            src={logoUrl}
+            alt={orgName ? `${orgName} logo` : "Organization logo"}
+            className="h-12 w-12 rounded-lg object-cover"
+            style={{ border: "1px solid var(--border-subtle)" }}
+          />
+          {orgName && (
+            <span className="text-xs" style={{ color: "var(--text-secondary-ds)" }}>
+              {orgName}
+            </span>
+          )}
         </div>
+      ) : orgName ? (
+        <div className="flex flex-col items-center gap-2 mb-6">
+          <div
+            className="flex h-12 w-12 items-center justify-center rounded-lg font-serif font-bold text-lg"
+            style={{
+              background: "var(--gold-bg-strong)",
+              color: "var(--gold-primary)",
+              border: "1px solid var(--border-gold)",
+            }}
+          >
+            {orgName.charAt(0).toUpperCase()}
+          </div>
+          <span className="text-xs" style={{ color: "var(--text-secondary-ds)" }}>
+            {orgName}
+          </span>
+        </div>
+      ) : null}
 
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-4 rounded-xl border border-border bg-card p-6 shadow-lg"
-        >
-          {error && (
-            <div className="rounded-lg bg-destructive/10 px-4 py-2 text-sm text-destructive">
-              {error}
+      <div className="space-y-1 mb-6">
+        <h1 className="font-serif text-2xl font-bold tracking-tight" style={{ color: "var(--gold-primary)" }}>
+          Welcome{orgName ? ` to ${orgName}` : ""}
+        </h1>
+        <p className="text-sm" style={{ color: "var(--text-secondary-ds)" }}>
+          Set your password to get started
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {error && (
+          <div className="rounded-lg bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
+            {error}
+          </div>
+        )}
+
+        <div className="space-y-1.5">
+          <Label htmlFor="password">Password</Label>
+          <Input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="At least 8 characters"
+            required
+            minLength={8}
+          />
+          {/* Password strength meter */}
+          {password.length > 0 && (
+            <div className="flex gap-1 mt-1">
+              <div className={cn("h-1 flex-1 rounded", strength >= 1 ? "bg-[var(--destructive)]" : "bg-[var(--bg-elevated)]")} />
+              <div className={cn("h-1 flex-1 rounded", strength >= 2 ? "bg-[var(--warning,#f59e0b)]" : "bg-[var(--bg-elevated)]")} />
+              <div className={cn("h-1 flex-1 rounded", strength >= 3 ? "bg-[var(--success)]" : "bg-[var(--bg-elevated)]")} />
             </div>
           )}
+        </div>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="At least 8 characters"
-              required
-              minLength={8}
-            />
-          </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="confirm-password">Confirm Password</Label>
+          <Input
+            id="confirm-password"
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="Confirm your password"
+            required
+          />
+          {passwordMismatch && (
+            <p className="text-xs text-destructive">Passwords do not match</p>
+          )}
+        </div>
 
-          <div className="space-y-1.5">
-            <Label htmlFor="confirm-password">Confirm Password</Label>
-            <Input
-              id="confirm-password"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirm your password"
-              required
-            />
-          </div>
-
-          <Button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-[var(--gold-primary)] text-black hover:bg-[var(--gold-bright)]"
-          >
-            {loading ? "Setting up..." : "Set Password & Continue"}
-          </Button>
-        </form>
-      </div>
+        <Button
+          type="submit"
+          disabled={loading || passwordMismatch}
+          variant="gold-solid"
+          size="lg"
+          className="w-full mt-2"
+        >
+          {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+          {loading ? "Setting up" : "Set Password & Continue"}
+        </Button>
+      </form>
     </div>
   );
 }

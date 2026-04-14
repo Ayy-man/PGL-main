@@ -10,7 +10,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 
 export default function OrganizationSettingsPage() {
   const { orgId } = useParams<{ orgId: string }>();
@@ -20,11 +23,19 @@ export default function OrganizationSettingsPage() {
 
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
+  const [slugError, setSlugError] = useState<string | null>(null);
   const [theme, setTheme] = useState("gold");
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [tenantId, setTenantId] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Saved values for dirty detection
+  const [savedName, setSavedName] = useState("");
+  const [savedSlug, setSavedSlug] = useState("");
+  const [savedTheme, setSavedTheme] = useState("gold");
+
+  const dirty = name !== savedName || slug !== savedSlug || theme !== savedTheme;
 
   useEffect(() => {
     async function loadTenant() {
@@ -54,14 +65,39 @@ export default function OrganizationSettingsPage() {
         setSlug(tenant.slug);
         setTheme(tenant.theme || "gold");
         setLogoUrl(tenant.logo_url);
+        setSavedName(tenant.name);
+        setSavedSlug(tenant.slug);
+        setSavedTheme(tenant.theme || "gold");
       }
       setLoading(false);
     }
     loadTenant();
   }, [orgId, router]);
 
+  // Beforeunload guard when form is dirty
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (dirty) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [dirty]);
+
+  function validateSlug(value: string) {
+    const slugRegex = /^[a-z0-9][a-z0-9-]*[a-z0-9]$|^[a-z0-9]$/;
+    if (value && !slugRegex.test(value)) {
+      setSlugError("Slug must be lowercase letters, numbers, and hyphens only");
+    } else {
+      setSlugError(null);
+    }
+  }
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (slugError) return;
     const formData = new FormData();
     formData.set("name", name);
     formData.set("slug", slug);
@@ -72,9 +108,17 @@ export default function OrganizationSettingsPage() {
       if (result.error) {
         toast({ title: "Error", description: result.error, variant: "destructive" });
       } else {
-        toast({ title: "Settings updated" });
+        setSavedName(name);
+        setSavedSlug(slug);
+        setSavedTheme(theme);
         if (result.slug && result.slug !== orgId) {
+          toast({
+            title: "Settings updated",
+            description: `Your workspace URL is now app.pgl.com/${result.slug}`,
+          });
           router.push(`/${result.slug}/settings/organization`);
+        } else {
+          toast({ title: "Settings updated" });
         }
       }
     });
@@ -82,8 +126,20 @@ export default function OrganizationSettingsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted-foreground border-t-transparent" />
+      <div className="space-y-6">
+        <Skeleton className="h-4 w-[240px] rounded" />
+        <Skeleton className="h-8 w-[280px] rounded-[8px]" />
+        <div className="surface-card rounded-[14px] p-6 space-y-4">
+          <Skeleton className="h-5 w-[80px] rounded" />
+          <Skeleton className="h-10 w-full rounded-[8px]" />
+          <Skeleton className="h-10 w-full rounded-[8px]" />
+          <Skeleton className="h-4 w-[200px] rounded" />
+        </div>
+        <div className="surface-card rounded-[14px] p-6 space-y-4">
+          <Skeleton className="h-5 w-[80px] rounded" />
+          <Skeleton className="h-16 w-16 rounded-lg" />
+          <Skeleton className="h-10 w-full rounded-[8px]" />
+        </div>
       </div>
     );
   }
@@ -94,6 +150,14 @@ export default function OrganizationSettingsPage() {
 
   return (
     <div className="space-y-6">
+      <Breadcrumbs
+        items={[
+          { label: "Dashboard", href: `/${orgId}` },
+          { label: "Settings", href: `/${orgId}/settings` },
+          { label: "Organization" },
+        ]}
+      />
+
       <div>
         <h1 className="font-serif text-3xl font-bold tracking-tight">
           Organization Settings
@@ -123,14 +187,17 @@ export default function OrganizationSettingsPage() {
               <Input
                 id="org-slug"
                 value={slug}
-                onChange={(e) =>
-                  setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))
-                }
+                onChange={(e) => setSlug(e.target.value)}
+                onBlur={(e) => validateSlug(e.target.value)}
                 placeholder="your-org-slug"
               />
-              <p className="text-xs text-muted-foreground">
-                Used in URLs: app.pgl.com/<strong>{slug || "slug"}</strong>
-              </p>
+              {slugError ? (
+                <p className="text-xs text-destructive">{slugError}</p>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  Used in URLs: app.pgl.com/<strong>{slug || "slug"}</strong>
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -149,6 +216,7 @@ export default function OrganizationSettingsPage() {
                   onUploaded={(url) => setLogoUrl(url)}
                 />
               )}
+              <p className="text-xs text-muted-foreground">Logo is saved immediately on upload.</p>
             </div>
             <div className="space-y-2">
               <Label>Theme</Label>
@@ -159,12 +227,26 @@ export default function OrganizationSettingsPage() {
 
         <Button
           type="submit"
-          disabled={isPending}
-          className="bg-[var(--gold-primary)] text-black hover:bg-[var(--gold-bright)]"
+          disabled={isPending || !!slugError}
+          variant="gold-solid"
+          size="lg"
+          className="gap-2"
         >
-          {isPending ? "Saving..." : "Save Changes"}
+          {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+          {isPending ? "Saving" : "Save Changes"}
+          {dirty && !isPending && (
+            <span className="h-2 w-2 rounded-full bg-[var(--gold-primary)] ml-1" />
+          )}
         </Button>
       </form>
+
+      <p className="text-xs text-muted-foreground mt-8">
+        Need to delete this workspace?{" "}
+        <a href="mailto:support@phronesis.dev" className="text-gold hover:underline">
+          Contact support
+        </a>
+        .
+      </p>
     </div>
   );
 }

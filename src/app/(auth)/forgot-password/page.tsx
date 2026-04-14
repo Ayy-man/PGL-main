@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Loader2, Mail } from "lucide-react";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -44,6 +45,10 @@ export default function ForgotPasswordPage() {
   if (submitted) {
     return (
       <div className="space-y-8">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full" style={{ background: "var(--gold-bg)" }}>
+          <Mail className="h-6 w-6" style={{ color: "var(--gold-primary)" }} />
+        </div>
+
         <div className="space-y-2">
           <h1 className="font-serif text-2xl font-bold tracking-tight">
             Check your email
@@ -61,7 +66,7 @@ export default function ForgotPasswordPage() {
               setSubmitted(false);
               setEmail("");
             }}
-            className="text-gold hover:underline"
+            className="text-gold hover:underline focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--gold-primary)]/40 rounded underline-offset-2 transition-colors"
           >
             try again
           </button>
@@ -122,7 +127,8 @@ export default function ForgotPasswordPage() {
           size="lg"
           className="w-full"
         >
-          {loading ? "Sending..." : "Send Reset Link"}
+          {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+          {loading ? "Sending" : "Send Reset Link"}
         </Button>
       </form>
 

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { UserPlus } from "lucide-react";
+import { UserPlus, Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -10,6 +10,17 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
 import { inviteTeamMember } from "@/app/actions/team";
 
 interface InviteDialogProps {
@@ -18,23 +29,32 @@ interface InviteDialogProps {
 
 export function InviteDialog({ orgId }: InviteDialogProps) {
   const router = useRouter();
+  const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState<string | null>(null);
 
   // Form state
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [role, setRole] = useState<"agent" | "assistant">("agent");
 
-  // Button hover state
-  const [triggerHovered, setTriggerHovered] = useState(false);
-
   function resetForm() {
     setEmail("");
     setFullName("");
     setRole("agent");
     setError(null);
+    setEmailError(null);
+  }
+
+  function validateEmail(value: string) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (value && !emailRegex.test(value)) {
+      setEmailError("Enter a valid email address");
+    } else {
+      setEmailError(null);
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -57,6 +77,10 @@ export function InviteDialog({ orgId }: InviteDialogProps) {
       }
 
       if (result.success) {
+        toast({
+          title: "Invitation sent",
+          description: `${email} will receive an email shortly.`,
+        });
         setOpen(false);
         resetForm();
         router.refresh();
@@ -76,22 +100,15 @@ export function InviteDialog({ orgId }: InviteDialogProps) {
         if (!isOpen) resetForm();
       }}
     >
-      <button
+      <Button
+        variant="gold-solid"
+        size="default"
         onClick={() => setOpen(true)}
-        className="inline-flex h-10 items-center justify-center gap-2 rounded-[8px] border px-4 text-sm font-semibold transition-colors"
-        style={{
-          borderColor: "var(--border-gold)",
-          color: "var(--gold-primary)",
-          backgroundColor: triggerHovered
-            ? "var(--gold-bg)"
-            : "var(--gold-bg-strong)",
-        }}
-        onMouseEnter={() => setTriggerHovered(true)}
-        onMouseLeave={() => setTriggerHovered(false)}
+        className="gap-2"
       >
         <UserPlus className="h-4 w-4" />
         Invite Team Member
-      </button>
+      </Button>
 
       <DialogContent>
         <DialogHeader>
@@ -110,88 +127,87 @@ export function InviteDialog({ orgId }: InviteDialogProps) {
 
           {/* Email */}
           <div className="space-y-1">
-            <label
-              htmlFor="invite-email"
-              className="block text-sm font-medium"
-              style={{ color: "var(--text-primary-ds)" }}
-            >
-              Email
-              <span className="text-destructive ml-0.5">*</span>
-            </label>
-            <input
+            <Label htmlFor="invite-email">
+              Email <span className="text-destructive ml-0.5">*</span>
+            </Label>
+            <Input
               id="invite-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              onBlur={(e) => validateEmail(e.target.value)}
               required
               disabled={submitting}
               placeholder="colleague@company.com"
-              className="w-full rounded-[8px] border border-[var(--border-default)] bg-[var(--bg-input)] px-3 py-2 text-sm text-[var(--text-primary-ds)] focus:ring-2 focus:ring-[var(--gold-primary)]/50 focus:border-[var(--gold-primary)] outline-none transition-colors disabled:opacity-50 placeholder:opacity-40"
             />
+            {emailError && (
+              <p className="text-xs text-destructive">{emailError}</p>
+            )}
           </div>
 
           {/* Full Name */}
           <div className="space-y-1">
-            <label
-              htmlFor="invite-name"
-              className="block text-sm font-medium"
-              style={{ color: "var(--text-primary-ds)" }}
-            >
-              Full Name
-              <span
-                className="ml-1 text-xs font-normal"
-                style={{ color: "var(--text-secondary-ds)" }}
-              >
+            <Label htmlFor="invite-name">
+              Full Name{" "}
+              <span className="ml-1 text-xs font-normal text-muted-foreground">
                 (optional)
               </span>
-            </label>
-            <input
+            </Label>
+            <Input
               id="invite-name"
               type="text"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               disabled={submitting}
               placeholder="Jane Doe"
-              className="w-full rounded-[8px] border border-[var(--border-default)] bg-[var(--bg-input)] px-3 py-2 text-sm text-[var(--text-primary-ds)] focus:ring-2 focus:ring-[var(--gold-primary)]/50 focus:border-[var(--gold-primary)] outline-none transition-colors disabled:opacity-50 placeholder:opacity-40"
             />
           </div>
 
           {/* Role */}
           <div className="space-y-1">
-            <label
-              htmlFor="invite-role"
-              className="block text-sm font-medium"
-              style={{ color: "var(--text-primary-ds)" }}
-            >
-              Role
-            </label>
-            <select
-              id="invite-role"
+            <Label htmlFor="invite-role">Role</Label>
+            <Select
               value={role}
-              onChange={(e) =>
-                setRole(e.target.value as "agent" | "assistant")
-              }
+              onValueChange={(v) => setRole(v as "agent" | "assistant")}
               disabled={submitting}
-              className="w-full rounded-[8px] border border-[var(--border-default)] bg-[var(--bg-input)] px-3 py-2 text-sm text-[var(--text-primary-ds)] focus:ring-2 focus:ring-[var(--gold-primary)]/50 focus:border-[var(--gold-primary)] outline-none transition-colors disabled:opacity-50"
             >
-              <option value="agent">Agent</option>
-              <option value="assistant">Assistant</option>
-            </select>
+              <SelectTrigger id="invite-role">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="agent">Agent</SelectItem>
+                <SelectItem value="assistant">Assistant</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              {role === "agent"
+                ? "Can create searches and enrich leads"
+                : "Can view searches and assist agents — no billing."}
+            </p>
           </div>
 
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full rounded-[8px] border px-4 py-2.5 text-sm font-semibold transition-opacity disabled:opacity-50 mt-2"
-            style={{
-              backgroundColor: "var(--gold-bg-strong)",
-              borderColor: "var(--border-gold)",
-              color: "var(--gold-primary)",
-            }}
-          >
-            {submitting ? "Sending Invite..." : "Send Invitation"}
-          </button>
+          {/* Footer buttons */}
+          <div className="flex gap-3 mt-2">
+            <Button
+              type="submit"
+              disabled={submitting || !!emailError}
+              variant="gold-solid"
+              size="lg"
+              className="flex-1"
+            >
+              {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              {submitting ? "Sending" : "Send Invitation"}
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="lg"
+              onClick={() => setOpen(false)}
+              disabled={submitting}
+            >
+              Cancel
+            </Button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

@@ -4,6 +4,9 @@ import { redirect } from "next/navigation";
 import { InviteDialog } from "./invite-dialog";
 import { UserStatusToggle } from "./user-status-toggle";
 import { TeamMemberActions } from "./team-member-actions";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Users } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +25,17 @@ function relativeTime(dateStr: string | null): string {
   const diffMonth = Math.floor(diffDay / 30);
   return `${diffMonth}mo ago`;
 }
+
+const roleLabel = (role: string) =>
+  ({ tenant_admin: "Admin", agent: "Agent", assistant: "Assistant", super_admin: "Super Admin" } as Record<string, string>)[role] ?? role;
+
+const roleBadgeClasses = (role: string) =>
+  ({
+    tenant_admin: "bg-[var(--gold-bg)] text-[var(--gold-primary)] border-[var(--border-gold)]",
+    agent: "bg-[var(--info-muted,#1e3a5f)] text-[var(--info,#60a5fa)] border-[var(--info,#60a5fa)]/30",
+    assistant: "bg-muted text-muted-foreground border-border",
+    super_admin: "bg-[var(--gold-primary)] text-[var(--bg-base,#0a0a0a)] border-[var(--gold-primary)] font-bold",
+  } as Record<string, string>)[role] ?? "";
 
 export default async function TeamPage({
   params,
@@ -55,17 +69,32 @@ export default async function TeamPage({
     console.error("[TeamPage] Failed to fetch users:", error);
   }
 
-  const teamMembers = users || [];
+  const teamMembers = (users || []) as Array<{
+    id: string;
+    email: string | null;
+    full_name: string | null;
+    role: string;
+    is_active: boolean;
+    updated_at: string | null;
+    created_at: string | null;
+    lastSignInAt?: string | null;
+  }>;
 
-  // Detect pending invites via auth.users last_sign_in_at
+  // Detect pending invites via auth.users last_sign_in_at — parallelized
   const admin = createAdminClient();
   const pendingUserIds = new Set<string>();
-  for (const member of teamMembers) {
-    const { data: authData } = await admin.auth.admin.getUserById(member.id);
-    if (authData?.user && !authData.user.last_sign_in_at) {
+
+  const authResults = await Promise.all(
+    teamMembers.map((m) => admin.auth.admin.getUserById(m.id))
+  );
+  authResults.forEach((res, i) => {
+    const member = teamMembers[i];
+    if (res.data?.user && !res.data.user.last_sign_in_at) {
       pendingUserIds.add(member.id);
     }
-  }
+    // Capture last_sign_in_at for accurate "Last Active"
+    member.lastSignInAt = res.data?.user?.last_sign_in_at ?? null;
+  });
 
   return (
     <div className="space-y-6">
@@ -81,63 +110,61 @@ export default async function TeamPage({
         <InviteDialog orgId={orgId} />
       </div>
 
-      <div className="surface-admin-card rounded-[14px] overflow-hidden">
-        {/* Desktop table */}
-        <div className="hidden md:block overflow-x-auto">
-          <table className="w-full">
-            <thead className="admin-thead">
-              <tr>
-                <th
-                  className="px-3 py-2 md:px-6 md:py-3 text-left text-[11px] font-semibold uppercase tracking-wider"
-                  style={{ color: "var(--admin-text-secondary)" }}
-                >
-                  Name
-                </th>
-                <th
-                  className="px-3 py-2 md:px-6 md:py-3 text-left text-[11px] font-semibold uppercase tracking-wider"
-                  style={{ color: "var(--admin-text-secondary)" }}
-                >
-                  Email
-                </th>
-                <th
-                  className="px-3 py-2 md:px-6 md:py-3 text-left text-[11px] font-semibold uppercase tracking-wider"
-                  style={{ color: "var(--admin-text-secondary)" }}
-                >
-                  Role
-                </th>
-                <th
-                  className="px-3 py-2 md:px-6 md:py-3 text-left text-[11px] font-semibold uppercase tracking-wider"
-                  style={{ color: "var(--admin-text-secondary)" }}
-                >
-                  Status
-                </th>
-                <th
-                  className="px-3 py-2 md:px-6 md:py-3 text-left text-[11px] font-semibold uppercase tracking-wider"
-                  style={{ color: "var(--admin-text-secondary)" }}
-                >
-                  Last Active
-                </th>
-                <th
-                  className="px-3 py-2 md:px-6 md:py-3 text-left text-[11px] font-semibold uppercase tracking-wider"
-                  style={{ color: "var(--admin-text-secondary)" }}
-                >
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {teamMembers.length === 0 ? (
+      {teamMembers.length === 0 ? (
+        <EmptyState
+          icon={Users}
+          title="No team members yet"
+          description="Invite your first agent or assistant to collaborate on saved searches and enrichment."
+        >
+          <InviteDialog orgId={orgId} />
+        </EmptyState>
+      ) : (
+        <div className="surface-admin-card rounded-[14px] overflow-hidden">
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full">
+              <thead className="admin-thead sticky top-0 z-10 bg-[var(--bg-elevated)] backdrop-blur">
                 <tr>
-                  <td
-                    colSpan={6}
-                    className="px-6 py-8 text-center text-sm text-muted-foreground"
+                  <th
+                    className="px-3 py-2 md:px-6 md:py-3 text-left text-[11px] font-semibold uppercase tracking-wider"
+                    style={{ color: "var(--admin-text-secondary)" }}
                   >
-                    No team members found. Invite your first team member to get
-                    started.
-                  </td>
+                    Name
+                  </th>
+                  <th
+                    className="px-3 py-2 md:px-6 md:py-3 text-left text-[11px] font-semibold uppercase tracking-wider"
+                    style={{ color: "var(--admin-text-secondary)" }}
+                  >
+                    Email
+                  </th>
+                  <th
+                    className="px-3 py-2 md:px-6 md:py-3 text-left text-[11px] font-semibold uppercase tracking-wider"
+                    style={{ color: "var(--admin-text-secondary)" }}
+                  >
+                    Role
+                  </th>
+                  <th
+                    className="px-3 py-2 md:px-6 md:py-3 text-left text-[11px] font-semibold uppercase tracking-wider"
+                    style={{ color: "var(--admin-text-secondary)" }}
+                  >
+                    Status
+                  </th>
+                  <th
+                    className="px-3 py-2 md:px-6 md:py-3 text-left text-[11px] font-semibold uppercase tracking-wider"
+                    style={{ color: "var(--admin-text-secondary)" }}
+                  >
+                    Last Active
+                  </th>
+                  <th
+                    className="px-3 py-2 md:px-6 md:py-3 text-left text-[11px] font-semibold uppercase tracking-wider"
+                    style={{ color: "var(--admin-text-secondary)" }}
+                  >
+                    Actions
+                  </th>
                 </tr>
-              ) : (
-                teamMembers.map((member) => (
+              </thead>
+              <tbody>
+                {teamMembers.map((member) => (
                   <tr
                     key={member.id}
                     className="admin-row-hover"
@@ -158,8 +185,13 @@ export default async function TeamPage({
                       {member.email}
                     </td>
                     <td className="px-3 py-3 md:px-6 md:py-4">
-                      <span className="inline-flex items-center rounded-full bg-[var(--gold-bg)] px-2.5 py-0.5 text-xs font-medium text-[var(--gold-primary)]">
-                        {member.role}
+                      <span
+                        className={cn(
+                          "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium",
+                          roleBadgeClasses(member.role)
+                        )}
+                      >
+                        {roleLabel(member.role)}
                       </span>
                     </td>
                     <td className="px-3 py-3 md:px-6 md:py-4">
@@ -182,8 +214,9 @@ export default async function TeamPage({
                     <td
                       className="px-3 py-3 md:px-6 md:py-4 text-sm"
                       style={{ color: "var(--text-primary-ds)" }}
+                      title={member.lastSignInAt ?? member.updated_at ?? undefined}
                     >
-                      {relativeTime(member.updated_at)}
+                      {relativeTime(member.lastSignInAt ?? member.updated_at)}
                     </td>
                     <td className="px-3 py-3 md:px-6 md:py-4">
                       <div className="flex items-center gap-2">
@@ -191,6 +224,7 @@ export default async function TeamPage({
                           userId={member.id}
                           isActive={member.is_active}
                           orgId={orgId}
+                          memberEmail={member.email ?? undefined}
                         />
                         <TeamMemberActions
                           userId={member.id}
@@ -204,20 +238,14 @@ export default async function TeamPage({
                       </div>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-        {/* Mobile card list */}
-        <div className="md:hidden divide-y" style={{ borderColor: "var(--border-subtle)" }}>
-          {teamMembers.length === 0 ? (
-            <div className="px-6 py-8 text-center text-sm text-muted-foreground">
-              No team members found. Invite your first team member to get started.
-            </div>
-          ) : (
-            teamMembers.map((member) => (
+          {/* Mobile card list */}
+          <div className="md:hidden divide-y" style={{ borderColor: "var(--border-subtle)" }}>
+            {teamMembers.map((member) => (
               <div key={member.id} className="p-4 space-y-2">
                 <div className="flex items-center justify-between gap-3">
                   <div className="min-w-0 flex-1">
@@ -232,14 +260,17 @@ export default async function TeamPage({
                     userId={member.id}
                     isActive={member.is_active}
                     orgId={orgId}
+                    memberEmail={member.email ?? undefined}
                   />
                 </div>
                 <div className="flex items-center gap-3 text-xs" style={{ color: "var(--text-secondary)" }}>
                   <span
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase"
-                    style={{ background: "var(--gold-bg)", color: "var(--gold-primary)" }}
+                    className={cn(
+                      "inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[10px] font-semibold uppercase",
+                      roleBadgeClasses(member.role)
+                    )}
                   >
-                    {member.role}
+                    {roleLabel(member.role)}
                   </span>
                   {pendingUserIds.has(member.id) ? (
                     <span className="inline-flex items-center rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-500">
@@ -256,11 +287,9 @@ export default async function TeamPage({
                       {member.is_active ? "Active" : "Inactive"}
                     </span>
                   )}
-                  {member.updated_at && (
-                    <span style={{ color: "var(--text-tertiary)" }}>
-                      {relativeTime(member.updated_at)}
-                    </span>
-                  )}
+                  <span style={{ color: "var(--text-tertiary)" }}>
+                    {relativeTime(member.lastSignInAt ?? member.updated_at)}
+                  </span>
                 </div>
                 <TeamMemberActions
                   userId={member.id}
@@ -272,10 +301,10 @@ export default async function TeamPage({
                   isActive={member.is_active}
                 />
               </div>
-            ))
-          )}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

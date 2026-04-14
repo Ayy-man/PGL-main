@@ -5,6 +5,12 @@ import { useRouter } from "next/navigation";
 import { confirmTenantOnboarding } from "@/app/actions/onboarding";
 import { ThemePicker } from "@/components/ui/theme-picker";
 import { LogoUpload } from "@/components/ui/logo-upload";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Loader2, AlertCircle } from "lucide-react";
 
 interface TenantData {
   id: string;
@@ -25,10 +31,14 @@ export default function ConfirmTenantPage() {
   // Form state
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
+  const [slugTouched, setSlugTouched] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [theme, setTheme] = useState("gold");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  // Dirty tracking for beforeunload
+  const [dirty, setDirty] = useState(false);
 
   useEffect(() => {
     async function fetchTenant() {
@@ -54,6 +64,33 @@ export default function ConfirmTenantPage() {
     fetchTenant();
   }, []);
 
+  // Slug auto-derive from name when slug not manually touched
+  useEffect(() => {
+    if (!slugTouched) {
+      setSlug(
+        name
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-|-$/g, "")
+      );
+    }
+  }, [name, slugTouched]);
+
+  // Beforeunload guard when form is dirty
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (dirty) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [dirty]);
+
+  const passwordMismatch =
+    confirmPassword.length > 0 && confirmPassword !== password;
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -75,6 +112,7 @@ export default function ConfirmTenantPage() {
       }
 
       if (result.success && result.slug) {
+        setDirty(false);
         router.push(`/${result.slug}/dashboard`);
       }
     } catch {
@@ -88,26 +126,14 @@ export default function ConfirmTenantPage() {
   if (loading) {
     return (
       <div className="max-w-lg mx-auto surface-card rounded-[14px] p-8">
-        <div className="space-y-4 animate-pulse">
-          <div
-            className="h-8 w-40 rounded"
-            style={{ background: "rgba(255,255,255,0.05)" }}
-          />
-          <div
-            className="h-4 w-64 rounded"
-            style={{ background: "rgba(255,255,255,0.03)" }}
-          />
+        <div className="space-y-4">
+          <Skeleton className="h-8 w-40 rounded-[8px]" />
+          <Skeleton className="h-4 w-64 rounded" />
           <div className="space-y-3 pt-4">
             {[...Array(5)].map((_, i) => (
               <div key={i} className="space-y-1.5">
-                <div
-                  className="h-3 w-24 rounded"
-                  style={{ background: "rgba(255,255,255,0.05)" }}
-                />
-                <div
-                  className="h-10 w-full rounded-[8px]"
-                  style={{ background: "rgba(255,255,255,0.03)" }}
-                />
+                <Skeleton className="h-3 w-24 rounded" />
+                <Skeleton className="h-10 w-full rounded-[8px]" />
               </div>
             ))}
           </div>
@@ -119,8 +145,21 @@ export default function ConfirmTenantPage() {
   // Fetch error state
   if (fetchError) {
     return (
-      <div className="max-w-lg mx-auto surface-card rounded-[14px] p-8 text-center">
-        <p className="text-sm text-destructive">{fetchError}</p>
+      <div className="max-w-lg mx-auto">
+        <EmptyState
+          variant="error"
+          icon={AlertCircle}
+          title="Couldn't load your organization"
+          description={fetchError}
+        >
+          <Button
+            variant="gold-solid"
+            size="sm"
+            onClick={() => window.location.reload()}
+          >
+            Try again
+          </Button>
+        </EmptyState>
       </div>
     );
   }
@@ -139,7 +178,11 @@ export default function ConfirmTenantPage() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-4"
+        onChange={() => setDirty(true)}
+      >
         {error && (
           <div className="rounded-lg bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
             {error}
@@ -148,73 +191,40 @@ export default function ConfirmTenantPage() {
 
         {/* Tenant Name */}
         <div className="space-y-1">
-          <label
-            htmlFor="name"
-            className="block text-sm font-medium"
-            style={{ color: "var(--text-primary-ds)" }}
-          >
-            Organization Name
-          </label>
-          <input
+          <Label htmlFor="name">Organization Name</Label>
+          <Input
             id="name"
             type="text"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => {
+              setName(e.target.value);
+              setDirty(true);
+            }}
             required
             disabled={submitting}
-            className="w-full rounded-[8px] border px-3 py-2 text-sm outline-none transition-colors disabled:opacity-50"
-            style={{
-              borderColor: "var(--border-default)",
-              backgroundColor: "var(--bg-input)",
-              color: "var(--text-primary-ds)",
-            }}
-            onFocus={(e) => {
-              e.currentTarget.style.borderColor = "var(--gold-primary)";
-              e.currentTarget.style.boxShadow =
-                "0 0 0 2px rgba(212,175,55,0.25)";
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.borderColor = "var(--border-default)";
-              e.currentTarget.style.boxShadow = "none";
-            }}
+            placeholder="Acme Corp"
           />
         </div>
 
         {/* Slug */}
         <div className="space-y-1">
-          <label
-            htmlFor="slug"
-            className="block text-sm font-medium"
-            style={{ color: "var(--text-primary-ds)" }}
-          >
-            URL Slug
-          </label>
-          <input
+          <Label htmlFor="slug">URL Slug</Label>
+          <Input
             id="slug"
             type="text"
             value={slug}
-            onChange={(e) => setSlug(e.target.value.toLowerCase())}
+            onChange={(e) => {
+              setSlug(e.target.value.toLowerCase());
+              setSlugTouched(true);
+              setDirty(true);
+            }}
             required
             pattern="^[a-z0-9][a-z0-9-]*[a-z0-9]$"
             disabled={submitting}
-            className="w-full rounded-[8px] border px-3 py-2 text-sm outline-none transition-colors disabled:opacity-50"
-            style={{
-              borderColor: "var(--border-default)",
-              backgroundColor: "var(--bg-input)",
-              color: "var(--text-primary-ds)",
-            }}
-            onFocus={(e) => {
-              e.currentTarget.style.borderColor = "var(--gold-primary)";
-              e.currentTarget.style.boxShadow =
-                "0 0 0 2px rgba(212,175,55,0.25)";
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.borderColor = "var(--border-default)";
-              e.currentTarget.style.boxShadow = "none";
-            }}
+            placeholder="acme-corp"
           />
           <p className="text-xs" style={{ color: "var(--text-secondary-ds)" }}>
-            Lowercase letters, numbers, and hyphens only
+            Your workspace URL: <strong>app.pgl.com/{slug || "your-org"}</strong>
           </p>
         </div>
 
@@ -226,7 +236,13 @@ export default function ConfirmTenantPage() {
           >
             Brand Theme
           </label>
-          <ThemePicker value={theme} onChange={setTheme} />
+          <ThemePicker
+            value={theme}
+            onChange={(v) => {
+              setTheme(v);
+              setDirty(true);
+            }}
+          />
           <input type="hidden" name="theme" value={theme} />
         </div>
 
@@ -248,7 +264,10 @@ export default function ConfirmTenantPage() {
             <LogoUpload
               tenantId={_tenant.id}
               currentUrl={logoUrl}
-              onUploaded={setLogoUrl}
+              onUploaded={(url) => {
+                setLogoUrl(url);
+                setDirty(true);
+              }}
             />
           </div>
         )}
@@ -261,37 +280,19 @@ export default function ConfirmTenantPage() {
 
         {/* New Password */}
         <div className="space-y-1">
-          <label
-            htmlFor="password"
-            className="block text-sm font-medium"
-            style={{ color: "var(--text-primary-ds)" }}
-          >
-            New Password
-          </label>
-          <input
+          <Label htmlFor="password">New Password</Label>
+          <Input
             id="password"
             type="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setDirty(true);
+            }}
             placeholder="Minimum 8 characters"
             required
             minLength={8}
             disabled={submitting}
-            className="w-full rounded-[8px] border px-3 py-2 text-sm outline-none transition-colors disabled:opacity-50 placeholder:opacity-40"
-            style={{
-              borderColor: "var(--border-default)",
-              backgroundColor: "var(--bg-input)",
-              color: "var(--text-primary-ds)",
-            }}
-            onFocus={(e) => {
-              e.currentTarget.style.borderColor = "var(--gold-primary)";
-              e.currentTarget.style.boxShadow =
-                "0 0 0 2px rgba(212,175,55,0.25)";
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.borderColor = "var(--border-default)";
-              e.currentTarget.style.boxShadow = "none";
-            }}
           />
           <p className="text-xs" style={{ color: "var(--text-secondary-ds)" }}>
             Choose a strong password with at least 8 characters
@@ -300,53 +301,36 @@ export default function ConfirmTenantPage() {
 
         {/* Confirm Password */}
         <div className="space-y-1">
-          <label
-            htmlFor="confirm_password"
-            className="block text-sm font-medium"
-            style={{ color: "var(--text-primary-ds)" }}
-          >
-            Confirm Password
-          </label>
-          <input
+          <Label htmlFor="confirm_password">Confirm Password</Label>
+          <Input
             id="confirm_password"
             type="password"
             value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            onChange={(e) => {
+              setConfirmPassword(e.target.value);
+              setDirty(true);
+            }}
             placeholder="Re-enter your password"
             required
             minLength={8}
             disabled={submitting}
-            className="w-full rounded-[8px] border px-3 py-2 text-sm outline-none transition-colors disabled:opacity-50 placeholder:opacity-40"
-            style={{
-              borderColor: "var(--border-default)",
-              backgroundColor: "var(--bg-input)",
-              color: "var(--text-primary-ds)",
-            }}
-            onFocus={(e) => {
-              e.currentTarget.style.borderColor = "var(--gold-primary)";
-              e.currentTarget.style.boxShadow =
-                "0 0 0 2px rgba(212,175,55,0.25)";
-            }}
-            onBlur={(e) => {
-              e.currentTarget.style.borderColor = "var(--border-default)";
-              e.currentTarget.style.boxShadow = "none";
-            }}
           />
+          {passwordMismatch && (
+            <p className="text-xs text-destructive">Passwords do not match</p>
+          )}
         </div>
 
         {/* Submit */}
-        <button
+        <Button
           type="submit"
-          disabled={submitting}
-          className="w-full rounded-[8px] border px-4 py-2.5 text-sm font-semibold transition-opacity disabled:opacity-50 mt-2"
-          style={{
-            backgroundColor: "var(--gold-bg-strong)",
-            borderColor: "var(--border-gold)",
-            color: "var(--gold-primary)",
-          }}
+          disabled={submitting || passwordMismatch}
+          variant="gold-solid"
+          size="lg"
+          className="w-full mt-2"
         >
-          {submitting ? "Confirming..." : "Confirm & Get Started"}
-        </button>
+          {submitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+          {submitting ? "Confirming" : "Confirm & Get Started"}
+        </Button>
       </form>
     </div>
   );

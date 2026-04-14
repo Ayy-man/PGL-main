@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { TENANT_THEMES, isValidTheme } from "@/lib/tenant-theme";
+import { Loader2, Eye, EyeOff, AlertCircle, Check } from "lucide-react";
 
 interface TenantBranding {
   name: string;
@@ -26,11 +27,14 @@ export default function LoginPage() {
 function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [branding, setBranding] = useState<TenantBranding | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  const message = searchParams.get("message");
 
   // Fetch tenant branding when tenant slug is in the URL
   useEffect(() => {
@@ -103,42 +107,44 @@ function LoginForm() {
   return (
     <div className="space-y-8">
       {/* Tenant branding or default PGL mark */}
-      {branding ? (
-        <div className="flex flex-col items-center gap-2">
-          {branding.logoUrl ? (
-            <img
-              src={branding.logoUrl}
-              alt={`${branding.name} logo`}
-              className="h-12 w-12 rounded-lg object-cover"
-              style={{ border: "1px solid var(--border-subtle)" }}
-            />
-          ) : (
-            <div
-              className="flex h-12 w-12 items-center justify-center rounded-lg font-serif font-bold text-lg"
-              style={{
-                background: isValidTheme(branding.theme)
-                  ? `linear-gradient(135deg, ${TENANT_THEMES[branding.theme].main}30, ${TENANT_THEMES[branding.theme].main}10)`
-                  : "var(--gold-bg-strong)",
-                color: isValidTheme(branding.theme)
-                  ? TENANT_THEMES[branding.theme].main
-                  : "var(--gold-primary)",
-                border: `1px solid ${isValidTheme(branding.theme) ? TENANT_THEMES[branding.theme].main + "40" : "var(--border-gold)"}`,
-              }}
-            >
-              {branding.name.charAt(0).toUpperCase()}
-            </div>
-          )}
-          <span className="text-xs" style={{ color: "var(--admin-text-secondary)" }}>
-            {branding.name}
-          </span>
-        </div>
-      ) : (
-        <div className="lg:hidden text-center">
-          <span className="font-serif text-lg font-bold tracking-tight text-gold">
-            PGL
-          </span>
-        </div>
-      )}
+      <div className="transition-opacity duration-300" style={{ opacity: branding !== null ? 1 : undefined }}>
+        {branding ? (
+          <div className="flex flex-col items-center gap-2">
+            {branding.logoUrl ? (
+              <img
+                src={branding.logoUrl}
+                alt={`${branding.name} logo`}
+                className="h-12 w-12 rounded-lg object-cover"
+                style={{ border: "1px solid var(--border-subtle)" }}
+              />
+            ) : (
+              <div
+                className="flex h-12 w-12 items-center justify-center rounded-lg font-serif font-bold text-lg"
+                style={{
+                  background: isValidTheme(branding.theme)
+                    ? `linear-gradient(135deg, ${TENANT_THEMES[branding.theme].main}30, ${TENANT_THEMES[branding.theme].main}10)`
+                    : "var(--gold-bg-strong)",
+                  color: isValidTheme(branding.theme)
+                    ? TENANT_THEMES[branding.theme].main
+                    : "var(--gold-primary)",
+                  border: `1px solid ${isValidTheme(branding.theme) ? TENANT_THEMES[branding.theme].main + "40" : "var(--border-gold)"}`,
+                }}
+              >
+                {branding.name.charAt(0).toUpperCase()}
+              </div>
+            )}
+            <span className="text-xs" style={{ color: "var(--admin-text-secondary)" }}>
+              {branding.name}
+            </span>
+          </div>
+        ) : (
+          <div className="lg:hidden text-center">
+            <span className="font-serif text-lg font-bold tracking-tight text-gold">
+              PGL
+            </span>
+          </div>
+        )}
+      </div>
 
       <div className="space-y-2">
         <h1 className="font-serif text-2xl font-bold tracking-tight">
@@ -150,8 +156,17 @@ function LoginForm() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
+        {/* Password reset success banner */}
+        {message === "password_reset_success" && (
+          <div className="rounded-lg bg-[var(--success-muted)] border border-[var(--success)]/20 px-4 py-3 text-sm text-[var(--success)] flex items-start gap-2">
+            <Check className="h-4 w-4 mt-0.5 shrink-0" />
+            Password updated. Sign in with your new password.
+          </div>
+        )}
+
         {error && (
-          <div className="rounded-lg bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
+          <div className="rounded-lg bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive flex items-start gap-2">
+            <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
             {error}
           </div>
         )}
@@ -166,6 +181,7 @@ function LoginForm() {
             placeholder="you@example.com"
             required
             disabled={loading}
+            autoFocus
             className="h-10 rounded-lg bg-background ring-offset-background placeholder:text-muted-foreground/60 focus-visible:ring-2 focus-visible:ring-gold/40 focus-visible:border-gold/50"
           />
         </div>
@@ -180,30 +196,45 @@ function LoginForm() {
               Forgot your password?
             </Link>
           </div>
-          <Input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter your password"
-            required
-            disabled={loading}
-            className="h-10 rounded-lg bg-background ring-offset-background placeholder:text-muted-foreground/60 focus-visible:ring-2 focus-visible:ring-gold/40 focus-visible:border-gold/50"
-          />
+          <div className="relative">
+            <Input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
+              required
+              disabled={loading}
+              className="h-10 rounded-lg bg-background ring-offset-background placeholder:text-muted-foreground/60 focus-visible:ring-2 focus-visible:ring-gold/40 focus-visible:border-gold/50 pr-10"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              className="absolute right-3 top-1/2 -translate-y-1/2"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? (
+                <EyeOff className="h-4 w-4 text-[var(--text-secondary-ds)]" />
+              ) : (
+                <Eye className="h-4 w-4 text-[var(--text-secondary-ds)]" />
+              )}
+            </button>
+          </div>
         </div>
 
         {branding && isValidTheme(branding.theme) && branding.theme !== "gold" ? (
-          <button
+          <Button
             type="submit"
             disabled={loading}
-            className="w-full h-11 rounded-lg text-sm font-semibold transition-opacity disabled:opacity-60 cursor-pointer"
+            size="lg"
+            className="w-full text-white"
             style={{
               background: TENANT_THEMES[branding.theme].main,
-              color: "#fff",
             }}
           >
-            {loading ? "Signing in..." : "Sign In"}
-          </button>
+            {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+            {loading ? "Signing in" : "Sign in"}
+          </Button>
         ) : (
           <Button
             type="submit"
@@ -212,7 +243,8 @@ function LoginForm() {
             size="lg"
             className="w-full"
           >
-            {loading ? "Signing in..." : "Sign In"}
+            {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+            {loading ? "Signing in" : "Sign in"}
           </Button>
         )}
       </form>
