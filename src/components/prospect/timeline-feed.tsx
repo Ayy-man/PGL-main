@@ -28,6 +28,7 @@ import {
   Loader2,
 } from "lucide-react";
 import type { ProspectActivity, ActivityCategory, EventType } from "@/types/activity";
+import { EmptyState } from "@/components/ui/empty-state";
 
 /* ------------------------------------------------------------------ */
 /*  Icon + color maps                                                  */
@@ -530,26 +531,11 @@ export function TimelineFeed({
 
   if (filteredEvents.length === 0) {
     return (
-      <div className="py-8 text-center">
-        <div
-          className="h-12 w-12 rounded-full flex items-center justify-center mx-auto mb-3"
-          style={{
-            background: "rgba(212,175,55,0.08)",
-            border: "1px solid rgba(212,175,55,0.15)",
-          }}
-        >
-          <Activity className="h-5 w-5" style={{ color: "var(--gold-primary)" }} />
-        </div>
-        <p className="font-serif text-sm font-semibold" style={{ color: "var(--text-foreground, rgba(232,228,220,0.9))" }}>
-          No activity yet
-        </p>
-        <p
-          className="text-xs mt-1 max-w-xs mx-auto"
-          style={{ color: "var(--text-secondary, rgba(232,228,220,0.5))" }}
-        >
-          Profile views, outreach, and notes from your team will appear here.
-        </p>
-      </div>
+      <EmptyState
+        icon={Activity}
+        title="No activity yet"
+        description="Actions on this prospect will appear here."
+      />
     );
   }
 

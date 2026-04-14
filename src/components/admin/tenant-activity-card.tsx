@@ -31,6 +31,7 @@ import {
   Activity,
 } from "lucide-react";
 import { ACTION_TYPES, type ActionType } from "@/lib/activity-logger";
+import { EmptyState } from "@/components/ui/empty-state";
 
 // ── Types ─────────────────────────────────────────────────────────
 
@@ -402,11 +403,7 @@ function ActivityModal({
               </p>
             </div>
           ) : entries.length === 0 ? (
-            <div className="flex h-64 items-center justify-center">
-              <p style={{ color: "var(--admin-text-secondary)" }}>
-                No activity found
-              </p>
-            </div>
+            <EmptyState icon={Activity} title="No activity found" description="No activity recorded for this period." />
           ) : (
             <table className="w-full text-sm">
               <thead>
@@ -644,14 +641,7 @@ export function TenantActivityCard({
         {loading ? (
           <ActivitySkeletonRows />
         ) : entries.length === 0 ? (
-          <div className="flex items-center justify-center py-6">
-            <p
-              className="text-sm"
-              style={{ color: "var(--admin-text-secondary)" }}
-            >
-              No activity yet
-            </p>
-          </div>
+          <EmptyState icon={Activity} title="No activity found" description="No activity recorded for this period." />
         ) : (
           <div>
             {entries.map((entry, i) => (

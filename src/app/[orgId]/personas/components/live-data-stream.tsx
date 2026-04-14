@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { type LucideIcon, Zap, TrendingUp, AlertCircle, Users, Search, FileDown, UserPlus, Activity } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 
 interface ActivityEntry {
   id: string;
@@ -144,24 +145,7 @@ export function LiveDataStream() {
             ))}
           </div>
         ) : entries.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 px-5 text-center">
-            <Activity
-              className="h-8 w-8 mb-3"
-              style={{ color: "var(--text-tertiary)" }}
-            />
-            <p
-              className="text-[13px]"
-              style={{ color: "var(--text-tertiary)" }}
-            >
-              No activity yet
-            </p>
-            <p
-              className="text-[11px] mt-1"
-              style={{ color: "var(--text-tertiary)" }}
-            >
-              Events will appear as you use the platform
-            </p>
-          </div>
+          <EmptyState icon={Activity} title="No activity yet" description="Saved searches and enrichment events will stream here." />
         ) : (
           entries.map((entry) => {
             const config = ACTION_CONFIG[entry.action_type] || DEFAULT_CONFIG;

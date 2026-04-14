@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
+import { EmptyState } from "@/components/ui/empty-state";
+import { BarChart3 } from "lucide-react";
 import {
   FunnelChart as RechartsFunnelChart,
   Funnel,
@@ -68,9 +70,7 @@ export function FunnelChart({ data }: FunnelChartProps) {
     return (
       <div className="surface-admin-card p-6">
         <p className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: "var(--admin-text-secondary)" }}>Search-to-Export Funnel (30d)</p>
-        <div className="h-[200px] md:h-[280px] flex items-center justify-center">
-          <p className="text-xs text-muted-foreground">No activity yet. Search and export prospects to see funnel data.</p>
-        </div>
+        <EmptyState icon={BarChart3} title="No funnel data yet" description="Search and export prospects to see funnel data." />
       </div>
     );
   }

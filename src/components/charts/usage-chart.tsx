@@ -10,6 +10,8 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import { EmptyState } from "@/components/ui/empty-state";
+import { LineChart as LineChartIcon } from "lucide-react";
 
 interface UsageChartData {
   date: string;
@@ -38,8 +40,8 @@ function formatDate(dateStr: string) {
 export function UsageChart({ data }: UsageChartProps) {
   if (data.length === 0) {
     return (
-      <div className="surface-card flex h-[200px] md:h-[400px] items-center justify-center rounded-[14px] p-4 md:p-6">
-        <p className="text-muted-foreground">No data available for this period</p>
+      <div className="surface-card rounded-[14px] p-4 md:p-6">
+        <EmptyState icon={LineChartIcon} title="No data this period" description="Select a wider date range or check back after activity." />
       </div>
     );
   }

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { EmptyState } from "@/components/ui/empty-state";
+import { BarChart3 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -504,11 +506,7 @@ export function PlatformPulseModal({
                 </div>
               ))
             ) : (
-              <div className="flex items-center justify-center h-16">
-                <p className="text-xs" style={{ color: "var(--admin-text-secondary)" }}>
-                  No activity data
-                </p>
-              </div>
+              <EmptyState icon={BarChart3} title="No activity data" description="No activity recorded for this timeframe." />
             )}
           </div>
         </div>

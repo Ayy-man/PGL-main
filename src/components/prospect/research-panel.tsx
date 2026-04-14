@@ -2,7 +2,8 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Clock, SendHorizontal, ChevronDown, ChevronUp, Globe, Loader2, CheckCircle2 } from "lucide-react";
+import { Clock, SendHorizontal, ChevronDown, ChevronUp, Globe, Loader2, CheckCircle2, SearchX } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import type { ScrapbookCard } from "@/types/research";
 import { ResearchResultCard } from "./research-result-card";
 
@@ -640,20 +641,11 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
 
         {/* Empty state: no messages, no suggestions, not searching */}
         {messages.length === 0 && suggestions.length === 0 && !isSearching && (
-          <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-            <div
-              className="w-12 h-12 rounded-full flex items-center justify-center mb-4"
-              style={{ background: "rgba(212,175,55,0.1)" }}
-            >
-              <SendHorizontal className="w-5 h-5" style={{ color: "var(--gold-primary, #d4af37)" }} />
-            </div>
-            <p className="font-sans text-sm mb-1" style={{ color: "var(--text-primary, #e8e4dc)" }}>
-              Research {prospect.first_name}
-            </p>
-            <p className="font-sans text-xs max-w-[280px]" style={{ color: "var(--text-tertiary, rgba(232,228,220,0.4))" }}>
-              Ask about their career, investments, recent news, SEC filings, or company activities.
-            </p>
-          </div>
+          <EmptyState
+            icon={SearchX}
+            title={`Research ${prospect.first_name}`}
+            description="Ask about their career, investments, recent news, SEC filings, or company activities."
+          />
         )}
 
         {/* Chat Messages */}
