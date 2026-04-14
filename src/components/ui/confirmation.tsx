@@ -35,8 +35,8 @@ const Confirmation = React.forwardRef<HTMLDivElement, ConfirmationProps>(
       <div
         ref={ref}
         className={cn(
-          "rounded-xl border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.03)] p-4 flex flex-col gap-3",
-          isDestructive && "border-[rgba(239,68,68,0.2)] bg-[rgba(239,68,68,0.03)]",
+          "rounded-xl border border-border-subtle bg-bg-elevated p-4 flex flex-col gap-3",
+          isDestructive && "border-destructive/20 bg-destructive/5",
           className
         )}
         {...props}
@@ -83,9 +83,9 @@ const ConfirmationIcon = React.forwardRef<HTMLDivElement, ConfirmationIconProps>
         ref={ref}
         className={cn(
           "flex h-9 w-9 items-center justify-center rounded-full",
-          variant === "warning" && "bg-[rgba(234,179,8,0.12)] text-yellow-400",
-          variant === "info" && "bg-[rgba(59,130,246,0.12)] text-blue-400",
-          variant === "destructive" && "bg-[rgba(239,68,68,0.12)] text-red-400",
+          variant === "warning" && "bg-warning-muted text-warning",
+          variant === "info" && "bg-info-muted text-info",
+          variant === "destructive" && "bg-destructive/15 text-destructive",
           className
         )}
         {...props}
