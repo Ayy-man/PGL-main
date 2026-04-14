@@ -4,6 +4,11 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Trash2, Download, Loader2 } from "lucide-react";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 import { deleteListAction } from "../actions";
 import type { List } from "@/lib/lists/types";
 import { useState, useEffect } from "react";
@@ -18,9 +23,10 @@ import {
 
 interface ListGridProps {
   lists: List[];
+  canEdit?: boolean;
 }
 
-export function ListGrid({ lists: serverLists }: ListGridProps) {
+export function ListGrid({ lists: serverLists, canEdit = true }: ListGridProps) {
   const params = useParams();
   const orgId = params.orgId as string;
   const [lists, setLists] = useState(serverLists);
@@ -140,15 +146,34 @@ export function ListGrid({ lists: serverLists }: ListGridProps) {
             </Button>
 
             {/* Delete button */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-muted-foreground hover:text-destructive cursor-pointer"
-              onClick={() => handleRequestDelete({ id: list.id, name: list.name })}
-              aria-label="Delete list"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </Button>
+            {canEdit ? (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-muted-foreground hover:text-destructive cursor-pointer"
+                onClick={() => handleRequestDelete({ id: list.id, name: list.name })}
+                aria-label="Delete list"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span tabIndex={0}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground opacity-40 cursor-not-allowed"
+                      disabled
+                      aria-label="Delete list (not available)"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent>Assistants cannot delete lists.</TooltipContent>
+              </Tooltip>
+            )}
 
             {/* View button */}
             <Button

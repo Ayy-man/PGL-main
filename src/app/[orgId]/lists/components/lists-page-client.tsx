@@ -6,12 +6,19 @@ import { ListGrid } from "./list-grid";
 import { CreateListDialog } from "./create-list-dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { List as ListIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 
 interface ListsPageClientProps {
   lists: List[];
+  canEdit?: boolean;
 }
 
-export function ListsPageClient({ lists: serverLists }: ListsPageClientProps) {
+export function ListsPageClient({ lists: serverLists, canEdit = true }: ListsPageClientProps) {
   const [lists, setLists] = useState(serverLists);
 
   useEffect(() => { setLists(serverLists); }, [serverLists]);
@@ -31,7 +38,20 @@ export function ListsPageClient({ lists: serverLists }: ListsPageClientProps) {
               : "Organize prospects into targeted groups"}
           </p>
         </div>
-        <CreateListDialog onCreated={handleListCreated} />
+        {canEdit ? (
+          <CreateListDialog onCreated={handleListCreated} />
+        ) : (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span tabIndex={0}>
+                <Button disabled variant="gold-solid" size="sm">
+                  Create List
+                </Button>
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>Only agents and admins can create lists.</TooltipContent>
+          </Tooltip>
+        )}
       </div>
 
       {lists.length === 0 ? (
@@ -40,10 +60,23 @@ export function ListsPageClient({ lists: serverLists }: ListsPageClientProps) {
           title="No lists yet"
           description="Create your first list to start organizing prospects for outreach."
         >
-          <CreateListDialog onCreated={handleListCreated} />
+          {canEdit ? (
+            <CreateListDialog onCreated={handleListCreated} />
+          ) : (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span tabIndex={0}>
+                  <Button disabled variant="gold-solid" size="sm">
+                    Create List
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>Only agents and admins can create lists.</TooltipContent>
+            </Tooltip>
+          )}
         </EmptyState>
       ) : (
-        <ListGrid lists={lists} />
+        <ListGrid lists={lists} canEdit={canEdit} />
       )}
     </div>
   );
