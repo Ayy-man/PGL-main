@@ -30,7 +30,7 @@ const Loader = React.forwardRef<HTMLDivElement, LoaderProps>(
         <div
           ref={ref}
           className={cn(
-            "rounded-full border-2 border-[rgba(255,255,255,0.1)] border-t-[rgba(212,175,55,0.7)] animate-spin",
+            "rounded-full border-2 border-[rgba(255,255,255,0.1)] border-t-[var(--gold-text)] animate-spin",
             size === "sm" && "h-4 w-4",
             size === "md" && "h-5 w-5",
             size === "lg" && "h-6 w-6",
@@ -72,7 +72,7 @@ const Loader = React.forwardRef<HTMLDivElement, LoaderProps>(
       >
         <span
           className={cn(
-            "rounded-full bg-[rgba(212,175,55,0.6)] animate-pulse",
+            "rounded-full bg-[var(--gold-text)] animate-pulse",
             dotSize[size]
           )}
         />
