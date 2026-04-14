@@ -69,12 +69,7 @@ export function TagInput({
         {value.map((tag) => (
           <span
             key={tag}
-            className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium"
-            style={{
-              background: "rgba(212,175,55,0.15)",
-              color: "#d4af37",
-              border: "1px solid rgba(212,175,55,0.3)",
-            }}
+            className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium bg-[var(--gold-bg-strong)] text-[var(--gold-primary)] border border-[var(--border-gold)]"
           >
             {tag}
             <button
@@ -112,27 +107,16 @@ export function TagInput({
       {/* Suggestions dropdown */}
       {showSuggestions && input && filteredSuggestions.length > 0 && (
         <div
-          className="absolute z-50 mt-1 w-full rounded-md border shadow-lg max-h-[200px] overflow-y-auto"
-          style={{
-            background: "#1a1a1a",
-            borderColor: "var(--border-default, hsl(var(--border)))",
-          }}
+          className="absolute z-50 mt-1 w-full rounded-md border border-[var(--border-default,hsl(var(--border)))] bg-[var(--bg-floating-elevated)] shadow-lg max-h-[200px] overflow-y-auto"
         >
           {filteredSuggestions.slice(0, 8).map((suggestion) => (
             <button
               key={suggestion}
               type="button"
-              className="w-full text-left px-3 py-2 text-sm transition-colors"
-              style={{ color: "var(--text-primary-ds, hsl(var(--popover-foreground)))" }}
+              className="w-full text-left px-3 py-2 text-sm transition-colors hover:bg-[var(--gold-bg)] hover:text-[var(--gold-primary)]"
               onMouseDown={(e) => {
                 e.preventDefault();
                 addTag(suggestion);
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.08)";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.background = "transparent";
               }}
             >
               {suggestion}
