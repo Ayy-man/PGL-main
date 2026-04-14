@@ -1,7 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Loader2, RefreshCw, ShieldAlert } from "lucide-react";
+import { RefreshCw, ShieldAlert } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 import { IntegrationCard } from "@/components/admin/api-keys/integration-card";
 import type { IntegrationStatus, IntegrationId } from "@/types/admin-api-keys";
 
@@ -73,22 +76,24 @@ export default function AdminApiKeysPage() {
             Secret values are never exposed — masked previews only.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => fetchData(true)}
-          disabled={refreshing || loading}
-          className="inline-flex items-center gap-2 rounded-[8px] px-3 py-2 text-xs font-semibold transition-colors disabled:opacity-50"
-          style={{
-            background: "color-mix(in oklch, var(--gold-primary) 12%, transparent)",
-            color: "var(--gold-text)",
-            border: "1px solid color-mix(in oklch, var(--gold-primary) 30%, transparent)",
-          }}
-        >
-          <RefreshCw
-            className={`h-3.5 w-3.5 ${refreshing ? "animate-spin" : ""}`}
-          />
-          Refresh
-        </button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              onClick={() => fetchData(true)}
+              disabled={refreshing || loading}
+              className={cn(
+                "p-2 rounded-[8px] transition-colors duration-200 text-[var(--text-secondary-ds)]",
+                "hover:text-[var(--gold-primary)] hover:bg-[var(--gold-bg)]",
+                "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--gold-primary)]/40",
+                "disabled:opacity-50 disabled:cursor-not-allowed"
+              )}
+            >
+              <RefreshCw className={cn("h-4 w-4", refreshing && "animate-spin")} />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>Refresh</TooltipContent>
+        </Tooltip>
       </div>
 
       {/* Security notice */}
@@ -123,13 +128,33 @@ export default function AdminApiKeysPage() {
         </div>
       </div>
 
-      {/* Loading state */}
+      {/* Loading state — skeleton cards matching grid */}
       {loading && integrations === null && (
-        <div className="flex items-center justify-center py-16">
-          <Loader2
-            className="h-6 w-6 animate-spin"
-            style={{ color: "var(--gold-primary)" }}
-          />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div
+              key={i}
+              className="rounded-[12px] p-5 flex flex-col gap-4"
+              style={{ background: "var(--bg-elevated)", border: "1px solid var(--border-subtle)" }}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex flex-col gap-1.5 flex-1">
+                  <Skeleton className="h-2.5 w-20" />
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-full" />
+                </div>
+                <Skeleton className="h-5 w-16 rounded-full shrink-0" />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-3 w-3/4" />
+              </div>
+              <div className="flex items-center justify-between">
+                <Skeleton className="h-5 w-20 rounded-full" />
+                <Skeleton className="h-3 w-10" />
+              </div>
+            </div>
+          ))}
         </div>
       )}
 

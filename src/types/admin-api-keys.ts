@@ -30,6 +30,7 @@ export interface IntegrationStatus {
   hasMockMode: boolean;       // only apollo today
   mockModeActive: boolean;    // resolved from platform_config
   supportsTest: boolean;      // whether a test endpoint exists
+  latestTestedAt?: string | null; // ISO timestamp of last successful test
 }
 
 /**

@@ -139,15 +139,30 @@ export function IntegrationCard({ integration, onMockModeChange }: IntegrationCa
             key={envVar.name}
             className="flex items-center justify-between gap-2 text-xs"
           >
-            <code
-              className="font-mono truncate"
-              style={{ color: "var(--text-secondary-ds)" }}
-              title={envVar.name}
-            >
-              {envVar.name}
-            </code>
+            <div className="flex items-center gap-1.5 min-w-0">
+              {envVar.configured ? (
+                <CheckCircle2
+                  className="h-3.5 w-3.5 shrink-0"
+                  style={{ color: "var(--success)" }}
+                  aria-label="Configured"
+                />
+              ) : (
+                <XCircle
+                  className="h-3.5 w-3.5 shrink-0"
+                  style={{ color: "oklch(0.62 0.19 22)" }}
+                  aria-label="Not configured"
+                />
+              )}
+              <code
+                className="font-mono truncate"
+                style={{ color: "var(--text-secondary-ds)" }}
+                title={envVar.name}
+              >
+                {envVar.name}
+              </code>
+            </div>
             <span
-              className="font-mono text-[11px]"
+              className="font-mono text-[11px] shrink-0"
               style={{
                 color: envVar.configured
                   ? "var(--gold-text)"
@@ -159,6 +174,13 @@ export function IntegrationCard({ integration, onMockModeChange }: IntegrationCa
           </div>
         ))}
       </div>
+
+      {/* Latest tested timestamp */}
+      {integration.latestTestedAt && (
+        <p className="text-[10px]" style={{ color: "var(--text-ghost)" }}>
+          Last tested: {new Date(integration.latestTestedAt).toLocaleString()}
+        </p>
+      )}
 
       {/* Mock mode toggle (Apollo only) */}
       {integration.hasMockMode && (
