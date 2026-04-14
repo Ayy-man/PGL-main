@@ -451,7 +451,7 @@ Plans:
 **Goal:** Close the 242 findings from the 5-agent UX audit (`.planning/audits/ux-polish-2026-04-14/`) so every role — Super Admin, Tenant Admin, Agent, Assistant — feels consistently luxury-grade. Ship in 5 PRs per the audit's suggested order: (1) 10 keystone primitive edits that cascade across the app (toast auto-dismiss + limit, `<Toaster/>` + `<TooltipProvider>` mounts, `Button` default → `gold-solid`, Toast/Tooltip/DropdownMenu restyle to `--bg-floating-elevated`, Input/Textarea/Select focus → `var(--gold-bg-strong)`, Badge/Button gold → token-based, `EnrichmentStatusDots` rollout + `animate-pulse`, `src/app/not-found.tsx`, Checkbox + Table selected-row → gold) that alone closes ~60 findings; (2) destructive-action safety sweep onto the existing `<Confirmation>` primitive (native `confirm()` + unguarded delete flows across search, lists, personas, team, system actions, API-key rotation); (3) Assistant read-only role gating threaded through BulkActionsBar + ProspectSlideOver + ListGrid + PersonaCardGrid + Notes (today Assistants see every write button and 403 on click); (4) tenant-theme leak fix — replace hard-coded `#d4af37` / `rgba(212,175,55,*)` with `var(--gold-*)` tokens in 9 primitive files so sapphire/emerald/coral tenants theme correctly; (5) per-screen polish working through the five per-area audit files. No architectural changes, no new features, no scope additions — polish only.
 **Requirements:** PHASE-39-K1 through PHASE-39-K10, PHASE-39-T1-DESTRUCTIVE-SWEEP, PHASE-39-T2-ROLE-GATING, PHASE-39-T3-THEME-LEAK, PHASE-39-T5-LOADING-SHAPE, PHASE-39-T6-SAAS-TELLS, PHASE-39-SCREEN-ADMIN, PHASE-39-SCREEN-AUTH, PHASE-39-SCREEN-AGENT, PHASE-39-SCREEN-SHELL, PHASE-39-SCREEN-TOKENS
 **Depends on:** Phase 38
-**Plans:** 8/9 plans executed
+**Plans:** 9/9 plans complete
 
 Plans:
 - [x] 39-01-PLAN.md — Keystone primitives (K1-K10): toast timing + Toaster admin mount + TooltipProvider + Button default gold-solid + floating-elevated surfaces + focus-shadow token + badge/button gold-var + EnrichmentStatusDots rollout + not-found.tsx + checkbox/table selected gold
@@ -462,7 +462,7 @@ Plans:
 - [x] 39-06-PLAN.md — Auth + onboarding + team + settings polish (02-tenant-admin-auth.md residuals): Loader2 spinners, ambient glow, password strength, Input primitive, team Promise.all, role differentiation
 - [x] 39-07-PLAN.md — Agent workflow polish (03-agent-workflow.md + T5 loading + T6 saas-tells): Checkbox indeterminate, TagInput, Realtime re-enrich, user-name resolution, count-up, 3 new loading.tsx
 - [x] 39-08-PLAN.md — Shell cross-cutting polish (04-shell-cross-cutting.md): sidebar unification, NavItems gold pill + Bookmark, TopBar avatar Link, CommandSearch onOpenAutoFocus, Dialog/Sheet backdrop-blur + font-serif, error-page consolidation, .focus-ring-gold utility
-- [ ] 39-09-PLAN.md — Design system typography + token cleanup (05-design-system.md residuals): Button motion, Input bg-input-custom, Select gold focus, Badge semantic tokens, Shimmer shimmer-skeleton, Dialog inline-style, color leak cleanup, EmptyState batch rollout (10 sites)
+- [x] 39-09-PLAN.md — Design system typography + token cleanup (05-design-system.md residuals): Button motion, Input bg-input-custom, Select gold focus, Badge semantic tokens, Shimmer shimmer-skeleton, Dialog inline-style, color leak cleanup, EmptyState batch rollout (10 sites)
 
 ---
 
