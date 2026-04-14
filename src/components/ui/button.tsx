@@ -33,7 +33,7 @@ const buttonVariants = cva(
       },
     },
     defaultVariants: {
-      variant: "default",
+      variant: "gold-solid",
       size: "default",
     },
   }
