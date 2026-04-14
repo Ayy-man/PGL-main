@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { DM_Sans, Cormorant_Garamond, JetBrains_Mono } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { SessionGuard } from "@/components/auth/session-guard";
 import "./globals.css";
 
@@ -50,7 +51,9 @@ export default function RootLayout({
         <div className="noise-overlay" aria-hidden="true" />
         <NuqsAdapter>
           <SessionGuard />
-          {children}
+          <TooltipProvider delayDuration={250} skipDelayDuration={500}>
+            {children}
+          </TooltipProvider>
         </NuqsAdapter>
         <Toaster />
       </body>
