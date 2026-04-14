@@ -381,6 +381,7 @@ Recent decisions affecting current work:
 - Phase 26 added: Targeted Multi-Source Search — Intent-routed channels (SEC EDGAR, ATTOM property, NewsAPI, Proxycurl, FAA Registry, Crunchbase) alongside Exa. LLM classifies query intent → fires specialized APIs in parallel → merges/deduplicates/ranks results into unified scrapbook feed.
 - Phase 28 added: Saved Search Incremental Refresh, Dismiss, and Delete
 - Phase 36 added: Fix NLP search flow issues (25 bugs from 5-agent audit)
+- Phase 38 added: Issue report timeline audit log — append-only `issue_report_events` table + right-rail timeline card beside Admin Actions on the admin report detail page, with close-requires-note UX and backfill of `reported`/`status_changed→resolved` events for existing rows
 
 ### Pending Todos
 
