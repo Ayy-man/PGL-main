@@ -8,6 +8,13 @@ import { deleteListAction } from "../actions";
 import type { List } from "@/lib/lists/types";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import {
+  Confirmation,
+  ConfirmationIcon,
+  ConfirmationTitle,
+  ConfirmationDescription,
+} from "@/components/ui/confirmation";
 
 interface ListGridProps {
   lists: List[];
@@ -18,24 +25,32 @@ export function ListGrid({ lists: serverLists }: ListGridProps) {
   const orgId = params.orgId as string;
   const [lists, setLists] = useState(serverLists);
   const [exportingId, setExportingId] = useState<string | null>(null);
+  const [pendingDeleteList, setPendingDeleteList] = useState<{ id: string; name: string } | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => { setLists(serverLists); }, [serverLists]);
 
-  const handleDelete = async (listId: string) => {
-    if (!confirm("Are you sure you want to delete this list? This cannot be undone.")) {
-      return;
-    }
+  const handleRequestDelete = (list: { id: string; name: string }) => {
+    setPendingDeleteList({ id: list.id, name: list.name });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!pendingDeleteList) return;
+    setDeleting(true);
 
     const previousLists = lists;
-    setLists(prev => prev.filter(l => l.id !== listId));
+    setLists(prev => prev.filter(l => l.id !== pendingDeleteList.id));
     toast({ title: "List deleted" });
 
-    const result = await deleteListAction(listId);
+    const result = await deleteListAction(pendingDeleteList.id);
     if (!result.success) {
       setLists(previousLists);
       toast({ title: "Delete failed", description: result.error || "Could not delete list.", variant: "destructive" });
     }
+
+    setDeleting(false);
+    setPendingDeleteList(null);
   };
 
   const handleExport = async (listId: string, listName: string) => {
@@ -129,7 +144,7 @@ export function ListGrid({ lists: serverLists }: ListGridProps) {
               variant="ghost"
               size="icon"
               className="h-8 w-8 text-muted-foreground hover:text-destructive cursor-pointer"
-              onClick={() => handleDelete(list.id)}
+              onClick={() => handleRequestDelete({ id: list.id, name: list.name })}
               aria-label="Delete list"
             >
               <Trash2 className="h-3.5 w-3.5" />
@@ -152,6 +167,25 @@ export function ListGrid({ lists: serverLists }: ListGridProps) {
           </div>
         </div>
       ))}
+
+      <Dialog open={!!pendingDeleteList} onOpenChange={(o) => !o && setPendingDeleteList(null)}>
+        <DialogContent>
+          <Confirmation
+            isDestructive
+            confirmLabel="Delete list"
+            cancelLabel="Cancel"
+            onConfirm={handleConfirmDelete}
+            onCancel={() => setPendingDeleteList(null)}
+            isLoading={deleting}
+          >
+            <ConfirmationIcon variant="destructive" />
+            <ConfirmationTitle>Delete {pendingDeleteList?.name}?</ConfirmationTitle>
+            <ConfirmationDescription>
+              This permanently removes the list and its member snapshot. Enriched prospect records remain, but list membership is lost.
+            </ConfirmationDescription>
+          </Confirmation>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
