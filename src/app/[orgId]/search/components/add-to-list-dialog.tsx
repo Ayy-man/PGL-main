@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { ListPlus } from "lucide-react";
 import Link from "next/link";
+import { EmptyState } from "@/components/ui/empty-state";
 
 interface AddToListDialogProps {
   prospect: ApolloPerson;
@@ -104,15 +105,11 @@ export function AddToListDialog({
 
         <div className="py-4">
           {lists.length === 0 ? (
-            <div className="text-center py-8 border-2 border-dashed rounded-lg">
-              <ListPlus className="h-8 w-8 text-muted-foreground/50 mx-auto mb-2" />
-              <p className="text-sm text-muted-foreground mb-3">
-                No lists yet
-              </p>
-              <Button size="sm" asChild>
+            <EmptyState icon={ListPlus} title="No lists yet">
+              <Button variant="gold" size="sm" asChild>
                 <Link href={`/${orgId}/lists`}>Create your first list</Link>
               </Button>
-            </div>
+            </EmptyState>
           ) : (
             <div className="space-y-3 max-h-[300px] overflow-y-auto">
               {lists.map((list) => (

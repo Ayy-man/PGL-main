@@ -17,7 +17,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
+import { ArrowUpDown, ArrowUp, ArrowDown, Search } from "lucide-react";
 import { DataTablePagination } from "./data-table-pagination";
 
 interface DataTableProps<TData, TValue> {
@@ -129,7 +130,7 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="hover:bg-muted/50 transition-colors"
+                  className="transition-colors"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
@@ -143,11 +144,8 @@ export function DataTable<TData, TValue>({
               ))
             ) : (
               <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center text-muted-foreground"
-                >
-                  No results.
+                <TableCell colSpan={columns.length} className="p-0">
+                  <EmptyState icon={Search} title="No results" description="Try adjusting filters or search terms." />
                 </TableCell>
               </TableRow>
             )}
