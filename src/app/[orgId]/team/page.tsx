@@ -197,6 +197,7 @@ export default async function TeamPage({
                           orgId={orgId}
                           currentUserId={user.id}
                           memberRole={member.role}
+                          memberEmail={member.email ?? undefined}
                           isPending={pendingUserIds.has(member.id)}
                           isActive={member.is_active}
                         />
@@ -266,6 +267,7 @@ export default async function TeamPage({
                   orgId={orgId}
                   currentUserId={user.id}
                   memberRole={member.role}
+                  memberEmail={member.email ?? undefined}
                   isPending={pendingUserIds.has(member.id)}
                   isActive={member.is_active}
                 />
