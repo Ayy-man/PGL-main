@@ -2,6 +2,11 @@
 
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Mail, Phone, X, Sparkles, Loader2, RefreshCw, ListPlus, ExternalLink, Shield } from "lucide-react";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -44,6 +49,7 @@ interface ProspectSlideOverProps {
   onEnrich?: (prospectId: string) => void;
   onAddToList?: (prospectId: string) => void;
   fromQuery?: string;
+  canEdit?: boolean;
 }
 
 export function ProspectSlideOver({
@@ -55,6 +61,7 @@ export function ProspectSlideOver({
   onEnrich,
   onAddToList,
   fromQuery = "?from=search",
+  canEdit = true,
 }: ProspectSlideOverProps) {
   const [reEnriching, setReEnriching] = useState(false);
   const [enrichedData, setEnrichedData] = useState<EnrichedData | null>(null);
@@ -335,26 +342,50 @@ export function ProspectSlideOver({
 
                 <div className="flex items-center gap-4">
                   {onAddToList && (
-                    <button
-                      onClick={() => onAddToList(prospect.id)}
-                      className="flex items-center gap-2 text-xs transition-colors"
-                      style={{ color: "var(--gold-primary)" }}
-                    >
-                      <ListPlus className="h-3 w-3" />
-                      Add to List
-                    </button>
+                    canEdit ? (
+                      <button
+                        onClick={() => onAddToList(prospect.id)}
+                        className="flex items-center gap-2 text-xs transition-colors"
+                        style={{ color: "var(--gold-primary)" }}
+                      >
+                        <ListPlus className="h-3 w-3" />
+                        Add to List
+                      </button>
+                    ) : (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span tabIndex={0} className="flex items-center gap-2 text-xs opacity-40 cursor-not-allowed" style={{ color: "var(--gold-primary)" }}>
+                            <ListPlus className="h-3 w-3" />
+                            Add to List
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>Assistants cannot add prospects to lists.</TooltipContent>
+                      </Tooltip>
+                    )
                   )}
-                  <button
-                    onClick={handleReEnrich}
-                    disabled={reEnriching}
-                    className="flex items-center gap-2 text-xs transition-colors disabled:opacity-50"
-                    style={{ color: "var(--text-tertiary, rgba(232,228,220,0.4))" }}
-                  >
-                    {reEnriching
-                      ? <Loader2 className="h-3 w-3 animate-spin" />
-                      : <RefreshCw className="h-3 w-3" />}
-                    {reEnriching ? "Re-enriching\u2026" : "Re-enrich"}
-                  </button>
+                  {canEdit ? (
+                    <button
+                      onClick={handleReEnrich}
+                      disabled={reEnriching}
+                      className="flex items-center gap-2 text-xs transition-colors disabled:opacity-50"
+                      style={{ color: "var(--text-tertiary, rgba(232,228,220,0.4))" }}
+                    >
+                      {reEnriching
+                        ? <Loader2 className="h-3 w-3 animate-spin" />
+                        : <RefreshCw className="h-3 w-3" />}
+                      {reEnriching ? "Re-enriching\u2026" : "Re-enrich"}
+                    </button>
+                  ) : (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span tabIndex={0} className="flex items-center gap-2 text-xs opacity-40 cursor-not-allowed" style={{ color: "var(--text-tertiary, rgba(232,228,220,0.4))" }}>
+                          <RefreshCw className="h-3 w-3" />
+                          Re-enrich
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>Assistants cannot re-enrich prospects.</TooltipContent>
+                    </Tooltip>
+                  )}
                 </div>
 
                 {/* View Full Profile — full-width gold button at bottom */}
@@ -424,17 +455,38 @@ export function ProspectSlideOver({
                     Unlock full contact data, intelligence dossier, and wealth
                     signals for this prospect.
                   </p>
-                  <button
-                    onClick={() => onEnrich?.(prospect.id)}
-                    className="w-full rounded-lg border py-2.5 text-sm font-medium transition-colors cursor-pointer hover:brightness-110"
-                    style={{
-                      borderColor: "rgba(212,175,55,0.4)",
-                      background: "rgba(212,175,55,0.12)",
-                      color: "var(--gold-primary)",
-                    }}
-                  >
-                    Enrich This Prospect
-                  </button>
+                  {canEdit ? (
+                    <button
+                      onClick={() => onEnrich?.(prospect.id)}
+                      className="w-full rounded-lg border py-2.5 text-sm font-medium transition-colors cursor-pointer hover:brightness-110"
+                      style={{
+                        borderColor: "rgba(212,175,55,0.4)",
+                        background: "rgba(212,175,55,0.12)",
+                        color: "var(--gold-primary)",
+                      }}
+                    >
+                      Enrich This Prospect
+                    </button>
+                  ) : (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span tabIndex={0} className="block w-full">
+                          <button
+                            disabled
+                            className="w-full rounded-lg border py-2.5 text-sm font-medium opacity-40 cursor-not-allowed"
+                            style={{
+                              borderColor: "rgba(212,175,55,0.4)",
+                              background: "rgba(212,175,55,0.12)",
+                              color: "var(--gold-primary)",
+                            }}
+                          >
+                            Enrich This Prospect
+                          </button>
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>Assistants cannot enrich prospects.</TooltipContent>
+                    </Tooltip>
+                  )}
                 </div>
               </>
             )}
