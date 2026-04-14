@@ -17,6 +17,7 @@ export default async function TenantLayout({
   let userName: string;
   let userInitials: string;
   let userRole: string;
+  let userEmail: string | undefined;
   let savedSearchCount = 0;
   let listsCount = 0;
 
@@ -67,6 +68,7 @@ export default async function TenantLayout({
     userName = user?.user_metadata?.full_name ?? user?.email ?? "User";
     userInitials = userName.charAt(0).toUpperCase() || "?";
     userRole = (user?.app_metadata?.role as string) || "assistant";
+    userEmail = user?.email ?? undefined;
   } catch (err) {
     // Re-throw Next.js internal errors (redirect, notFound)
     if (err && typeof err === "object" && "digest" in err) throw err;
@@ -96,6 +98,7 @@ export default async function TenantLayout({
           userRole={userRole}
           userName={userName}
           userInitials={userInitials}
+          userEmail={userEmail}
           savedSearchCount={savedSearchCount}
           listsCount={listsCount}
         />
