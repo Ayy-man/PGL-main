@@ -9,18 +9,18 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default:
-          "border-transparent bg-primary text-primary-foreground shadow hover:bg-primary/80",
+          "bg-gold-bg text-gold-primary border-border-gold",
         secondary:
           "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
         destructive:
           "border-transparent bg-destructive text-destructive-foreground shadow hover:bg-destructive/80",
         outline: "text-foreground",
         success:
-          "bg-[rgba(34,197,94,0.15)] text-[#22c55e] border-[rgba(34,197,94,0.3)]",
+          "bg-success-muted text-success border-success/30",
         warning:
-          "bg-[rgba(245,158,11,0.15)] text-[#f59e0b] border-[rgba(245,158,11,0.3)]",
+          "bg-warning-muted text-warning border-warning/30",
         info:
-          "bg-[rgba(96,165,250,0.15)] text-[#60a5fa] border-[rgba(96,165,250,0.3)]",
+          "bg-info-muted text-info border-info/30",
         gold:
           "bg-[var(--gold-bg)] text-[var(--gold-primary)] border-[var(--border-gold)]",
         "gold-solid":

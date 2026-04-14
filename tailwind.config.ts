@@ -100,7 +100,6 @@ const config: Config = {
   			sm: 'calc(var(--radius) - 4px)',
   			card: '14px',
   			btn: '8px',
-  			badge: '20px',
   		},
   		animation: {
   			'page-enter': 'fadeIn 0.4s ease forwards',
