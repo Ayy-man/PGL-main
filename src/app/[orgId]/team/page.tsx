@@ -224,6 +224,7 @@ export default async function TeamPage({
                           userId={member.id}
                           isActive={member.is_active}
                           orgId={orgId}
+                          memberEmail={member.email ?? undefined}
                         />
                         <TeamMemberActions
                           userId={member.id}
@@ -259,6 +260,7 @@ export default async function TeamPage({
                     userId={member.id}
                     isActive={member.is_active}
                     orgId={orgId}
+                    memberEmail={member.email ?? undefined}
                   />
                 </div>
                 <div className="flex items-center gap-3 text-xs" style={{ color: "var(--text-secondary)" }}>
