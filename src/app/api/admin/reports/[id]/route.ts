@@ -55,7 +55,21 @@ export async function GET(
     screenshotUrl = signedData?.signedUrl ?? null;
   }
 
-  return NextResponse.json({ report, screenshotUrl });
+  // Phase 38: fetch events for consumers of this endpoint (ASC order, joined actor).
+  // NOTE: viewed_by_admin and screenshot_expired writes live in the page.tsx server
+  // loader (Plan 03 Task 2), NOT here — the admin UI does not call this GET, so
+  // writes here would never fire on a real page visit.
+  const { data: events } = await admin
+    .from("issue_report_events")
+    .select(`
+      id, report_id, event_type, actor_user_id, actor_role,
+      from_status, to_status, note, created_at,
+      actor:actor_user_id ( id, email, full_name )
+    `)
+    .eq("report_id", id)
+    .order("created_at", { ascending: true });
+
+  return NextResponse.json({ report, screenshotUrl, events: events ?? [] });
 }
 
 const CLOSED_STATUSES: readonly string[] = ["resolved", "wontfix", "duplicate"];
