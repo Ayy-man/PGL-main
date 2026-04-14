@@ -446,6 +446,16 @@ Plans:
 - [x] 38-03-PLAN.md — TimelineCard component (5 variants) + 2:1 grid layout split + close-requires-note UX + server loader threads events
 - [x] 38-04-PLAN.md — UAT: 7-scenario end-to-end verification against CONTEXT.md success criteria
 
+### Phase 39: UX Polish Pass - Luxury Consistency and Keystone Primitives
+
+**Goal:** Close the 242 findings from the 5-agent UX audit (`.planning/audits/ux-polish-2026-04-14/`) so every role — Super Admin, Tenant Admin, Agent, Assistant — feels consistently luxury-grade. Ship in 5 PRs per the audit's suggested order: (1) 10 keystone primitive edits that cascade across the app (toast auto-dismiss + limit, `<Toaster/>` + `<TooltipProvider>` mounts, `Button` default → `gold-solid`, Toast/Tooltip/DropdownMenu restyle to `--bg-floating-elevated`, Input/Textarea/Select focus → `var(--gold-bg-strong)`, Badge/Button gold → token-based, `EnrichmentStatusDots` rollout + `animate-pulse`, `src/app/not-found.tsx`, Checkbox + Table selected-row → gold) that alone closes ~60 findings; (2) destructive-action safety sweep onto the existing `<Confirmation>` primitive (native `confirm()` + unguarded delete flows across search, lists, personas, team, system actions, API-key rotation); (3) Assistant read-only role gating threaded through BulkActionsBar + ProspectSlideOver + ListGrid + PersonaCardGrid + Notes (today Assistants see every write button and 403 on click); (4) tenant-theme leak fix — replace hard-coded `#d4af37` / `rgba(212,175,55,*)` with `var(--gold-*)` tokens in 9 primitive files so sapphire/emerald/coral tenants theme correctly; (5) per-screen polish working through the five per-area audit files. No architectural changes, no new features, no scope additions — polish only.
+**Requirements**: TBD (derive from audit README Top-25 + 6 systemic themes during /gsd-plan-phase)
+**Depends on:** Phase 38
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 39 to break down)
+
 ---
 
 ### Phase 19: Admin Automations Dashboard — Inngest Monitoring

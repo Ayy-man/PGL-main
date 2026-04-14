@@ -383,6 +383,7 @@ Recent decisions affecting current work:
 - Phase 28 added: Saved Search Incremental Refresh, Dismiss, and Delete
 - Phase 36 added: Fix NLP search flow issues (25 bugs from 5-agent audit)
 - Phase 38 added: Issue report timeline audit log — append-only `issue_report_events` table + right-rail timeline card beside Admin Actions on the admin report detail page, with close-requires-note UX and backfill of `reported`/`status_changed→resolved` events for existing rows
+- Phase 39 added: UX Polish Pass — Luxury Consistency and Keystone Primitives. 242 findings from 5-agent audit (`.planning/audits/ux-polish-2026-04-14/`). Ships in 5 PRs: (1) 10 keystone primitive edits that cascade (~60 findings closed); (2) destructive-action safety sweep onto `<Confirmation>`; (3) Assistant read-only role gating across write surface; (4) tenant-theme hex→CSS-var leak in 9 primitives; (5) per-screen polish from the 5 detail files. Polish only — no architectural changes, no new features.
 
 ### Pending Todos
 
