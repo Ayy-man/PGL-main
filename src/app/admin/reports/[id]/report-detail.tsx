@@ -3,7 +3,8 @@
 import { useState, useTransition, useCallback } from "react";
 import Link from "next/link";
 import { ArrowLeft, ChevronDown, ChevronRight, Copy, Check } from "lucide-react";
-import type { IssueStatus } from "@/types/database";
+import type { IssueStatus, IssueReportEventWithActor } from "@/types/database";
+import { TimelineCard } from "./timeline-card";
 
 interface ResolverUser {
   id: string;
@@ -37,6 +38,7 @@ interface ReportDetailData {
 interface ReportDetailProps {
   report: ReportDetailData;
   screenshotUrl: string | null;
+  events: IssueReportEventWithActor[];
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -54,6 +56,8 @@ const STATUS_OPTIONS: { value: IssueStatus; label: string }[] = [
   { value: "wontfix", label: "Won't Fix" },
   { value: "duplicate", label: "Duplicate" },
 ];
+
+const CLOSED_STATUSES: IssueStatus[] = ["resolved", "wontfix", "duplicate"];
 
 function formatRelativeTime(dateStr: string): string {
   const diffMs = Date.now() - new Date(dateStr).getTime();
@@ -106,7 +110,7 @@ function SectionCard({ title, children }: { title: string; children: React.React
   );
 }
 
-export function ReportDetail({ report: initialReport, screenshotUrl }: ReportDetailProps) {
+export function ReportDetail({ report: initialReport, screenshotUrl, events }: ReportDetailProps) {
   const [report, setReport] = useState<ReportDetailData>(initialReport);
   const [status, setStatus] = useState<IssueStatus>(initialReport.status);
   const [notes, setNotes] = useState(initialReport.admin_notes ?? "");
@@ -115,6 +119,10 @@ export function ReportDetail({ report: initialReport, screenshotUrl }: ReportDet
   const [contextExpanded, setContextExpanded] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [copied, setCopied] = useState(false);
+
+  const isClosing = CLOSED_STATUSES.includes(status);
+  const notesEmpty = notes.trim().length === 0;
+  const blockCloseForEmptyNote = isClosing && notesEmpty;
 
   const buildDebugPrompt = useCallback(() => {
     const snap = report.target_snapshot as Record<string, unknown> | null;
@@ -355,7 +363,7 @@ export function ReportDetail({ report: initialReport, screenshotUrl }: ReportDet
   };
 
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="space-y-6 max-w-5xl">
       {/* Back navigation */}
       <div>
         <Link
@@ -557,93 +565,110 @@ export function ReportDetail({ report: initialReport, screenshotUrl }: ReportDet
         )}
       </div>
 
-      {/* 8. Admin actions */}
-      <SectionCard title="Admin Actions">
-        {error && (
-          <div
-            className="rounded-[8px] border px-4 py-3 text-sm"
-            style={{
-              background: "var(--destructive-bg, #3f0000)",
-              borderColor: "var(--destructive)",
-              color: "var(--destructive)",
-            }}
-          >
-            {error}
-          </div>
-        )}
-        {success && (
-          <div
-            className="rounded-[8px] border px-4 py-3 text-sm"
-            style={{
-              background: "var(--success-muted)",
-              borderColor: "var(--success)",
-              color: "var(--success)",
-            }}
-          >
-            {success}
-          </div>
-        )}
-
-        <div className="space-y-4">
-          <div className="space-y-1.5">
-            <label
-              className="text-xs font-medium text-muted-foreground"
-              htmlFor="status-select"
-            >
-              Status
-            </label>
-            <select
-              id="status-select"
-              value={status}
-              onChange={(e) => setStatus(e.target.value as IssueStatus)}
-              className="w-full h-9 rounded-[8px] border px-3 text-sm focus:outline-none"
-              style={inputStyle}
-            >
-              {STATUS_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-            {status === "resolved" && report.status !== "resolved" && (
-              <p className="text-xs text-muted-foreground">
-                Saving as resolved will automatically record your user ID and the timestamp.
-              </p>
+      {/* 8. Admin actions + Timeline */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <SectionCard title="Admin Actions">
+            {error && (
+              <div
+                className="rounded-[8px] border px-4 py-3 text-sm"
+                style={{
+                  background: "var(--destructive-bg, #3f0000)",
+                  borderColor: "var(--destructive)",
+                  color: "var(--destructive)",
+                }}
+              >
+                {error}
+              </div>
             )}
-          </div>
+            {success && (
+              <div
+                className="rounded-[8px] border px-4 py-3 text-sm"
+                style={{
+                  background: "var(--success-muted)",
+                  borderColor: "var(--success)",
+                  color: "var(--success)",
+                }}
+              >
+                {success}
+              </div>
+            )}
 
-          <div className="space-y-1.5">
-            <label
-              className="text-xs font-medium text-muted-foreground"
-              htmlFor="admin-notes"
-            >
-              Admin notes
-            </label>
-            <textarea
-              id="admin-notes"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Internal notes visible only to super admins…"
-              rows={4}
-              className="w-full rounded-[8px] border px-3 py-2 text-sm resize-none focus:outline-none"
-              style={inputStyle}
-            />
-          </div>
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <label
+                  className="text-xs font-medium text-muted-foreground"
+                  htmlFor="status-select"
+                >
+                  Status
+                </label>
+                <select
+                  id="status-select"
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value as IssueStatus)}
+                  className="w-full h-9 rounded-[8px] border px-3 text-sm focus:outline-none"
+                  style={inputStyle}
+                >
+                  {STATUS_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.label}
+                    </option>
+                  ))}
+                </select>
+                {status === "resolved" && report.status !== "resolved" && (
+                  <p className="text-xs text-muted-foreground">
+                    Saving as resolved will automatically record your user ID and the timestamp.
+                  </p>
+                )}
+                {blockCloseForEmptyNote && (
+                  <p className="text-xs" style={{ color: "var(--destructive, #ef4444)" }}>
+                    A note is required when closing an issue.
+                  </p>
+                )}
+              </div>
 
-          <button
-            onClick={handleSave}
-            disabled={isPending}
-            className="h-9 rounded-[8px] px-4 text-sm font-semibold transition-colors disabled:opacity-60"
-            style={{
-              background: "var(--gold-bg-strong)",
-              border: "1px solid var(--border-gold)",
-              color: "var(--gold-primary)",
-            }}
-          >
-            {isPending ? "Saving…" : "Save changes"}
-          </button>
+              <div className="space-y-1.5">
+                <label
+                  className="text-xs font-medium text-muted-foreground"
+                  htmlFor="admin-notes"
+                >
+                  Admin notes
+                </label>
+                <textarea
+                  id="admin-notes"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Internal notes visible only to super admins…"
+                  rows={4}
+                  className="w-full rounded-[8px] border px-3 py-2 text-sm resize-none focus:outline-none"
+                  style={inputStyle}
+                />
+              </div>
+
+              <button
+                onClick={handleSave}
+                disabled={isPending || blockCloseForEmptyNote}
+                className="h-9 rounded-[8px] px-4 text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                style={{
+                  background: "var(--gold-bg-strong)",
+                  border: "1px solid var(--border-gold)",
+                  color: "var(--gold-primary)",
+                }}
+              >
+                {isPending ? "Saving…" : "Save changes"}
+              </button>
+            </div>
+          </SectionCard>
         </div>
-      </SectionCard>
+        <div className="lg:col-span-1">
+          <TimelineCard
+            events={events}
+            reporterName={report.users?.full_name ?? report.users?.email ?? null}
+            category={report.category}
+            description={report.description}
+          />
+        </div>
+      </div>
     </div>
   );
 }
