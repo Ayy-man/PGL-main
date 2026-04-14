@@ -29,9 +29,6 @@ export function PersonaCard({ persona, onDelete, onUpdated }: PersonaCardProps) 
   });
 
   const handleDelete = () => {
-    if (!window.confirm(`Are you sure you want to delete "${persona.name}"?`)) {
-      return;
-    }
     onDelete?.(persona.id);
   };
 
