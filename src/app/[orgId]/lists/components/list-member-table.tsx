@@ -28,6 +28,13 @@ import { EnrichmentStatusDots } from "@/components/ui/enrichment-status-dots";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { ProspectAvatar } from "@/components/prospect/prospect-avatar";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import {
+  Confirmation,
+  ConfirmationIcon,
+  ConfirmationTitle,
+  ConfirmationDescription,
+} from "@/components/ui/confirmation";
 
 interface ListMemberTableProps {
   members: ListMember[];
@@ -112,22 +119,32 @@ export function ListMemberTable({ members: serverMembers, listId, listName }: Li
     : "";
   const [members, setMembers] = useState(serverMembers);
   const [enrichingId, setEnrichingId] = useState<string | null>(null);
+  const [pendingRemoveMember, setPendingRemoveMember] = useState<{ memberId: string; prospectName: string } | null>(null);
+  const [removing, setRemoving] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => { setMembers(serverMembers); }, [serverMembers]);
 
-  const handleRemove = async (memberId: string) => {
-    if (!confirm("Remove this prospect from the list?")) return;
+  const handleRequestRemove = (memberId: string, prospectName: string) => {
+    setPendingRemoveMember({ memberId, prospectName });
+  };
+
+  const handleConfirmRemove = async () => {
+    if (!pendingRemoveMember) return;
+    setRemoving(true);
 
     const previousMembers = members;
-    setMembers(prev => prev.filter(m => m.id !== memberId));
+    setMembers(prev => prev.filter(m => m.id !== pendingRemoveMember.memberId));
     toast({ title: "Prospect removed from list" });
 
-    const result = await removeFromListAction(memberId);
+    const result = await removeFromListAction(pendingRemoveMember.memberId);
     if (!result.success) {
       setMembers(previousMembers);
       toast({ title: "Remove failed", description: result.error || "Could not remove prospect.", variant: "destructive" });
     }
+
+    setRemoving(false);
+    setPendingRemoveMember(null);
   };
 
   const handleReEnrich = async (prospectId: string) => {
@@ -281,7 +298,7 @@ export function ListMemberTable({ members: serverMembers, listId, listName }: Li
                       variant="ghost"
                       size="icon"
                       className="h-7 w-7"
-                      onClick={() => handleRemove(member.id)}
+                      onClick={() => handleRequestRemove(member.id, member.prospect.name)}
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
@@ -353,7 +370,7 @@ export function ListMemberTable({ members: serverMembers, listId, listName }: Li
                   variant="ghost"
                   size="icon"
                   className="h-7 w-7 shrink-0"
-                  onClick={() => handleRemove(member.id)}
+                  onClick={() => handleRequestRemove(member.id, member.prospect.name)}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </Button>
@@ -362,6 +379,27 @@ export function ListMemberTable({ members: serverMembers, listId, listName }: Li
           </div>
         ))}
       </div>
+
+      <Dialog open={!!pendingRemoveMember} onOpenChange={(o) => !o && setPendingRemoveMember(null)}>
+        <DialogContent>
+          <Confirmation
+            isDestructive
+            confirmLabel="Remove"
+            cancelLabel="Cancel"
+            onConfirm={handleConfirmRemove}
+            onCancel={() => setPendingRemoveMember(null)}
+            isLoading={removing}
+          >
+            <ConfirmationIcon variant="destructive" />
+            <ConfirmationTitle>
+              Remove {pendingRemoveMember?.prospectName ?? "this prospect"} from the list?
+            </ConfirmationTitle>
+            <ConfirmationDescription>
+              The prospect record stays in your database. You can re-add them from search later.
+            </ConfirmationDescription>
+          </Confirmation>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
