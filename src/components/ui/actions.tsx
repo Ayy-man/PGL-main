@@ -37,7 +37,7 @@ const ActionButton = React.forwardRef<HTMLButtonElement, ActionButtonProps>(
         className={cn(
           "inline-flex h-7 w-7 items-center justify-center rounded-md transition-all",
           "text-foreground/40 hover:text-foreground/80 hover:bg-[rgba(255,255,255,0.06)]",
-          active && "text-[#d4af37] hover:text-[#d4af37] bg-[rgba(212,175,55,0.08)]",
+          active && "text-[var(--gold-primary)] hover:text-[var(--gold-primary)] bg-[var(--gold-bg)]",
           className
         )}
         {...props}

@@ -86,7 +86,7 @@ const MessageBubble = React.forwardRef<HTMLDivElement, MessageBubbleProps>(
         className={cn(
           "rounded-xl px-4 py-3 text-sm leading-relaxed",
           role === "user"
-            ? "bg-[rgba(212,175,55,0.12)] border border-[rgba(212,175,55,0.2)] text-foreground ml-auto"
+            ? "bg-[var(--gold-bg-strong)] border border-[var(--border-gold)] text-foreground ml-auto"
             : "bg-[rgba(255,255,255,0.04)] border border-[rgba(255,255,255,0.08)] text-foreground/90",
           className
         )}

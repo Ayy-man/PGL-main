@@ -20,7 +20,7 @@ const PromptInput = React.forwardRef<HTMLDivElement, PromptInputProps>(
         <div
           ref={ref}
           className={cn(
-            "flex flex-col gap-2 rounded-xl border border-[rgba(255,255,255,0.1)] bg-[rgba(255,255,255,0.03)] p-3 focus-within:border-[rgba(212,175,55,0.4)] transition-colors",
+            "flex flex-col gap-2 rounded-xl border border-border-subtle bg-bg-elevated p-3 focus-within:border-[var(--border-gold)] transition-colors",
             className
           )}
           {...props}
