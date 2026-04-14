@@ -17,18 +17,19 @@ const SOURCE_LABELS: Record<string, string> = {
   claude: "AI Analysis",
 };
 
-function getDotStyle(status: SourceStatus): { background: string; boxShadow: string } {
+// Maps status -> dot color class (bg uses CSS token) and glow utility class from globals.css
+function getDotClasses(status: SourceStatus): { bgClass: string; glowClass: string } {
   switch (status) {
     case "complete":
-      return { background: "var(--success)", boxShadow: "0 0 6px rgba(34,197,94,0.6)" };
+      return { bgClass: "bg-[var(--success)]", glowClass: "dot-glow-green" };
     case "in_progress":
-      return { background: "var(--info)", boxShadow: "0 0 6px rgba(96,165,250,0.6)" };
+      return { bgClass: "bg-[var(--info)]", glowClass: "dot-glow-blue" };
     case "failed":
-      return { background: "var(--destructive)", boxShadow: "0 0 6px rgba(239,68,68,0.6)" };
+      return { bgClass: "bg-[var(--destructive)]", glowClass: "dot-glow-red" };
     case "circuit_open":
-      return { background: "var(--warning)", boxShadow: "0 0 6px rgba(245,158,11,0.6)" };
+      return { bgClass: "bg-[var(--warning)]", glowClass: "dot-glow-amber" };
     default:
-      return { background: "rgba(255,255,255,0.15)", boxShadow: "none" };
+      return { bgClass: "bg-[rgba(255,255,255,0.15)]", glowClass: "" };
   }
 }
 
@@ -39,17 +40,18 @@ export function EnrichmentStatusDots({ sourceStatus, className }: EnrichmentStat
     <div className={cn("flex items-center gap-1.5", className)}>
       {SOURCE_ORDER.map((key) => {
         const status = sourceStatus[key] ?? "pending";
-        const dotClass = cn(
-          "h-2.5 w-2.5 rounded-full shrink-0 transition-shadow",
-          status === "in_progress" && "animate-pulse",
-          status === "pending" && "animate-pulse opacity-60"
-        );
+        const { bgClass, glowClass } = getDotClasses(status);
         return (
           <div
             key={key}
             title={`${SOURCE_LABELS[key] ?? key}: ${status}`}
-            className={dotClass}
-            style={getDotStyle(status)}
+            className={cn(
+              "h-2.5 w-2.5 rounded-full shrink-0 transition-shadow",
+              bgClass,
+              glowClass,
+              status === "in_progress" && "animate-pulse",
+              status === "pending" && "animate-pulse opacity-60"
+            )}
           />
         );
       })}
