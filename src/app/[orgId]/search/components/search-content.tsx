@@ -26,6 +26,12 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  Confirmation,
+  ConfirmationIcon,
+  ConfirmationTitle,
+  ConfirmationDescription,
+} from "@/components/ui/confirmation";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -782,8 +788,8 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
               onProspectClick={handleProspectClick}
               savedSearchMode={isSavedSearchMode}
               onDismiss={isSavedSearchMode ? (id) => {
-                if (!confirm("Dismiss this prospect? You can undo this later.")) return;
-                handleDismiss([id]);
+                setPendingDismissIds([id]);
+                setDismissDialogOpen(true);
               } : undefined}
               onUndoDismiss={handleUndoDismiss}
               lastRefreshedAt={lastRefreshedAt}
@@ -1414,25 +1420,25 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
       {/* Dismiss confirmation dialog */}
       <Dialog open={dismissDialogOpen} onOpenChange={setDismissDialogOpen}>
         <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Dismiss {pendingDismissIds.length} prospect{pendingDismissIds.length > 1 ? "s" : ""}?</DialogTitle>
-            <DialogDescription>
-              They won&apos;t appear in future refreshes of this search.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setDismissDialogOpen(false)}>Cancel</Button>
-            <Button
-              variant="ghost"
-              className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-              onClick={() => {
-                handleDismiss(pendingDismissIds);
-                setDismissDialogOpen(false);
-              }}
-            >
-              Dismiss
-            </Button>
-          </DialogFooter>
+          <Confirmation
+            isDestructive
+            confirmLabel="Dismiss"
+            cancelLabel="Cancel"
+            onConfirm={() => {
+              handleDismiss(pendingDismissIds);
+            }}
+            onCancel={() => setDismissDialogOpen(false)}
+          >
+            <ConfirmationIcon variant="destructive" />
+            <ConfirmationTitle>
+              Dismiss {pendingDismissIds.length === 1 ? "this prospect" : `${pendingDismissIds.length} prospects`}?
+            </ConfirmationTitle>
+            <ConfirmationDescription>
+              {pendingDismissIds.length === 1
+                ? "They won't appear in future refreshes of this search. You can undo this later."
+                : `These ${pendingDismissIds.length} prospects won't appear in future refreshes of this search.`}
+            </ConfirmationDescription>
+          </Confirmation>
         </DialogContent>
       </Dialog>
 
