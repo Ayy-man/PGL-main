@@ -1,7 +1,15 @@
 "use client";
 
 import type { ApolloPerson } from "@/lib/apollo/types";
-import { MapPin, X } from "lucide-react";
+import { MapPin, X, CheckCircle2 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Skeleton } from "@/components/ui/skeleton";
+import { WealthTierBadge } from "@/components/ui/wealth-tier-badge";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 function formatRelativeDate(dateStr: string | undefined): string {
   if (!dateStr) return "—";
@@ -37,6 +45,7 @@ type SavedSearchMeta = {
   is_new: boolean;
   prospect_id: string | null;
   last_seen_at: string;
+  wealth_tier?: string | null;
 };
 
 type ApolloPersonWithMeta = ApolloPerson & { _savedSearchMeta?: SavedSearchMeta };
@@ -65,6 +74,7 @@ export function ProspectResultsTable({
   lastRefreshedAt,
 }: ProspectResultsTableProps) {
   const allSelected = selectedIds.size === results.length && results.length > 0;
+  const someSelected = selectedIds.size > 0 && selectedIds.size < results.length;
 
   return (
     <div
@@ -88,11 +98,9 @@ export function ProspectResultsTable({
               }}
             >
               <th className="py-3.5 pl-5 pr-3 text-left w-12" scope="col">
-                <input
-                  type="checkbox"
-                  checked={allSelected}
-                  onChange={onSelectAll}
-                  className="h-4 w-4 rounded border-border accent-[var(--gold-primary)] cursor-pointer"
+                <Checkbox
+                  checked={someSelected ? "indeterminate" : allSelected}
+                  onCheckedChange={onSelectAll}
                   aria-label="Select all"
                 />
               </th>
@@ -155,7 +163,7 @@ export function ProspectResultsTable({
                 <tr
                   key={prospect.id}
                   onClick={() => onProspectClick(prospect.id)}
-                  className="row-hover-gold group transition-colors duration-150 cursor-pointer"
+                  className="row-hover-gold group transition-colors duration-150 cursor-pointer active:bg-[var(--gold-bg)]"
                   data-selected={isSelected || undefined}
                   style={{
                     borderBottom: "1px solid var(--border-subtle)",
@@ -166,21 +174,19 @@ export function ProspectResultsTable({
                   <td className="whitespace-nowrap py-5 pl-5 pr-3">
                     {savedSearchMode && isEnriched ? (
                       <span
-                        className="text-[10px] px-1.5 py-0.5 rounded"
-                        style={{ color: "var(--text-tertiary)", background: "rgba(255,255,255,0.05)" }}
+                        className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-[var(--gold-bg)] text-[var(--gold-text)] border border-[var(--border-gold)]"
                       >
-                        Enriched
+                        <CheckCircle2 className="h-3 w-3" /> Enriched
                       </span>
                     ) : (
-                      <input
-                        type="checkbox"
+                      <Checkbox
                         checked={isSelected}
-                        onChange={(e) => {
-                          e.stopPropagation();
-                          onSelect(prospect.id);
+                        onCheckedChange={(checked) => {
+                          if (typeof checked === "boolean") {
+                            onSelect(prospect.id);
+                          }
                         }}
                         onClick={(e) => e.stopPropagation()}
-                        className="h-4 w-4 rounded border-border accent-[var(--gold-primary)] cursor-pointer"
                         aria-label={`Select ${name}`}
                       />
                     )}
@@ -236,12 +242,18 @@ export function ProspectResultsTable({
 
                   {/* Wealth Tier — shown after enrichment */}
                   <td className="whitespace-nowrap px-3 py-5">
-                    <span
-                      className="text-sm"
-                      style={{ color: "var(--text-ghost)" }}
-                    >
-                      —
-                    </span>
+                    {prospect._savedSearchMeta?.wealth_tier ? (
+                      <WealthTierBadge tier={prospect._savedSearchMeta.wealth_tier} />
+                    ) : prospect._enriched === true ? (
+                      <Skeleton className="h-5 w-12 rounded" />
+                    ) : (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="text-sm" style={{ color: "var(--text-ghost)" }}>Locked</span>
+                        </TooltipTrigger>
+                        <TooltipContent>Enrich to reveal wealth tier</TooltipContent>
+                      </Tooltip>
+                    )}
                   </td>
 
                   {/* Title & Company */}
@@ -363,20 +375,18 @@ export function ProspectResultsTable({
                 {/* Checkbox — hidden for enriched prospects in saved search mode (matches desktop) */}
                 {savedSearchMode && isEnriched ? (
                   <span
-                    className="mt-1 text-[10px] px-1.5 py-0.5 rounded shrink-0"
-                    style={{ color: "var(--text-tertiary)", background: "rgba(255,255,255,0.05)" }}
+                    className="mt-1 inline-flex items-center gap-1 shrink-0 text-[10px] px-1.5 py-0.5 rounded bg-[var(--gold-bg)] text-[var(--gold-text)] border border-[var(--border-gold)]"
                   >
-                    Enriched
+                    <CheckCircle2 className="h-3 w-3" /> Enriched
                   </span>
                 ) : (
-                <input
-                  type="checkbox"
-                  className="mt-1 h-5 w-5 rounded accent-[var(--gold-primary)] cursor-pointer"
-                  checked={isSelected}
-                  onChange={() => onSelect(prospect.id)}
-                  onClick={(e) => e.stopPropagation()}
-                  aria-label={`Select ${name}`}
-                />
+                  <Checkbox
+                    className="mt-1 h-5 w-5"
+                    checked={isSelected}
+                    onCheckedChange={() => onSelect(prospect.id)}
+                    onClick={(e) => e.stopPropagation()}
+                    aria-label={`Select ${name}`}
+                  />
                 )}
                 {/* Name + details */}
                 <div className="flex-1 min-w-0">

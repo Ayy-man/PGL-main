@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import type { Persona } from "@/lib/personas/types";
 import type { SavedSearchProspect } from "@/lib/personas/types";
@@ -18,6 +18,7 @@ import { ReportIssueButton } from "@/components/issues/report-issue-button";
 import { PersonaFormDialog } from "../../personas/components/persona-form-dialog";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Dialog,
   DialogContent,
@@ -40,12 +41,12 @@ interface SearchContentProps {
 
 function SkeletonRow() {
   return (
-    <tr className="animate-pulse" style={{ borderBottom: "1px solid var(--border-subtle)" }}>
-      <td className="py-4 pl-5 pr-3"><div className="h-4 w-4 rounded" style={{ background: "rgba(255,255,255,0.06)" }} /></td>
-      <td className="px-3 py-4"><div className="flex items-center gap-3"><div className="h-10 w-10 rounded-full" style={{ background: "rgba(255,255,255,0.06)" }} /><div className="space-y-1.5"><div className="h-4 w-28 rounded" style={{ background: "rgba(255,255,255,0.06)" }} /><div className="h-3 w-20 rounded" style={{ background: "rgba(255,255,255,0.04)" }} /></div></div></td>
-      <td className="px-3 py-4"><div className="h-6 w-24 rounded-full" style={{ background: "rgba(255,255,255,0.04)" }} /></td>
-      <td className="px-3 py-4"><div className="space-y-1.5"><div className="h-4 w-32 rounded" style={{ background: "rgba(255,255,255,0.06)" }} /><div className="h-3 w-24 rounded" style={{ background: "rgba(255,255,255,0.04)" }} /></div></td>
-      <td className="px-3 py-4"><div className="flex gap-1"><div className="h-2.5 w-2.5 rounded-full" style={{ background: "rgba(255,255,255,0.06)" }} /><div className="h-2.5 w-2.5 rounded-full" style={{ background: "rgba(255,255,255,0.06)" }} /><div className="h-2.5 w-2.5 rounded-full" style={{ background: "rgba(255,255,255,0.06)" }} /></div></td>
+    <tr style={{ borderBottom: "1px solid var(--border-subtle)" }}>
+      <td className="py-4 pl-5 pr-3"><Skeleton className="h-4 w-4 rounded" /></td>
+      <td className="px-3 py-4"><div className="flex items-center gap-3"><Skeleton className="h-10 w-10 rounded-full" /><div className="space-y-1.5"><Skeleton className="h-4 w-28 rounded" /><Skeleton className="h-3 w-20 rounded" /></div></div></td>
+      <td className="px-3 py-4"><Skeleton className="h-6 w-24 rounded-full" /></td>
+      <td className="px-3 py-4"><div className="space-y-1.5"><Skeleton className="h-4 w-32 rounded" /><Skeleton className="h-3 w-24 rounded" /></div></td>
+      <td className="px-3 py-4"><div className="flex gap-1"><Skeleton className="h-2.5 w-2.5 rounded-full" /><Skeleton className="h-2.5 w-2.5 rounded-full" /><Skeleton className="h-2.5 w-2.5 rounded-full" /></div></td>
       <td className="px-3 py-4" />
     </tr>
   );
@@ -126,12 +127,19 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
   const [bulkMode, setBulkMode] = useState<"add" | "enrich">("add");
   const [isBulkSubmitting, setIsBulkSubmitting] = useState(false);
   const [bulkSelectedListIds, setBulkSelectedListIds] = useState<string[]>([]);
+  const [listSearch, setListSearch] = useState("");
 
   // Inline list creation state
   const [localLists, setLocalLists] = useState<List[]>(lists);
   const [showNewListInput, setShowNewListInput] = useState(false);
   const [newListName, setNewListName] = useState("");
   const [isCreatingList, setIsCreatingList] = useState(false);
+
+  // Filtered lists for bulk dialog search
+  const filteredLists = useMemo(
+    () => localLists.filter((l) => l.name.toLowerCase().includes(listSearch.toLowerCase())),
+    [localLists, listSearch]
+  );
 
   // Saved search state
   const [savedProspects, setSavedProspects] = useState<SavedSearchProspect[]>([]);
@@ -849,7 +857,8 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
                     <button
                       key={pageNum}
                       onClick={() => setSavedPage(pageNum)}
-                      className="relative inline-flex items-center px-4 py-2 text-sm font-semibold transition-colors duration-150 cursor-pointer"
+                      aria-current={isActive ? "page" : undefined}
+                      className="relative inline-flex items-center px-4 py-2 text-sm font-semibold transition-colors duration-150 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--gold-primary)]"
                       style={
                         isActive
                           ? { background: "var(--gold-primary)", color: "var(--bg-root)", zIndex: 10 }
@@ -921,7 +930,8 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
                       key={pageNum}
                       onClick={() => setSearchState({ page: pageNum })}
                       disabled={isLoading}
-                      className="relative inline-flex items-center px-4 py-2 text-sm font-semibold transition-colors duration-150 cursor-pointer"
+                      aria-current={isActive ? "page" : undefined}
+                      className="relative inline-flex items-center px-4 py-2 text-sm font-semibold transition-colors duration-150 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--gold-primary)]"
                       style={
                         isActive
                           ? {
@@ -967,7 +977,7 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
                       }
                     }}
                     placeholder={`1-${pagination.totalPages}`}
-                    className="relative inline-flex items-center px-2 py-2 text-sm font-semibold w-20 text-center outline-none focus:ring-2 focus:ring-[var(--gold-primary)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    className="relative inline-flex items-center px-2 py-2 text-sm font-semibold w-20 text-center outline-none focus:ring-2 focus:ring-[var(--gold-primary)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none animate-in fade-in duration-150"
                     style={{
                       background: "var(--bg-elevated)",
                       color: "var(--text-primary-ds)",
@@ -1260,7 +1270,8 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
           <div className="py-4">
             {/* Inline create new list */}
             {showNewListInput ? (
-              <div className="flex items-center gap-2 mb-3">
+              <div className="mb-3">
+                <div className="flex items-center gap-2">
                 <Input
                   autoFocus
                   placeholder="New list name"
@@ -1320,16 +1331,30 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
                   <X className="h-3 w-3" />
                 </Button>
               </div>
-            ) : (
-              <Button
-                variant="outline"
-                size="sm"
-                className="mb-3 w-full"
-                onClick={() => setShowNewListInput(true)}
-              >
-                <Plus className="h-3.5 w-3.5 mr-1.5" />
-                New List
-              </Button>
+                <span className="mt-1 block text-[10px] text-muted-foreground">
+                  <kbd className="font-sans">↵</kbd> to create · <kbd className="font-sans">Esc</kbd> to cancel
+                </span>
+              </div>
+              ) : (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mb-3 w-full"
+                  onClick={() => setShowNewListInput(true)}
+                >
+                  <Plus className="h-3.5 w-3.5 mr-1.5" />
+                  New List
+                </Button>
+                {localLists.length > 0 && (
+                  <Input
+                    placeholder="Search lists..."
+                    value={listSearch}
+                    onChange={(e) => setListSearch(e.target.value)}
+                    className="mb-3"
+                  />
+                )}
+              </>
             )}
 
             {localLists.length === 0 && !showNewListInput ? (
@@ -1341,7 +1366,7 @@ export function SearchContent({ personas, lists, orgId }: SearchContentProps) {
               </div>
             ) : (
               <div className="space-y-3 max-h-[300px] overflow-y-auto">
-                {localLists.map((list) => (
+                {filteredLists.map((list) => (
                   <div
                     key={list.id}
                     className="flex items-start space-x-3 p-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"

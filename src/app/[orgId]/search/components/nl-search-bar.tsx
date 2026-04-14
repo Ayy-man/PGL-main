@@ -8,7 +8,6 @@ interface NLSearchBarProps {
   onSearch: (keywords: string) => void;
   isLoading?: boolean;
   onClear?: () => void;
-  onChange?: (value: string) => void;
 }
 
 export function NLSearchBar({
@@ -16,7 +15,6 @@ export function NLSearchBar({
   onSearch,
   isLoading = false,
   onClear,
-  onChange,
 }: NLSearchBarProps) {
   const [value, setValue] = useState<string>(initialValue);
   const [isFocused, setIsFocused] = useState(false);
@@ -34,7 +32,6 @@ export function NLSearchBar({
     const newValue = e.target.value;
     setValue(newValue);
     handleAutoResize();
-    onChange?.(newValue);
     // If user clears the textarea completely, notify parent
     if (!newValue.trim() && onClear) {
       onClear();
