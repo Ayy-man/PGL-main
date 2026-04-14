@@ -229,7 +229,7 @@ export function LogoUpload({
 
       {/* Error message */}
       {error && (
-        <p className="mt-2 text-xs" style={{ color: "oklch(0.62 0.19 22)" }}>
+        <p className="mt-2 text-xs text-destructive">
           {error}
         </p>
       )}
