@@ -438,12 +438,12 @@ Plans:
 **Goal:** Add an append-only event history for `issue_reports` and surface it as a right-rail timeline card next to Admin Actions on the admin report detail page. New `issue_report_events` table with backfill, 5 event types (reported, status_changed, note_added, viewed_by_admin, screenshot_expired), close-requires-note enforcement on both client and server, and TimelineCard UI rendered in a 2:1 grid beside the existing Admin Actions form on lg: screens.
 **Requirements**: PHASE-38-SCHEMA, PHASE-38-TYPES, PHASE-38-BACKFILL, PHASE-38-WRITERS-TENANT, PHASE-38-WRITERS-ADMIN, PHASE-38-CLOSE-GUARD-SERVER, PHASE-38-CLOSE-GUARD-CLIENT, PHASE-38-VIEW-DEDUP, PHASE-38-SCREENSHOT-EXPIRED, PHASE-38-TIMELINE-UI, PHASE-38-LAYOUT, PHASE-38-UAT
 **Depends on:** Phase 37
-**Plans:** 1/4 plans executed
+**Plans:** 3/4 plans executed
 
 Plans:
 - [x] 38-01-PLAN.md — Schema + backfill migration + TypeScript types + [BLOCKING] schema push
-- [ ] 38-02-PLAN.md — Event writers: tenant POST reported + admin PATCH status_changed/note_added with close-requires-note 400 + GET viewed_by_admin dedup + screenshot_expired + events[] response
-- [ ] 38-03-PLAN.md — TimelineCard component (5 variants) + 2:1 grid layout split + close-requires-note UX + server loader threads events
+- [x] 38-02-PLAN.md — Event writers: tenant POST reported + admin PATCH status_changed/note_added with close-requires-note 400 + GET viewed_by_admin dedup + screenshot_expired + events[] response
+- [x] 38-03-PLAN.md — TimelineCard component (5 variants) + 2:1 grid layout split + close-requires-note UX + server loader threads events
 - [ ] 38-04-PLAN.md — UAT: 7-scenario end-to-end verification against CONTEXT.md success criteria
 
 ---
