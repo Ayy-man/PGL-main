@@ -543,6 +543,11 @@
   /* Status badge pulse */
   .badge-pulse { animation: pulse-subtle 2s ease-in-out infinite; }
   .badge-pulse-urgent { animation: pulse-subtle 1s ease-in-out infinite; }
+
+  /* Gold focus ring utility — use on interactive elements for accessible gold ring */
+  .focus-ring-gold {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold-primary)] focus-visible:ring-offset-2;
+  }
 }
 
 /* Hide ambient glow on mobile — saves GPU compositing */
