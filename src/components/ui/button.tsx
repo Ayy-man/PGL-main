@@ -21,9 +21,9 @@ const buttonVariants = cva(
           "bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.08)] text-foreground/60 rounded-[8px] hover:border-[rgba(255,255,255,0.15)] hover:text-foreground",
         link: "text-primary underline-offset-4 hover:underline",
         gold:
-          "bg-[rgba(212,175,55,0.1)] border border-[rgba(212,175,55,0.25)] text-[#d4af37] font-semibold rounded-[8px] hover:bg-[rgba(212,175,55,0.18)]",
+          "bg-[var(--gold-bg)] border border-[var(--border-gold)] text-[var(--gold-primary)] font-semibold rounded-[8px] hover:bg-[var(--gold-bg-strong)]",
         "gold-solid":
-          "bg-[#d4af37] text-[#0a0a0a] font-bold rounded-[8px] shadow-[0_0_20px_rgba(212,175,55,0.2)] hover:bg-[#c4a030]",
+          "bg-[var(--gold-primary)] text-[var(--gold-foreground,#0a0a0a)] font-bold rounded-[8px] shadow-[0_0_20px_var(--gold-bg-strong)] hover:bg-[var(--gold-bright)]",
       },
       size: {
         default: "h-9 px-4 py-2",
