@@ -42,7 +42,7 @@ const ShimmerLine = React.forwardRef<HTMLDivElement, ShimmerLineProps>(
       <div
         ref={ref}
         className={cn(
-          "h-3 rounded-full bg-[rgba(255,255,255,0.06)] animate-pulse",
+          "h-3 rounded-full bg-border-subtle shimmer-skeleton",
           widthMap[width],
           className
         )}
@@ -65,7 +65,7 @@ const ShimmerBlock = React.forwardRef<HTMLDivElement, ShimmerBlockProps>(
       <div
         ref={ref}
         className={cn(
-          "w-full rounded-lg bg-[rgba(255,255,255,0.04)] animate-pulse",
+          "w-full rounded-lg bg-bg-elevated shimmer-skeleton",
           height,
           className
         )}
@@ -86,14 +86,14 @@ const ShimmerCard = React.forwardRef<
     <div
       ref={ref}
       className={cn(
-        "rounded-xl border border-[rgba(255,255,255,0.06)] p-4 flex flex-col gap-3",
+        "rounded-xl border border-border-subtle bg-bg-elevated p-4 flex flex-col gap-3",
         className
       )}
       {...props}
     >
       <div className="flex items-center gap-2">
-        <div className="h-4 w-4 rounded-full bg-[rgba(255,255,255,0.08)] animate-pulse shrink-0" />
-        <div className="h-3 w-24 rounded-full bg-[rgba(255,255,255,0.08)] animate-pulse" />
+        <div className="h-4 w-4 rounded-full bg-border-subtle shimmer-skeleton shrink-0" />
+        <div className="h-3 w-24 rounded-full bg-border-subtle shimmer-skeleton" />
       </div>
       <ShimmerLine width="full" />
       <ShimmerLine width="3/4" />
