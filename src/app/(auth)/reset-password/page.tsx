@@ -6,6 +6,8 @@ import { createClient } from "@/lib/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function ResetPasswordPage() {
   return (
@@ -13,6 +15,12 @@ export default function ResetPasswordPage() {
       <ResetPasswordForm />
     </Suspense>
   );
+}
+
+function passwordStrength(pwd: string): 1 | 2 | 3 {
+  if (pwd.length < 8) return 1;
+  if (pwd.length >= 8 && /[A-Z]/.test(pwd) && /\d/.test(pwd)) return 3;
+  return 2;
 }
 
 function ResetPasswordForm() {
@@ -46,6 +54,9 @@ function ResetPasswordForm() {
 
     return () => subscription.unsubscribe();
   }, [searchParams]);
+
+  const strength = password.length > 0 ? passwordStrength(password) : 0;
+  const passwordMismatch = confirmPassword.length > 0 && confirmPassword !== password;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -96,7 +107,7 @@ function ResetPasswordForm() {
           </p>
         </div>
         <div className="flex justify-center py-4">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-gold border-t-transparent" />
+          <Loader2 className="h-6 w-6 animate-spin" style={{ color: "var(--gold-primary)" }} />
         </div>
       </div>
     );
@@ -139,6 +150,14 @@ function ResetPasswordForm() {
             disabled={loading}
             className="h-10 rounded-lg bg-background ring-offset-background placeholder:text-muted-foreground/60 focus-visible:ring-2 focus-visible:ring-gold/40 focus-visible:border-gold/50"
           />
+          {/* Password strength meter */}
+          {password.length > 0 && (
+            <div className="flex gap-1 mt-1">
+              <div className={cn("h-1 flex-1 rounded", strength >= 1 ? "bg-[var(--destructive)]" : "bg-[var(--bg-elevated)]")} />
+              <div className={cn("h-1 flex-1 rounded", strength >= 2 ? "bg-[var(--warning,#f59e0b)]" : "bg-[var(--bg-elevated)]")} />
+              <div className={cn("h-1 flex-1 rounded", strength >= 3 ? "bg-[var(--success)]" : "bg-[var(--bg-elevated)]")} />
+            </div>
+          )}
         </div>
 
         <div className="space-y-1.5">
@@ -153,16 +172,20 @@ function ResetPasswordForm() {
             disabled={loading}
             className="h-10 rounded-lg bg-background ring-offset-background placeholder:text-muted-foreground/60 focus-visible:ring-2 focus-visible:ring-gold/40 focus-visible:border-gold/50"
           />
+          {passwordMismatch && (
+            <p className="text-xs text-destructive">Passwords do not match</p>
+          )}
         </div>
 
         <Button
           type="submit"
-          disabled={loading}
+          disabled={loading || passwordMismatch}
           variant="gold-solid"
           size="lg"
           className="w-full"
         >
-          {loading ? "Updating..." : "Update Password"}
+          {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+          {loading ? "Updating" : "Update Password"}
         </Button>
       </form>
     </div>
