@@ -143,6 +143,8 @@ export function ReportDetail({ report: initialReport, screenshotUrl, events: ini
   const [closeDialogOpen, setCloseDialogOpen] = useState(false);
   const [closeStatus, setCloseStatus] = useState<IssueStatus>("resolved");
   const [closeNote, setCloseNote] = useState("");
+  const [reopenDialogOpen, setReopenDialogOpen] = useState(false);
+  const [reopenReason, setReopenReason] = useState("");
 
   const isClosing = CLOSED_STATUSES.includes(status);
   const notesEmpty = notes.trim().length === 0;
@@ -484,12 +486,7 @@ export function ReportDetail({ report: initialReport, screenshotUrl, events: ini
   const handleReopen = () => {
     setError(null);
     setSuccess(null);
-    // window.prompt returns null on Cancel → abort. Empty string → reopen without reason.
-    const reason = typeof window !== "undefined"
-      ? window.prompt("Reason for reopening (optional)")
-      : "";
-    if (reason === null) return;
-    const reasonTrimmed = reason.trim();
+    const reasonTrimmed = reopenReason.trim();
     startTransition(async () => {
       try {
         const payload: { status: IssueStatus; admin_notes?: string } = { status: "open" };
@@ -519,6 +516,8 @@ export function ReportDetail({ report: initialReport, screenshotUrl, events: ini
         if (data.event) {
           setEvents((prev) => [...prev, data.event as IssueReportEventWithActor]);
         }
+        setReopenDialogOpen(false);
+        setReopenReason("");
         setSuccess("Ticket reopened");
       } catch (e) {
         setError(e instanceof Error ? e.message : "Unexpected error occurred");
@@ -853,7 +852,11 @@ export function ReportDetail({ report: initialReport, screenshotUrl, events: ini
 
                 {reportIsClosed && (
                   <button
-                    onClick={handleReopen}
+                    onClick={() => {
+                      setReopenDialogOpen((v) => !v);
+                      setError(null);
+                      setSuccess(null);
+                    }}
                     disabled={isPending}
                     className="h-9 rounded-[8px] px-4 text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
                     style={{
@@ -862,7 +865,7 @@ export function ReportDetail({ report: initialReport, screenshotUrl, events: ini
                       color: "var(--destructive, #ef4444)",
                     }}
                   >
-                    {isPending ? "Reopening…" : "Reopen ticket"}
+                    {reopenDialogOpen ? "Cancel reopen" : "Reopen ticket"}
                   </button>
                 )}
               </div>
@@ -936,6 +939,69 @@ export function ReportDetail({ report: initialReport, screenshotUrl, events: ini
                       onClick={() => {
                         setCloseDialogOpen(false);
                         setCloseNote("");
+                      }}
+                      disabled={isPending}
+                      className="h-9 rounded-[8px] px-4 text-sm font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                      style={{
+                        background: "transparent",
+                        border: "1px solid var(--border-subtle)",
+                        color: "var(--text-secondary-ds)",
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {reopenDialogOpen && reportIsClosed && (
+                <div
+                  className="space-y-3 rounded-[8px] border p-3"
+                  style={{
+                    background: "var(--bg-root)",
+                    borderColor: "var(--border-subtle)",
+                  }}
+                >
+                  <p
+                    className="text-xs font-semibold uppercase tracking-wider"
+                    style={{ color: "var(--admin-text-secondary)" }}
+                  >
+                    Reopen ticket
+                  </p>
+                  <div className="space-y-1.5">
+                    <label
+                      className="text-xs font-medium text-muted-foreground"
+                      htmlFor="reopen-reason"
+                    >
+                      Reason (optional)
+                    </label>
+                    <textarea
+                      id="reopen-reason"
+                      value={reopenReason}
+                      onChange={(e) => setReopenReason(e.target.value)}
+                      placeholder="Why is this being reopened? (optional)"
+                      rows={3}
+                      className="w-full rounded-[8px] border px-3 py-2 text-sm resize-none focus:outline-none"
+                      style={inputStyle}
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleReopen}
+                      disabled={isPending}
+                      className="h-9 rounded-[8px] px-4 text-sm font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                      style={{
+                        background: "var(--bg-elevated)",
+                        border: "1px solid var(--destructive)",
+                        color: "var(--destructive, #ef4444)",
+                      }}
+                    >
+                      {isPending ? "Reopening…" : "Confirm reopen"}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setReopenDialogOpen(false);
+                        setReopenReason("");
                       }}
                       disabled={isPending}
                       className="h-9 rounded-[8px] px-4 text-sm font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
