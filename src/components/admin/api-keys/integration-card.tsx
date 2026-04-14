@@ -5,6 +5,14 @@ import { ExternalLink, Loader2, CheckCircle2, XCircle, PlayCircle } from "lucide
 import type { IntegrationStatus, IntegrationId } from "@/types/admin-api-keys";
 import { StatusBadge } from "./status-badge";
 import { BreakerBadge } from "./breaker-badge";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import {
+  Confirmation,
+  ConfirmationIcon,
+  ConfirmationTitle,
+  ConfirmationDescription,
+} from "@/components/ui/confirmation";
+import { useToast } from "@/hooks/use-toast";
 
 interface TestResult {
   ok: boolean;
@@ -30,6 +38,8 @@ export function IntegrationCard({ integration, onMockModeChange }: IntegrationCa
   const [result, setResult] = useState<TestResult | null>(null);
   const [mockBusy, setMockBusy] = useState(false);
   const [mockOn, setMockOn] = useState(integration.mockModeActive);
+  const [pendingDisableMock, setPendingDisableMock] = useState(false);
+  const { toast } = useToast();
 
   async function runTest() {
     setTesting(true);
@@ -51,9 +61,18 @@ export function IntegrationCard({ integration, onMockModeChange }: IntegrationCa
     }
   }
 
-  async function toggleMock() {
+  function handleMockToggle() {
+    // Turning mock ON is safe — no confirmation needed
+    if (!mockOn) {
+      void sendMockPatch(true);
+    } else {
+      // Turning mock OFF burns credits — require confirmation
+      setPendingDisableMock(true);
+    }
+  }
+
+  async function sendMockPatch(next: boolean) {
     setMockBusy(true);
-    const next = !mockOn;
     try {
       const res = await fetch("/api/admin/api-keys/config", {
         method: "POST",
@@ -67,7 +86,11 @@ export function IntegrationCard({ integration, onMockModeChange }: IntegrationCa
       setMockOn(next);
       onMockModeChange?.(integration.id, next);
     } catch (err) {
-      console.error("[IntegrationCard] mock toggle failed:", err);
+      toast({
+        variant: "destructive",
+        title: "Couldn't update mock mode",
+        description: err instanceof Error ? err.message : "Unknown error",
+      });
     } finally {
       setMockBusy(false);
     }
@@ -159,7 +182,7 @@ export function IntegrationCard({ integration, onMockModeChange }: IntegrationCa
           </div>
           <button
             type="button"
-            onClick={toggleMock}
+            onClick={handleMockToggle}
             disabled={mockBusy}
             aria-pressed={mockOn}
             className="relative inline-flex h-5 w-9 items-center rounded-full transition-colors"
@@ -244,6 +267,28 @@ export function IntegrationCard({ integration, onMockModeChange }: IntegrationCa
           )}
         </div>
       )}
+
+      <Dialog open={pendingDisableMock} onOpenChange={setPendingDisableMock}>
+        <DialogContent>
+          <Confirmation
+            isDestructive
+            confirmLabel="Turn off mock mode"
+            cancelLabel="Keep mock mode on"
+            onConfirm={async () => {
+              await sendMockPatch(false);
+              setPendingDisableMock(false);
+            }}
+            onCancel={() => setPendingDisableMock(false)}
+            isLoading={mockBusy}
+          >
+            <ConfirmationIcon variant="destructive" />
+            <ConfirmationTitle>Turn off mock mode?</ConfirmationTitle>
+            <ConfirmationDescription>
+              Live Apollo enrichment will begin immediately on the next bulk-enrich action. This burns paid credits. Only proceed if credits have renewed.
+            </ConfirmationDescription>
+          </Confirmation>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
