@@ -8,6 +8,7 @@ import {
   deletePersona,
 } from "@/lib/personas/queries";
 import type { PersonaFilters } from "@/lib/personas/types";
+import { requireRole } from "@/lib/auth/rbac";
 
 export async function createPersonaAction(formData: FormData) {
   const supabase = await createClient();
@@ -22,6 +23,9 @@ export async function createPersonaAction(formData: FormData) {
   if (!tenantId) {
     throw new Error("No tenant ID found in user metadata");
   }
+
+  // Server-side role guard — phase 42. Per 42-01-PLAN.md Pattern A.
+  await requireRole("agent");
 
   // Parse form data
   const name = formData.get("name") as string;
@@ -102,6 +106,9 @@ export async function updatePersonaAction(id: string, formData: FormData) {
     throw new Error("No tenant ID found in user metadata");
   }
 
+  // Server-side role guard — phase 42. Per 42-01-PLAN.md Pattern A.
+  await requireRole("agent");
+
   // Parse form data
   const name = formData.get("name") as string;
   const description = formData.get("description") as string | null;
@@ -167,6 +174,9 @@ export async function deletePersonaAction(id: string) {
   if (!tenantId) {
     throw new Error("No tenant ID found in user metadata");
   }
+
+  // Server-side role guard — phase 42. Per 42-01-PLAN.md Pattern A.
+  await requireRole("agent");
 
   // Delete persona
   await deletePersona(id, tenantId);
