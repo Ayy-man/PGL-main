@@ -29,5 +29,5 @@ export default async function ListsPage({ params }: PageProps) {
 
   const lists = await getLists(tenantId);
 
-  return <ListsPageClient lists={lists} canEdit={canEdit} />;
+  return <ListsPageClient lists={lists} canEdit={canEdit} tenantId={tenantId} />;
 }

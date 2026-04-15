@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import type { List } from "@/lib/lists/types";
-import { ListGrid } from "./list-grid";
+import { ListGrid, type ListGridOptimisticHandle } from "./list-grid";
 import { CreateListDialog } from "./create-list-dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { List as ListIcon } from "lucide-react";
@@ -16,10 +16,15 @@ import {
 interface ListsPageClientProps {
   lists: List[];
   canEdit?: boolean;
+  tenantId?: string;
 }
 
-export function ListsPageClient({ lists: serverLists, canEdit = true }: ListsPageClientProps) {
+export function ListsPageClient({ lists: serverLists, canEdit = true, tenantId }: ListsPageClientProps) {
   const [lists, setLists] = useState(serverLists);
+  // Imperative handle exposed by ListGrid so the dialog can push a pending row
+  // into the grid the instant the user submits — without prop-drilling or
+  // lifting grid state up to this page client. See 40-05-PLAN.md Task 2.
+  const [gridHandle, setGridHandle] = useState<ListGridOptimisticHandle | null>(null);
 
   useEffect(() => { setLists(serverLists); }, [serverLists]);
 
@@ -39,7 +44,11 @@ export function ListsPageClient({ lists: serverLists, canEdit = true }: ListsPag
           </p>
         </div>
         {canEdit ? (
-          <CreateListDialog onCreated={handleListCreated} />
+          <CreateListDialog
+            onCreated={handleListCreated}
+            gridHandle={gridHandle}
+            tenantId={tenantId}
+          />
         ) : (
           <Tooltip>
             <TooltipTrigger asChild>
@@ -61,7 +70,11 @@ export function ListsPageClient({ lists: serverLists, canEdit = true }: ListsPag
           description="Create your first list to start organizing prospects for outreach."
         >
           {canEdit ? (
-            <CreateListDialog onCreated={handleListCreated} />
+            <CreateListDialog
+              onCreated={handleListCreated}
+              gridHandle={gridHandle}
+              tenantId={tenantId}
+            />
           ) : (
             <Tooltip>
               <TooltipTrigger asChild>
@@ -76,7 +89,7 @@ export function ListsPageClient({ lists: serverLists, canEdit = true }: ListsPag
           )}
         </EmptyState>
       ) : (
-        <ListGrid lists={lists} canEdit={canEdit} />
+        <ListGrid lists={lists} canEdit={canEdit} onReady={setGridHandle} />
       )}
     </div>
   );
