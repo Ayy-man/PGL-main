@@ -5,6 +5,12 @@ import type { ApolloPerson } from "@/lib/apollo/types";
 import type { List } from "@/lib/lists/types";
 import { AddToListDialog } from "./add-to-list-dialog";
 import { Button } from "@/components/ui/button";
+import { WealthTierBadge } from "@/components/ui/wealth-tier-badge";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 import { Mail, Phone, Linkedin } from "lucide-react";
 
 function getInitials(name: string): string {
@@ -118,6 +124,24 @@ export function ProspectResultCard({
               {name}
             </span>
             <span className="text-xs text-muted-foreground/50">—</span>
+            {/* Wealth tier badge (tolerant of extended prospect shape — search flows
+                that have run enrichment may attach `wealth_tier` to the person payload). */}
+            {(() => {
+              const tier = (prospect as ApolloPerson & { wealth_tier?: string | null }).wealth_tier;
+              if (!tier) return null;
+              return (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className="inline-flex cursor-help">
+                      <WealthTierBadge tier={tier} />
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    Estimated net worth. Tier is derived from public filings, company ownership, and observed signals.
+                  </TooltipContent>
+                </Tooltip>
+              );
+            })()}
           </div>
 
           {/* Title + Company */}

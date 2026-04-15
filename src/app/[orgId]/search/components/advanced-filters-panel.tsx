@@ -4,6 +4,11 @@ import { useState, useEffect, useMemo } from "react";
 import { SlidersHorizontal, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TagInput } from "@/components/ui/tag-input";
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 import type { PersonaFilters } from "@/lib/personas/types";
 
 interface AdvancedFiltersPanelProps {
@@ -84,36 +89,43 @@ export function AdvancedFiltersPanel({
   return (
     <div>
       {/* Toggle button — always visible */}
-      <button
-        type="button"
-        data-tour-id="advanced-filters-toggle"
-        onClick={() => setIsOpen((prev) => !prev)}
-        className="flex items-center gap-2 text-[13px] font-medium cursor-pointer transition-all duration-200 hover:text-[var(--text-primary-ds)]"
-        style={{
-          color: "var(--text-secondary-ds)",
-          background: "transparent",
-          border: "none",
-          padding: 0,
-        }}
-        aria-expanded={isOpen}
-      >
-        <SlidersHorizontal className="h-4 w-4 shrink-0" />
-        <span>Advanced Filters</span>
-        {diffDetected && isOpen && (
-          <span
-            className="h-2 w-2 rounded-full shrink-0"
-            style={{ background: "var(--gold-primary)" }}
-            aria-label="Unapplied changes"
-          />
-        )}
-        <ChevronDown
-          className="h-4 w-4 shrink-0"
-          style={{
-            transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
-            transition: "transform 0.2s ease",
-          }}
-        />
-      </button>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            data-tour-id="advanced-filters-toggle"
+            onClick={() => setIsOpen((prev) => !prev)}
+            className="flex items-center gap-2 text-[13px] font-medium cursor-pointer transition-all duration-200 hover:text-[var(--text-primary-ds)]"
+            style={{
+              color: "var(--text-secondary-ds)",
+              background: "transparent",
+              border: "none",
+              padding: 0,
+            }}
+            aria-expanded={isOpen}
+          >
+            <SlidersHorizontal className="h-4 w-4 shrink-0" />
+            <span>Advanced Filters</span>
+            {diffDetected && isOpen && (
+              <span
+                className="h-2 w-2 rounded-full shrink-0"
+                style={{ background: "var(--gold-primary)" }}
+                aria-label="Unapplied changes"
+              />
+            )}
+            <ChevronDown
+              className="h-4 w-4 shrink-0"
+              style={{
+                transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+                transition: "transform 0.2s ease",
+              }}
+            />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent>
+          Narrow results by industry, title, location, wealth tier, and more.
+        </TooltipContent>
+      </Tooltip>
 
       {/* Collapsible panel */}
       {isOpen && (

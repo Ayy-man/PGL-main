@@ -806,6 +806,14 @@ export function ProfileView({
                   market: "Market",
                   claude: "AI",
                 };
+                // One-sentence tooltip copy per source — explains what each dot means.
+                const sourceTooltips: Record<string, string> = {
+                  contactout: "Email and phone lookup via ContactOut.",
+                  exa: "Public web signals — news, bios, and employer pages.",
+                  sec: "SEC EDGAR filings including Form 4 insider transactions.",
+                  market: "Live market data for publicly traded employers.",
+                  claude: "AI-generated summary synthesizing all sources above.",
+                };
                 return (
                   <div className="flex flex-wrap gap-1.5 mt-2">
                     {enrichmentSources.map((src) => {
@@ -829,23 +837,29 @@ export function ProfileView({
                           ? "var(--gold-primary)"
                           : "var(--text-secondary, rgba(232,228,220,0.5))";
                       return (
-                        <div
-                          key={src}
-                          className="flex items-center px-2 py-1 rounded-[8px] text-[11px] gap-1.5 transition-all flex-1 min-w-[calc(50%-3px)]"
-                          style={{
-                            border: `1px solid ${isComplete ? "rgba(212,175,55,0.15)" : "var(--border-default, rgba(255,255,255,0.06))"}`,
-                            background: isComplete
-                              ? "rgba(212,175,55,0.04)"
-                              : "transparent",
-                            color: textColor,
-                          }}
-                        >
-                          <span
-                            className="h-1.5 w-1.5 rounded-full inline-block shrink-0"
-                            style={{ background: dotColor }}
-                          />
-                          {shortLabels[src] ?? src}
-                        </div>
+                        <Tooltip key={src}>
+                          <TooltipTrigger asChild>
+                            <div
+                              className="flex items-center px-2 py-1 rounded-[8px] text-[11px] gap-1.5 transition-all flex-1 min-w-[calc(50%-3px)] cursor-help"
+                              style={{
+                                border: `1px solid ${isComplete ? "rgba(212,175,55,0.15)" : "var(--border-default, rgba(255,255,255,0.06))"}`,
+                                background: isComplete
+                                  ? "rgba(212,175,55,0.04)"
+                                  : "transparent",
+                                color: textColor,
+                              }}
+                            >
+                              <span
+                                className="h-1.5 w-1.5 rounded-full inline-block shrink-0"
+                                style={{ background: dotColor }}
+                              />
+                              {shortLabels[src] ?? src}
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            {sourceTooltips[src] ?? `${shortLabels[src] ?? src} enrichment source.`}
+                          </TooltipContent>
+                        </Tooltip>
                       );
                     })}
                   </div>

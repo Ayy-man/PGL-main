@@ -89,10 +89,17 @@ export function BulkActionsBar({
           </Button>
 
           {canEdit ? (
-            <Button variant="gold" size="sm" onClick={onEnrich}>
-              <Sparkles className="h-4 w-4 mr-1.5" />
-              Enrich Selection
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="gold" size="sm" onClick={onEnrich}>
+                  <Sparkles className="h-4 w-4 mr-1.5" />
+                  Enrich Selection
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                Uses about 1 credit per prospect. Pulls email, phone, wealth signals, and recent news.
+              </TooltipContent>
+            </Tooltip>
           ) : (
             <Tooltip>
               <TooltipTrigger asChild>
