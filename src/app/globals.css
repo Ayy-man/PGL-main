@@ -146,6 +146,9 @@
     --border-gold: rgba(212,175,55,0.25);
     --border-sidebar: rgba(212,175,55,0.08);
     --gold-primary: #d4af37;
+    /* r,g,b triplet — compose alpha via rgba(var(--gold-primary-rgb), X).
+       Overridden per-tenant in [orgId]/layout.tsx so tenant themes cascade. */
+    --gold-primary-rgb: 212,175,55;
     --gold-bright: #f0d060;
     --gold-text: rgba(212,175,55,0.7);
     --gold-bg: rgba(212,175,55,0.08);
