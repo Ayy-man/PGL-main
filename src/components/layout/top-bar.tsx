@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { CommandSearch } from "./command-search";
+import { HelpMenu } from "./help-menu";
 
 interface TopBarProps {
   userName?: string;
@@ -25,6 +26,7 @@ export function TopBar({ userName, userInitials = "?", avatarUrl, orgId }: TopBa
 
       {/* Right: Avatar (bell removed — no notifications feature) */}
       <div className="flex items-center gap-3">
+        <HelpMenu orgId={orgId} />
         <Link
           href={orgId ? `/${orgId}/settings` : "/settings"}
           title={userName}
