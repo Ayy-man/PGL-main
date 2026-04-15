@@ -4,14 +4,14 @@ milestone: v2.0
 milestone_name: milestone
 status: executing
 stopped_at: Completed 27-03-PLAN.md
-last_updated: "2026-04-15T13:04:35.851Z"
-last_activity: 2026-04-15 -- Phase 40 execution started
+last_updated: "2026-04-15T16:47:57.883Z"
+last_activity: 2026-04-15 -- Phase 41 execution started
 progress:
   total_phases: 35
   completed_phases: 15
-  total_plans: 90
-  completed_plans: 83
-  percent: 92
+  total_plans: 96
+  completed_plans: 90
+  percent: 94
 ---
 
 # Project State
@@ -22,14 +22,14 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** Real estate teams can quickly find and qualify wealthy prospects by searching structured lead databases, enriching profiles with personal contact info and wealth signals, and organizing prospects into actionable lists.
 
-**Current focus:** Phase 40 — instant-ux-demo-slice
+**Current focus:** Phase 41 — tutorial-onboarding-flows
 
 ## Current Position
 
-Phase: 40 (instant-ux-demo-slice) — EXECUTING
-Plan: 1 of 8
-Status: Executing Phase 40
-Last activity: 2026-04-15 -- Phase 40 execution started
+Phase: 41 (tutorial-onboarding-flows) — EXECUTING
+Plan: 1 of 6
+Status: Executing Phase 41
+Last activity: 2026-04-15 -- Phase 41 execution started
 
 Progress: [████████████████████] 100% (20/20 phases complete)
 
