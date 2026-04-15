@@ -20,6 +20,10 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
+  ROW_SKELETON_SHAPE,
+  CARD_SKELETON_SHAPE,
+} from "@/components/ui/lib/skeleton-shapes";
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -58,6 +62,78 @@ function SkeletonRow() {
       <td className="px-3 py-4"><div className="flex gap-1"><Skeleton className="h-2.5 w-2.5 rounded-full" /><Skeleton className="h-2.5 w-2.5 rounded-full" /><Skeleton className="h-2.5 w-2.5 rounded-full" /></div></td>
       <td className="px-3 py-4" />
     </tr>
+  );
+}
+
+/**
+ * Phase 40-07: skeleton row shown APPENDED to the bottom of the search
+ * results while an extend-search ("Load more 500") request is in flight.
+ * Uses rounded-lg per Phase 14-polish row-shape convention. Matches the
+ * 6-column layout of <ProspectResultsTable>.
+ */
+function ExtendSkeletonRow({ variant }: { variant: "even" | "odd" }) {
+  return (
+    <tr
+      style={{
+        borderBottom: "1px solid var(--border-subtle)",
+        background: variant === "odd" ? "rgba(255,255,255,0.015)" : "transparent",
+      }}
+    >
+      <td className="py-5 pl-5 pr-3">
+        <Skeleton className={`h-4 w-4 ${ROW_SKELETON_SHAPE}`} />
+      </td>
+      <td className="px-3 py-5">
+        <div className="flex items-center gap-3">
+          <Skeleton className="h-10 w-10 rounded-full" />
+          <div className="space-y-1.5">
+            <Skeleton className={`h-4 w-32 ${ROW_SKELETON_SHAPE}`} />
+            <Skeleton className={`h-3 w-24 ${ROW_SKELETON_SHAPE}`} />
+          </div>
+        </div>
+      </td>
+      <td className="px-3 py-5">
+        <Skeleton className={`h-6 w-24 ${ROW_SKELETON_SHAPE}`} />
+      </td>
+      <td className="px-3 py-5">
+        <div className="space-y-1.5">
+          <Skeleton className={`h-4 w-40 ${ROW_SKELETON_SHAPE}`} />
+          <Skeleton className={`h-3 w-28 ${ROW_SKELETON_SHAPE}`} />
+        </div>
+      </td>
+      <td className="px-3 py-5">
+        <Skeleton className={`h-3 w-16 ${ROW_SKELETON_SHAPE}`} />
+      </td>
+      <td className="px-3 py-5">
+        <div className="flex gap-1">
+          <Skeleton className="h-2.5 w-2.5 rounded-full" />
+          <Skeleton className="h-2.5 w-2.5 rounded-full" />
+          <Skeleton className="h-2.5 w-2.5 rounded-full" />
+        </div>
+      </td>
+    </tr>
+  );
+}
+
+/**
+ * Mobile card-shape variant: rounded-[14px] per card-shape convention.
+ */
+function ExtendSkeletonCard() {
+  return (
+    <div
+      className={`p-4 ${CARD_SKELETON_SHAPE}`}
+      style={{
+        border: "1px solid var(--border-subtle)",
+        background: "rgba(255,255,255,0.02)",
+      }}
+    >
+      <div className="flex items-center gap-3">
+        <Skeleton className="h-10 w-10 rounded-full" />
+        <div className="flex-1 space-y-1.5">
+          <Skeleton className={`h-4 w-32 ${ROW_SKELETON_SHAPE}`} />
+          <Skeleton className={`h-3 w-48 ${ROW_SKELETON_SHAPE}`} />
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -842,6 +918,47 @@ export function SearchContent({ personas, lists, orgId, canEdit = true }: Search
               lastRefreshedAt={lastRefreshedAt}
             />
           </div>
+        )}
+
+        {/*
+          Phase 40-07: extend-search skeleton rows.
+          When "Load next 500 from Apollo" is clicked, append 5 skeleton rows
+          immediately at the bottom of the results so the wait feels purposeful
+          rather than frozen. Replaced by real rows via loadSavedProspects()
+          on response settle. Only rendered in saved-search mode because
+          handleLoadMore only fires there.
+        */}
+        {isSavedSearchMode && isLoadingMore && (
+          <>
+            {/* Desktop table skeleton — mirrors ProspectResultsTable 6-col layout */}
+            <div
+              className="hidden md:block overflow-hidden"
+              data-testid="extend-skeleton-rows"
+              style={{
+                borderLeft: "1px solid var(--border-default)",
+                borderRight: "1px solid var(--border-default)",
+                borderBottom: "1px solid var(--border-default)",
+                background: "var(--bg-card-gradient)",
+              }}
+            >
+              <table className="min-w-full">
+                <tbody>
+                  {[0, 1, 2, 3, 4].map((i) => (
+                    <ExtendSkeletonRow
+                      key={`extend-skeleton-${i}`}
+                      variant={i % 2 === 1 ? "odd" : "even"}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {/* Mobile card-shape variant */}
+            <div className="md:hidden space-y-2 mt-2">
+              {[0, 1, 2, 3, 4].map((i) => (
+                <ExtendSkeletonCard key={`extend-skeleton-card-${i}`} />
+              ))}
+            </div>
+          </>
         )}
 
         {/* Pagination — saved search mode */}

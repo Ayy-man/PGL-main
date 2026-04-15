@@ -175,6 +175,17 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
     el.style.height = Math.min(el.scrollHeight, maxHeight) + "px";
   };
 
+  // Phase 40-07: skeleton verified — Phase 27 shimmer still fires on send.
+  //   - streamPhase transitions idle -> reasoning -> tool -> shimmer -> cards
+  //     -> sources -> complete (see line ~722).
+  //   - While isSearching && streamingCards.length === 0 && streamPhase !== "reasoning",
+  //     4 shimmer rows render inline (line ~812).
+  //   - A dedicated "Analyzing results" shimmer status line renders when
+  //     streamPhase === "shimmer" (line ~828).
+  // No code change required — the loading affordance survived the Phase 40
+  // refactors. If a future refactor removes the `streamPhase === "shimmer"`
+  // branch or the shimmer-rows block, this comment + the explicit branches
+  // below are the load-bearing surfaces to restore.
   const handleSend = useCallback(
     async (query: string) => {
       if (!query.trim() || isSearching) return;

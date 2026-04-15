@@ -30,3 +30,25 @@ appears to be a Supabase RPC mock signature mismatch in the mock setup
 (`ts(2554)`-style runtime error at line 257 of `enrich-prospect.ts`).
 Out of scope per executor deviation rules.
 
+## Pre-existing build-time prerender errors
+
+**Source plan:** 40-07 (discovered during Task 2 build verification)
+
+**Pages affected (14):**
+`/_not-found`, `/login`, `/forgot-password`, `/reset-password`, `/suspended`,
+`/` (root), `/admin`, `/admin/analytics`, `/admin/api-keys`,
+`/admin/automations`, `/admin/tenants/new`, `/admin/users/new`,
+`/onboarding/confirm-tenant`, `/onboarding/set-password`.
+
+**Error:** `TypeError: Cannot read properties of undefined (reading 'trim')`
+at `.next/server/chunks/6352.js` during static export.
+
+**Why deferred:** Confirmed pre-existing by stashing the Task 2 working tree
+and re-running `next build` against unmodified base commit `4d02a76` — same
+14 pages fail with the same error, so not a regression introduced by 40-07.
+Next.js `Compiled successfully` and `Linting and checking validity of types`
+both pass, so the failure is at the static-prerender phase for pages that
+likely need a runtime env var (probably a shared layout that reads
+`process.env.*.trim()` without a null guard). Out of scope per executor
+deviation rules; not touching files I didn't own.
+
