@@ -9,6 +9,11 @@ import { PersonaPillRow } from "@/components/dashboard/persona-pill-row";
 import { RecentExportsTable } from "@/components/dashboard/recent-exports-table";
 import { ActivityFeed } from "@/components/dashboard/activity-feed";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { AdminOnboardingChecklist } from "@/components/onboarding/admin-checklist";
+import { isChecklistComplete } from "@/lib/onboarding/checklist";
+import { emptyStateCopy } from "@/lib/onboarding/empty-state-copy";
+import type { OnboardingState } from "@/types/onboarding";
 import type { ActivityLogEntry } from "@/lib/activity-logger";
 
 export default async function TenantDashboard({
@@ -29,6 +34,14 @@ export default async function TenantDashboard({
   const tenantId = user.app_metadata?.tenant_id as string;
   const role = user.app_metadata?.role as string;
   const isAdmin = role === "tenant_admin" || role === "super_admin";
+
+  // Phase 41-04 — pull onboarding_state off the session JWT (cheap, already
+  // in app_metadata). `isTenantAdmin` gates the checklist render — super_admin
+  // never sees it because super_admin dashboards are tenant-agnostic.
+  const isTenantAdmin = role === "tenant_admin";
+  const onboardingState =
+    (user.app_metadata?.onboarding_state as OnboardingState | undefined) ??
+    null;
 
   // --- Date ranges ---
   const now = new Date();
@@ -55,6 +68,7 @@ export default async function TenantDashboard({
       listsCreated: number;
     } | null>,
     Promise<ActivityLogEntry[]>,
+    Promise<{ logo_url: string | null; theme: string | null } | null>,
   ] = [
     getPersonas(tenantId).catch(() => []),
     getLists(tenantId).catch(() => []),
@@ -128,10 +142,36 @@ export default async function TenantDashboard({
         return [];
       }
     })(),
+    // Phase 41-04 — tenant row (logo_url, theme) for the admin onboarding
+    // checklist's self-healing derivation. Only fetched for tenant admins to
+    // avoid a pointless round-trip for agents/assistants.
+    isTenantAdmin
+      ? (async () => {
+          try {
+            const { data } = await supabase
+              .from("tenants")
+              .select("logo_url, theme")
+              .eq("id", tenantId)
+              .single();
+            return (
+              (data as { logo_url: string | null; theme: string | null }) ??
+              null
+            );
+          } catch {
+            return null;
+          }
+        })()
+      : Promise.resolve(null),
   ];
 
-  const [personas, lists, newProspectsResult, analyticsTotals, recentExports] =
-    await Promise.all(fetchPromises);
+  const [
+    personas,
+    lists,
+    newProspectsResult,
+    analyticsTotals,
+    recentExports,
+    tenantRow,
+  ] = await Promise.all(fetchPromises);
   const newProspectsCount = newProspectsResult?.count ?? 0;
 
   // Resolve user names for export entries
@@ -169,8 +209,43 @@ export default async function TenantDashboard({
       ? Math.min(100, Math.round((profilesEnriched / profilesViewed) * 100))
       : 0;
 
+  // Phase 41-04 — admin onboarding checklist gate. Two conditions must hold:
+  //   1. current user is a tenant_admin (not agent/assistant/super_admin)
+  //   2. at least one of the 4 checklist items is still incomplete
+  // `isChecklistComplete` applies the same self-healing derivation as the
+  // rendered component, so the gate is consistent with what the user would
+  // see if we rendered unconditionally.
+  const checklistTenant = {
+    logo_url: tenantRow?.logo_url ?? null,
+    theme: tenantRow?.theme ?? null,
+  };
+  const showChecklist =
+    isTenantAdmin &&
+    !isChecklistComplete({
+      state: onboardingState,
+      tenant: checklistTenant,
+      personaCount: personas.length,
+      orgId,
+    });
+
+  // Phase 41-04 (absorbed from Plan 41-05) — dashboard no-personas EmptyState
+  // copy comes from `emptyStateCopy("dashboard")` so future copy tweaks are a
+  // one-file edit in src/lib/onboarding/empty-state-copy.ts.
+  const dashboardEmptyCopy = emptyStateCopy("dashboard");
+
   return (
     <div className="page-enter space-y-4 md:space-y-8">
+      {/* Phase 41-04 — Admin onboarding checklist (tenant_admin only, hidden
+          once all 4 items complete). */}
+      {showChecklist && (
+        <AdminOnboardingChecklist
+          state={onboardingState}
+          tenant={checklistTenant}
+          personaCount={personas.length}
+          orgId={orgId}
+        />
+      )}
+
       {/* New prospects alert banner */}
       {newProspectsCount > 0 && (
         <div
@@ -273,8 +348,24 @@ export default async function TenantDashboard({
         )}
       </div>
 
-      {/* Persona pill row (all roles) */}
-      <PersonaPillRow personas={personas} orgId={orgId} />
+      {/* Persona pill row (all roles). When empty, render the dashboard
+          EmptyState with copy driven by `emptyStateCopy("dashboard")` —
+          absorbed from Plan 41-05 per the Wave 3 page.tsx collision
+          amendment. */}
+      {personas.length === 0 ? (
+        <EmptyState
+          title={dashboardEmptyCopy.title}
+          description={dashboardEmptyCopy.body}
+        >
+          <Button asChild variant="gold-solid">
+            <Link href={dashboardEmptyCopy.ctaHref(orgId)}>
+              {dashboardEmptyCopy.ctaLabel}
+            </Link>
+          </Button>
+        </EmptyState>
+      ) : (
+        <PersonaPillRow personas={personas} orgId={orgId} />
+      )}
     </div>
   );
 }
