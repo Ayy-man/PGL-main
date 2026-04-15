@@ -466,6 +466,36 @@ Plans:
 
 ---
 
+### Phase 40: Instant UX Pass — Optimistic Mutations + Supabase Realtime for Enrichment
+
+**Goal:** Eliminate every user-visible "waiting for server" moment. Audit every mutating action in the app (server actions, fetch POST/PATCH/DELETE calls to `/api/*`, Supabase writes) and resolve each one of three ways: (a) **optimistic update** — write to UI state immediately, then reconcile on server response (rename list, toggle favorite, add/remove tag, edit inline field, delete row, reorder, mark-seen, add-to-list, note save, status change); (b) **Supabase Realtime** — subscribe to the table and let the server push truth (enrichment_status transitions on `saved_search_prospects` + `prospects.enriched_at`, so green checks appear without browser refresh — the exact complaint Adrian raised on the 2026-04-13 call); (c) **fast skeleton** — when neither optimistic nor realtime fits (multi-step flows, external API calls), show a skeleton immediately and never a blank screen. Deliverable is a written audit spreadsheet of every mutating surface with its chosen strategy, then the actual implementation. Constraints: no regressions to RLS, no memory leaks from uncleaned Realtime channels, gracefully degrade to polling when WS fails, preserve toast/error UX on rollback.
+
+**Requirements:** PHASE-40-MUTATION-AUDIT, PHASE-40-OPTIMISTIC-LISTS, PHASE-40-OPTIMISTIC-PERSONAS, PHASE-40-OPTIMISTIC-PROSPECT-EDIT, PHASE-40-OPTIMISTIC-NOTES, PHASE-40-OPTIMISTIC-TAGS, PHASE-40-REALTIME-ENRICHMENT, PHASE-40-REALTIME-CHANNEL-CLEANUP, PHASE-40-SKELETON-FALLBACK, PHASE-40-ROLLBACK-UX, PHASE-40-RLS-SAFETY, PHASE-40-UAT
+**Depends on:** Phase 39
+**Status:** Not started
+
+---
+
+### Phase 41: Tutorial & Onboarding Flows — First-Run Experience for Non-Technical Users
+
+**Goal:** Ship the onboarding path for real estate agents (non-technical users per Adrian's 2026-04-13 call: *"they don't want to spend time understanding crazy interfaces and tools"*). Deliverable: (1) **first-run product tour** — dismissible multi-step coachmark/spotlight overlay triggered on first login to tenant app that walks through Discover → New Search → Enrich Selection → List → Prospect Profile → Export CSV (the core value journey); (2) **empty-state tutorials** — contextual "how to get started" cards on Dashboard, Lists, Personas, Activity when empty (not just decorative emptiness, an actual prompt with a CTA); (3) **embedded 2–3 min overview video** — Loom or self-hosted, accessible from a persistent Help button in the top bar; (4) **tooltip-style inline help** — on dense controls (Advanced Filters, enrichment status dots, bulk actions bar); (5) **"Replay tour" entry** in user settings so they can re-trigger the walkthrough; (6) **admin-side onboarding checklist** — for Tenant Admins on first login (invite team, upload logo, pick theme, create first persona) with progress bar that persists across sessions. Progress state stored per-user in Supabase. No architectural changes to existing surfaces — tutorial lives as an overlay + empty-state copy + help affordances. Success criterion: a real estate agent with zero prior context can complete their first enriched search without asking for help.
+
+**Requirements:** PHASE-41-TOUR-ENGINE, PHASE-41-TOUR-CONTENT-TENANT, PHASE-41-TOUR-CONTENT-ADMIN, PHASE-41-EMPTY-STATE-TUTORIALS, PHASE-41-OVERVIEW-VIDEO, PHASE-41-HELP-BUTTON, PHASE-41-TOOLTIP-HELP, PHASE-41-REPLAY-TOUR, PHASE-41-ADMIN-CHECKLIST, PHASE-41-PROGRESS-PERSISTENCE, PHASE-41-UAT
+**Depends on:** Phase 39 (Phase 40 not a hard dep — can ship in parallel)
+**Status:** Not started
+
+---
+
+### Phase 38 [STALE]: Per-Tenant Credit Limit System — DEFERRED
+
+**Status:** STALE as of 2026-04-15. Directory renamed to `.planning/phases/38-per-tenant-credit-system.STALE/`. Do not execute without explicit user confirmation.
+
+**Why deferred:** On the 2026-04-13 call with Camila + Ayman, Adrian said: *"We don't have to do that right now because I want to get the tool to the client working ASAP."* Priority is shipping to Maggie (first real estate client), collecting 2–3 weeks of real feedback, then re-evaluating whether credit metering matters when scaling to other verticals. Existing Apollo rate limits + the Maggie agreement are sufficient for now.
+
+**When to revisit:** (a) Adrian revives it explicitly, (b) a second tenant with different consumption profile onboards, or (c) usage exceeds what the current flat-fee agreement covers.
+
+---
+
 ### Phase 19: Admin Automations Dashboard — Inngest Monitoring
 
 **Goal:** Add an Automations tab to the admin panel that displays health, invocation history, and per-source status for all Inngest background functions (enrich-prospect, aggregate-daily-metrics). Clicking a run opens a detail sidebar with timing, source breakdown, error messages, and re-enrich action. Built from existing DB data (prospects, activity_log) supplemented by Inngest REST API for run-level details.
