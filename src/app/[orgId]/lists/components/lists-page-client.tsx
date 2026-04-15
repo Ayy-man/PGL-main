@@ -12,6 +12,7 @@ import {
   TooltipTrigger,
   TooltipContent,
 } from "@/components/ui/tooltip";
+import { emptyStateCopy } from "@/lib/onboarding/empty-state-copy";
 
 interface ListsPageClientProps {
   lists: List[];
@@ -20,6 +21,7 @@ interface ListsPageClientProps {
 }
 
 export function ListsPageClient({ lists: serverLists, canEdit = true, tenantId }: ListsPageClientProps) {
+  const copy = emptyStateCopy("lists");
   const [lists, setLists] = useState(serverLists);
   // Imperative handle exposed by ListGrid so the dialog can push a pending row
   // into the grid the instant the user submits — without prop-drilling or
@@ -66,9 +68,12 @@ export function ListsPageClient({ lists: serverLists, canEdit = true, tenantId }
       {lists.length === 0 ? (
         <EmptyState
           icon={ListIcon}
-          title="No lists yet"
-          description="Create your first list to start organizing prospects for outreach."
+          title={copy.title}
+          description={copy.body}
         >
+          {/* copy.ctaLabel ("Create your first list") used for the disabled preview below;
+              the enabled path opens CreateListDialog whose own trigger reads "Create List"
+              to match the header button — single-source CTA, no label drift. */}
           {canEdit ? (
             <CreateListDialog
               onCreated={handleListCreated}
@@ -80,7 +85,7 @@ export function ListsPageClient({ lists: serverLists, canEdit = true, tenantId }
               <TooltipTrigger asChild>
                 <span tabIndex={0}>
                   <Button disabled variant="gold-solid" size="sm">
-                    Create List
+                    {copy.ctaLabel}
                   </Button>
                 </span>
               </TooltipTrigger>

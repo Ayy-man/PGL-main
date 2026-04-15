@@ -1,11 +1,15 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState, useCallback } from "react";
+import { useParams } from "next/navigation";
 import { Copy, Activity } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { ACTION_TYPES, type ActionType } from "@/lib/activity-logger";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Button } from "@/components/ui/button";
+import { emptyStateCopy } from "@/lib/onboarding/empty-state-copy";
 
 interface ActivityEntry {
   id: string;
@@ -73,6 +77,9 @@ function getPresetDates(preset: DatePreset): { start: string; end: string } {
 }
 
 export function ActivityLogViewer() {
+  const params = useParams<{ orgId: string }>();
+  const orgId = params?.orgId ?? "";
+  const emptyCopy = emptyStateCopy("activity");
   const [entries, setEntries] = useState<ActivityEntry[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -226,9 +233,13 @@ export function ActivityLogViewer() {
         ) : entries.length === 0 ? (
           <EmptyState
             icon={Activity}
-            title="No activity yet"
-            description="Actions your team takes will appear here."
-          />
+            title={emptyCopy.title}
+            description={emptyCopy.body}
+          >
+            <Button asChild variant="gold-solid" size="sm">
+              <Link href={emptyCopy.ctaHref(orgId)}>{emptyCopy.ctaLabel}</Link>
+            </Button>
+          </EmptyState>
         ) : (
           <table className="w-full text-sm">
             <thead>

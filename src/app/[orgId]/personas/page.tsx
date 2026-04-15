@@ -1,13 +1,16 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { getPersonas } from "@/lib/personas/queries";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import { Button } from "@/components/ui/button";
 import { PersonasLayout } from "./components/personas-layout";
 import { ReportIssueButton } from "@/components/issues/report-issue-button";
 import { Users } from "lucide-react";
 import type { UserRole } from "@/types/auth";
 import { ROLE_PERMISSIONS } from "@/types/auth";
+import { emptyStateCopy } from "@/lib/onboarding/empty-state-copy";
 
 export default async function PersonasPage({
   params,
@@ -87,13 +90,23 @@ export default async function PersonasPage({
       </div>
 
       {/* Main content */}
-      {personas.length === 0 ? (
-        <EmptyState
-          icon={Users}
-          title="No saved searches yet"
-          description="Create a saved search to define your ideal buyer profile and start searching for qualified prospects."
-        />
-      ) : (
+      {personas.length === 0 ? (() => {
+        const copy = emptyStateCopy("personas");
+        // Route the CTA to /search so clicking it leads to the place where a
+        // saved search is actually created (via the "Save this search" flow).
+        // The helper's self-referential default is avoided for actionability.
+        return (
+          <EmptyState
+            icon={Users}
+            title={copy.title}
+            description={copy.body}
+          >
+            <Button asChild variant="gold-solid" size="sm">
+              <Link href={`/${orgId}/search`}>{copy.ctaLabel}</Link>
+            </Button>
+          </EmptyState>
+        );
+      })() : (
         <PersonasLayout personas={personas} prospectCount={prospectCount} hasActivity={hasActivity} orgId={orgId} canEdit={canEdit} />
       )}
     </div>
