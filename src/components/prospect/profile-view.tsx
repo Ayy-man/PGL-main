@@ -24,6 +24,7 @@ import { MarketIntelligenceCard } from "./market-intelligence-card";
 import { LookalikeDiscovery } from "./lookalike-discovery";
 import { useToast } from "@/hooks/use-toast";
 import { AddToListDialogProfile } from "./add-to-list-dialog-profile";
+import { applyTagDiff, computeTagDiff } from "./lib/tags-reducer";
 import type { ProspectActivity, ActivityCategory } from "@/types/activity";
 import {
   Tooltip,
@@ -291,34 +292,37 @@ export function ProfileView({
     await handleFieldSave("lead_owner_id", ownerId);
   }, [handleFieldSave]);
 
-  // Tags change handler — POST/DELETE per tag
+  // Tags change handler — POST/DELETE per tag with rollback-on-error toast
   const handleTagsChange = useCallback(async (newTags: string[]) => {
-    const added = newTags.filter((t) => !currentTags.includes(t));
-    const removed = currentTags.filter((t) => !newTags.includes(t));
+    const { added, removed } = computeTagDiff(currentTags, newTags);
 
     setCurrentTags(newTags); // optimistic
 
-    for (const tag of added) {
-      const res = await fetch(`/api/prospects/${prospect.id}/tags`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tag }),
-      });
-      if (!res.ok) {
-        setCurrentTags((prev) => prev.filter((t) => t !== tag)); // revert
-      }
-    }
-    for (const tag of removed) {
-      const res = await fetch(`/api/prospects/${prospect.id}/tags`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tag }),
-      });
-      if (!res.ok) {
-        setCurrentTags((prev) => [...prev, tag]); // revert
-      }
-    }
-  }, [currentTags, prospect.id]);
+    await applyTagDiff({
+      prospectId: prospect.id,
+      added,
+      removed,
+      fetchImpl: fetch,
+      onAddFail: (tag, errorMsg) => {
+        // Revert: remove the failed tag from UI state
+        setCurrentTags((prev) => prev.filter((t) => t !== tag));
+        toast({
+          title: `Failed to add tag "${tag}"`,
+          description: errorMsg,
+          variant: "destructive",
+        });
+      },
+      onRemoveFail: (tag, errorMsg) => {
+        // Revert: put the tag back (guarded against duplicates)
+        setCurrentTags((prev) => (prev.includes(tag) ? prev : [...prev, tag]));
+        toast({
+          title: `Failed to remove tag "${tag}"`,
+          description: errorMsg,
+          variant: "destructive",
+        });
+      },
+    });
+  }, [currentTags, prospect.id, toast]);
 
   const noteHasChanged = noteText !== lastSavedNote;
 
