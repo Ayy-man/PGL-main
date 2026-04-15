@@ -6,6 +6,7 @@ import { logActivity } from "@/lib/activity-logger";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { getSiteUrl } from "@/lib/site-url";
+import { updateOnboardingState } from "./onboarding-state";
 
 const inviteSchema = z.object({
   email: z.string().email("Valid email is required"),
@@ -139,7 +140,15 @@ export async function inviteTeamMember(formData: FormData) {
       revalidatePath(`/${orgId}/team`);
     }
 
-    // 9. Return success
+    // 9. Phase 41-04 — flip admin_checklist.invite_team to true. Fire-and-
+    //    forget: we log errors but never block the successful invite return.
+    try {
+      await updateOnboardingState({ admin_checklist: { invite_team: true } });
+    } catch (err) {
+      console.error("[onboarding] invite_team observer failed:", err);
+    }
+
+    // 10. Return success
     return { success: true, email: validated.email };
   } catch (error) {
     console.error("Invite team member error:", error);

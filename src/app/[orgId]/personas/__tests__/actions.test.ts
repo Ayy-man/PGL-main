@@ -29,6 +29,12 @@ vi.mock("@/lib/personas/queries", () => ({
 // --- Mock next/cache (revalidatePath is a no-op in tests) ---
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 
+// --- Mock @/app/actions/onboarding-state (Phase 41-04 checklist observer) ---
+// Server Action would drag in next/headers under `environment: 'node'` — stub it.
+vi.mock("@/app/actions/onboarding-state", () => ({
+  updateOnboardingState: vi.fn().mockResolvedValue({ ok: true }),
+}));
+
 // --- Import SUT after mocks ---
 import {
   createPersonaAction,

@@ -7,6 +7,7 @@ import { logActivity } from "@/lib/activity-logger";
 import { tenantSlugSchema } from "@/lib/validations/schemas";
 import { isValidTheme } from "@/lib/tenant-theme";
 import { revalidatePath } from "next/cache";
+import { updateOnboardingState } from "./onboarding-state";
 
 const updateTenantSettingsSchema = z.object({
   name: z.string().min(1, "Name is required").max(100),
@@ -49,10 +50,12 @@ export async function updateTenantSettings(formData: FormData) {
   const { name, slug, theme } = parsed.data;
   const admin = createAdminClient();
 
-  // Fetch current tenant data for before/after logging
+  // Fetch current tenant data for before/after logging + onboarding observer
+  // (logo_url read lets us flip admin_checklist.upload_logo idempotently when
+  // a save happens after a prior logo upload).
   const { data: oldTenant, error: fetchError } = await admin
     .from("tenants")
-    .select("name, slug, theme")
+    .select("name, slug, theme, logo_url")
     .eq("id", tenantId)
     .single();
 
@@ -87,6 +90,27 @@ export async function updateTenantSettings(formData: FormData) {
       after: newValues,
     },
   });
+
+  // Phase 41-04 — admin checklist observer. Flip pick_theme when the saved
+  // theme is non-default; flip upload_logo whenever the tenant already has a
+  // logo_url persisted (the observer is idempotent). The dedicated upload
+  // endpoint (`/api/upload/logo`) also flips upload_logo directly on first
+  // successful upload — this branch catches the "save settings after a prior
+  // upload" path and self-heals stale flags.
+  const checklistPartial: { pick_theme?: boolean; upload_logo?: boolean } = {};
+  if (newValues.theme !== "gold") {
+    checklistPartial.pick_theme = true;
+  }
+  if (oldTenant.logo_url) {
+    checklistPartial.upload_logo = true;
+  }
+  if (Object.keys(checklistPartial).length > 0) {
+    try {
+      await updateOnboardingState({ admin_checklist: checklistPartial });
+    } catch (err) {
+      console.error("[onboarding] tenant-settings observer failed:", err);
+    }
+  }
 
   revalidatePath(`/${slug}/settings/organization`);
   return { success: true, slug };

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { updateOnboardingState } from "@/app/actions/onboarding-state";
 
 export const dynamic = "force-dynamic";
 
@@ -130,7 +131,16 @@ export async function POST(request: Request) {
       );
     }
 
-    // 9. Return the public URL
+    // 9. Phase 41-04 — flip admin_checklist.upload_logo. Fire-and-forget:
+    //    logo upload already succeeded, so we never want an observer failure
+    //    to surface as a 500.
+    try {
+      await updateOnboardingState({ admin_checklist: { upload_logo: true } });
+    } catch (err) {
+      console.error("[onboarding] upload_logo observer failed:", err);
+    }
+
+    // 10. Return the public URL
     return NextResponse.json({ url: publicUrl });
   } catch (error) {
     console.error("Logo upload error:", error);

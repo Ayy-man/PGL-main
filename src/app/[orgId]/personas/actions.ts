@@ -9,6 +9,7 @@ import {
 } from "@/lib/personas/queries";
 import type { PersonaFilters } from "@/lib/personas/types";
 import { requireRole } from "@/lib/auth/rbac";
+import { updateOnboardingState } from "@/app/actions/onboarding-state";
 
 export async function createPersonaAction(formData: FormData) {
   const supabase = await createClient();
@@ -85,6 +86,18 @@ export async function createPersonaAction(formData: FormData) {
     description: description?.trim() || undefined,
     filters
   });
+
+  // Phase 41-04 — flip admin_checklist.create_first_persona to true. Observer
+  // is idempotent (the Server Action merges into existing metadata) so we can
+  // safely flip on every successful create. Errors are swallowed so the
+  // primary action still returns the persona cleanly.
+  try {
+    await updateOnboardingState({
+      admin_checklist: { create_first_persona: true },
+    });
+  } catch (err) {
+    console.error("[onboarding] create_first_persona observer failed:", err);
+  }
 
   // Revalidate personas page
   revalidatePath(`/[orgId]/personas`, "page");
