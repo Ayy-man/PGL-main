@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { logActivity } from "@/lib/activity-logger";
 import { logProspectActivity } from "@/lib/activity";
+import { hasMinRole } from "@/types/auth";
+import type { UserRole } from "@/types/auth";
 
 /**
  * PATCH /api/prospects/[prospectId]/notes
@@ -30,6 +32,15 @@ export async function PATCH(
       return NextResponse.json(
         { error: "Tenant ID not found" },
         { status: 401 }
+      );
+    }
+
+    // Server-side role guard — phase 42. Per 42-01-PLAN.md Pattern B.
+    const role = (user.app_metadata?.role as UserRole) || "assistant";
+    if (!hasMinRole(role, "agent")) {
+      return NextResponse.json(
+        { error: "Forbidden", message: "Your role does not permit this action" },
+        { status: 403 }
       );
     }
 
