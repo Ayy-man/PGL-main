@@ -65,7 +65,7 @@ export function ProductTour() {
   // This handles role-gated pages where the tour-target is missing.
   if (!anchorEl) {
     return (
-      <div className="fixed bottom-6 right-6 z-50 w-[min(22rem,90vw)] rounded-lg border bg-[var(--bg-elevated,#1a1a1a)] p-4 shadow-xl">
+      <div className="fixed bottom-6 right-6 z-50 w-[min(22rem,90vw)] rounded-lg border bg-[var(--bg-floating-elevated,#1a1a1e)] backdrop-blur-sm p-4 shadow-xl">
         <div className="space-y-3">
           <h4 className="font-serif text-base font-semibold">{step.title}</h4>
           <p className="text-sm text-muted-foreground">{step.body}</p>
