@@ -159,3 +159,14 @@ Total 40.1 items: 6 + 4 + 9 + 4 = **23 treatment applications** across **~17 dis
 ---
 
 *Phase 40.1 planner: start here. Filter `Phase = 40.1`, group by file, plan in waves of disjoint-file sets, mirror the treatment patterns already shipped in Phase 40.*
+
+---
+
+## Amendments (post-audit)
+
+### 2026-04-15 — Plan 40-02 abandoned; 11 → 10 in-scope surfaces for Phase 40
+
+- **R3 (realtime: saved_search_prospects channel)** was the original Plan 40-02 surface. ABANDONED because `saved_search_prospects` has no `enrichment_status` column (it has `status` with values 'active' / 'dismissed' / 'enriched'), AND because the list-page pill Adrian complained about reads `member.prospect.enrichment_status` — sourced from the `prospects` table, not `saved_search_prospects`. Plan 40-03's `prospects` channel (R4) delivers the actual live-pill-flip.
+- **New Phase 40.1 surface:** a separate `saved_search_prospects` UPDATE subscription for the *saved-search-results* page (different surface from the list-members page). Would flip the result-card "enriched" badge live when a user bulk-enriches from another tab. Recaptured here for future polish; NOT shipping in Phase 40.
+- **Phase 40 in-scope surface count:** 11 → **10**. Remaining 10: R4 + P1 + #1 + #2 + #14 + #16 + #18 + #19 + #20 + #29.
+
