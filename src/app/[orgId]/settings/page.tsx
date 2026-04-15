@@ -1,15 +1,23 @@
 "use client";
 
 import { useState, useTransition, useEffect, useRef } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import {
+  Confirmation,
+  ConfirmationIcon,
+  ConfirmationTitle,
+  ConfirmationDescription,
+} from "@/components/ui/confirmation";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { Loader2, Eye, EyeOff } from "lucide-react";
+import { Loader2, Eye, EyeOff, RotateCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { updateProfile, changePassword } from "@/app/actions/profile";
+import { updateOnboardingState } from "@/app/actions/onboarding-state";
 import { cn } from "@/lib/utils";
 
 function passwordStrength(pwd: string): 1 | 2 | 3 {
@@ -20,6 +28,7 @@ function passwordStrength(pwd: string): 1 | 2 | 3 {
 
 export default function SettingsPage() {
   const { orgId } = useParams<{ orgId: string }>();
+  const router = useRouter();
   const { toast } = useToast();
 
   const [profileError, setProfileError] = useState<string | null>(null);
@@ -29,6 +38,9 @@ export default function SettingsPage() {
 
   const [profilePending, startProfileTransition] = useTransition();
   const [passwordPending, startPasswordTransition] = useTransition();
+
+  const [resetOpen, setResetOpen] = useState(false);
+  const [resetPending, startResetTransition] = useTransition();
 
   // Password show/hide
   const [showCurrent, setShowCurrent] = useState(false);
@@ -89,6 +101,33 @@ export default function SettingsPage() {
         setPasswordDirty(false);
         toast({ title: "Password updated" });
       }
+    });
+  }
+
+  function handleResetOnboarding() {
+    startResetTransition(async () => {
+      const result = await updateOnboardingState({
+        tour_completed: false,
+        tour_skipped_at: undefined,
+        admin_checklist: {
+          invite_team: false,
+          upload_logo: false,
+          pick_theme: false,
+          create_first_persona: false,
+        },
+      });
+      if (!result.ok) {
+        toast({
+          title: "Reset failed",
+          description: result.error,
+          variant: "destructive",
+        });
+        return;
+      }
+      setResetOpen(false);
+      toast({ title: "Onboarding reset — starting tour" });
+      router.push(`/${orgId}`);
+      router.refresh();
     });
   }
 
@@ -287,6 +326,48 @@ export default function SettingsPage() {
           </form>
         </CardContent>
       </Card>
+
+      {/* Reset Onboarding */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base font-semibold">
+            Reset onboarding
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-sm" style={{ color: "var(--text-secondary-ds)" }}>
+            Replay the product tour from step 1 and reset the admin setup
+            checklist. Your data is not affected.
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setResetOpen(true)}
+          >
+            <RotateCcw className="h-4 w-4 mr-2" />
+            Reset onboarding
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Dialog open={resetOpen} onOpenChange={(o) => !o && setResetOpen(false)}>
+        <DialogContent>
+          <Confirmation
+            confirmLabel="Reset onboarding"
+            cancelLabel="Cancel"
+            onConfirm={handleResetOnboarding}
+            onCancel={() => setResetOpen(false)}
+            isLoading={resetPending}
+          >
+            <ConfirmationIcon variant="info" />
+            <ConfirmationTitle>Reset onboarding?</ConfirmationTitle>
+            <ConfirmationDescription>
+              The product tour will re-fire from step 1 and the admin setup
+              checklist resets to 0/4. No data is deleted.
+            </ConfirmationDescription>
+          </Confirmation>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
