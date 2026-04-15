@@ -42,7 +42,7 @@ export function IntelligenceDossier({ dossier, generatedAt, enrichmentComplete }
       </div>
 
       {/* Summary */}
-      <div className="mb-5 px-3 py-2 rounded-[8px]" style={{ background: "rgba(212,175,55,0.04)" }}>
+      <div className="mb-5 px-3 py-2 rounded-[8px]" style={{ background: "rgba(var(--gold-primary-rgb), 0.04)" }}>
         <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary, rgba(232,228,220,0.7))" }}>
           {dossier.summary}
         </p>

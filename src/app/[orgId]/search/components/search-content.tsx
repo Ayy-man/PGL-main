@@ -1364,7 +1364,7 @@ export function SearchContent({ personas, lists, orgId, canEdit = true }: Search
                     className="text-[13px] px-2 py-1 rounded-md transition-colors"
                     style={{
                       color: showDismissed ? "var(--gold-text)" : "var(--text-tertiary)",
-                      background: showDismissed ? "rgba(212, 175, 55, 0.1)" : "transparent",
+                      background: showDismissed ? "rgba(var(--gold-primary-rgb), 0.1)" : "transparent",
                     }}
                   >
                     {showDismissed ? "Hide" : "Show"} dismissed ({dismissedCount})

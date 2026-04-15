@@ -243,7 +243,7 @@ export function TenantHeatmap({ data }: TenantHeatmapProps) {
         {/* Decorative blur */}
         <div
           className="absolute -top-20 -left-20 w-64 h-64 rounded-full blur-3xl pointer-events-none"
-          style={{ background: "rgba(212,175,55,0.05)" }}
+          style={{ background: "rgba(var(--gold-primary-rgb), 0.05)" }}
         />
 
         {/* Header skeleton */}
@@ -303,7 +303,7 @@ export function TenantHeatmap({ data }: TenantHeatmapProps) {
       {/* Decorative blur */}
       <div
         className="absolute -top-20 -left-20 w-64 h-64 rounded-full blur-3xl pointer-events-none"
-        style={{ background: "rgba(212,175,55,0.05)" }}
+        style={{ background: "rgba(var(--gold-primary-rgb), 0.05)" }}
       />
 
       {/* Header */}
@@ -353,7 +353,7 @@ export function TenantHeatmap({ data }: TenantHeatmapProps) {
             style={{
               background: "var(--gold-primary)",
               color: "var(--bg-root)",
-              boxShadow: "0 0 15px rgba(212,175,55,0.3)",
+              boxShadow: "0 0 15px rgba(var(--gold-primary-rgb), 0.3)",
             }}
           >
             <Plus className="h-4 w-4" /> Provision New Tenant

@@ -19,7 +19,7 @@ const CATEGORY_COLORS: Record<string, { bg: string; text: string }> = {
   career_move: { bg: "rgba(59,130,246,0.15)", text: "#60a5fa" },
   funding: { bg: "rgba(34,197,94,0.15)", text: "#4ade80" },
   media: { bg: "rgba(168,85,247,0.15)", text: "#c084fc" },
-  wealth_signal: { bg: "rgba(212,175,55,0.15)", text: "#d4af37" },
+  wealth_signal: { bg: "rgba(var(--gold-primary-rgb), 0.15)", text: "var(--gold-primary)" },
   company_intel: { bg: "rgba(99,102,241,0.15)", text: "#818cf8" },
   recognition: { bg: "rgba(244,114,182,0.15)", text: "#f472b6" },
   sec_filing: { bg: "rgba(251,146,60,0.15)", text: "#fb923c" },
@@ -39,7 +39,7 @@ function ExaHighlightQuote({ highlights, scores }: { highlights?: string[]; scor
     <blockquote
       className="mt-2 px-3 py-1.5 text-xs font-sans italic leading-relaxed rounded-[6px]"
       style={{
-        background: "rgba(212,175,55,0.05)",
+        background: "rgba(var(--gold-primary-rgb), 0.05)",
         color: "var(--text-tertiary, rgba(232,228,220,0.4))",
       }}
     >
@@ -110,7 +110,7 @@ export function ResearchResultCard({
         boxShadow:
           "0 1px 3px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)",
         border: isPinned
-          ? "1px solid rgba(212,175,55,0.2)"
+          ? "1px solid rgba(var(--gold-primary-rgb), 0.2)"
           : "1px solid rgba(255,255,255,0.06)",
         animation: `cardFadeIn 300ms ease forwards`,
         animationDelay: animDelay,
@@ -119,16 +119,16 @@ export function ResearchResultCard({
       onMouseEnter={(e) => {
         const el = e.currentTarget as HTMLDivElement;
         el.style.borderColor = isPinned
-          ? "rgba(212,175,55,0.3)"
+          ? "rgba(var(--gold-primary-rgb), 0.3)"
           : "var(--border-hover, rgba(255,255,255,0.15))";
         el.style.transform = "translateY(-1px)";
         el.style.boxShadow =
-          "0 2px 8px rgba(0,0,0,0.4), 0 0 12px rgba(212,175,55,0.08), inset 0 1px 0 rgba(255,255,255,0.04)";
+          "0 2px 8px rgba(0,0,0,0.4), 0 0 12px rgba(var(--gold-primary-rgb), 0.08), inset 0 1px 0 rgba(255,255,255,0.04)";
       }}
       onMouseLeave={(e) => {
         const el = e.currentTarget as HTMLDivElement;
         el.style.borderColor = isPinned
-          ? "rgba(212,175,55,0.2)"
+          ? "rgba(var(--gold-primary-rgb), 0.2)"
           : "var(--border-subtle, rgba(255,255,255,0.08))";
         el.style.transform = "translateY(0)";
         el.style.boxShadow =

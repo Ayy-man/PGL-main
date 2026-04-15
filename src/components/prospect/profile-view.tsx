@@ -562,7 +562,7 @@ export function ProfileView({
                     }}
                     onMouseEnter={(e) => {
                       (e.currentTarget as HTMLAnchorElement).style.borderColor =
-                        "rgba(212,175,55,0.15)";
+                        "rgba(var(--gold-primary-rgb), 0.15)";
                       (e.currentTarget as HTMLAnchorElement).style.color =
                         "var(--gold-primary)";
                     }}
@@ -765,7 +765,7 @@ export function ProfileView({
                       prospect.enrichment_status === "complete"
                         ? "rgba(34,197,94,0.15)"
                         : prospect.enrichment_status === "in_progress"
-                          ? "rgba(212,175,55,0.15)"
+                          ? "rgba(var(--gold-primary-rgb), 0.15)"
                           : "rgba(255,255,255,0.05)",
                     color:
                       prospect.enrichment_status === "complete"
@@ -777,7 +777,7 @@ export function ProfileView({
                       prospect.enrichment_status === "complete"
                         ? "rgba(34,197,94,0.25)"
                         : prospect.enrichment_status === "in_progress"
-                          ? "rgba(212,175,55,0.25)"
+                          ? "rgba(var(--gold-primary-rgb), 0.25)"
                           : "rgba(255,255,255,0.08)"
                     }`,
                   }}
@@ -842,9 +842,9 @@ export function ProfileView({
                             <div
                               className="flex items-center px-2 py-1 rounded-[8px] text-[11px] gap-1.5 transition-all flex-1 min-w-[calc(50%-3px)] cursor-help"
                               style={{
-                                border: `1px solid ${isComplete ? "rgba(212,175,55,0.15)" : "var(--border-default, rgba(255,255,255,0.06))"}`,
+                                border: `1px solid ${isComplete ? "rgba(var(--gold-primary-rgb), 0.15)" : "var(--border-default, rgba(255,255,255,0.06))"}`,
                                 background: isComplete
-                                  ? "rgba(212,175,55,0.04)"
+                                  ? "rgba(var(--gold-primary-rgb), 0.04)"
                                   : "transparent",
                                 color: textColor,
                               }}

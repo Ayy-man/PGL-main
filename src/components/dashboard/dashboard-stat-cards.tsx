@@ -33,8 +33,8 @@ function StatCard({
       <div
         className="inline-flex items-center justify-center h-9 w-9 rounded-[8px] mb-3"
         style={{
-          background: "rgba(212,175,55,0.08)",
-          border: "1px solid rgba(212,175,55,0.12)",
+          background: "rgba(var(--gold-primary-rgb), 0.08)",
+          border: "1px solid rgba(var(--gold-primary-rgb), 0.12)",
         }}
       >
         <Icon

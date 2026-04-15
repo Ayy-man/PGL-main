@@ -32,7 +32,7 @@ export function TopBar({ userName, userInitials = "?", avatarUrl, orgId }: TopBa
           title={userName}
           className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-medium hover:opacity-80 transition-opacity"
           style={{
-            background: "var(--gold-bg, rgba(212,175,55,0.08))",
+            background: "var(--gold-bg, rgba(var(--gold-primary-rgb), 0.08))",
             color: "var(--gold-primary)",
             border: "1px solid var(--border-gold)",
           }}

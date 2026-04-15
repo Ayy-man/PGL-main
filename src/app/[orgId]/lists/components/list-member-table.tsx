@@ -104,7 +104,7 @@ function CopyButton({ text, icon: Icon }: { text: string; icon: typeof Mail }) {
       onMouseEnter={(e) => {
         if (!copied) {
           (e.currentTarget as HTMLButtonElement).style.color = "var(--gold-primary)";
-          (e.currentTarget as HTMLButtonElement).style.background = "rgba(212,175,55,0.08)";
+          (e.currentTarget as HTMLButtonElement).style.background = "rgba(var(--gold-primary-rgb), 0.08)";
         }
       }}
       onMouseLeave={(e) => {

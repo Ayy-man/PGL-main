@@ -44,7 +44,7 @@ export function ListsTab({ memberships, orgId, onAddToList }: ListsTabProps) {
         aria-label="Add to list"
         className="flex min-h-[96px] cursor-pointer flex-col items-center justify-center gap-2 rounded-[14px] border border-dashed p-4 transition-colors"
         style={{
-          borderColor: "rgba(212,175,55,0.3)",
+          borderColor: "rgba(var(--gold-primary-rgb), 0.3)",
           color: "var(--gold-primary)",
         }}
         onMouseEnter={(e) => {

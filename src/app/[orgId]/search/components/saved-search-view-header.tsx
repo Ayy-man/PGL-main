@@ -130,9 +130,9 @@ export function SavedSearchViewHeader({
               key={`${pill.category}-${idx}`}
               className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[12px] font-medium"
               style={{
-                background: "rgba(212,175,55,0.08)",
+                background: "rgba(var(--gold-primary-rgb), 0.08)",
                 color: "var(--gold-primary)",
-                border: "1px solid rgba(212,175,55,0.15)",
+                border: "1px solid rgba(var(--gold-primary-rgb), 0.15)",
               }}
             >
               <span style={{ color: "var(--text-ghost)" }} className="text-[11px]">{pill.category}:</span>

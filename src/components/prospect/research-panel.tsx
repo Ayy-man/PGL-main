@@ -444,7 +444,7 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
         className="flex items-center gap-3 px-4 py-3 flex-shrink-0"
         style={{
           background:
-            "linear-gradient(135deg, rgba(255,255,255,0.03), rgba(212,175,55,0.04))",
+            "linear-gradient(135deg, rgba(255,255,255,0.03), rgba(var(--gold-primary-rgb), 0.04))",
           borderBottom: "1px solid var(--border-subtle, rgba(255,255,255,0.08))",
         }}
       >
@@ -452,7 +452,7 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
         <div
           className="flex-shrink-0 w-8 h-8 rounded-full overflow-hidden flex items-center justify-center text-xs font-semibold"
           style={{
-            background: "rgba(212,175,55,0.15)",
+            background: "rgba(var(--gold-primary-rgb), 0.15)",
             color: "var(--gold-primary, #d4af37)",
           }}
         >
@@ -545,7 +545,7 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
             }}
             onMouseEnter={(e) =>
               ((e.currentTarget as HTMLButtonElement).style.background =
-                "rgba(212,175,55,0.08)")
+                "rgba(var(--gold-primary-rgb), 0.08)")
             }
             onMouseLeave={(e) =>
               ((e.currentTarget as HTMLButtonElement).style.background = "transparent")
@@ -636,7 +636,7 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
                   }}
                   onMouseEnter={(e) =>
                     ((e.currentTarget as HTMLButtonElement).style.borderColor =
-                      "var(--border-gold, rgba(212,175,55,0.4))")
+                      "var(--border-gold, rgba(var(--gold-primary-rgb), 0.4))")
                   }
                   onMouseLeave={(e) =>
                     ((e.currentTarget as HTMLButtonElement).style.borderColor =
@@ -668,8 +668,8 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
                 <div
                   className="font-sans text-sm rounded-2xl rounded-br-md px-4 py-2.5 max-w-[80%]"
                   style={{
-                    background: "var(--gold-bg-strong, rgba(212,175,55,0.12))",
-                    border: "1px solid var(--border-gold, rgba(212,175,55,0.3))",
+                    background: "var(--gold-bg-strong, rgba(var(--gold-primary-rgb), 0.12))",
+                    border: "1px solid var(--border-gold, rgba(var(--gold-primary-rgb), 0.3))",
                     color: "var(--text-primary, #e8e4dc)",
                   }}
                 >
@@ -868,8 +868,8 @@ export function ResearchPanel({ prospectId, prospect, orgId: _orgId }: ResearchP
             const el = e.currentTarget as HTMLDivElement;
             el.style.borderColor = isSearching
               ? "var(--gold-primary, #d4af37)"
-              : "var(--border-gold, rgba(212,175,55,0.4))";
-            el.style.boxShadow = "0 0 0 2px rgba(212,175,55,0.15)";
+              : "var(--border-gold, rgba(var(--gold-primary-rgb), 0.4))";
+            el.style.boxShadow = "0 0 0 2px rgba(var(--gold-primary-rgb), 0.15)";
           }}
           onBlurCapture={(e) => {
             const el = e.currentTarget as HTMLDivElement;
@@ -982,8 +982,8 @@ function _ToolStatus({ status }: { status: string }) {
     <div
       className="flex items-center gap-2 text-xs font-mono px-3 py-2 rounded-lg"
       style={{
-        background: "rgba(212,175,55,0.06)",
-        border: "1px solid rgba(212,175,55,0.15)",
+        background: "rgba(var(--gold-primary-rgb), 0.06)",
+        border: "1px solid rgba(var(--gold-primary-rgb), 0.15)",
         color: "var(--gold-primary, #d4af37)",
       }}
     >
@@ -1007,7 +1007,7 @@ function _ShimmerCard() {
     >
       <div
         className="h-3 w-24 rounded animate-pulse"
-        style={{ background: "rgba(212,175,55,0.15)" }}
+        style={{ background: "rgba(var(--gold-primary-rgb), 0.15)" }}
       />
       <div
         className="h-4 w-3/4 rounded animate-pulse"

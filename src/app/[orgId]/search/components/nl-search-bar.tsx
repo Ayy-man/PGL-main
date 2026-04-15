@@ -52,10 +52,10 @@ export function NLSearchBar({
       style={{
         background: "rgba(255,255,255,0.03)",
         border: `1px solid ${
-          isFocused ? "rgba(212,175,55,0.55)" : "rgba(212,175,55,0.18)"
+          isFocused ? "rgba(var(--gold-primary-rgb), 0.55)" : "rgba(var(--gold-primary-rgb), 0.18)"
         }`,
         boxShadow: isFocused
-          ? "inset 0 0 0 1px rgba(212,175,55,0.25), 0 0 0 4px rgba(212,175,55,0.08)"
+          ? "inset 0 0 0 1px rgba(var(--gold-primary-rgb), 0.25), 0 0 0 4px rgba(var(--gold-primary-rgb), 0.08)"
           : "none",
         transition: "border-color 0.2s ease, box-shadow 0.2s ease",
       }}

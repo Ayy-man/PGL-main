@@ -170,15 +170,15 @@ export function ProspectCard({
             }}
             className="flex items-center gap-1 rounded-[8px] px-3 py-1.5 text-[12px] font-semibold transition-all duration-200 cursor-pointer"
             style={{
-              background: "rgba(212,175,55,0.1)",
-              border: "1px solid rgba(212,175,55,0.25)",
+              background: "rgba(var(--gold-primary-rgb), 0.1)",
+              border: "1px solid rgba(var(--gold-primary-rgb), 0.25)",
               color: "var(--gold-primary)",
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background = "rgba(212,175,55,0.18)";
+              (e.currentTarget as HTMLButtonElement).style.background = "rgba(var(--gold-primary-rgb), 0.18)";
             }}
             onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background = "rgba(212,175,55,0.1)";
+              (e.currentTarget as HTMLButtonElement).style.background = "rgba(var(--gold-primary-rgb), 0.1)";
             }}
           >
             <UserPlus className="h-3.5 w-3.5 shrink-0" />

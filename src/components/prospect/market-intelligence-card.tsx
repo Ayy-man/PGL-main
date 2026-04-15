@@ -217,8 +217,8 @@ export function MarketIntelligenceCard({
           disabled={isLoading}
           className="flex items-center gap-2 rounded-[8px] px-4 py-2 text-sm font-medium transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           style={{
-            background: "rgba(212,175,55,0.08)",
-            border: "1px solid rgba(212,175,55,0.2)",
+            background: "rgba(var(--gold-primary-rgb), 0.08)",
+            border: "1px solid rgba(var(--gold-primary-rgb), 0.2)",
             color: "var(--gold-primary)",
           }}
         >
@@ -470,10 +470,10 @@ export function MarketIntelligenceCard({
               className="flex-1 flex flex-col items-center rounded-[8px] px-3 py-2 transition-all cursor-pointer"
               style={{
                 background: isActive
-                  ? "rgba(212,175,55,0.15)"
+                  ? "rgba(var(--gold-primary-rgb), 0.15)"
                   : "rgba(255,255,255,0.02)",
                 border: isActive
-                  ? "1px solid rgba(212,175,55,0.4)"
+                  ? "1px solid rgba(var(--gold-primary-rgb), 0.4)"
                   : "1px solid rgba(255,255,255,0.06)",
               }}
             >

@@ -50,7 +50,7 @@ function SearchRow({
       onMouseLeave={() => setHovered(false)}
       className="flex items-center gap-4 w-full rounded-[12px] px-4 py-3 cursor-pointer transition-all duration-150 text-left"
       style={{
-        border: `1px solid ${hovered ? "rgba(212,175,55,0.2)" : "rgba(255,255,255,0.06)"}`,
+        border: `1px solid ${hovered ? "rgba(var(--gold-primary-rgb), 0.2)" : "rgba(255,255,255,0.06)"}`,
         background: hovered ? "var(--gold-bg)" : "var(--bg-elevated)",
         boxShadow: hovered ? "0 2px 12px rgba(0,0,0,0.12)" : "none",
       }}
@@ -90,9 +90,9 @@ function SearchRow({
       <div
         className="flex items-center gap-1.5 shrink-0 px-3 py-1.5 rounded-[8px] text-[12px] font-medium transition-colors"
         style={{
-          background: hovered ? "rgba(212,175,55,0.15)" : "rgba(255,255,255,0.04)",
+          background: hovered ? "rgba(var(--gold-primary-rgb), 0.15)" : "rgba(255,255,255,0.04)",
           color: hovered ? "var(--gold-primary)" : "var(--text-secondary-ds)",
-          border: `1px solid ${hovered ? "rgba(212,175,55,0.3)" : "rgba(255,255,255,0.08)"}`,
+          border: `1px solid ${hovered ? "rgba(var(--gold-primary-rgb), 0.3)" : "rgba(255,255,255,0.08)"}`,
         }}
       >
         <Play className="h-3 w-3" style={{ fill: "currentColor" }} />

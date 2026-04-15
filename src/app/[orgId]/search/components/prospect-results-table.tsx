@@ -214,9 +214,9 @@ export function ProspectResultsTable({
                             <span
                               className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide"
                               style={{
-                                background: "rgba(212, 175, 55, 0.15)",
+                                background: "rgba(var(--gold-primary-rgb), 0.15)",
                                 color: "var(--gold-text, #f4d47f)",
-                                border: "1px solid rgba(212, 175, 55, 0.3)",
+                                border: "1px solid rgba(var(--gold-primary-rgb), 0.3)",
                               }}
                             >
                               NEW
@@ -308,7 +308,7 @@ export function ProspectResultsTable({
                         <button
                           onClick={(e) => { e.stopPropagation(); onUndoDismiss(prospect.id); }}
                           className="text-[12px] px-2 py-1 rounded transition-colors"
-                          style={{ color: "var(--gold-text)", background: "rgba(212, 175, 55, 0.1)" }}
+                          style={{ color: "var(--gold-text)", background: "rgba(var(--gold-primary-rgb), 0.1)" }}
                         >
                           Undo
                         </button>
@@ -381,9 +381,9 @@ export function ProspectResultsTable({
                       <span
                         className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide"
                         style={{
-                          background: "rgba(212, 175, 55, 0.15)",
+                          background: "rgba(var(--gold-primary-rgb), 0.15)",
                           color: "var(--gold-text, #f4d47f)",
-                          border: "1px solid rgba(212, 175, 55, 0.3)",
+                          border: "1px solid rgba(var(--gold-primary-rgb), 0.3)",
                         }}
                       >
                         NEW
@@ -417,7 +417,7 @@ export function ProspectResultsTable({
                     <button
                       onClick={(e) => { e.stopPropagation(); onUndoDismiss(prospect.id); }}
                       className="text-[12px] px-2 py-1 rounded mt-1 transition-colors"
-                      style={{ color: "var(--gold-text)", background: "rgba(212, 175, 55, 0.1)" }}
+                      style={{ color: "var(--gold-text)", background: "rgba(var(--gold-primary-rgb), 0.1)" }}
                     >
                       Undo
                     </button>

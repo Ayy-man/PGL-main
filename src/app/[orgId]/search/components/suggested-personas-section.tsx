@@ -83,7 +83,7 @@ function SuggestedCard({
       onMouseLeave={() => setHovered(false)}
       className="text-left w-full rounded-[14px] p-4 cursor-pointer transition-all duration-150"
       style={{
-        border: `1px solid ${hovered ? "rgba(212,175,55,0.2)" : "rgba(255,255,255,0.06)"}`,
+        border: `1px solid ${hovered ? "rgba(var(--gold-primary-rgb), 0.2)" : "rgba(255,255,255,0.06)"}`,
         background: hovered ? "var(--bg-elevated)" : "var(--bg-card-gradient)",
         transform: hovered ? "translateY(-2px)" : "translateY(0)",
         boxShadow: hovered ? "0 6px 20px rgba(0,0,0,0.2)" : "none",

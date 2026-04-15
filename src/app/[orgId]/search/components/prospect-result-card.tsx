@@ -81,7 +81,7 @@ export function ProspectResultCard({
           ? "1px solid var(--border-hover)"
           : "1px solid var(--border-default)",
         boxShadow: isHovered
-          ? "var(--card-shadow-hover), 0 0 20px rgba(212, 175, 55, 0.06)"
+          ? "var(--card-shadow-hover), 0 0 20px rgba(var(--gold-primary-rgb), 0.06)"
           : "var(--card-shadow)",
       }}
     >

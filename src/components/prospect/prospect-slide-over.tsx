@@ -131,10 +131,10 @@ export function ProspectSlideOver({
           width: "min(480px, 90vw)",
           background: "#0d0d10",
           borderLeft: isEnriched
-            ? "1px solid rgba(212,175,55,0.35)"
-            : "1px solid rgba(212,175,55,0.1)",
+            ? "1px solid rgba(var(--gold-primary-rgb), 0.35)"
+            : "1px solid rgba(var(--gold-primary-rgb), 0.1)",
           boxShadow: isEnriched
-            ? "-20px 0 60px rgba(212,175,55,0.08), -4px 0 20px rgba(0,0,0,0.5)"
+            ? "-20px 0 60px rgba(var(--gold-primary-rgb), 0.08), -4px 0 20px rgba(0,0,0,0.5)"
             : "-20px 0 60px rgba(0,0,0,0.5)",
         }}
         className="p-0 overflow-y-auto"
@@ -157,8 +157,8 @@ export function ProspectSlideOver({
             <span
               className="flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium"
               style={{
-                borderColor: "rgba(212,175,55,0.3)",
-                background: "rgba(212,175,55,0.08)",
+                borderColor: "rgba(var(--gold-primary-rgb), 0.3)",
+                background: "rgba(var(--gold-primary-rgb), 0.08)",
                 color: "var(--gold-primary)",
               }}
             >
@@ -179,7 +179,7 @@ export function ProspectSlideOver({
                   className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border-2 text-sm font-semibold text-foreground"
                   style={{
                     background: "var(--bg-card)",
-                    borderColor: isEnriched ? "rgba(212,175,55,0.4)" : "var(--border)",
+                    borderColor: isEnriched ? "rgba(var(--gold-primary-rgb), 0.4)" : "var(--border)",
                   }}
                 >
                   {initials}
@@ -247,7 +247,7 @@ export function ProspectSlideOver({
                     <div
                       className="grid grid-cols-2 overflow-hidden rounded-[10px] border"
                       style={{
-                        borderColor: "rgba(212,175,55,0.2)",
+                        borderColor: "rgba(var(--gold-primary-rgb), 0.2)",
                         background: "var(--bg-card-gradient)",
                       }}
                     >
@@ -322,8 +322,8 @@ export function ProspectSlideOver({
                       <div
                         className="rounded-[10px] border p-4"
                         style={{
-                          borderColor: "rgba(212,175,55,0.15)",
-                          background: "rgba(212,175,55,0.03)",
+                          borderColor: "rgba(var(--gold-primary-rgb), 0.15)",
+                          background: "rgba(var(--gold-primary-rgb), 0.03)",
                         }}
                       >
                         <p
@@ -394,8 +394,8 @@ export function ProspectSlideOver({
                     href={`/${orgId}/prospects/${prospectId}${fromQuery}`}
                     className="flex w-full items-center justify-center gap-2 rounded-lg border py-3 text-sm font-semibold transition-colors cursor-pointer hover:brightness-110"
                     style={{
-                      borderColor: "rgba(212,175,55,0.4)",
-                      background: "rgba(212,175,55,0.12)",
+                      borderColor: "rgba(var(--gold-primary-rgb), 0.4)",
+                      background: "rgba(var(--gold-primary-rgb), 0.12)",
                       color: "var(--gold-primary)",
                     }}
                   >
@@ -435,8 +435,8 @@ export function ProspectSlideOver({
                 <div
                   className="rounded-[10px] border p-5 space-y-4"
                   style={{
-                    borderColor: "rgba(212,175,55,0.3)",
-                    background: "rgba(212,175,55,0.04)",
+                    borderColor: "rgba(var(--gold-primary-rgb), 0.3)",
+                    background: "rgba(var(--gold-primary-rgb), 0.04)",
                   }}
                 >
                   <div className="flex items-center gap-2">
@@ -460,8 +460,8 @@ export function ProspectSlideOver({
                       onClick={() => onEnrich?.(prospect.id)}
                       className="w-full rounded-lg border py-2.5 text-sm font-medium transition-colors cursor-pointer hover:brightness-110"
                       style={{
-                        borderColor: "rgba(212,175,55,0.4)",
-                        background: "rgba(212,175,55,0.12)",
+                        borderColor: "rgba(var(--gold-primary-rgb), 0.4)",
+                        background: "rgba(var(--gold-primary-rgb), 0.12)",
                         color: "var(--gold-primary)",
                       }}
                     >
@@ -475,8 +475,8 @@ export function ProspectSlideOver({
                             disabled
                             className="w-full rounded-lg border py-2.5 text-sm font-medium opacity-40 cursor-not-allowed"
                             style={{
-                              borderColor: "rgba(212,175,55,0.4)",
-                              background: "rgba(212,175,55,0.12)",
+                              borderColor: "rgba(var(--gold-primary-rgb), 0.4)",
+                              background: "rgba(var(--gold-primary-rgb), 0.12)",
                               color: "var(--gold-primary)",
                             }}
                           >

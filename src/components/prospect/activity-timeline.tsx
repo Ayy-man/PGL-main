@@ -81,8 +81,8 @@ export function ActivityTimeline({ events }: ActivityTimelineProps) {
         <div
           className="h-12 w-12 rounded-full flex items-center justify-center mx-auto mb-3"
           style={{
-            background: "rgba(212,175,55,0.08)",
-            border: "1px solid rgba(212,175,55,0.15)",
+            background: "rgba(var(--gold-primary-rgb), 0.08)",
+            border: "1px solid rgba(var(--gold-primary-rgb), 0.15)",
           }}
         >
           <Activity
@@ -131,7 +131,7 @@ export function ActivityTimeline({ events }: ActivityTimelineProps) {
                   ? "var(--gold-primary)"
                   : "var(--border-default, rgba(255,255,255,0.06))",
                 boxShadow: isFirst
-                  ? "0 0 0 3px rgba(212,175,55,0.2)"
+                  ? "0 0 0 3px rgba(var(--gold-primary-rgb), 0.2)"
                   : "none",
               }}
             />
@@ -153,7 +153,7 @@ export function ActivityTimeline({ events }: ActivityTimelineProps) {
                     "rgba(255,255,255,0.02)";
                 } else {
                   (e.currentTarget as HTMLDivElement).style.borderColor =
-                    "rgba(212,175,55,0.15)";
+                    "rgba(var(--gold-primary-rgb), 0.15)";
                 }
               }}
               onMouseLeave={(e) => {

@@ -50,9 +50,9 @@ export function ActivityFilter({
         onClick={() => setIsOpen((prev) => !prev)}
         className="flex items-center gap-1.5 px-2 py-1 text-xs font-medium rounded-[6px] border transition-all duration-150"
         style={{
-          background: isOpen ? "rgba(212,175,55,0.05)" : "rgba(255,255,255,0.03)",
+          background: isOpen ? "rgba(var(--gold-primary-rgb), 0.05)" : "rgba(255,255,255,0.03)",
           borderColor: isOpen
-            ? "rgba(212,175,55,0.3)"
+            ? "rgba(var(--gold-primary-rgb), 0.3)"
             : "var(--border-default, rgba(255,255,255,0.06))",
           color: "var(--text-secondary, rgba(232,228,220,0.5))",
         }}

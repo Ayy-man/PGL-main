@@ -42,7 +42,7 @@ export interface CreateActivityParams {
 
 // Category display colors (dot + left accent)
 export const CATEGORY_COLORS: Record<ActivityCategory, { dot: string; accent: string; label: string }> = {
-  outreach: { dot: 'var(--gold-primary)', accent: 'rgba(212,175,55,0.3)', label: 'Outreach' },
+  outreach: { dot: 'var(--gold-primary)', accent: 'rgba(var(--gold-primary-rgb), 0.3)', label: 'Outreach' },
   data: { dot: 'var(--info, #3b82f6)', accent: 'rgba(59,130,246,0.3)', label: 'Data Updates' },
   team: { dot: 'rgba(255,255,255,0.25)', accent: 'transparent', label: 'Team Activity' },
   custom: { dot: 'var(--purple, #a855f7)', accent: 'rgba(168,85,247,0.3)', label: 'Custom' },

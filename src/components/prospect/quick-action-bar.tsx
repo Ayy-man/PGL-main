@@ -216,7 +216,7 @@ export function QuickActionBar({ prospectId, onActivityCreated }: QuickActionBar
             onClick={() => submit(activeItem.category, activeItem.eventType, EVENT_TITLES[activeItem.eventType] ?? activeItem.label, noteValue.trim() || null)}
             disabled={isSubmitting}
             className="flex items-center justify-center w-7 h-7 rounded-[6px] border shrink-0"
-            style={{ background: "rgba(212,175,55,0.1)", borderColor: "var(--gold-primary)", color: "var(--gold-primary)" }}
+            style={{ background: "rgba(var(--gold-primary-rgb), 0.1)", borderColor: "var(--gold-primary)", color: "var(--gold-primary)" }}
           >
             {isSubmitting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
           </button>
@@ -242,7 +242,7 @@ export function QuickActionBar({ prospectId, onActivityCreated }: QuickActionBar
           />
           <div className="flex justify-end gap-2">
             <button onClick={handleCancel} className="px-3 py-1 text-xs rounded-[6px] border" style={{ background: "rgba(255,255,255,0.03)", borderColor: "var(--border-default)", color: "var(--text-secondary)" }}>Cancel</button>
-            <button onClick={() => submit("team", "note_added", "Note added", noteValue.trim())} disabled={isSubmitting || !noteValue.trim()} className="flex items-center gap-1.5 px-3 py-1 text-xs rounded-[6px] border" style={{ background: "rgba(212,175,55,0.1)", borderColor: "var(--gold-primary)", color: "var(--gold-primary)", opacity: !noteValue.trim() ? 0.5 : 1 }}>
+            <button onClick={() => submit("team", "note_added", "Note added", noteValue.trim())} disabled={isSubmitting || !noteValue.trim()} className="flex items-center gap-1.5 px-3 py-1 text-xs rounded-[6px] border" style={{ background: "rgba(var(--gold-primary-rgb), 0.1)", borderColor: "var(--gold-primary)", color: "var(--gold-primary)", opacity: !noteValue.trim() ? 0.5 : 1 }}>
               {isSubmitting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
               Save Note
             </button>

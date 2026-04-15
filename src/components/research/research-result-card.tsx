@@ -25,7 +25,7 @@ function getCategoryColor(category: string): string {
       return "rgba(59,130,246,0.6)";
     case "wealth_signal":
     case "funding":
-      return "rgba(212,175,55,0.6)";
+      return "rgba(var(--gold-primary-rgb), 0.6)";
     case "corporate":
     case "company_intel":
       return "rgba(168,85,247,0.6)";

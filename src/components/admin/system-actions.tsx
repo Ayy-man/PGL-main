@@ -118,7 +118,7 @@ export function SystemActions() {
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = "rgba(255,255,255,0.05)";
-                e.currentTarget.style.borderColor = "rgba(212,175,55,0.30)";
+                e.currentTarget.style.borderColor = "rgba(var(--gold-primary-rgb), 0.30)";
                 const icon = e.currentTarget.querySelector("svg");
                 if (icon) (icon as SVGElement).style.color = "var(--gold-primary)";
               }}

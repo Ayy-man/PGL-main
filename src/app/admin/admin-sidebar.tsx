@@ -46,7 +46,7 @@ export function AdminSidebar({ userInitials, userEmail }: AdminSidebarProps) {
         <div
           className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg font-serif font-bold text-sm"
           style={{
-            background: "var(--gold-bg, rgba(212,175,55,0.08))",
+            background: "var(--gold-bg, rgba(var(--gold-primary-rgb), 0.08))",
             color: "var(--gold-primary)",
             border: "1px solid var(--border-gold)",
           }}

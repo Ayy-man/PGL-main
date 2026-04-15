@@ -20,10 +20,10 @@ export function DossierResearchToggle({ active, onChange }: DossierResearchToggl
                 ? "var(--gold-primary, #d4af37)"
                 : "var(--text-tertiary, rgba(232,228,220,0.4))",
               background: isActive
-                ? "var(--gold-bg-strong, rgba(212,175,55,0.12))"
+                ? "var(--gold-bg-strong, rgba(var(--gold-primary-rgb), 0.12))"
                 : "transparent",
               boxShadow: isActive
-                ? "0 0 0 1px var(--border-gold, rgba(212,175,55,0.2))"
+                ? "0 0 0 1px var(--border-gold, rgba(var(--gold-primary-rgb), 0.2))"
                 : "none",
             }}
             onMouseEnter={(e) => {

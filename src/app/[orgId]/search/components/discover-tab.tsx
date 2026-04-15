@@ -62,7 +62,7 @@ export function DiscoverTab({
           aria-hidden="true"
           style={{
             background:
-              "radial-gradient(ellipse 60% 40% at 50% 40%, rgba(212,175,55,0.05) 0%, transparent 70%)",
+              "radial-gradient(ellipse 60% 40% at 50% 40%, rgba(var(--gold-primary-rgb), 0.05) 0%, transparent 70%)",
           }}
         />
 

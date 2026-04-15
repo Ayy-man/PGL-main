@@ -188,7 +188,7 @@ export function ResearchPinDropdown({
         className="absolute top-0 left-0 right-0 z-50 rounded-lg p-3 space-y-2"
         style={{
           background: "#1e1e1e",
-          border: "1px solid rgba(212,175,55,0.4)",
+          border: "1px solid rgba(var(--gold-primary-rgb), 0.4)",
           boxShadow: "0 8px 24px rgba(0,0,0,0.7)",
         }}
         ref={dropdownRef}
@@ -216,7 +216,7 @@ export function ResearchPinDropdown({
           className="w-full px-3 py-2 rounded-md text-sm font-sans focus:outline-none"
           style={{
             background: "rgba(255,255,255,0.04)",
-            border: "1px solid var(--border-gold, rgba(212,175,55,0.4))",
+            border: "1px solid var(--border-gold, rgba(var(--gold-primary-rgb), 0.4))",
             color: "var(--text-primary, #e8e4dc)",
           }}
           placeholder={isHook ? "Outreach hook" : "Headline"}
@@ -299,7 +299,7 @@ export function ResearchPinDropdown({
         }}
         onMouseEnter={(e) => {
           const el = e.currentTarget as HTMLButtonElement;
-          el.style.background = "rgba(212,175,55,0.1)";
+          el.style.background = "rgba(var(--gold-primary-rgb), 0.1)";
           el.style.color = "var(--gold-primary, #d4af37)";
         }}
         onMouseLeave={(e) => {

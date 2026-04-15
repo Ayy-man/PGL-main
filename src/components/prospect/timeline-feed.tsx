@@ -395,7 +395,7 @@ function EventRow({ event, users, prospectId, onEventDeleted, onEventUpdated }: 
                 disabled={isSaving}
                 className="flex items-center gap-1 px-2 py-0.5 text-[10px] rounded border"
                 style={{
-                  background: "rgba(212,175,55,0.1)",
+                  background: "rgba(var(--gold-primary-rgb), 0.1)",
                   borderColor: "var(--gold-primary)",
                   color: "var(--gold-primary)",
                 }}

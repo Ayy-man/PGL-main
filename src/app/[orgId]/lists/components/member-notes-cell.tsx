@@ -47,7 +47,7 @@ export function MemberNotesCell({ memberId, initialNotes }: MemberNotesCellProps
         borderBottom: "1px solid transparent",
       }}
       onFocus={(e) => {
-        (e.target as HTMLInputElement).style.borderBottomColor = "rgba(212,175,55,0.3)";
+        (e.target as HTMLInputElement).style.borderBottomColor = "rgba(var(--gold-primary-rgb), 0.3)";
       }}
       onBlur={(e) => {
         (e.target as HTMLInputElement).style.borderBottomColor = "transparent";

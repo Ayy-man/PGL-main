@@ -156,7 +156,7 @@ export function MobileBottomNav({ orgId, userRole }: MobileBottomNavProps) {
               >
                 <div
                   className="flex items-center justify-center h-7 w-12 rounded-full transition-colors duration-200"
-                  style={isActive ? { background: "rgba(212,175,55,0.12)" } : undefined}
+                  style={isActive ? { background: "rgba(var(--gold-primary-rgb), 0.12)" } : undefined}
                 >
                   <tab.icon
                     className="h-5 w-5 shrink-0"
@@ -194,7 +194,7 @@ export function MobileBottomNav({ orgId, userRole }: MobileBottomNavProps) {
           >
             <div
               className="flex items-center justify-center h-7 w-12 rounded-full transition-colors duration-200"
-              style={isMoreActive ? { background: "rgba(212,175,55,0.12)" } : undefined}
+              style={isMoreActive ? { background: "rgba(var(--gold-primary-rgb), 0.12)" } : undefined}
             >
               <MoreHorizontal
                 className="h-5 w-5 shrink-0"

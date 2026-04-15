@@ -135,7 +135,7 @@ export function LeadOwnerSelect({
           className="absolute left-0 top-full mt-1 min-w-[220px] rounded-lg z-50 border overflow-hidden"
           style={{
             backgroundColor: "#1a1a1a",
-            borderColor: "var(--border-gold, rgba(212,175,55,0.3))",
+            borderColor: "var(--border-gold, rgba(var(--gold-primary-rgb), 0.3))",
             boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
           }}
         >

@@ -35,10 +35,10 @@ export function PersonaCard({ persona, onSelect }: PersonaCardProps) {
       style={{
         background: isHovered ? "var(--bg-card-hover)" : "var(--bg-card-gradient)",
         border: isHovered
-          ? "1px solid rgba(212,175,55,0.3)"
+          ? "1px solid rgba(var(--gold-primary-rgb), 0.3)"
           : "1px solid var(--border-default)",
         boxShadow: isHovered
-          ? "var(--card-shadow-hover), 0 0 20px rgba(212, 175, 55, 0.06)"
+          ? "var(--card-shadow-hover), 0 0 20px rgba(var(--gold-primary-rgb), 0.06)"
           : "var(--card-shadow)",
       }}
     >
@@ -46,7 +46,7 @@ export function PersonaCard({ persona, onSelect }: PersonaCardProps) {
       <div
         className="absolute top-0 right-0 w-32 h-32 pointer-events-none"
         style={{
-          background: "radial-gradient(circle at top right, rgba(212,175,55,0.06) 0%, transparent 70%)",
+          background: "radial-gradient(circle at top right, rgba(var(--gold-primary-rgb), 0.06) 0%, transparent 70%)",
         }}
       />
 

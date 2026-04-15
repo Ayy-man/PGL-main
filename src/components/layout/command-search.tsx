@@ -201,7 +201,7 @@ function CommandSearchInner({ orgId }: { orgId: string }) {
                 key={`${item.type}-${item.id}`}
                 className="flex w-full items-center gap-3 px-4 py-2 text-left transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--border-gold)] focus-visible:ring-inset"
                 style={{
-                  background: idx === activeIndex ? "rgba(212,175,55,0.08)" : "transparent",
+                  background: idx === activeIndex ? "rgba(var(--gold-primary-rgb), 0.08)" : "transparent",
                   color: idx === activeIndex ? "var(--gold-primary)" : "var(--text-primary-ds)",
                 }}
                 onMouseEnter={() => setActiveIndex(idx)}

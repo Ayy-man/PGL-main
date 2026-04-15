@@ -59,14 +59,14 @@ function getCategoryColor(category: string): { bg: string; text: string; border:
   switch (category) {
     case "sec_filing": return { bg: "rgba(59,130,246,0.1)", text: "#3b82f6", border: "rgba(59,130,246,0.2)" };
     case "career_move": return { bg: "rgba(34,197,94,0.1)", text: "#22c55e", border: "rgba(34,197,94,0.2)" };
-    case "wealth_signal": return { bg: "rgba(212,175,55,0.08)", text: "var(--gold-primary)", border: "rgba(212,175,55,0.15)" };
+    case "wealth_signal": return { bg: "rgba(var(--gold-primary-rgb), 0.08)", text: "var(--gold-primary)", border: "rgba(var(--gold-primary-rgb), 0.15)" };
     case "funding": return { bg: "rgba(16,185,129,0.1)", text: "#10b981", border: "rgba(16,185,129,0.2)" };
     case "media": return { bg: "rgba(168,85,247,0.1)", text: "#a855f7", border: "rgba(168,85,247,0.2)" };
     case "company_intel": return { bg: "rgba(6,182,212,0.1)", text: "#06b6d4", border: "rgba(6,182,212,0.2)" };
     case "recognition": return { bg: "rgba(245,158,11,0.1)", text: "#f59e0b", border: "rgba(245,158,11,0.2)" };
     case "market_event": return { bg: "rgba(59,130,246,0.1)", text: "#3b82f6", border: "rgba(59,130,246,0.2)" };
     case "negative_signal": return { bg: "rgba(239,68,68,0.1)", text: "#ef4444", border: "rgba(239,68,68,0.2)" };
-    default: return { bg: "rgba(212,175,55,0.08)", text: "var(--gold-primary)", border: "rgba(212,175,55,0.15)" };
+    default: return { bg: "rgba(var(--gold-primary-rgb), 0.08)", text: "var(--gold-primary)", border: "rgba(var(--gold-primary-rgb), 0.15)" };
   }
 }
 
@@ -172,7 +172,7 @@ export function SignalTimeline({
       {/* Gold highlight animation for research-pinned signals */}
       <style>{`
         @keyframes goldHighlight {
-          0% { background-color: rgba(212,175,55,0.15); }
+          0% { background-color: rgba(var(--gold-primary-rgb), 0.15); }
           100% { background-color: transparent; }
         }
       `}</style>
@@ -190,8 +190,8 @@ export function SignalTimeline({
             onClick={() => setFilterOpen((p) => !p)}
             className="flex items-center gap-1.5 text-xs rounded-[8px] px-3 py-1.5 border outline-none cursor-pointer transition-all duration-150"
             style={{
-              background: filterOpen ? "rgba(212,175,55,0.05)" : "rgba(255,255,255,0.04)",
-              borderColor: filterOpen ? "rgba(212,175,55,0.3)" : "var(--border-default, rgba(255,255,255,0.08))",
+              background: filterOpen ? "rgba(var(--gold-primary-rgb), 0.05)" : "rgba(255,255,255,0.04)",
+              borderColor: filterOpen ? "rgba(var(--gold-primary-rgb), 0.3)" : "var(--border-default, rgba(255,255,255,0.08))",
               color: "var(--text-secondary, rgba(232,228,220,0.7))",
             }}
           >
@@ -217,10 +217,10 @@ export function SignalTimeline({
                   className="w-full text-left flex items-center gap-2 px-3 py-1.5 text-xs transition-colors duration-100"
                   style={{
                     color: categoryFilter === value ? "var(--gold-primary, #d4af37)" : "var(--text-foreground, rgba(232,228,220,0.9))",
-                    background: categoryFilter === value ? "rgba(212,175,55,0.08)" : "transparent",
+                    background: categoryFilter === value ? "rgba(var(--gold-primary-rgb), 0.08)" : "transparent",
                   }}
                   onMouseEnter={(e) => { if (categoryFilter !== value) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.04)"; }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = categoryFilter === value ? "rgba(212,175,55,0.08)" : "transparent"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = categoryFilter === value ? "rgba(var(--gold-primary-rgb), 0.08)" : "transparent"; }}
                 >
                   {categoryFilter === value && <svg className="h-3 w-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><polyline points="20 6 9 17 4 12" /></svg>}
                   {categoryFilter !== value && <span className="w-3 shrink-0" />}
@@ -288,7 +288,7 @@ export function SignalTimeline({
                         className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded"
                         style={{
                           color: "var(--gold-primary)",
-                          background: "rgba(212,175,55,0.1)",
+                          background: "rgba(var(--gold-primary-rgb), 0.1)",
                         }}
                       >
                         NEW
@@ -301,9 +301,9 @@ export function SignalTimeline({
                     <span
                       className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded animate-pulse"
                       style={{
-                        background: "var(--gold-bg-strong, rgba(212,175,55,0.15))",
+                        background: "var(--gold-bg-strong, rgba(var(--gold-primary-rgb), 0.15))",
                         color: "var(--gold-primary)",
-                        border: "1px solid var(--border-gold, rgba(212,175,55,0.3))",
+                        border: "1px solid var(--border-gold, rgba(var(--gold-primary-rgb), 0.3))",
                       }}
                     >
                       NEW
@@ -364,9 +364,9 @@ export function SignalTimeline({
             disabled={loading}
             className="text-xs px-4 py-2 rounded-md transition-opacity disabled:opacity-50"
             style={{
-              background: "rgba(212,175,55,0.08)",
+              background: "rgba(var(--gold-primary-rgb), 0.08)",
               color: "var(--gold-primary)",
-              border: "1px solid rgba(212,175,55,0.2)",
+              border: "1px solid rgba(var(--gold-primary-rgb), 0.2)",
             }}
           >
             {loading ? "Loading..." : "Load more"}
