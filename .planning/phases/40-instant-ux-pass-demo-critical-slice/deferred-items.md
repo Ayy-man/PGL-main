@@ -16,3 +16,17 @@
 (dismiss/tags/profile-edit optimistic updates). Last touched in commit
 `0d08d93 feat: add CI pipeline, integration tests, structured API errors`.
 Out of scope per executor deviation rules.
+
+## Pre-existing test failures (enrich-prospect)
+
+**Source plan:** 40-06 (discovered during full-suite vitest run)
+
+**File:** `src/inngest/functions/__tests__/enrich-prospect.test.ts`
+**Result:** 22/22 tests failing on base commit `085482b` (confirmed by
+stashing working tree and running against unmodified base).
+
+**Why deferred:** Pre-existing failures unrelated to 40-06 scope. Root cause
+appears to be a Supabase RPC mock signature mismatch in the mock setup
+(`ts(2554)`-style runtime error at line 257 of `enrich-prospect.ts`).
+Out of scope per executor deviation rules.
+

@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Pencil, Check, X } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { runFieldSave } from "./lib/profile-edit-reducer";
 
 interface InlineEditFieldProps {
   value: string | null;
@@ -35,6 +37,7 @@ export function InlineEditField({
   const [displayValue, setDisplayValue] = useState<string | null>(value);
   const [flash, setFlash] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   // Sync display value when prop changes externally
   useEffect(() => {
@@ -68,14 +71,19 @@ export function InlineEditField({
     setFlash(true);
     setTimeout(() => setFlash(false), 500);
 
-    // Persist in background — rollback on failure
-    try {
-      await onSave(newValue);
-    } catch {
-      setDisplayValue(previousValue);
-      setInputValue(previousValue ?? "");
-    }
-  }, [inputValue, displayValue, onSave]);
+    // Persist in background — rollback + destructive toast on failure
+    await runFieldSave({
+      newValue,
+      previousValue,
+      onSave,
+      onRevert: (prev) => {
+        setDisplayValue(prev);
+        setInputValue(prev ?? "");
+      },
+      toast,
+      label,
+    });
+  }, [inputValue, displayValue, onSave, toast, label]);
 
   const handleCancel = useCallback(() => {
     setInputValue(displayValue ?? "");
