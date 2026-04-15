@@ -14,7 +14,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import { Loader2, Eye, EyeOff, RotateCcw } from "lucide-react";
+import Link from "next/link";
+import { Loader2, Eye, EyeOff, RotateCcw, Building2, ChevronRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { updateProfile, changePassword } from "@/app/actions/profile";
 import { updateOnboardingState } from "@/app/actions/onboarding-state";
@@ -191,6 +192,36 @@ export default function SettingsPage() {
           </form>
         </CardContent>
       </Card>
+
+      {/* Organization (tenant-admin + super-admin only — destination page gates) */}
+      <Link
+        href={`/${orgId}/settings/organization`}
+        className="block group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl"
+      >
+        <Card className="transition-colors hover:border-[var(--border-gold)]">
+          <CardContent className="flex items-center gap-4 p-6">
+            <div
+              className="flex h-10 w-10 items-center justify-center rounded-lg"
+              style={{
+                backgroundColor: "var(--gold-bg-strong)",
+                border: "1px solid var(--border-gold)",
+              }}
+            >
+              <Building2 className="h-5 w-5" style={{ color: "var(--gold-primary)" }} />
+            </div>
+            <div className="flex-1">
+              <p className="font-semibold">Organization</p>
+              <p className="text-sm" style={{ color: "var(--text-secondary-ds)" }}>
+                Update your team name, upload a logo, and pick a theme.
+              </p>
+            </div>
+            <ChevronRight
+              className="h-5 w-5 transition-transform group-hover:translate-x-0.5"
+              style={{ color: "var(--text-secondary-ds)" }}
+            />
+          </CardContent>
+        </Card>
+      </Link>
 
       {/* Password Section */}
       <Card>
