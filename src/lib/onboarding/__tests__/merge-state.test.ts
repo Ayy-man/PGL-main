@@ -79,15 +79,18 @@ describe("mergeOnboardingState", () => {
   });
 
   it("filters unknown top-level keys out of the returned state", () => {
-    const next = mergeOnboardingState(undefined, {
+    // Cast through `unknown` so we can pass a partial that includes keys
+    // outside OnboardingStatePartial — we want to verify the runtime filter,
+    // not the type system.
+    const rogue = {
       tour_completed: true,
-      // @ts-expect-error — intentional unknown key to assert defensive filter
       role: "super_admin",
-      // @ts-expect-error — another intentional unknown key
       tenant_id: "t-pwn",
-    });
-    expect((next as Record<string, unknown>).role).toBeUndefined();
-    expect((next as Record<string, unknown>).tenant_id).toBeUndefined();
+    } as unknown as Parameters<typeof mergeOnboardingState>[1];
+    const next = mergeOnboardingState(undefined, rogue);
+    const asRecord = next as unknown as Record<string, unknown>;
+    expect(asRecord.role).toBeUndefined();
+    expect(asRecord.tenant_id).toBeUndefined();
     expect(next.tour_completed).toBe(true);
   });
 
