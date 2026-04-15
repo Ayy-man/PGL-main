@@ -7,6 +7,8 @@ import type { ApolloPerson } from "@/lib/apollo/types";
 import { isApolloMockMode } from "@/lib/platform-config";
 import { apolloRateLimiter } from "@/lib/rate-limit/limiters";
 import { withRateLimit, rateLimitResponse } from "@/lib/rate-limit/middleware";
+import { hasMinRole } from "@/types/auth";
+import type { UserRole } from "@/types/auth";
 
 /**
  * Apollo mock mode — controlled via platform_config.apollo_mock_enrichment (DB)
@@ -118,6 +120,19 @@ export async function POST(request: Request) {
     const tenantId = user.app_metadata?.tenant_id as string | undefined;
     if (!tenantId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Server-side role guard — phase 42. Per 42-01-PLAN.md Pattern B.
+    // Inline check (not requireRole) because Route Handlers cannot
+    // tolerate redirect() — it would surface as 500. Placed BEFORE
+    // rate-limiter so Assistant requests cannot consume the tenant's
+    // Apollo rate budget.
+    const role = (user.app_metadata?.role as UserRole) || "assistant";
+    if (!hasMinRole(role, "agent")) {
+      return NextResponse.json(
+        { error: "Forbidden", message: "Your role does not permit this action" },
+        { status: 403 }
+      );
     }
 
     const rateLimit = await withRateLimit(apolloRateLimiter, `tenant:${tenantId}`);
