@@ -38,6 +38,7 @@ export function BulkActionsBar({
 
   return (
     <div
+      data-tour-id="bulk-actions-bar"
       className="flex items-center justify-between rounded-[10px] px-4 py-3 mb-3 animate-slide-up"
       style={{
         background: "var(--bg-elevated)",

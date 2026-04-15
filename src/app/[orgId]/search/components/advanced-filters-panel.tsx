@@ -86,6 +86,7 @@ export function AdvancedFiltersPanel({
       {/* Toggle button — always visible */}
       <button
         type="button"
+        data-tour-id="advanced-filters-toggle"
         onClick={() => setIsOpen((prev) => !prev)}
         className="flex items-center gap-2 text-[13px] font-medium cursor-pointer transition-all duration-200 hover:text-[var(--text-primary-ds)]"
         style={{

@@ -296,6 +296,7 @@ export function ListGrid({ lists: serverLists, canEdit = true, onReady }: ListGr
               <Button
                 variant="ghost"
                 size="sm"
+                data-tour-id="export-csv"
                 className="text-muted-foreground hover:text-foreground cursor-pointer"
                 aria-label="Export list"
                 onClick={() => handleExport(list.id, list.name)}

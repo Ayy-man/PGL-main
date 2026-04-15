@@ -747,6 +747,7 @@ export function ProfileView({
         <div className="lg:col-span-3 flex flex-col gap-4">
           {/* Enrichment Status Card */}
           <div
+            data-tour-id="profile-summary"
             className="rounded-[14px] p-5"
             style={{
               background: "var(--bg-card-gradient, rgba(255,255,255,0.03))",

@@ -220,7 +220,7 @@ export function ListMemberTable({ members: serverMembers, listId, listName }: Li
   };
 
   return (
-    <div>
+    <div data-tour-id="list-member-table">
       {/* Desktop table */}
       <div className="hidden md:block">
         <Table>

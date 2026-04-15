@@ -47,6 +47,7 @@ export function NLSearchBar({
 
   return (
     <div
+      data-tour-id="nl-search-bar"
       className="relative rounded-[24px] overflow-hidden"
       style={{
         background: "rgba(255,255,255,0.03)",

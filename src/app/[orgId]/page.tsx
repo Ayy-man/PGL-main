@@ -234,7 +234,7 @@ export default async function TenantDashboard({
             <History className="h-4 w-4" />
             Export History
           </Link>
-          <Button asChild variant="gold-solid" className="card-interactive press-effect">
+          <Button asChild variant="gold-solid" className="card-interactive press-effect" data-tour-id="discover-card">
             <Link href={`/${orgId}/search`}>
               <Download className="h-4 w-4" />
               Download New List

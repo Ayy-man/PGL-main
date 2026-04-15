@@ -3,7 +3,9 @@ import { notFound, redirect } from "next/navigation";
 import { Sidebar } from "@/components/layout/sidebar";
 import { TopBar } from "@/components/layout/top-bar";
 import { MobileBottomNav } from "@/components/layout/mobile-bottom-nav";
+import { TourTrigger } from "@/components/onboarding/tour-trigger";
 import { getThemeCSSVariables, isValidTheme, DEFAULT_THEME } from "@/lib/tenant-theme";
+import type { OnboardingState } from "@/types/onboarding";
 
 export default async function TenantLayout({
   children,
@@ -20,6 +22,7 @@ export default async function TenantLayout({
   let userEmail: string | undefined;
   let savedSearchCount = 0;
   let listsCount = 0;
+  let initialOnboardingState: OnboardingState | null = null;
 
   try {
     ({ orgId } = await params);
@@ -69,6 +72,8 @@ export default async function TenantLayout({
     userInitials = userName.charAt(0).toUpperCase() || "?";
     userRole = (user?.app_metadata?.role as string) || "assistant";
     userEmail = user?.email ?? undefined;
+    initialOnboardingState =
+      (user.app_metadata?.onboarding_state as OnboardingState | undefined) ?? null;
   } catch (err) {
     // Re-throw Next.js internal errors (redirect, notFound)
     if (err && typeof err === "object" && "digest" in err) throw err;
@@ -116,6 +121,9 @@ export default async function TenantLayout({
 
         {/* Mobile bottom navigation — renders only below lg */}
         <MobileBottomNav orgId={orgId} userRole={userRole} />
+
+        {/* Product tour — renders only when onboarding_state.tour_completed !== true */}
+        <TourTrigger initialOnboardingState={initialOnboardingState} />
       </div>
     </div>
   );
