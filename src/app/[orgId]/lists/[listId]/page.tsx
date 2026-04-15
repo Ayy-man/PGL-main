@@ -3,6 +3,7 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { getListById, getListMembers } from "@/lib/lists/queries";
 import { ListMemberTable } from "../components/list-member-table";
+import { ListProspectsRealtime } from "../components/list-prospects-realtime";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ReportIssueButton } from "@/components/issues/report-issue-button";
@@ -94,7 +95,21 @@ export default async function ListDetailPage({ params }: PageProps) {
           description="Add prospects from the search page to start building your pipeline."
         />
       ) : (
-        <ListMemberTable members={members} listId={listId} listName={list.name} />
+        <>
+          <ListMemberTable members={members} listId={listId} listName={list.name} />
+          {/*
+            Phase 40-03: Realtime subscriber on `prospects` UPDATE events for
+            this tenant. Headless — renders null. Reconciles payloads against
+            the currently-rendered prospect IDs client-side (filter-string
+            length cap prevents `id=in.(...)`). With no `onPayload` passed, it
+            falls back to `router.refresh()` so this server component re-fetches
+            and the enrichment dot / timestamps update without a manual reload.
+          */}
+          <ListProspectsRealtime
+            tenantId={tenantId}
+            visibleIds={members.map((m) => m.prospect_id)}
+          />
+        </>
       )}
     </div>
   );

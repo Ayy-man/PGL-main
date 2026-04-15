@@ -32,17 +32,18 @@ function makePayload(
   newRow: ProspectsRow,
   oldRow: Partial<ProspectsRow> = {}
 ): RealtimePostgresChangesPayload<ProspectsRow> {
+  // supabase-js adds commit_timestamp/errors on actual events, but the reducer
+  // under test only reads `new` and `old`, so we cast to avoid listing the
+  // full runtime shape in every fixture.
   return {
     eventType: "UPDATE",
     new: newRow,
     old: oldRow,
     schema: "public",
     table: "prospects",
-    // @ts-expect-error - supabase adds commit_timestamp/errors on actual events,
-    // not required for the reducer under test.
     commit_timestamp: new Date().toISOString(),
-    errors: null,
-  };
+    errors: [],
+  } as unknown as RealtimePostgresChangesPayload<ProspectsRow>;
 }
 
 function makeMember(overrides: Partial<TestMember> = {}): TestMember {
