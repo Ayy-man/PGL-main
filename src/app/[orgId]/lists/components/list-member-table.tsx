@@ -25,6 +25,14 @@ import { MemberNotesCell } from "./member-notes-cell";
 import { removeFromListAction } from "../actions";
 import type { ListMember } from "@/lib/lists/types";
 import { EnrichmentStatusDots } from "@/components/ui/enrichment-status-dots";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  ROW_SKELETON_SHAPE,
+  CARD_SKELETON_SHAPE,
+  addEnrichingIds,
+  removeEnrichingIds,
+  reconcileEnrichedPayload,
+} from "@/components/ui/lib/skeleton-shapes";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
@@ -122,7 +130,13 @@ export function ListMemberTable({ members: serverMembers, listId, listName }: Li
     ? `?from=list&listId=${listId}&listName=${encodeURIComponent(listName)}`
     : "";
   const [members, setMembers] = useState(serverMembers);
-  const [enrichingId, setEnrichingId] = useState<string | null>(null);
+  // enrichingIds: Set of prospect IDs currently being (re-)enriched. Rows in
+  // this set render a skeleton cell layout instead of normal content until the
+  // enrichment resolves (via explicit fetch settle OR via the Realtime payload
+  // at line ~186 landing with a terminal enrichment_status).
+  // Phase 40-07: replaced prior `enrichingId: string | null` single-slot
+  // tracker so concurrent re-enriches no longer stomp each other's spinners.
+  const [enrichingIds, setEnrichingIds] = useState<Set<string>>(new Set());
   const [pendingRemoveMember, setPendingRemoveMember] = useState<{ memberId: string; prospectName: string } | null>(null);
   const [removing, setRemoving] = useState(false);
   const { toast } = useToast();
@@ -165,23 +179,25 @@ export function ListMemberTable({ members: serverMembers, listId, listName }: Li
   };
 
   const handleReEnrich = async (prospectId: string) => {
-    setEnrichingId(prospectId);
+    setEnrichingIds((prev) => addEnrichingIds(prev, [prospectId]));
     try {
       const res = await fetch(`/api/prospects/${prospectId}/enrich?force=true`, { method: "POST" });
       if (res.ok) {
         toast({ title: "Re-enrichment queued", description: "Data will refresh in the background." });
       } else {
         toast({ title: "Re-enrichment failed", description: "Could not queue enrichment.", variant: "destructive" });
-        setEnrichingId(null);
+        setEnrichingIds((prev) => removeEnrichingIds(prev, [prospectId]));
         return;
       }
     } catch {
       toast({ title: "Re-enrichment failed", description: "Network error.", variant: "destructive" });
-      setEnrichingId(null);
+      setEnrichingIds((prev) => removeEnrichingIds(prev, [prospectId]));
       return;
     }
 
-    // Subscribe to Realtime updates — clear spinner when enrichment completes or fails
+    // Subscribe to Realtime updates — clear skeleton when enrichment completes or fails.
+    // reconcileEnrichedPayload handles the terminal-status gate + no-op early-return
+    // if the id was already cleared (e.g. by a concurrent request).
     const supabase = createClient();
     const channel = supabase
       .channel(`list-re-enrich-${prospectId}`)
@@ -189,9 +205,13 @@ export function ListMemberTable({ members: serverMembers, listId, listName }: Li
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "prospects", filter: `id=eq.${prospectId}` },
         (payload) => {
-          const row = payload.new as { enrichment_status?: string };
-          if (row.enrichment_status === "complete" || row.enrichment_status === "failed") {
-            setEnrichingId(null);
+          const row = payload.new as { id?: string; enrichment_status?: string };
+          const id = row.id ?? prospectId;
+          const status = row.enrichment_status;
+          if (status === "complete" || status === "failed" || status === "enriched") {
+            setEnrichingIds((prev) =>
+              reconcileEnrichedPayload(prev, { id, enrichment_status: status })
+            );
             supabase.removeChannel(channel);
           }
         }
@@ -216,7 +236,64 @@ export function ListMemberTable({ members: serverMembers, listId, listName }: Li
             </TableRow>
           </TableHeader>
           <TableBody>
-            {members.map((member, i) => (
+            {members.map((member, i) => {
+              const isEnriching = enrichingIds.has(member.prospect.id);
+              if (isEnriching) {
+                // Phase 40-07 bulk/re-enrich skeleton: targeted rows show
+                // rounded-lg skeletons in the enrichment-populated columns
+                // (prospect, location, contact, status-width, added, notes).
+                // Cleared by Realtime terminal status OR fetch-settle fallback.
+                return (
+                  <TableRow
+                    key={member.id}
+                    className="row-hover-lift"
+                    style={{ background: i % 2 === 1 ? "rgba(255,255,255,0.015)" : "transparent" }}
+                    data-testid="list-row-enriching-skeleton"
+                  >
+                    <TableCell className="py-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <Skeleton className={`h-10 w-10 ${ROW_SKELETON_SHAPE}`} />
+                        <div className="flex-1 space-y-1.5">
+                          <Skeleton className={`h-4 w-40 ${ROW_SKELETON_SHAPE}`} />
+                          <Skeleton className={`h-3 w-56 ${ROW_SKELETON_SHAPE}`} />
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className={`h-4 w-24 ${ROW_SKELETON_SHAPE}`} />
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center justify-center gap-2">
+                        <Skeleton className={`h-4 w-4 ${ROW_SKELETON_SHAPE}`} />
+                        <Skeleton className={`h-4 w-4 ${ROW_SKELETON_SHAPE}`} />
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className={`h-6 w-20 ${ROW_SKELETON_SHAPE}`} />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className={`h-3 w-12 ${ROW_SKELETON_SHAPE}`} />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className={`h-4 w-40 ${ROW_SKELETON_SHAPE}`} />
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1 justify-end">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          title="Re-enrichment in progress"
+                          disabled
+                        >
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              }
+              return (
               <TableRow
                 key={member.id}
                 className="row-hover-lift press-effect"
@@ -325,9 +402,9 @@ export function ListMemberTable({ members: serverMembers, listId, listName }: Li
                       className="h-7 w-7"
                       title="Re-enrich prospect"
                       onClick={() => handleReEnrich(member.prospect.id)}
-                      disabled={enrichingId === member.prospect.id}
+                      disabled={enrichingIds.has(member.prospect.id)}
                     >
-                      {enrichingId === member.prospect.id
+                      {enrichingIds.has(member.prospect.id)
                         ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
                         : <RefreshCw className="h-3.5 w-3.5" />}
                     </Button>
@@ -342,14 +419,40 @@ export function ListMemberTable({ members: serverMembers, listId, listName }: Li
                   </div>
                 </TableCell>
               </TableRow>
-            ))}
+              );
+            })}
           </TableBody>
         </Table>
       </div>
 
       {/* Mobile card list */}
       <div className="md:hidden divide-y" style={{ borderColor: "var(--border-subtle)" }}>
-        {members.map((member) => (
+        {members.map((member) => {
+          const isEnriching = enrichingIds.has(member.prospect.id);
+          if (isEnriching) {
+            // Phase 40-07 mobile skeleton card: rounded-[14px] outer shape per
+            // Phase 14-polish convention for card-shaped skeletons.
+            return (
+              <div
+                key={member.id}
+                className={`p-4 space-y-2 ${CARD_SKELETON_SHAPE}`}
+                data-testid="list-card-enriching-skeleton"
+              >
+                <div className="flex items-center gap-3">
+                  <Skeleton className={`h-8 w-8 ${ROW_SKELETON_SHAPE}`} />
+                  <div className="flex-1 space-y-1.5">
+                    <Skeleton className={`h-4 w-32 ${ROW_SKELETON_SHAPE}`} />
+                    <Skeleton className={`h-3 w-48 ${ROW_SKELETON_SHAPE}`} />
+                  </div>
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <Skeleton className={`h-6 w-20 ${ROW_SKELETON_SHAPE}`} />
+                  <Skeleton className={`h-3 w-16 ${ROW_SKELETON_SHAPE}`} />
+                </div>
+              </div>
+            );
+          }
+          return (
           <div key={member.id} className="p-4 space-y-2">
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0 flex-1">
@@ -397,9 +500,9 @@ export function ListMemberTable({ members: serverMembers, listId, listName }: Li
                   className="h-7 w-7 shrink-0"
                   title="Re-enrich prospect"
                   onClick={() => handleReEnrich(member.prospect.id)}
-                  disabled={enrichingId === member.prospect.id}
+                  disabled={enrichingIds.has(member.prospect.id)}
                 >
-                  {enrichingId === member.prospect.id
+                  {enrichingIds.has(member.prospect.id)
                     ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
                     : <RefreshCw className="h-3.5 w-3.5" />}
                 </Button>
@@ -414,7 +517,8 @@ export function ListMemberTable({ members: serverMembers, listId, listName }: Li
               </div>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
 
       <Dialog open={!!pendingRemoveMember} onOpenChange={(o) => !o && setPendingRemoveMember(null)}>

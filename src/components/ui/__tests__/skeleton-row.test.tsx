@@ -35,55 +35,59 @@ describe("Skeleton shape conventions", () => {
   });
 });
 
+function sortedSetValues(s: Set<string>): string[] {
+  return Array.from(s).sort();
+}
+
 describe("addEnrichingIds (pure)", () => {
   it("adds ids to an empty Set", () => {
-    const next = addEnrichingIds(new Set(), ["a", "b"]);
-    expect([...next].sort()).toEqual(["a", "b"]);
+    const next = addEnrichingIds(new Set<string>(), ["a", "b"]);
+    expect(sortedSetValues(next)).toEqual(["a", "b"]);
   });
 
   it("merges with existing ids without dedupe issues", () => {
-    const prev = new Set(["a"]);
+    const prev = new Set<string>(["a"]);
     const next = addEnrichingIds(prev, ["b", "a", "c"]);
-    expect([...next].sort()).toEqual(["a", "b", "c"]);
+    expect(sortedSetValues(next)).toEqual(["a", "b", "c"]);
   });
 
   it("returns a new Set (immutability — no mutation of prev)", () => {
-    const prev = new Set(["a"]);
+    const prev = new Set<string>(["a"]);
     const next = addEnrichingIds(prev, ["b"]);
     expect(next).not.toBe(prev);
-    expect([...prev]).toEqual(["a"]); // prev untouched
+    expect(sortedSetValues(prev)).toEqual(["a"]); // prev untouched
   });
 
   it("no-ops when given an empty id list (still returns a new Set)", () => {
-    const prev = new Set(["a"]);
+    const prev = new Set<string>(["a"]);
     const next = addEnrichingIds(prev, []);
-    expect([...next]).toEqual(["a"]);
+    expect(sortedSetValues(next)).toEqual(["a"]);
     expect(next).not.toBe(prev);
   });
 });
 
 describe("removeEnrichingIds (pure)", () => {
   it("removes ids from a Set", () => {
-    const prev = new Set(["a", "b", "c"]);
+    const prev = new Set<string>(["a", "b", "c"]);
     const next = removeEnrichingIds(prev, ["b"]);
-    expect([...next].sort()).toEqual(["a", "c"]);
+    expect(sortedSetValues(next)).toEqual(["a", "c"]);
   });
 
   it("ignores ids that are not present", () => {
-    const prev = new Set(["a"]);
+    const prev = new Set<string>(["a"]);
     const next = removeEnrichingIds(prev, ["zzz"]);
-    expect([...next]).toEqual(["a"]);
+    expect(sortedSetValues(next)).toEqual(["a"]);
   });
 
   it("returns a new Set (no mutation)", () => {
-    const prev = new Set(["a", "b"]);
+    const prev = new Set<string>(["a", "b"]);
     const next = removeEnrichingIds(prev, ["a"]);
     expect(next).not.toBe(prev);
-    expect([...prev].sort()).toEqual(["a", "b"]); // prev untouched
+    expect(sortedSetValues(prev)).toEqual(["a", "b"]); // prev untouched
   });
 
   it("clearing all ids yields an empty Set", () => {
-    const prev = new Set(["a", "b"]);
+    const prev = new Set<string>(["a", "b"]);
     const next = removeEnrichingIds(prev, ["a", "b"]);
     expect(next.size).toBe(0);
   });
@@ -91,42 +95,52 @@ describe("removeEnrichingIds (pure)", () => {
 
 describe("reconcileEnrichedPayload (realtime belt-and-suspenders)", () => {
   it("clears an id when realtime payload reports enrichment_status === 'enriched'", () => {
-    const prev = new Set(["a", "b"]);
+    const prev = new Set<string>(["a", "b"]);
     const next = reconcileEnrichedPayload(prev, {
       id: "a",
       enrichment_status: "enriched",
     });
-    expect([...next].sort()).toEqual(["b"]);
+    expect(sortedSetValues(next)).toEqual(["b"]);
   });
 
   it("also clears on terminal status 'complete' or 'failed' (existing re-enrich contract)", () => {
     expect(
-      [...reconcileEnrichedPayload(new Set(["a"]), { id: "a", enrichment_status: "complete" })]
+      sortedSetValues(
+        reconcileEnrichedPayload(new Set<string>(["a"]), {
+          id: "a",
+          enrichment_status: "complete",
+        })
+      )
     ).toEqual([]);
     expect(
-      [...reconcileEnrichedPayload(new Set(["a"]), { id: "a", enrichment_status: "failed" })]
+      sortedSetValues(
+        reconcileEnrichedPayload(new Set<string>(["a"]), {
+          id: "a",
+          enrichment_status: "failed",
+        })
+      )
     ).toEqual([]);
   });
 
   it("leaves the Set untouched for non-terminal statuses (pending, enriching)", () => {
-    const prev = new Set(["a"]);
+    const prev = new Set<string>(["a"]);
     const pending = reconcileEnrichedPayload(prev, { id: "a", enrichment_status: "pending" });
-    expect([...pending]).toEqual(["a"]);
+    expect(sortedSetValues(pending)).toEqual(["a"]);
   });
 
   it("leaves the Set untouched when the payload id is not tracked", () => {
-    const prev = new Set(["a"]);
+    const prev = new Set<string>(["a"]);
     const next = reconcileEnrichedPayload(prev, {
       id: "zzz",
       enrichment_status: "enriched",
     });
-    expect([...next].sort()).toEqual(["a"]);
+    expect(sortedSetValues(next)).toEqual(["a"]);
     // Same reference is fine here — no work to do
   });
 
   it("no-ops when payload has no enrichment_status", () => {
-    const prev = new Set(["a"]);
+    const prev = new Set<string>(["a"]);
     const next = reconcileEnrichedPayload(prev, { id: "a" });
-    expect([...next]).toEqual(["a"]);
+    expect(sortedSetValues(next)).toEqual(["a"]);
   });
 });
