@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { requireRole } from "@/lib/auth/rbac";
 import {
   createList,
   deleteList,
@@ -24,6 +25,12 @@ async function getAuthenticatedUser() {
   if (!tenantId) {
     throw new Error("No tenant ID found in session");
   }
+
+  // Server-side role guard — phase 42. Per 42-01-PLAN.md Pattern A.
+  // assistant is rejected here (redirect → navigation); agent,
+  // tenant_admin, super_admin all pass. Placed AFTER auth/tenant
+  // resolution, BEFORE any DB write in the 6 calling actions.
+  await requireRole("agent");
 
   return { userId: user.id, tenantId };
 }
