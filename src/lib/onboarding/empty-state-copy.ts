@@ -1,18 +1,14 @@
 /**
- * Phase 41-04 — Wave 3 coordination stub.
+ * Empty-state copy map for Phase 41 onboarding polish.
  *
- * The full `emptyStateCopy` helper ships in Plan 41-05 with 4 surface keys
- * ("dashboard", "lists", "personas", "activity") and a safe fallback. Plan
- * 41-05 runs in the same wave as 41-04 and also modifies dashboard-adjacent
- * surfaces, so 41-04 Task 3 must consume the helper from a concrete module
- * path at build time. This file is the MINIMAL "dashboard"-key stub 41-04
- * creates; 41-05's executor extends it with the remaining 3 surface keys +
- * the fallback + the unit tests.
+ * Agent-friendly language: no product jargon like "persona" without explaining
+ * it means "saved search". Every entry carries its own CTA so consumers render
+ * a single Button-as-Link via the existing EmptyState `children` slot.
  *
- * Amendment: the must_haves truth "Dashboard EmptyState (no-personas slot)
- * uses emptyStateCopy('dashboard') from Plan 41-05's helper" was absorbed
- * into 41-04 on 2026-04-15 to resolve the Wave 3 `[orgId]/page.tsx`
- * collision between plans 04 and 05.
+ * Coordination note: this file was seeded by Plan 41-04 (dashboard-only stub)
+ * to unblock Plan 04's dashboard EmptyState absorb in Wave 3, then extended by
+ * Plan 41-05 to the full 4-surface map. Conflict resolved 2026-04-15 by taking
+ * Plan 41-05's complete version.
  */
 
 export type EmptyStateSurface = "dashboard" | "lists" | "personas" | "activity";
@@ -24,15 +20,31 @@ export interface EmptyStateCopyEntry {
   ctaHref: (orgId: string) => string;
 }
 
-/**
- * Concrete entry for the "dashboard" surface. Agent-friendly copy per
- * CONTEXT — no "persona" jargon without definition.
- */
-const DASHBOARD: EmptyStateCopyEntry = {
-  title: "Welcome — create your first saved search",
-  body: "Start with a saved search — describe who you want to reach in plain English, then enrich for contacts and wealth signals.",
-  ctaLabel: "New saved search",
-  ctaHref: (orgId) => `/${orgId}/personas`,
+export const EMPTY_STATE_COPY: Record<EmptyStateSurface, EmptyStateCopyEntry> = {
+  dashboard: {
+    title: "Find your first prospects",
+    body: "Start with a saved search — describe who you want to reach in plain English, then enrich for contacts and wealth signals.",
+    ctaLabel: "Create your first saved search",
+    ctaHref: (orgId) => `/${orgId}/personas`,
+  },
+  lists: {
+    title: "No lists yet",
+    body: "Save enriched prospects into a list to track outreach, take notes, and export when you're ready.",
+    ctaLabel: "Create your first list",
+    ctaHref: (orgId) => `/${orgId}/lists`,
+  },
+  personas: {
+    title: "Save a search to reuse it",
+    body: "A saved search remembers your criteria so you can re-run it anytime. Think of it as a reusable search recipe.",
+    ctaLabel: "Create your first saved search",
+    ctaHref: (orgId) => `/${orgId}/personas`,
+  },
+  activity: {
+    title: "No activity yet",
+    body: "Complete your first search and enrichment to see activity tracked here — every search, every enrichment, every list change.",
+    ctaLabel: "Start a search",
+    ctaHref: (orgId) => `/${orgId}/search`,
+  },
 };
 
 const FALLBACK: EmptyStateCopyEntry = {
@@ -43,25 +55,13 @@ const FALLBACK: EmptyStateCopyEntry = {
 };
 
 /**
- * Returns the canonical empty-state copy for a given surface. Stub scope
- * covers "dashboard" only; Plan 41-05 extends to the other 3 surfaces.
- * Never returns null, never throws — unknown surfaces fall through to a
- * safe FALLBACK.
+ * Returns the copy entry for a known surface, or a safe fallback for anything else.
+ * Never throws. Never returns null.
  */
 export function emptyStateCopy(
-  surface: EmptyStateSurface | string
+  surface: EmptyStateSurface | string,
 ): EmptyStateCopyEntry {
-  if (surface === "dashboard") return DASHBOARD;
-  return FALLBACK;
+  return (
+    (EMPTY_STATE_COPY as Record<string, EmptyStateCopyEntry>)[surface] ?? FALLBACK
+  );
 }
-
-/**
- * Exported for Plan 41-05's extension — the target executor will rewrite
- * this object to include all 4 surface keys and restore the proper helper
- * signature.
- */
-export const EMPTY_STATE_COPY: Partial<
-  Record<EmptyStateSurface, EmptyStateCopyEntry>
-> = {
-  dashboard: DASHBOARD,
-};
