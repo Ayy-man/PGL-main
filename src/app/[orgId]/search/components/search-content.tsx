@@ -37,7 +37,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 import { createListAction } from "../../lists/actions";
+import { runOptimisticDismiss } from "../lib/dismiss-reducer";
 
 interface SearchContentProps {
   personas: Persona[];
@@ -241,36 +243,6 @@ export function SearchContent({ personas, lists, orgId, canEdit = true }: Search
     }
   }, [searchState.persona, loadSavedProspects, savedProspects.length, toast]);
 
-  const handleDismiss = useCallback(async (apolloPersonIds: string[]) => {
-    if (!searchState.persona) return;
-
-    // Save for rollback
-    const previousProspects = savedProspects;
-    const previousDismissedCount = dismissedCount;
-
-    // Optimistic update
-    setSavedProspects(prev => prev.filter(p => !apolloPersonIds.includes(p.apollo_person_id)));
-    setDismissedCount(prev => prev + apolloPersonIds.length);
-    setSelectedIds(new Set());
-    setDismissDialogOpen(false);
-    setPendingDismissIds([]);
-    toast({ title: `${apolloPersonIds.length} prospect${apolloPersonIds.length > 1 ? "s" : ""} dismissed` });
-
-    try {
-      const resp = await fetch(`/api/search/${searchState.persona}/dismiss`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: apolloPersonIds.length > 1 ? "bulk-dismiss" : "dismiss", apolloPersonIds }),
-      });
-      if (!resp.ok) throw new Error("Dismiss failed");
-    } catch {
-      // Rollback
-      setSavedProspects(previousProspects);
-      setDismissedCount(previousDismissedCount);
-      toast({ title: "Dismiss failed", description: "Could not dismiss prospect(s).", variant: "destructive" });
-    }
-  }, [searchState.persona, savedProspects, dismissedCount, toast]);
-
   const handleUndoDismiss = useCallback(async (apolloPersonId: string) => {
     if (!searchState.persona) return;
 
@@ -291,6 +263,71 @@ export function SearchContent({ personas, lists, orgId, canEdit = true }: Search
       toast({ title: "Restore failed", variant: "destructive" });
     }
   }, [searchState.persona, loadSavedProspects, toast]);
+
+  const handleDismiss = useCallback(async (apolloPersonIds: string[]) => {
+    if (!searchState.persona) return;
+    const persona = searchState.persona;
+
+    // Save for rollback (captured before UI reset)
+    const previousProspects = savedProspects;
+    const previousDismissedCount = dismissedCount;
+
+    // UI bookkeeping (selection + dialog) happens synchronously;
+    // reducer + fetch handled by runOptimisticDismiss
+    setSelectedIds(new Set());
+    setDismissDialogOpen(false);
+    setPendingDismissIds([]);
+
+    // Derive display name for single-dismiss toast (apollo_data is Record<string, unknown>)
+    const displayName = (() => {
+      if (apolloPersonIds.length !== 1) return undefined;
+      const row = previousProspects.find((p) => p.apollo_person_id === apolloPersonIds[0]);
+      const name = row?.apollo_data && typeof row.apollo_data === "object"
+        ? (row.apollo_data as { name?: string }).name
+        : undefined;
+      return typeof name === "string" && name.length > 0 ? name : undefined;
+    })();
+
+    // Undo handler: restore UI instantly + POST undo to server; uses the
+    // same single-id endpoint for each id so partial failures are visible.
+    const handleUndoClick = async () => {
+      setSavedProspects(previousProspects);
+      setDismissedCount(previousDismissedCount);
+      try {
+        const resp = await fetch(`/api/search/${persona}/dismiss`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "undo", apolloPersonIds }),
+        });
+        if (!resp.ok) throw new Error("Undo failed");
+        await loadSavedProspects(persona);
+      } catch {
+        toast({ title: "Restore failed", variant: "destructive" });
+      }
+    };
+
+    await runOptimisticDismiss({
+      previous: { prospects: previousProspects, dismissedCount: previousDismissedCount },
+      apolloPersonIds,
+      searchId: persona,
+      fetchImpl: fetch,
+      setState: (next) => {
+        // Cast through unknown: reducer types DismissProspect with only
+        // apollo_person_id, but at runtime the reducer preserves the full
+        // SavedSearchProspect rows (filter only). This is safe because we
+        // never pass fabricated rows in — we pass React state back and forth.
+        setSavedProspects(next.prospects as unknown as SavedSearchProspect[]);
+        setDismissedCount(next.dismissedCount);
+      },
+      toast,
+      undoAction: (
+        <ToastAction altText="Undo" onClick={handleUndoClick}>
+          Undo
+        </ToastAction>
+      ),
+      displayName,
+    });
+  }, [searchState.persona, savedProspects, dismissedCount, loadSavedProspects, toast]);
 
   const handleBulkDismissClick = useCallback(() => {
     const ids = Array.from(selectedIds);

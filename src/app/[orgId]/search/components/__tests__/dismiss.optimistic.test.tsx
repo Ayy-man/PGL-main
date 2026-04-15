@@ -35,14 +35,17 @@ describe("applyDismiss (pure reducer)", () => {
     expect(next.dismissedCount).toBe(2);
   });
 
-  it("returns same values when no ids match", () => {
+  it("returns same prospects when no ids match (still increments counter — matches locked behavior)", () => {
+    // applyDismiss is intentionally dumb about payload/actual-removal mismatches
+    // because the server is the source of truth for dismissedCount. Counter
+    // reconciliation happens on next loadSavedProspects reload.
     const prev: DismissState = {
       prospects: [makeProspect("a")],
       dismissedCount: 5,
     };
     const next = applyDismiss(prev, ["zzz"]);
     expect(next.prospects).toHaveLength(1);
-    expect(next.dismissedCount).toBe(5);
+    expect(next.dismissedCount).toBe(6);
   });
 
   it("does not double-count when same id dismissed twice", () => {
@@ -84,6 +87,7 @@ describe("runOptimisticDismiss (orchestration)", () => {
       dismissedCount: 0,
     };
 
+    const undoSentinel = { __undo: true };
     const result = await runOptimisticDismiss({
       previous: prev,
       apolloPersonIds: ["a"],
@@ -91,6 +95,7 @@ describe("runOptimisticDismiss (orchestration)", () => {
       fetchImpl,
       setState,
       toast,
+      undoAction: undoSentinel as unknown as import("@/components/ui/toast").ToastActionElement,
     });
 
     expect(result.committed).toBe(true);
@@ -112,7 +117,7 @@ describe("runOptimisticDismiss (orchestration)", () => {
     expect(toast).toHaveBeenCalledTimes(1);
     const toastArg = toast.mock.calls[0][0];
     expect(toastArg.title).toContain("dismissed");
-    expect(toastArg.action).toBeDefined();
+    expect(toastArg.action).toBe(undoSentinel);
   });
 
   it("uses bulk-dismiss action when >1 ids", async () => {
