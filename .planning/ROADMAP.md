@@ -466,13 +466,23 @@ Plans:
 
 ---
 
-### Phase 40: Instant UX Pass — Optimistic Mutations + Supabase Realtime for Enrichment
+### Phase 40: Instant UX Pass — Demo-Critical Slice (Realtime Enrichment + Top-5 Optimistic + 3 Skeletons)
 
-**Goal:** Eliminate every user-visible "waiting for server" moment. Audit every mutating action in the app (server actions, fetch POST/PATCH/DELETE calls to `/api/*`, Supabase writes) and resolve each one of three ways: (a) **optimistic update** — write to UI state immediately, then reconcile on server response (rename list, toggle favorite, add/remove tag, edit inline field, delete row, reorder, mark-seen, add-to-list, note save, status change); (b) **Supabase Realtime** — subscribe to the table and let the server push truth (enrichment_status transitions on `saved_search_prospects` + `prospects.enriched_at`, so green checks appear without browser refresh — the exact complaint Adrian raised on the 2026-04-13 call); (c) **fast skeleton** — when neither optimistic nor realtime fits (multi-step flows, external API calls), show a skeleton immediately and never a blank screen. Deliverable is a written audit spreadsheet of every mutating surface with its chosen strategy, then the actual implementation. Constraints: no regressions to RLS, no memory leaks from uncleaned Realtime channels, gracefully degrade to polling when WS fails, preserve toast/error UX on rollback.
+**Goal:** Ship the user-visible "instant UX" improvements that Maggie will notice in her first 2–3 weeks — specifically addressing Adrian's 2026-04-13 call complaint: *"you have to refresh the browser for it to show green."* Scope is reduced from the full 28-surface audit to the **11 highest-impact surfaces**: (1) **2 Supabase Realtime subscriptions** — new channel on `saved_search_prospects.enrichment_status` + new channel on `prospects.enriched_at` so enrichment status goes green live on the list members page and the prospect slide-over, without a refresh; (2) **5 optimistic updates** on the highest-frequency mutations that currently feel laggy: `createListAction`, `deleteListAction`, `dismissSearchProspect`, `addProspectTag`/`removeProspectTag`, and `updateProspectProfile` (inline field edit); (3) **3 skeleton states** for the slow external calls: `bulk-enrich` (enriched rows), `extendSavedSearch` (Apollo "Load More"), and research message send (Exa/LLM). Constraints: no regressions to RLS, no memory leaks from uncleaned Realtime channels, gracefully degrade to polling when WS fails, preserve toast/error UX on rollback. Remaining ~17 surfaces (admin CRUD, notes, activity log, signals mark-seen, research pin, issue reports, etc.) moved to Phase 40.1 (post-Maggie). Full audit artifact is produced by Phase 40-01 so 40.1 has a checklist to work from.
 
-**Requirements:** PHASE-40-MUTATION-AUDIT, PHASE-40-OPTIMISTIC-LISTS, PHASE-40-OPTIMISTIC-PERSONAS, PHASE-40-OPTIMISTIC-PROSPECT-EDIT, PHASE-40-OPTIMISTIC-NOTES, PHASE-40-OPTIMISTIC-TAGS, PHASE-40-REALTIME-ENRICHMENT, PHASE-40-REALTIME-CHANNEL-CLEANUP, PHASE-40-SKELETON-FALLBACK, PHASE-40-ROLLBACK-UX, PHASE-40-RLS-SAFETY, PHASE-40-UAT
+**Requirements:** PHASE-40-AUDIT-DOC (full 28-surface strategy table), PHASE-40-REALTIME-SAVED-SEARCH (new channel on `saved_search_prospects`), PHASE-40-REALTIME-PROSPECTS (new channel on `prospects.enriched_at`), PHASE-40-REALTIME-CHANNEL-CLEANUP (useEffect teardown + polling fallback), PHASE-40-OPTIMISTIC-CREATE-LIST, PHASE-40-OPTIMISTIC-DELETE-LIST, PHASE-40-OPTIMISTIC-DISMISS, PHASE-40-OPTIMISTIC-TAGS, PHASE-40-OPTIMISTIC-PROFILE-EDIT, PHASE-40-SKELETON-BULK-ENRICH, PHASE-40-SKELETON-EXTEND-SEARCH, PHASE-40-SKELETON-RESEARCH, PHASE-40-ROLLBACK-UX, PHASE-40-RLS-SAFETY, PHASE-40-UAT
 **Depends on:** Phase 39
-**Status:** Not started
+**Status:** Not started — pre-Maggie-demo blocker
+
+---
+
+### Phase 40.1: Instant UX Pass — Full Rollout (Remaining ~17 Mutating Surfaces)
+
+**Goal:** Complete the instant-UX strategy by applying optimistic / realtime / skeleton to the remaining ~17 mutating surfaces not covered by Phase 40's demo-critical slice. Uses the audit artifact produced by Phase 40-01 (`40-AUDIT.md`) as the checklist. Surfaces include: admin CRUD (`createTenantAction`, `toggleTenantStatusAction`, admin API key / user / automation routes), tenant-app polish (`updateMemberStatusAction`, `updateMemberNotesAction`, `addToListAction`, `createPersonaAction`/`updatePersonaAction`/`deletePersonaAction`, `updateProspectNotes`, `createProspectActivity`, `markSignalsSeen`, `pinResearchNote`, `updateResearchSession`, `refreshSavedSearch`, `issueReport`). No architectural changes from Phase 40 — same three strategies, same RLS + channel-cleanup constraints. Ship after Maggie has a few weeks of feedback so we polish what she actually uses.
+
+**Requirements:** PHASE-40.1-ADMIN-OPTIMISTIC, PHASE-40.1-LIST-MEMBER-OPTIMISTIC, PHASE-40.1-PERSONA-CRUD-OPTIMISTIC, PHASE-40.1-NOTES-OPTIMISTIC, PHASE-40.1-ACTIVITY-OPTIMISTIC, PHASE-40.1-SIGNAL-SEEN-OPTIMISTIC, PHASE-40.1-RESEARCH-PIN-OPTIMISTIC, PHASE-40.1-REFRESH-SEARCH-REALTIME, PHASE-40.1-UAT
+**Depends on:** Phase 40 (audit artifact)
+**Status:** Not started — post-Maggie-demo
 
 ---
 
