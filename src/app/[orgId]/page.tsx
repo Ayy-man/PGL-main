@@ -248,8 +248,9 @@ export default async function TenantDashboard({
 
       {/* New prospects alert banner */}
       {newProspectsCount > 0 && (
-        <div
-          className="flex items-center gap-3 rounded-[14px] px-5 py-3"
+        <Link
+          href={`/${orgId}/search`}
+          className="flex items-center gap-3 rounded-[14px] px-5 py-3 cursor-pointer transition-colors hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           style={{
             background: "var(--gold-bg-strong)",
             border: "1px solid var(--border-gold)",
@@ -267,14 +268,7 @@ export default async function TenantDashboard({
             {newProspectsCount === 1 ? "prospect" : "prospects"} found in the
             last 24h
           </p>
-          <Link
-            href={`/${orgId}/search`}
-            className="ml-auto text-xs underline cursor-pointer"
-            style={{ color: "var(--gold-text)" }}
-          >
-            View
-          </Link>
-        </div>
+        </Link>
       )}
 
       {/* Title row with action buttons */}
