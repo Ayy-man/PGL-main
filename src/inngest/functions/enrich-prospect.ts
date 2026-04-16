@@ -163,6 +163,7 @@ export const enrichProspect = inngest.createFunction(
         exa: { status: "pending", at: new Date().toISOString() },
         sec: { status: "pending", at: new Date().toISOString() },
         market: { status: "pending", at: new Date().toISOString() },
+        wealth_tier: { status: "pending", at: new Date().toISOString() },
         claude: { status: "pending", at: new Date().toISOString() },
         dossier: { status: "pending", at: new Date().toISOString() },
       };
