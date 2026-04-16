@@ -3,7 +3,7 @@ export type ActivityCategory = 'outreach' | 'data' | 'team' | 'custom';
 export type OutreachEventType = 'call' | 'email' | 'met' | 'linkedin';
 export type DataEventType = 'enrichment_started' | 'enrichment_complete' | 'enrichment_failed'
   | 'contactout_updated' | 'exa_updated' | 'sec_updated' | 'ai_summary_updated'
-  | 'market_data_updated' | 'new_signal'
+  | 'market_data_updated' | 'new_signal' | 'wealth_tier_estimated'
   | 'research_scrapbook_search' | 'research_scrapbook_pin';
 export type TeamEventType = 'profile_viewed' | 'note_added' | 'added_to_list' | 'removed_from_list'
   | 'exported_csv' | 'profile_edited' | 'status_changed' | 'tag_added' | 'tag_removed'
@@ -63,6 +63,7 @@ export const EVENT_TITLES: Partial<Record<EventType, string>> = {
   ai_summary_updated: 'AI summary generated',
   market_data_updated: 'Market data refreshed',
   new_signal: 'New signal detected',
+  wealth_tier_estimated: 'Wealth tier estimated',
   research_scrapbook_search: 'Research scrapbook search',
   research_scrapbook_pin: 'Research finding pinned',
   profile_viewed: 'Viewed profile',

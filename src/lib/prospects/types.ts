@@ -38,6 +38,11 @@ export interface Prospect {
   manual_state?: string | null;
   manual_country?: string | null;
   manual_wealth_tier?: string | null;
+  // Auto-estimated wealth tier (Phase 43)
+  auto_wealth_tier?: string | null;
+  auto_wealth_tier_confidence?: string | null;
+  auto_wealth_tier_reasoning?: string | null;
+  auto_wealth_tier_estimated_at?: string | null;
   manual_photo_url?: string | null;
   pinned_note?: string | null;
   lead_owner_id?: string | null;
