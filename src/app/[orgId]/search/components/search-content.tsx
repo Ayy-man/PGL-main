@@ -19,6 +19,7 @@ import { PersonaFormDialog } from "../../personas/components/persona-form-dialog
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
+import { emitTourEvent } from "@/lib/onboarding/tour-event-bus";
 import {
   ROW_SKELETON_SHAPE,
   CARD_SKELETON_SHAPE,
@@ -450,13 +451,18 @@ export function SearchContent({ personas, lists, orgId, canEdit = true }: Search
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showDismissed]);
 
-  // Auto-scroll to results when they arrive (M3)
+  // Auto-scroll to results when they arrive (M3) + emit tour event so the
+  // product tour advances from "Your turn" (step 7) to "Your results"
+  // (step 8) only AFTER leads have actually rendered.
   useEffect(() => {
-    if ((results.length > 0 || savedProspects.length > 0) && resultsRef.current) {
-      const timer = setTimeout(() => {
-        resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-      }, 150);
-      return () => clearTimeout(timer);
+    if (results.length > 0 || savedProspects.length > 0) {
+      emitTourEvent("results_ready");
+      if (resultsRef.current) {
+        const timer = setTimeout(() => {
+          resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }, 150);
+        return () => clearTimeout(timer);
+      }
     }
   }, [results.length, savedProspects.length]);
 

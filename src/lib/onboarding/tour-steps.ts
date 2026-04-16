@@ -18,6 +18,7 @@ export type TourStepId =
 export type TourAdvanceEvent =
   | "search_submitted"
   | "persona_created"
+  | "results_ready"
   | "list_added"
   | "enrichment_complete";
 
@@ -94,7 +95,9 @@ export const TOUR_STEPS: readonly TourStep[] = [
     targetSelector: '[data-tour-id="nl-search-bar"]',
     placement: "bottom",
     suggestedHref: (o) => `/${o}/search`,
-    advanceOn: { event: "search_submitted" },
+    // Advance only when leads actually render — not on submit (results take
+    // 1-2s to load, so advancing on submit puts step 8 over a loading state).
+    advanceOn: { event: "results_ready" },
   },
 
   // ─── PART C — SEARCH RESULTS ──────────────────────────────────────
@@ -103,7 +106,9 @@ export const TOUR_STEPS: readonly TourStep[] = [
     title: "Your results",
     body: "Ranked by relevance. All start as Preview Only — names redacted, no contacts. Search is free; only enrichment costs credits.",
     targetSelector: '[data-tour-id="results-header"]',
-    placement: "bottom",
+    // top-placed so it appears above the header (in the filter pills / search
+    // area) instead of overlapping the results table below.
+    placement: "top",
     hiddenForAssistant: true,
   },
   {

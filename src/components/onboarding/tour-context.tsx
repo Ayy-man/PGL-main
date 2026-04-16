@@ -159,9 +159,10 @@ export function TourProvider({
       );
     } else {
       unsubs.push(subscribeTourEvent(step.advanceOn.event, advance));
-      // The search-try step has an implicit OR: either submitting the NL
-      // search OR creating a persona should advance.
-      if (step.advanceOn.event === "search_submitted") {
+      // The search-try step (advanceOn: results_ready) has an implicit OR:
+      // creating a persona also advances — persona_created renders results
+      // the same way so it's equivalent to results_ready semantically.
+      if (step.advanceOn.event === "results_ready") {
         unsubs.push(subscribeTourEvent("persona_created", advance));
       }
     }
@@ -193,8 +194,13 @@ export function TourProvider({
     const jumpToResults = () => {
       Promise.resolve().then(() => setCurrentStep("results-header"));
     };
+    // Listen for results_ready (not search_submitted) so the jump lands
+    // on step 8 only AFTER leads have actually rendered — otherwise the
+    // popover shows over a loading state and repositions awkwardly.
+    // persona_created fires on saved-search create, which also renders
+    // results, so it's an equivalent trigger.
     const unsubs = [
-      subscribeTourEvent("search_submitted", jumpToResults),
+      subscribeTourEvent("results_ready", jumpToResults),
       subscribeTourEvent("persona_created", jumpToResults),
     ];
     return () => {
