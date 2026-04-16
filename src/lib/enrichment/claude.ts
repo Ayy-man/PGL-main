@@ -125,6 +125,8 @@ export interface DossierInput {
     totalValue: number;
   }> | null;
   stockSnapshot?: { ticker: string } | null;
+  // Phase 43: Optional wealth-tier hint from estimate-wealth-tier step (Option B — hint, not locked input)
+  autoWealthTier?: { tier: string; confidence: string } | null;
 }
 
 const DOSSIER_SYSTEM_PROMPT = `You are a luxury real estate intelligence analyst preparing a structured profile brief for a high-net-worth prospect. Generate a JSON dossier with exactly these fields:
@@ -154,7 +156,7 @@ export async function generateIntelligenceDossier(
   params: DossierInput
 ): Promise<IntelligenceDossierData | null> {
   try {
-    const { name, title, company, workEmail, contactData, webSignals, insiderTransactions, stockSnapshot } = params;
+    const { name, title, company, workEmail, contactData, webSignals, insiderTransactions, stockSnapshot, autoWealthTier } = params;
 
     // When company is unknown, surface the email domain as a company signal
     const companyLine = company || (workEmail ? `Unknown (email domain: ${workEmail.split("@")[1]})` : "Unknown");
@@ -168,6 +170,14 @@ export async function generateIntelligenceDossier(
 
     if (stockSnapshot?.ticker) {
       userMessage += `\nPublicly traded: ${stockSnapshot.ticker}\n`;
+    }
+
+    // Phase 43: Optional hint from separate wealth-tier classifier. Passed as
+    // context, not as a locked constraint — dossier LLM still reasons from signals
+    // and may disagree. Keeps narrative wealth_assessment aligned with the
+    // structured auto_wealth_tier field shown in the UI (Option B per RESEARCH).
+    if (autoWealthTier && autoWealthTier.tier && autoWealthTier.confidence) {
+      userMessage += `\nSeparate wealth-tier classifier: tier=${autoWealthTier.tier}, confidence=${autoWealthTier.confidence}. Use this as context but verify against the specific signals below.\n`;
     }
 
     if (webSignals && webSignals.length > 0) {
