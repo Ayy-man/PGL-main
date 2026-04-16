@@ -19,6 +19,7 @@ interface BulkActionsBarProps {
   onEnrich: () => void;
   onDismiss?: () => void;     // NEW
   showDismiss?: boolean;       // NEW — only show in saved search mode
+  hideAddToList?: boolean;     // hide Add to List when all selected are preview-only
   canEdit?: boolean;           // false for assistant role
 }
 
@@ -32,6 +33,7 @@ export function BulkActionsBar({
   onEnrich,
   onDismiss,
   showDismiss,
+  hideAddToList,
   canEdit = true,
 }: BulkActionsBarProps) {
   const someSelected = selectedCount > 0 && selectedCount < totalCount;
@@ -63,7 +65,7 @@ export function BulkActionsBar({
       {/* Right side: action buttons — only visible when items are selected */}
       {selectedCount > 0 && (
         <div className="flex items-center gap-2">
-          {canEdit ? (
+          {!hideAddToList && (canEdit ? (
             <Button variant="ghost" size="sm" onClick={onAddToList}>
               <ListPlus className="h-4 w-4 mr-1.5" />
               Add to List
@@ -80,7 +82,7 @@ export function BulkActionsBar({
               </TooltipTrigger>
               <TooltipContent>Assistants cannot add prospects to lists.</TooltipContent>
             </Tooltip>
-          )}
+          ))}
 
           {/* Export CSV stays enabled — read-safe operation */}
           <Button variant="ghost" size="sm" onClick={onExport}>

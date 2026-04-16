@@ -851,6 +851,13 @@ export function SearchContent({ personas, lists, orgId, canEdit = true }: Search
           .map(savedProspectToApolloPerson)
       : activeResults;
     const tableResults = isSavedSearchMode ? pagedSavedResults : activeResults;
+    // Hide "Add to List" when every selected prospect is preview-only — they
+    // must be enriched before they can be listed, so the button would just
+    // throw a destructive toast.
+    const selectedProspects = activeResults.filter((r) => selectedIds.has(r.id));
+    const allSelectedUnenriched =
+      selectedProspects.length > 0 &&
+      selectedProspects.every((p) => p._enriched === false);
 
     return (
       <div ref={resultsRef}>
@@ -868,6 +875,7 @@ export function SearchContent({ personas, lists, orgId, canEdit = true }: Search
             onEnrich={handleBulkEnrich}
             onDismiss={handleBulkDismissClick}
             showDismiss={isSavedSearchMode}
+            hideAddToList={allSelectedUnenriched}
             canEdit={canEdit}
           />
         )}

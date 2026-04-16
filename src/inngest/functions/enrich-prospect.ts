@@ -222,12 +222,20 @@ export const enrichProspect = inngest.createFunction(
           });
         }
 
-        // Save contact data if found
+        // Save contact data if found — merge with existing contact_data so
+        // photo_url (and any other field stored at upsert time) is preserved.
         if (result.found && (result.personalEmail || result.phone)) {
+          const { data: existingRow } = await supabase
+            .from("prospects")
+            .select("contact_data")
+            .eq("id", prospectId)
+            .single();
+          const existingContactData = (existingRow?.contact_data as Record<string, unknown>) ?? {};
           await supabase
             .from("prospects")
             .update({
               contact_data: {
+                ...existingContactData,
                 personal_email: result.personalEmail,
                 phone: result.phone,
                 source: "contactout",
