@@ -24,7 +24,6 @@ import { MemberStatusSelect } from "./member-status-select";
 import { MemberNotesCell } from "./member-notes-cell";
 import { removeFromListAction } from "../actions";
 import type { ListMember } from "@/lib/lists/types";
-import { EnrichmentStatusDots } from "@/components/ui/enrichment-status-dots";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   ROW_SKELETON_SHAPE,
@@ -82,6 +81,55 @@ function timeAgo(dateStr: string): string {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
+
+function EnrichmentDot({ status }: { status: string | null }) {
+  switch (status) {
+    case "complete":
+    case "enriched":
+      return (
+        <span
+          className="inline-block h-2.5 w-2.5 rounded-full shrink-0"
+          style={{
+            background: "var(--success, #22c55e)",
+            boxShadow: "0 0 0 2px rgba(34,197,94,0.18)",
+          }}
+          title="Enriched"
+        />
+      );
+    case "in_progress":
+      return <Loader2 className="h-3 w-3 animate-spin shrink-0" style={{ color: "var(--gold-primary)" }} />;
+    case "failed":
+      return (
+        <span
+          className="inline-block h-2.5 w-2.5 rounded-full shrink-0"
+          style={{
+            background: "var(--destructive, #ef4444)",
+            boxShadow: "0 0 0 2px rgba(239,68,68,0.18)",
+          }}
+          title="Failed"
+        />
+      );
+    case "pending":
+      return (
+        <span
+          className="inline-block h-2.5 w-2.5 rounded-full shrink-0 animate-pulse"
+          style={{ background: "rgba(255,255,255,0.4)" }}
+          title="Pending"
+        />
+      );
+    default:
+      return (
+        <span
+          className="inline-block h-2.5 w-2.5 rounded-full shrink-0"
+          style={{
+            background: "transparent",
+            border: "1.5px solid rgba(255,255,255,0.35)",
+          }}
+          title="Not enriched"
+        />
+      );
+  }
+}
 
 function CopyButton({ text, icon: Icon }: { text: string; icon: typeof Mail }) {
   const [copied, setCopied] = useState(false);
@@ -310,7 +358,13 @@ export function ListMemberTable({ members: serverMembers, listId, listName }: Li
                       email={member.prospect.email}
                       size="md"
                     />
-                    <EnrichmentStatusDots sourceStatus={null} />
+                    <EnrichmentDot
+                      status={
+                        enrichingIds.has(member.prospect.id)
+                          ? "in_progress"
+                          : member.prospect.enrichment_status ?? null
+                      }
+                    />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
                         <HoverCard openDelay={300} closeDelay={120}>
@@ -472,7 +526,13 @@ export function ListMemberTable({ members: serverMembers, listId, listName }: Li
                     email={member.prospect.email}
                     size="sm"
                   />
-                  <EnrichmentStatusDots sourceStatus={null} />
+                  <EnrichmentDot
+                    status={
+                      enrichingIds.has(member.prospect.id)
+                        ? "in_progress"
+                        : member.prospect.enrichment_status ?? null
+                    }
+                  />
                   <HoverCard openDelay={300} closeDelay={120}>
                     <HoverCardTrigger asChild>
                       <Link
