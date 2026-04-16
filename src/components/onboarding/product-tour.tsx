@@ -1,16 +1,18 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+
 import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { TOUR_STEPS } from "@/lib/onboarding/tour-steps";
+import { nextTourStep } from "@/lib/onboarding/tour-navigation";
 import { useTour } from "./tour-context";
 
 export function ProductTour() {
   const { currentStep, isActive, next, skip, complete } = useTour();
   const { orgId } = useParams<{ orgId: string }>();
+  const router = useRouter();
   const step = React.useMemo(
     () => TOUR_STEPS.find((s) => s.id === currentStep),
     [currentStep]
@@ -25,6 +27,31 @@ export function ProductTour() {
     const el = document.querySelector<HTMLElement>(step.targetSelector);
     setAnchorEl(el);
   }, [step]);
+
+  // Fix 1 — Single-click Next that also auto-navigates cross-page.
+  // If the NEXT step's target isn't on the current page and that step has
+  // a suggestedHref, push to the page BEFORE advancing tour state. Collapses
+  // the previous two-click (Next -> fallback card -> Go to page) into one.
+  const handleNext = React.useCallback(() => {
+    if (!step) return;
+    const isTerminal = step.id === TOUR_STEPS[TOUR_STEPS.length - 1].id;
+    if (isTerminal) {
+      complete();
+      return;
+    }
+    const nextId = nextTourStep(step.id);
+    const nextStep = nextId
+      ? TOUR_STEPS.find((s) => s.id === nextId)
+      : null;
+    if (nextStep && orgId) {
+      const targetExists =
+        document.querySelector(nextStep.targetSelector) !== null;
+      if (!targetExists && nextStep.suggestedHref) {
+        router.push(nextStep.suggestedHref(orgId));
+      }
+    }
+    next();
+  }, [step, orgId, next, complete, router]);
 
   // Virtual ref for PopoverAnchor — memoized so Radix observes the same ref
   // object across renders. Radix's popper calls .current.getBoundingClientRect()
@@ -52,10 +79,7 @@ export function ProductTour() {
             <Button size="sm" variant="ghost" onClick={skip}>
               Skip
             </Button>
-            <Button
-              size="sm"
-              onClick={() => (isLast ? complete() : next())}
-            >
+            <Button size="sm" onClick={handleNext}>
               {isLast ? "Done" : "Next"}
             </Button>
           </div>
@@ -64,21 +88,16 @@ export function ProductTour() {
     </PopoverContent>
   );
 
-  // If the target element is not found on this page, show a fallback card
-  // anchored bottom-right with a "Go to" CTA that deep-links to the page
-  // where the step's target lives (via step.suggestedHref).
+  // Safety-net fallback: target element not present on current page (user
+  // manually navigated somewhere weird, or a target hasn't mounted yet).
+  // Shows the step in a fixed bottom-right card. Next still works — it
+  // either auto-navigates via handleNext (Fix 1) or advances step state.
   if (!anchorEl) {
-    const href = step.suggestedHref && orgId ? step.suggestedHref(orgId) : null;
     return (
       <div className="fixed bottom-6 right-6 z-50 w-[min(22rem,90vw)] rounded-lg border bg-[var(--bg-floating-elevated,#1a1a1e)] backdrop-blur-sm p-4 shadow-xl">
         <div className="space-y-3">
           <h4 className="font-serif text-base font-semibold">{step.title}</h4>
           <p className="text-sm text-muted-foreground">{step.body}</p>
-          {href && (
-            <p className="text-xs" style={{ color: "var(--gold-primary)" }}>
-              Continue on the next page →
-            </p>
-          )}
           <div className="flex items-center justify-between pt-1">
             <span className="text-xs text-muted-foreground">
               Step {stepIndex} of {TOUR_STEPS.length}
@@ -87,15 +106,9 @@ export function ProductTour() {
               <Button size="sm" variant="ghost" onClick={skip}>
                 Skip
               </Button>
-              {href ? (
-                <Button asChild size="sm">
-                  <Link href={href}>Go to page</Link>
-                </Button>
-              ) : (
-                <Button size="sm" onClick={() => (isLast ? complete() : next())}>
-                  {isLast ? "Done" : "Next"}
-                </Button>
-              )}
+              <Button size="sm" onClick={handleNext}>
+                {isLast ? "Done" : "Next"}
+              </Button>
             </div>
           </div>
         </div>
