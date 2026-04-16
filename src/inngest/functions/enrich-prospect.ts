@@ -4,6 +4,7 @@ import { enrichExa } from "@/lib/enrichment/exa";
 import { digestExaResults, type DigestedSignal } from "@/lib/enrichment/exa-digest";
 import { enrichEdgar, lookupCompanyCik, enrichEdgarByName } from "@/lib/enrichment/edgar";
 import { generateProspectSummary, generateIntelligenceDossier } from "@/lib/enrichment/claude";
+import { estimateWealthTier } from "@/lib/enrichment/wealth-tier";
 import { logActivity } from "@/lib/activity-logger";
 import { logProspectActivity } from "@/lib/activity";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -640,6 +641,109 @@ export const enrichProspect = inngest.createFunction(
       }
     });
 
+    // Step 4.75: Estimate wealth tier from collected signals (Phase 43)
+    //
+    // Synthesizes SEC cash transactions, SEC grants, Exa wealth signals, and
+    // career inference into a structured tier + confidence + reasoning via a
+    // dedicated LLM call. Runs after market-data so it sees the ticker, and
+    // BEFORE generate-summary/generate-dossier so those steps can optionally
+    // reference the tier. Failure is graceful — marks source as failed and
+    // returns null-tier, pipeline continues.
+    //
+    // Variable is named `wealthTierResult` so Plan 05 can reference it when
+    // wiring an optional wealth_tier hint into the dossier prompt.
+    const wealthTierResult = await step.run("estimate-wealth-tier", async () => {
+      try {
+        const result = await estimateWealthTier({
+          name,
+          title,
+          company,
+          secTransactions:
+            edgarData.found && edgarData.transactions.length > 0
+              ? edgarData.transactions
+              : null,
+          webSignals:
+            exaData.found && exaData.signals.length > 0
+              ? exaData.signals.map((s) => ({
+                  category: s.category,
+                  headline: s.headline,
+                  summary: s.summary,
+                }))
+              : null,
+          stockSnapshot: effectiveTicker ? { ticker: effectiveTicker } : null,
+        });
+
+        if (!result) {
+          await updateSourceStatus(prospectId, "wealth_tier", {
+            status: "failed",
+            error: "estimateWealthTier returned null",
+            at: new Date().toISOString(),
+          });
+          return {
+            tier: null as string | null,
+            confidence: null as string | null,
+            reasoning: null as string | null,
+            status: "failed" as const,
+          };
+        }
+
+        // D-06: "unknown" tier means the helper ran but landed on insufficient-data;
+        // surface as no_data (not failed, not complete). Any real tier -> complete.
+        const status = result.tier === "unknown" ? "no_data" : "complete";
+
+        // Persist the 4 auto_wealth_tier_* columns (Phase 43 migration)
+        await supabase
+          .from("prospects")
+          .update({
+            auto_wealth_tier: result.tier,
+            auto_wealth_tier_confidence: result.confidence,
+            auto_wealth_tier_reasoning: result.reasoning,
+            auto_wealth_tier_estimated_at: new Date().toISOString(),
+          })
+          .eq("id", prospectId);
+
+        await updateSourceStatus(prospectId, "wealth_tier", {
+          status,
+          at: new Date().toISOString(),
+        });
+
+        // Fire-and-forget activity log (surfaces in per-prospect timeline)
+        logProspectActivity({
+          prospectId,
+          tenantId,
+          userId: null,
+          category: "data",
+          eventType: "wealth_tier_estimated",
+          title: `Wealth tier estimated: ${result.tier} (${result.confidence} confidence)`,
+          metadata: {
+            tier: result.tier,
+            confidence: result.confidence,
+            primary_signal: result.primary_signal,
+          },
+        }).catch(() => {});
+
+        return {
+          tier: result.tier as string | null,
+          confidence: result.confidence as string | null,
+          reasoning: result.reasoning as string | null,
+          status,
+        };
+      } catch (error) {
+        console.error("[Inngest] Wealth-tier estimation failed:", error);
+        await updateSourceStatus(prospectId, "wealth_tier", {
+          status: "failed",
+          error: error instanceof Error ? error.message : String(error),
+          at: new Date().toISOString(),
+        });
+        return {
+          tier: null as string | null,
+          confidence: null as string | null,
+          reasoning: null as string | null,
+          status: "failed" as const,
+        };
+      }
+    });
+
     // Step 5: Generate AI summary with Claude
     const aiSummary = await step.run("generate-summary", async () => {
       try {
@@ -817,6 +921,7 @@ export const enrichProspect = inngest.createFunction(
           exa: exaData.status,
           sec: edgarData.status,
           market: marketData.status,
+          wealth_tier: wealthTierResult.status,
           claude: aiSummary.status,
           dossier: dossierResult.status,
         },
@@ -827,7 +932,7 @@ export const enrichProspect = inngest.createFunction(
         prospectId, tenantId, userId,
         category: 'data', eventType: 'enrichment_complete',
         title: 'Enrichment completed',
-        metadata: { contactout: contactData.status, exa: exaData.status, sec: edgarData.status, market: marketData.status, claude: aiSummary.status, dossier: dossierResult.status },
+        metadata: { contactout: contactData.status, exa: exaData.status, sec: edgarData.status, market: marketData.status, wealth_tier: wealthTierResult.status, claude: aiSummary.status, dossier: dossierResult.status },
       });
 
       return { status: "complete", timestamp: new Date().toISOString() };
@@ -841,6 +946,7 @@ export const enrichProspect = inngest.createFunction(
         exa: exaData.status,
         sec: edgarData.status,
         market: marketData.status,
+        wealth_tier: wealthTierResult.status,
         claude: aiSummary.status,
         dossier: dossierResult.status,
       },
