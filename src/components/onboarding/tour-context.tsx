@@ -177,6 +177,37 @@ export function TourProvider({
     };
   }, [isActive, currentStep, next]);
 
+  // Skip-ahead: if the user performs a search (NL submit OR persona create)
+  // during ANY step before `results-header`, jump the tour straight to
+  // `results-header`. Users who already know how the product works don't
+  // need to click Next through every explanatory step when they've
+  // visibly understood and acted.
+  //
+  // Deliberately global (not gated to a specific step's advanceOn) so the
+  // user can search at any point in the dashboard/discover sequence and
+  // the tour will meet them at the results.
+  React.useEffect(() => {
+    if (!isActive || !currentStep) return;
+    // Only skip-ahead if current step is BEFORE results-header in the
+    // filtered step list (assistants don't see results-header, so they
+    // naturally never hit this).
+    const currentIdx = steps.findIndex((s) => s.id === currentStep);
+    const resultsIdx = steps.findIndex((s) => s.id === "results-header");
+    if (resultsIdx === -1) return; // role doesn't include results step
+    if (currentIdx === -1 || currentIdx >= resultsIdx) return;
+
+    const jumpToResults = () => {
+      Promise.resolve().then(() => setCurrentStep("results-header"));
+    };
+    const unsubs = [
+      subscribeTourEvent("search_submitted", jumpToResults),
+      subscribeTourEvent("persona_created", jumpToResults),
+    ];
+    return () => {
+      for (const u of unsubs) u();
+    };
+  }, [isActive, currentStep, steps]);
+
   return (
     <TourContext.Provider
       value={{ currentStep, isActive, next, previous, skip, complete, restart }}
