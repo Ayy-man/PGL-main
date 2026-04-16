@@ -45,7 +45,27 @@ Apollo does NOT expose net worth, wealth, or income as filterable fields. These 
 
 Rule: strip all such phrases and return only the remaining searchable structure (title, industry, location, seniority, company size). The platform enriches wealth signals automatically post-search — users get wealth data without having to put it in the search.
 
-Example:
+CRITICAL — FUNDING STAGE / BUSINESS EVENT PHRASES ARE NOT APOLLO-SEARCHABLE:
+Apollo does NOT filter by funding round, exit status, acquisition, or any time-bounded business event. Nobody's LinkedIn title contains the literal text "series B fundraising" or "IPO" — so putting these in keywords returns ZERO matches. Drop them ENTIRELY. Examples to DROP:
+- "raising series A/B/C/D", "just raised", "recently funded", "post-Series X"
+- "pre-IPO", "IPO experience", "going public", "newly public"
+- "acquired by X", "post-acquisition", "recently exited", "exited founders"
+- "profitable", "cash-flow positive", "pre-revenue", "bootstrapped"
+
+These are signals a user should discover AFTER enrichment (Exa web search surfaces news, SEC filings surface IPO status). Do NOT try to search for them.
+
+CRITICAL — BE CONSERVATIVE. When in doubt, LEAVE FIELDS EMPTY rather than guess.
+- Do NOT infer companySize from words like "startup" or "founders" — only set it when the user EXPLICITLY says a size ("100+ employees", "small company", "enterprise"). Empty companySize returns more (better) results than a narrow range.
+- Do NOT pack extra noise into "keywords". Use keywords only for genuine free-text modifiers the user typed (specific product, specific skill, specific language). If nothing clearly belongs, omit keywords entirely.
+- Do NOT invent titles beyond 2-4 close variants. Too many titles narrow results.
+- Fewer well-chosen filters beats many aggressive ones.
+
+Examples:
+
+User: "tech founders in SF raising series B"
+Output: {"titles":["Founder","Co-Founder","CEO"],"seniorities":["founder","c_suite"],"industries":["Technology","Computer Software"],"locations":["San Francisco, California"]}
+(the "raising series B" phrase is dropped; NO companySize — "founders" alone doesn't imply size; NO keywords — "series B" is not a searchable person attribute)
+
 User: "tech founders in Miami worth $5M+"
 Output: {"titles":["Founder","Co-Founder","CEO"],"seniorities":["founder","c_suite"],"industries":["Technology","Computer Software"],"locations":["Miami, Florida"]}
 (the "worth $5M+" phrase is dropped entirely — do not add to keywords)
@@ -54,19 +74,16 @@ User: "UHNW real estate investors in NYC"
 Output: {"titles":["Investor","Managing Partner","Principal"],"industries":["Real Estate","Private Equity"],"locations":["New York"]}
 (the "UHNW" phrase is dropped)
 
-Examples:
-
-User: "tech founders in SF raising series B"
-Output: {"titles":["Founder","Co-Founder","CEO"],"seniorities":["founder","c_suite"],"industries":["Technology","Computer Software"],"locations":["San Francisco, California"],"companySize":["11,20","21,50","51,100"],"keywords":"series B fundraising"}
-
 User: "managing directors at bulge bracket banks in New York"
 Output: {"titles":["Managing Director","Executive Director","Senior Managing Director"],"seniorities":["c_suite","vp","director"],"industries":["Investment Banking","Capital Markets","Financial Services"],"locations":["New York"]}
 
 User: "C-suite biotech executives in Boston with IPO experience"
-Output: {"titles":["CEO","CFO","COO","CTO","Chief Medical Officer","Chief Scientific Officer"],"seniorities":["c_suite"],"industries":["Biotechnology","Pharmaceuticals"],"locations":["Boston, Massachusetts"],"keywords":"IPO"}
+Output: {"titles":["CEO","CFO","COO","CTO"],"seniorities":["c_suite"],"industries":["Biotechnology","Pharmaceuticals"],"locations":["Boston, Massachusetts"]}
+(the "with IPO experience" phrase is dropped — IPO status is not Apollo-searchable)
 
 User: "VP of sales at SaaS companies with 500+ employees"
-Output: {"titles":["VP of Sales","Vice President of Sales","Head of Sales","SVP Sales"],"seniorities":["vp","director"],"industries":["Computer Software","Internet"],"companySize":["501,1000","1001,2000","2001,5000","5001,10000","10001,"]}
+Output: {"titles":["VP of Sales","Vice President of Sales","Head of Sales"],"seniorities":["vp","director"],"industries":["Computer Software","Internet"],"companySize":["501,1000","1001,2000","2001,5000","5001,10000","10001,"]}
+(companySize set because user EXPLICITLY said "500+ employees")
 
 User: "Andrew Kantor"
 Output: {"person_name":"Andrew Kantor"}
