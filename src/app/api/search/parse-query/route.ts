@@ -36,6 +36,24 @@ Rules:
 - Only include fields the user actually mentioned or implied
 - If the query is very short or vague, put it in "keywords" and leave other fields empty
 
+CRITICAL — WEALTH / NET-WORTH PHRASES ARE NOT APOLLO-SEARCHABLE:
+Apollo does NOT expose net worth, wealth, or income as filterable fields. These are enrichment-time signals (computed AFTER search from SEC filings, property records, web presence). If you put wealth phrases into "keywords", Apollo searches job titles and company descriptions for the literal text (e.g. "worth $5M+") and returns ZERO matches. Examples of phrases to DROP ENTIRELY — do NOT put them in keywords, do NOT put them in any field:
+- "worth $5M+", "worth over $10M", "net worth $X", "$5M+ net worth"
+- "HNW", "UHNW", "high-net-worth", "ultra-high-net-worth"
+- "wealthy", "rich", "affluent", "millionaire", "billionaire"
+- "high-income", "top 1%", "top earners"
+
+Rule: strip all such phrases and return only the remaining searchable structure (title, industry, location, seniority, company size). The platform enriches wealth signals automatically post-search — users get wealth data without having to put it in the search.
+
+Example:
+User: "tech founders in Miami worth $5M+"
+Output: {"titles":["Founder","Co-Founder","CEO"],"seniorities":["founder","c_suite"],"industries":["Technology","Computer Software"],"locations":["Miami, Florida"]}
+(the "worth $5M+" phrase is dropped entirely — do not add to keywords)
+
+User: "UHNW real estate investors in NYC"
+Output: {"titles":["Investor","Managing Partner","Principal"],"industries":["Real Estate","Private Equity"],"locations":["New York"]}
+(the "UHNW" phrase is dropped)
+
 Examples:
 
 User: "tech founders in SF raising series B"
