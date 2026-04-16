@@ -137,19 +137,23 @@ export function ProductTour() {
   const isFirst = stepIndex === 1;
 
   // JSX variable (not a component) so it doesn't cause remount on every render
+  // Layout: [← Back] [4 / 15 — center] [Skip | Next]
   const tourFooter = (
-    <div className="flex items-center justify-between pt-1">
-      <div className="flex items-center gap-1">
-        <span className="text-xs text-muted-foreground">
-          {stepIndex} / {TOUR_STEPS.length}
-        </span>
+    <div className="flex items-center pt-1">
+      {/* Left: Back (placeholder div keeps centering when hidden) */}
+      <div className="flex-1">
         {!isFirst && (
           <Button size="sm" variant="ghost" className="px-2 text-xs" onClick={previous}>
             ← Back
           </Button>
         )}
       </div>
-      <div className="flex gap-2">
+      {/* Center: step counter */}
+      <span className="text-xs text-muted-foreground">
+        {stepIndex} / {TOUR_STEPS.length}
+      </span>
+      {/* Right: Skip + Next */}
+      <div className="flex-1 flex justify-end gap-2">
         <Button size="sm" variant="ghost" onClick={skip}>
           Skip
         </Button>
