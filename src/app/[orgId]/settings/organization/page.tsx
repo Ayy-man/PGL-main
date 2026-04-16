@@ -129,16 +129,18 @@ export default function OrganizationSettingsPage() {
       <div className="space-y-6">
         <Skeleton className="h-4 w-[240px] rounded" />
         <Skeleton className="h-8 w-[280px] rounded-[8px]" />
-        <div className="surface-card rounded-[14px] p-6 space-y-4">
-          <Skeleton className="h-5 w-[80px] rounded" />
-          <Skeleton className="h-10 w-full rounded-[8px]" />
-          <Skeleton className="h-10 w-full rounded-[8px]" />
-          <Skeleton className="h-4 w-[200px] rounded" />
-        </div>
-        <div className="surface-card rounded-[14px] p-6 space-y-4">
-          <Skeleton className="h-5 w-[80px] rounded" />
-          <Skeleton className="h-16 w-16 rounded-lg" />
-          <Skeleton className="h-10 w-full rounded-[8px]" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+          <div className="surface-card rounded-[14px] p-6 space-y-4">
+            <Skeleton className="h-5 w-[80px] rounded" />
+            <Skeleton className="h-10 w-full rounded-[8px]" />
+            <Skeleton className="h-10 w-full rounded-[8px]" />
+            <Skeleton className="h-4 w-[200px] rounded" />
+          </div>
+          <div className="surface-card rounded-[14px] p-6 space-y-4">
+            <Skeleton className="h-5 w-[80px] rounded" />
+            <Skeleton className="h-16 w-16 rounded-lg" />
+            <Skeleton className="h-10 w-full rounded-[8px]" />
+          </div>
         </div>
       </div>
     );
@@ -168,6 +170,7 @@ export default function OrganizationSettingsPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">General</CardTitle>
@@ -224,6 +227,7 @@ export default function OrganizationSettingsPage() {
             </div>
           </CardContent>
         </Card>
+        </div>
 
         <Button
           type="submit"
