@@ -47,22 +47,16 @@ export function TourProvider({
   }, [userRole]);
 
   const [isActive, setIsActive] = React.useState(initiallyActive);
+  // Always start at step 1 — never skip ahead based on which anchors happen
+  // to be in the DOM. The tour is designed as a sequential journey; if the
+  // anchor for step 1 isn't present on the current page, product-tour.tsx
+  // shows a center-screen fallback card with a Next that auto-navigates.
   const [currentStep, setCurrentStep] = React.useState<TourStepId | null>(() => {
-    if (!initiallyActive || typeof document === "undefined") return null;
-    return findFirstPresentStep(steps, (sel) => !!document.querySelector(sel));
+    if (!initiallyActive) return null;
+    return steps[0]?.id ?? null;
   });
 
-  // Re-resolve first present step on mount (SSR->CSR, data-tour-id nodes may
-  // mount after first render).
-  React.useEffect(() => {
-    if (!isActive || currentStep) return;
-    const id = requestAnimationFrame(() => {
-      setCurrentStep(
-        findFirstPresentStep(steps, (sel) => !!document.querySelector(sel))
-      );
-    });
-    return () => cancelAnimationFrame(id);
-  }, [isActive, currentStep, steps]);
+  // No re-resolve needed — we always start at step 0, not at "first visible".
 
   const next = React.useCallback(() => {
     // Structural advance using the ROLE-FILTERED step list, not all TOUR_STEPS.
