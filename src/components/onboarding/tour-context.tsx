@@ -6,7 +6,7 @@ import {
   type TourStepId,
 } from "@/lib/onboarding/tour-steps";
 import {
-  nextPresentTourStep,
+  nextTourStep,
   previousTourStep,
   findFirstPresentStep,
 } from "@/lib/onboarding/tour-navigation";
@@ -56,14 +56,12 @@ export function TourProvider({
   }, [isActive, currentStep]);
 
   const next = React.useCallback(() => {
-    // Use nextPresentTourStep (not nextTourStep) so steps whose targets are
-    // missing on the current page are skipped rather than hung over nothing.
-    // isSelectorPresent is a client-side query; safe inside the callback.
-    setCurrentStep((s) =>
-      s
-        ? nextPresentTourStep(s, (sel) => document.querySelector(sel) !== null)
-        : null
-    );
+    // Structural advance. The tour is a multi-page journey — most steps have
+    // targets on DIFFERENT pages, so auto-skipping missing targets would end
+    // the tour prematurely. If the advanced-to step's target isn't on the
+    // current page, ProductTour's fallback card renders with a
+    // "Go to [page]" CTA that deep-links via suggestedHref.
+    setCurrentStep((s) => (s ? nextTourStep(s) : null));
   }, []);
 
   const previous = React.useCallback(() => {

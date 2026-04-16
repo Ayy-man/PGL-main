@@ -69,6 +69,7 @@ export function NavItems({ orgId, userRole, collapsed, savedSearchCount, listsCo
             key={item.href}
             href={fullHref}
             title={collapsed ? item.label : undefined}
+            data-tour-id={item.href === "/search" ? "discover-card" : undefined}
             className={`relative flex items-center ${collapsed ? "justify-center" : "gap-3"} rounded-[8px] ${collapsed ? "px-0 py-3" : "px-3 py-3"} text-sm font-medium ghost-hover transition-[background-color,color] cursor-pointer`}
             style={
               isActive
