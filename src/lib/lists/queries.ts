@@ -151,7 +151,9 @@ export async function getListMembers(listId: string, tenantId: string): Promise<
         work_phone,
         linkedin_url,
         enrichment_status,
-        contact_data
+        enrichment_source_status,
+        contact_data,
+        manual_photo_url
       )
     `)
     .eq("list_id", listId)
@@ -173,7 +175,9 @@ export async function getListMembers(listId: string, tenantId: string): Promise<
     work_phone: string | null;
     linkedin_url: string | null;
     enrichment_status: string | null;
+    enrichment_source_status: Record<string, string> | null;
     contact_data: { photo_url?: string } | null;
+    manual_photo_url: string | null;
   };
 
   type RawListMember = {
@@ -211,7 +215,8 @@ export async function getListMembers(listId: string, tenantId: string): Promise<
         phone: raw.work_phone,
         linkedin_url: raw.linkedin_url,
         enrichment_status: raw.enrichment_status,
-        photo_url: (raw.contact_data as { photo_url?: string } | null)?.photo_url ?? null,
+        enrichment_source_status: raw.enrichment_source_status,
+        photo_url: raw.manual_photo_url ?? (raw.contact_data as { photo_url?: string } | null)?.photo_url ?? null,
       }
     });
   }
@@ -253,7 +258,9 @@ export async function addProspectToList(
         work_phone,
         linkedin_url,
         enrichment_status,
-        contact_data
+        enrichment_source_status,
+        contact_data,
+        manual_photo_url
       )
     `)
     .single();
@@ -277,7 +284,9 @@ export async function addProspectToList(
     work_phone: string | null;
     linkedin_url: string | null;
     enrichment_status: string | null;
+    enrichment_source_status: Record<string, string> | null;
     contact_data: { photo_url?: string } | null;
+    manual_photo_url: string | null;
   };
 
   type RawInsertData = {
@@ -316,7 +325,8 @@ export async function addProspectToList(
       phone: raw?.work_phone ?? null,
       linkedin_url: raw?.linkedin_url ?? null,
       enrichment_status: raw?.enrichment_status ?? null,
-      photo_url: (raw?.contact_data as { photo_url?: string } | null)?.photo_url ?? null,
+      enrichment_source_status: raw?.enrichment_source_status ?? null,
+      photo_url: raw?.manual_photo_url ?? (raw?.contact_data as { photo_url?: string } | null)?.photo_url ?? null,
     }
   } as ListMember;
 }

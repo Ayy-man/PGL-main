@@ -4,6 +4,14 @@ import { Mail, Phone, ExternalLink, Loader2 } from "lucide-react";
 import { ProspectAvatar } from "@/components/prospect/prospect-avatar";
 import type { ListMember } from "@/lib/lists/types";
 
+const SOURCE_SHORT_LABELS: Array<[string, string]> = [
+  ["contactout", "Contact"],
+  ["exa", "Web"],
+  ["sec", "Filings"],
+  ["market", "Market"],
+  ["claude", "AI"],
+];
+
 interface LeadHoverPreviewProps {
   prospect: ListMember["prospect"];
 }
@@ -63,12 +71,28 @@ function shortLocation(loc: string): string {
   return loc;
 }
 
+function sourceDotColor(status: string | undefined): string {
+  switch (status) {
+    case "complete":
+      return "var(--success, #22c55e)";
+    case "in_progress":
+      return "var(--info, #60a5fa)";
+    case "failed":
+      return "var(--destructive, #ef4444)";
+    case "circuit_open":
+      return "var(--warning, #f59e0b)";
+    default:
+      return "rgba(255,255,255,0.15)";
+  }
+}
+
 export function LeadHoverPreview({ prospect }: LeadHoverPreviewProps) {
   // Null-guard per CLAUDE.md memory: list_members join can yield missing prospect data.
   // ListMember.prospect.name is non-nullable per the type, but title/company/location may be null.
   const titleLine = [prospect.title, prospect.company].filter(Boolean).join(" at ");
   const hasEmail = !!prospect.email;
   const hasPhone = !!prospect.phone;
+  const hasSourceStatus = !!prospect.enrichment_source_status;
 
   return (
     <div className="space-y-3">
@@ -142,6 +166,33 @@ export function LeadHoverPreview({ prospect }: LeadHoverPreviewProps) {
           </span>
         </div>
       </div>
+
+      {/* Per-source enrichment breakdown — matches the profile page ENRICHMENT STATUS panel */}
+      {hasSourceStatus && (
+        <div className="grid grid-cols-2 gap-1.5 pt-2 border-t" style={{ borderColor: "var(--border-subtle)" }}>
+          {SOURCE_SHORT_LABELS.map(([key, label]) => {
+            const status = prospect.enrichment_source_status?.[key];
+            return (
+              <span
+                key={key}
+                className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px]"
+                style={{
+                  background: "rgba(255,255,255,0.03)",
+                  border: "1px solid var(--border-subtle)",
+                  color: "var(--text-secondary, rgba(232,228,220,0.7))",
+                }}
+                title={`${label}: ${status ?? "pending"}`}
+              >
+                <span
+                  className="inline-block h-1.5 w-1.5 rounded-full shrink-0"
+                  style={{ background: sourceDotColor(status) }}
+                />
+                {label}
+              </span>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
