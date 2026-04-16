@@ -46,7 +46,7 @@ export function AdminOnboardingChecklist({
   if (completed === items.length) return null;
 
   return (
-    <Card className="mb-6">
+    <Card className="mb-6" data-tour-id="onboarding-checklist">
       <CardHeader>
         <CardTitle className="flex items-center justify-between text-base">
           <span>Get your account set up</span>

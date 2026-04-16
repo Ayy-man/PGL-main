@@ -279,7 +279,7 @@ export default async function TenantDashboard({
 
       {/* Title row with action buttons */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-        <div>
+        <div data-tour-id="dashboard-hero">
           <h1
             className="font-serif font-semibold"
             style={{

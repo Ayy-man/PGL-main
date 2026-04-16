@@ -187,22 +187,25 @@ export function SavedSearchShortcutList({
           <button
             type="button"
             onClick={onCreateNew}
-            className="flex items-center gap-1.5 text-[12px] font-medium cursor-pointer transition-colors px-2.5 py-1 rounded-full"
+            data-tour-id="new-search-cta"
+            className="flex items-center gap-2 text-[14px] font-semibold cursor-pointer transition-all px-4 py-2 rounded-full shadow-sm"
             style={{
-              background: "transparent",
-              border: "1px dashed var(--border-default)",
-              color: "var(--text-tertiary)",
+              background: "var(--gold-primary)",
+              border: "1px solid var(--gold-primary)",
+              color: "#0a0a0a",
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.color = "var(--gold-primary)";
-              e.currentTarget.style.borderColor = "var(--border-gold)";
+              e.currentTarget.style.background = "var(--gold-bright)";
+              e.currentTarget.style.borderColor = "var(--gold-bright)";
+              e.currentTarget.style.transform = "translateY(-1px)";
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.color = "var(--text-tertiary)";
-              e.currentTarget.style.borderColor = "var(--border-default)";
+              e.currentTarget.style.background = "var(--gold-primary)";
+              e.currentTarget.style.borderColor = "var(--gold-primary)";
+              e.currentTarget.style.transform = "translateY(0)";
             }}
           >
-            <Plus className="h-3 w-3" />
+            <Plus className="h-4 w-4" strokeWidth={2.5} />
             New Search
           </button>
         )}

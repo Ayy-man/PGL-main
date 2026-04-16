@@ -415,7 +415,7 @@ export function ProfileView({
       {/* === THREE-COLUMN DOSSIER === */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* ─── LEFT COLUMN ─── */}
-        <div className="lg:col-span-3 flex flex-col gap-4">
+        <div className="lg:col-span-3 flex flex-col gap-4" data-tour-id="dossier-contacts">
           {/* Profile Card */}
           <ProfileHeader
             prospect={{ ...prospect, enrichment_status: prospect.enrichment_status ?? "none" }}
@@ -654,6 +654,7 @@ export function ProfileView({
             {activePanel === "dossier" ? (
               <div
                 key="dossier"
+                data-tour-id="ai-summary"
                 className="animate-in fade-in slide-in-from-bottom-1 duration-250"
               >
                 <IntelligenceDossier
@@ -665,6 +666,7 @@ export function ProfileView({
             ) : (
               <div
                 key="research"
+                data-tour-id="research-panel"
                 className="animate-in fade-in slide-in-from-bottom-1 duration-250 flex-1 flex flex-col"
               >
                 <ResearchPanel
@@ -691,13 +693,15 @@ export function ProfileView({
           {activePanel === "dossier" && (
             <>
               {/* Wealth Signal Timeline */}
-              <SignalTimeline
-                prospectId={prospect.id}
-                orgId={orgId}
-                initialSignals={initialSignals ?? []}
-                totalCount={signalCount ?? 0}
-                enrichmentComplete={prospect.enrichment_status === "complete"}
-              />
+              <div data-tour-id="wealth-signals">
+                <SignalTimeline
+                  prospectId={prospect.id}
+                  orgId={orgId}
+                  initialSignals={initialSignals ?? []}
+                  totalCount={signalCount ?? 0}
+                  enrichmentComplete={prospect.enrichment_status === "complete"}
+                />
+              </div>
 
               {/* Research Notes */}
               {researchNotes.length > 0 && (
@@ -747,7 +751,7 @@ export function ProfileView({
         <div className="lg:col-span-3 flex flex-col gap-4">
           {/* Enrichment Status Card */}
           <div
-            data-tour-id="profile-summary"
+            data-tour-id="enrichment-status"
             className="rounded-[14px] p-5"
             style={{
               background: "var(--bg-card-gradient, rgba(255,255,255,0.03))",

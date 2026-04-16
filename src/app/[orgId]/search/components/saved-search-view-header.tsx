@@ -77,7 +77,7 @@ export function SavedSearchViewHeader({
   }
 
   return (
-    <header className="mb-5">
+    <header className="mb-5" data-tour-id="results-header">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
           <h1
