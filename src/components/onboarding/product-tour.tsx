@@ -45,16 +45,14 @@ export function ProductTour() {
   }, [step]);
 
   // Fix 2 — Auto-advance on organic interaction with the current step's
-  // target. If the user focuses the NL search bar, types in it, or clicks a
-  // button inside the bulk actions bar / profile summary / etc., advance the
-  // tour without requiring a Next click. One-shot: first meaningful event
-  // advances and listeners detach.
-  //
-  // Events listened: click, focus (capture), input (capture). NOT:
-  // mouseenter/mouseover/scroll/mousemove — those would over-fire and make
-  // the tour feel twitchy.
+  // target element. One-shot: first meaningful event advances and listeners
+  // detach. Skipped for steps with advanceOn — those are event-bus driven
+  // (e.g. search_submitted fires on Enter/submit, not on mere focus/click).
+  // Attaching DOM listeners on top of the event bus would advance the tour
+  // the moment the user clicks into the NL search bar, before they've typed.
   React.useEffect(() => {
     if (!anchorEl) return;
+    if (step?.advanceOn) return; // event bus handles this step
     let fired = false;
     const advance = () => {
       if (fired) return;
@@ -69,7 +67,7 @@ export function ProductTour() {
       anchorEl.removeEventListener("focus", advance, true);
       anchorEl.removeEventListener("input", advance, true);
     };
-  }, [anchorEl, next]);
+  }, [anchorEl, next, step]);
 
   // Fix 1 — Single-click Next that also auto-navigates cross-page.
   // If the NEXT step's target isn't on the current page and that step has
