@@ -20,3 +20,34 @@ src/lib/search/__tests__/execute-research.test.ts(200,46): error TS2493: Tuple t
 pnpm tsc --noEmit 2>&1 | grep -E "(auto_wealth_tier|wealth_tier_estimated|DataEventType)"
 # (no output — zero errors related to Phase 43 types)
 ```
+
+## Pre-existing Test Failures (Out of Scope)
+
+Discovered during Plan 02 Task 2 verification. The wider vitest suite reports
+22 failing tests in `src/inngest/functions/__tests__/enrich-prospect.test.ts`,
+all with the same signature:
+
+```
+TypeError: supabase.rpc is not a function
+  at updateSourceStatus src/inngest/functions/enrich-prospect.ts:24:18
+  at src/inngest/functions/enrich-prospect.ts:265:15
+  at src/inngest/functions/enrich-prospect.ts:194:25
+```
+
+Root cause: the mock Supabase client in that suite lacks an `rpc()` method.
+`updateSourceStatus` was updated (prior to Phase 43) to use the
+`merge_enrichment_source_status` RPC for atomic JSONB merge, but the test mock
+wasn't kept in lock-step. This is NOT introduced by Phase 43 and is not caused
+by `estimateWealthTier` — our own suite (`wealth-tier.test.ts`) is green with
+13/13 passing.
+
+Per executor `SCOPE BOUNDARY` rule, not fixed here. Will need a follow-up
+quick task to add `rpc: vi.fn(() => Promise.resolve({ data: null, error: null }))`
+to the mock Supabase chain in `enrich-prospect.test.ts`.
+
+**Verification that Phase 43-02 additions pass cleanly:**
+```
+pnpm vitest run src/lib/enrichment/__tests__/wealth-tier.test.ts
+# Test Files  1 passed (1)
+#      Tests  13 passed (13)
+```
