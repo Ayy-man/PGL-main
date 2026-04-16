@@ -36,6 +36,8 @@ interface EnrichedData {
   company: string | null;
   enrichment_status: string | null;
   manual_wealth_tier: string | null;
+  auto_wealth_tier: string | null;
+  auto_wealth_tier_reasoning: string | null;
   contact_data: { phone?: string; personal_email?: string; work_phone?: string } | null;
   intelligence_dossier: { summary?: string; outreach_hooks?: string[] } | null;
 }
@@ -120,7 +122,13 @@ export function ProspectSlideOver({
   const displayTitle = enrichedData?.title || prospect?.title || null;
   const displayCompany = enrichedData?.company || prospect?.company || null;
   const displayLinkedin = enrichedData?.linkedin_url || null;
-  const displayWealthTier = enrichedData?.manual_wealth_tier || null;
+  const displayWealthTier =
+    enrichedData?.manual_wealth_tier ||
+    enrichedData?.auto_wealth_tier ||
+    null;
+  const isAutoWealthTier =
+    !enrichedData?.manual_wealth_tier && !!enrichedData?.auto_wealth_tier;
+  const autoWealthTierReasoning = enrichedData?.auto_wealth_tier_reasoning ?? undefined;
   const dossierSummary = enrichedData?.intelligence_dossier?.summary || null;
 
   return (
@@ -190,10 +198,17 @@ export function ProspectSlideOver({
                   </h2>
                   {displayWealthTier && (
                     <p
-                      className="mt-0.5 text-xs font-medium"
+                      className="mt-0.5 text-xs font-medium inline-flex items-center gap-1"
                       style={{ color: "var(--gold-primary)" }}
+                      title={isAutoWealthTier ? autoWealthTierReasoning : undefined}
                     >
-                      {displayWealthTier}
+                      {isAutoWealthTier && (
+                        <Sparkles
+                          className="h-3 w-3 shrink-0"
+                          aria-label="Auto-estimated wealth tier"
+                        />
+                      )}
+                      <span>{displayWealthTier}</span>
                     </p>
                   )}
                 </div>
