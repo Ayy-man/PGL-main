@@ -25,14 +25,21 @@ export function ProductTour() {
       return;
     }
     // Try immediately — covers same-page step advances where the anchor
-    // is already in the DOM.
+    // is already in the DOM. If found, batched with no flash.
     const el = document.querySelector<HTMLElement>(step.targetSelector);
     if (el) { setAnchorEl(el); return; }
 
-    // Not found yet: retry after one animation frame (handles client
-    // components that render synchronously but after the effect). If
-    // still missing (e.g. Suspense boundary still showing fallback after
-    // a page navigation), retry once more after 300ms.
+    // Not found: clear the stale anchor from the previous step so the
+    // popover doesn't render at the OLD position during the retry window
+    // (which looked like "right spot for a second then yank to center").
+    // Fallback card briefly shows → then either rAF/300ms finds the new
+    // anchor and positions correctly, or fallback stays.
+    setAnchorEl(null);
+
+    // Retry after one animation frame (handles client components that
+    // render synchronously but after the effect). If still missing (e.g.
+    // Suspense boundary still showing fallback after a page navigation),
+    // retry once more after 300ms.
     let timer: ReturnType<typeof setTimeout> | undefined;
     const raf = requestAnimationFrame(() => {
       const el2 = document.querySelector<HTMLElement>(step.targetSelector);
