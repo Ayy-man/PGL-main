@@ -514,6 +514,16 @@ Plans:
 
 **When to revisit:** (a) Adrian revives it explicitly, (b) a second tenant with different consumption profile onboards, or (c) usage exceeds what the current flat-fee agreement covers.
 
+### Phase 43: Wealth Tier Auto-Estimation — Automated wealth tier scoring during prospect enrichment. New Inngest step that synthesizes SEC transaction data, Exa wealth signals, and career inference to output a structured wealth tier (1-4: Affluent/HNW/VHNW/UHNW) with confidence rating and reasoning. Stores tier in 4 new DB columns on the prospects table. Wires into the existing enrichment pipeline between market-data and AI summary steps. UI: auto-populate the Set wealth tier field in the prospect card with manual override capability.
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 42
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 43 to break down)
+
 ---
 
 ### Phase 19: Admin Automations Dashboard — Inngest Monitoring
