@@ -144,11 +144,12 @@ export function ProductTour() {
 
   // Safety-net fallback: target element not present on current page (user
   // manually navigated somewhere weird, or a target hasn't mounted yet).
-  // Shows the step in a fixed bottom-right card. Next still works — it
-  // either auto-navigates via handleNext (Fix 1) or advances step state.
+  // Shows the step center-screen — deliberately NOT bottom-right because
+  // that corner is reserved for toast notifications. Next still works —
+  // it either auto-navigates via handleNext (Fix 1) or advances step state.
   if (!anchorEl) {
     return (
-      <div className="fixed bottom-6 right-6 z-50 w-[min(22rem,90vw)] rounded-lg border bg-[var(--bg-floating-elevated,#1a1a1e)] backdrop-blur-sm p-4 shadow-xl">
+      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[min(22rem,90vw)] rounded-lg border bg-[var(--bg-floating-elevated,#1a1a1e)] backdrop-blur-sm p-4 shadow-xl">
         <div className="space-y-3">
           <h4 className="font-serif text-base font-semibold">{step.title}</h4>
           <p className="text-sm text-muted-foreground">{effectiveBody}</p>
