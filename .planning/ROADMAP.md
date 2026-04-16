@@ -519,13 +519,13 @@ Plans:
 **Goal:** Add a dedicated `estimate-wealth-tier` Inngest step between `fetch-market-data` and `generate-summary` that synthesizes SEC Form 4 cash transactions, SEC RSU/option grants, Exa wealth/funding signals, stock-snapshot ticker context, and title/company inference into a structured 5-tier enum (ultra_high / very_high / high / emerging / unknown) with confidence (high/medium/low) and reasoning. Persist result in 4 new columns on `prospects` (auto_wealth_tier, auto_wealth_tier_confidence, auto_wealth_tier_reasoning, auto_wealth_tier_estimated_at). Profile-header + prospect-slide-over display auto tier with Sparkles icon + reasoning tooltip when no manual override exists; manual override wins per D-07. Optional hint pass-through into dossier prompt keeps narrative wealth_assessment aligned with the structured tier.
 **Requirements**: phase-goal (Phase 43 has no explicit REQ-IDs; locked decisions D-01 through D-08 in 43-CONTEXT.md)
 **Depends on:** Phase 42
-**Plans:** 3/6 plans executed
+**Plans:** 4/6 plans executed
 
 Plans:
 - [x] 43-01-PLAN.md — Migration + types + [BLOCKING] schema push (4 auto_wealth_tier_* columns, DataEventType extension)
 - [x] 43-02-PLAN.md — estimateWealthTier helper + Vitest suite (9 fixtures covering rubric branches + normalization + error paths)
 - [x] 43-03-PLAN.md — Inngest step wiring (insert between fetch-market-data and generate-summary, source-status tracking, activity log event)
-- [ ] 43-04-PLAN.md — UI wire-through (profile-header + slide-over with Sparkles + reasoning tooltip, manual override precedence)
+- [x] 43-04-PLAN.md — UI wire-through (profile-header + slide-over with Sparkles + reasoning tooltip, manual override precedence)
 - [ ] 43-05-PLAN.md — Optional dossier hint pass-through (DossierInput.autoWealthTier, narrative alignment)
 - [ ] 43-06-PLAN.md — Build + UAT verification (pnpm build + test + pitfall-regression grep audit + human-verify UI fallback)
 
