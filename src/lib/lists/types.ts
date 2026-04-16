@@ -29,8 +29,10 @@ export interface ListMember {
     phone: string | null;
     linkedin_url: string | null;
     enrichment_status: string | null;
-    enrichment_source_status: Record<string, string> | null;
+    enrichment_source_status: Record<string, string | { status?: string; at?: string; error?: string }> | null;
     photo_url: string | null;
+    manual_wealth_tier: string | null;
+    lead_owner_id: string | null;
   };
 }
 

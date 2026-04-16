@@ -1,6 +1,6 @@
 "use client";
 
-import { Mail, Phone, ExternalLink, Loader2 } from "lucide-react";
+import { Mail, Phone, ExternalLink, Loader2, User, Sparkles } from "lucide-react";
 import { ProspectAvatar } from "@/components/prospect/prospect-avatar";
 import type { ListMember } from "@/lib/lists/types";
 
@@ -11,6 +11,15 @@ const SOURCE_SHORT_LABELS: Array<[string, string]> = [
   ["market", "Market"],
   ["claude", "AI"],
 ];
+
+/** DB stores enrichment_source_status as either flat strings or {status, at, error?} objects. Normalize. */
+function extractStatus(
+  raw: string | { status?: string; at?: string; error?: string } | undefined
+): string | undefined {
+  if (!raw) return undefined;
+  if (typeof raw === "string") return raw;
+  return raw.status;
+}
 
 interface LeadHoverPreviewProps {
   prospect: ListMember["prospect"];
@@ -171,7 +180,7 @@ export function LeadHoverPreview({ prospect }: LeadHoverPreviewProps) {
       {hasSourceStatus && (
         <div className="grid grid-cols-2 gap-1.5 pt-2 border-t" style={{ borderColor: "var(--border-subtle)" }}>
           {SOURCE_SHORT_LABELS.map(([key, label]) => {
-            const status = prospect.enrichment_source_status?.[key];
+            const status = extractStatus(prospect.enrichment_source_status?.[key]);
             return (
               <span
                 key={key}
@@ -193,6 +202,30 @@ export function LeadHoverPreview({ prospect }: LeadHoverPreviewProps) {
           })}
         </div>
       )}
+
+      {/* Footer: assignment + wealth tier */}
+      <div className="flex items-center justify-between gap-2 pt-2 border-t text-[11px]" style={{ borderColor: "var(--border-subtle)" }}>
+        <span
+          className="inline-flex items-center gap-1.5"
+          style={{
+            color: prospect.lead_owner_id ? "var(--gold-primary)" : "var(--text-tertiary, rgba(232,228,220,0.4))",
+          }}
+          title={prospect.lead_owner_id ? "Assigned to a team member" : "Unassigned"}
+        >
+          <User className="h-3 w-3" />
+          {prospect.lead_owner_id ? "Assigned" : "Unassigned"}
+        </span>
+        <span
+          className="inline-flex items-center gap-1.5"
+          style={{
+            color: prospect.manual_wealth_tier ? "var(--gold-primary)" : "var(--text-tertiary, rgba(232,228,220,0.4))",
+          }}
+          title={prospect.manual_wealth_tier ? `Wealth tier: ${prospect.manual_wealth_tier}` : "Wealth tier not set"}
+        >
+          <Sparkles className="h-3 w-3" />
+          {prospect.manual_wealth_tier ?? "Tier —"}
+        </span>
+      </div>
     </div>
   );
 }
