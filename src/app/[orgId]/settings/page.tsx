@@ -199,7 +199,7 @@ export default function SettingsPage() {
         className="block group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl"
       >
         <Card className="transition-colors hover:border-[var(--border-gold)]">
-          <CardContent className="flex items-center gap-4 p-6">
+          <CardContent className="flex items-center gap-4 p-6 md:pt-6">
             <div
               className="flex h-10 w-10 items-center justify-center rounded-lg"
               style={{
