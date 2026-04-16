@@ -50,7 +50,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
     title: "Your setup checklist",
     body: "Finish these 4 steps anytime: invite your team, upload a logo, pick a theme, create your first search.",
     targetSelector: '[data-tour-id="onboarding-checklist"]',
-    placement: "right",
+    placement: "bottom",
     suggestedHref: (o) => `/${o}`,
   },
   {

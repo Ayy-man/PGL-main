@@ -10,7 +10,7 @@ import { nextTourStep } from "@/lib/onboarding/tour-navigation";
 import { useTour } from "./tour-context";
 
 export function ProductTour() {
-  const { currentStep, isActive, next, skip, complete } = useTour();
+  const { currentStep, isActive, next, previous, skip, complete } = useTour();
   const { orgId } = useParams<{ orgId: string }>();
   const router = useRouter();
   const step = React.useMemo(
@@ -134,6 +134,34 @@ export function ProductTour() {
   // Only surface it when timeout fires (and as usual on all other steps).
   const showNextButton = !isWaitingForEnrichment || timedOut;
 
+  const isFirst = stepIndex === 1;
+
+  // JSX variable (not a component) so it doesn't cause remount on every render
+  const tourFooter = (
+    <div className="flex items-center justify-between pt-1">
+      <div className="flex items-center gap-1">
+        <span className="text-xs text-muted-foreground">
+          {stepIndex} / {TOUR_STEPS.length}
+        </span>
+        {!isFirst && (
+          <Button size="sm" variant="ghost" className="px-2 text-xs" onClick={previous}>
+            ← Back
+          </Button>
+        )}
+      </div>
+      <div className="flex gap-2">
+        <Button size="sm" variant="ghost" onClick={skip}>
+          Skip
+        </Button>
+        {showNextButton && (
+          <Button size="sm" onClick={handleNext}>
+            {isLast ? "Done" : timedOut ? "Continue anyway" : "Next"}
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+
   const content = (
     <PopoverContent
       side={step.placement}
@@ -145,21 +173,7 @@ export function ProductTour() {
       <div key={step.id} className="space-y-3 animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-2 duration-300">
         <h4 className="font-serif text-base font-semibold">{step.title}</h4>
         <p className="text-sm text-muted-foreground">{effectiveBody}</p>
-        <div className="flex items-center justify-between pt-1">
-          <span className="text-xs text-muted-foreground">
-            Step {stepIndex} of {TOUR_STEPS.length}
-          </span>
-          <div className="flex gap-2">
-            <Button size="sm" variant="ghost" onClick={skip}>
-              Skip
-            </Button>
-            {showNextButton && (
-              <Button size="sm" onClick={handleNext}>
-                {isLast ? "Done" : timedOut ? "Continue anyway" : "Next"}
-              </Button>
-            )}
-          </div>
-        </div>
+        {tourFooter}
       </div>
     </PopoverContent>
   );
@@ -182,21 +196,7 @@ export function ProductTour() {
         <div key={step.id} className="space-y-3 animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-2 duration-300">
           <h4 className="font-serif text-base font-semibold">{step.title}</h4>
           <p className="text-sm text-muted-foreground">{effectiveBody}</p>
-          <div className="flex items-center justify-between pt-1">
-            <span className="text-xs text-muted-foreground">
-              Step {stepIndex} of {TOUR_STEPS.length}
-            </span>
-            <div className="flex gap-2">
-              <Button size="sm" variant="ghost" onClick={skip}>
-                Skip
-              </Button>
-              {showNextButton && (
-                <Button size="sm" onClick={handleNext}>
-                  {isLast ? "Done" : timedOut ? "Continue anyway" : "Next"}
-                </Button>
-              )}
-            </div>
-          </div>
+          {tourFooter}
         </div>
       </div>
     );
