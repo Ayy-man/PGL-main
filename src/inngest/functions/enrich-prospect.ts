@@ -834,6 +834,14 @@ export const enrichProspect = inngest.createFunction(
             ? edgarData.transactions
             : null,
           stockSnapshot: effectiveTicker ? { ticker: effectiveTicker } : null,
+          // Phase 43: Pass auto_wealth_tier estimate forward as optional hint. Keeps the
+          // dossier's narrative wealth_assessment aligned with the structured field shown
+          // in the UI. Null-guarded — if the wealth-tier step failed, no hint is passed
+          // and the dossier behaves exactly as before.
+          autoWealthTier:
+            wealthTierResult.tier && wealthTierResult.confidence
+              ? { tier: wealthTierResult.tier, confidence: wealthTierResult.confidence }
+              : null,
         });
 
         if (dossier) {
