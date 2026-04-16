@@ -682,27 +682,31 @@ CREATE INDEX IF NOT EXISTS prospects_auto_wealth_tier_idx
 
 **If this table is empty:** Not empty — two MEDIUM-risk assumptions (A6, A7) that the executor should verify during implementation or UAT.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **C-suite market-cap threshold without marketCap data (Pitfall 1)**
    - What we know: CONTEXT.md rubric uses $10B market cap boundary; current `StockSnapshot` has no marketCap field.
    - What's unclear: Whether the planner prefers (a) drop the boundary, (b) hardcode a mega-cap list, or (c) extend the snapshot.
    - Recommendation: Go with (a). Simplify the rubric to "public-co C-suite with RSU grants" — gives `very_high medium` regardless of company size. Still 10x better than no auto-tier.
+   - **RESOLVED:** Adopted option (a) — Plan 02 drops the marketCap boundary; single collapsed rule covers public-co C-suite with RSU grants.
 
 2. **Prompt iteration loop**
    - What we know: The rubric is locked in D-05; exact wording is Claude's Discretion.
    - What's unclear: Whether planner wants a prompt-eval harness (test fixtures + expected output) or ship as-is and iterate in production.
    - Recommendation: Ship with 5-6 Vitest fixtures (see Validation Architecture). Prompt refinement is a cheap followup.
+   - **RESOLVED:** Plan 02 ships with 9 Vitest fixtures covering rubric branches (exceeded recommendation).
 
 3. **Backfill strategy for Maggie demo**
    - What we know: Forcerefresh endpoint works per-prospect; no bulk backfill script exists.
    - What's unclear: Demo size — 10 test prospects or 1000 existing prospects?
    - Recommendation: Plan for a simple throttled backfill script as an ops task, not part of the phase code. If "all existing prospects need tiers for demo" becomes a hard requirement, escalate to a quick task post-phase.
+   - **RESOLVED:** Deferred to ops — Plan 06 UAT Step 2 tests forceRefresh per-prospect; bulk backfill escalated to follow-up quick task if demand materializes.
 
 4. **Should `auto_wealth_tier` be surfaced on the prospect slide-over (search results panel)?**
    - What we know: Slide-over reads `manual_wealth_tier` from the GET endpoint. Not mentioned in CONTEXT.md UI scope.
    - What's unclear: Whether the slide-over display should also fall back to auto.
    - Recommendation: Yes — the slide-over is the first touchpoint for a result; a visible tier there is the payoff for this phase. Plan should include slide-over wire-up (1 field on the EnrichedData type + 1 resolver line).
+   - **RESOLVED:** Included in scope — Plan 04 Task 2 wires slide-over to fall back to `auto_wealth_tier` with reasoning tooltip.
 
 ## Environment Availability
 
