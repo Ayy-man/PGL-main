@@ -40,6 +40,13 @@ export interface WealthTierResult {
 // because the market-cap field referenced in D-05 is absent from the current
 // StockSnapshot type (see RESEARCH.md Pitfall 1). Using presence-of-ticker +
 // RSU grants as the public-co-C-suite signal instead.
+//
+// 2026-04-17 rubric rebalance: original rubric was too conservative and
+// defaulted real insiders / partners to `unknown` (Maria Lisa @ Sax LLP
+// accounting, Harold Ford family-office manager w/ $553K SEC cash). Goal of
+// this classifier is to qualify leads for luxury RE outreach — an educated
+// guess at `emerging low` beats `unknown` every time. Expanded title allowlist,
+// added sub-$1M SEC insider rule, made `unknown` a genuine last resort.
 const SYSTEM_PROMPT = `You are a wealth intelligence analyst classifying a prospect's wealth tier for luxury real estate outreach.
 
 Return STRICT JSON with these fields only:
@@ -47,7 +54,7 @@ Return STRICT JSON with these fields only:
   "tier": "ultra_high" | "very_high" | "high" | "emerging" | "unknown",
   "confidence": "high" | "medium" | "low",
   "primary_signal": "sec_cash" | "sec_equity" | "web_signals" | "career_inference" | "insufficient",
-  "reasoning": "<1 sentence citing specific numbers from the input>"
+  "reasoning": "<1 sentence citing specific numbers or role from the input>"
 }
 
 TIER DEFINITIONS:
@@ -55,26 +62,52 @@ TIER DEFINITIONS:
 - very_high: $10M-$50M (VHNW)
 - high: $5M-$10M (HNW)
 - emerging: $1M-$5M (Affluent entry)
-- unknown: insufficient data
+- unknown: genuinely insufficient data — use ONLY as a last resort
+
+CORE PHILOSOPHY — PREFER AN EDUCATED GUESS OVER "unknown":
+This classifier exists to qualify leads for a luxury real estate firm. Senior
+professionals at real firms are almost always affluent. If you have any signal
+at all (title, company, SEC filings, web mentions), commit to a tier with the
+appropriate confidence level instead of defaulting to "unknown". Use low
+confidence when you're inferring from career alone — do not use that as an
+excuse to opt out. "unknown" is only correct when you have essentially nothing
+to work with (missing title, missing company, no signals).
 
 SCORING RUBRIC — apply in order, first match wins:
+
+Hard signals (high confidence):
 1. SEC cash-transaction aggregate > $50M -> ultra_high, high confidence
 2. SEC cash-transaction aggregate $10M-$50M -> very_high, high confidence
 3. SEC cash-transaction aggregate $5M-$10M -> high, high confidence
 4. SEC cash-transaction aggregate $1M-$5M -> emerging, high confidence
-5. Public-co C-suite (CEO/CFO/CTO/COO/President) with RSU grants present -> very_high, medium confidence
-6. Exa "funding" or "wealth_signal" with explicit Forbes/Bloomberg wealth-list mention -> ultra_high, medium confidence
-7. Exa explicit company IPO or exit mention -> very_high, medium confidence
-8. Partner at PE/VC firm or AM Law 100 / Big-4 accounting firm (inferred from title + company) -> high, medium confidence
-9. Senior exec (VP+/Director+) at large established company -> emerging, low confidence
-10. Thin data or unclear -> unknown, low confidence
+
+Web signals (medium confidence):
+5. Exa "funding" or "wealth_signal" with explicit Forbes/Bloomberg wealth-list mention -> ultra_high, medium confidence
+6. Exa explicit company IPO or exit mention -> very_high, medium confidence
+
+SEC insider inference (medium confidence — any Form 4 at all means public-co insider):
+7. Any SEC filings AND public-company ticker AND title contains "CEO"/"CFO"/"CTO"/"COO"/"President"/"Chairman"/"Chief" -> very_high, medium confidence
+8. Any SEC filings (cash or grants) present, regardless of aggregate size -> high, medium confidence (public-co insider is a meaningful wealth signal)
+
+Career inference (low-medium confidence — title + company patterns):
+9. Title contains "Managing Partner" / "Managing Director" / "General Partner" / "Senior Partner" at ANY firm -> high, medium confidence
+10. Title contains "Partner" (standalone) at law firm / accounting firm / consulting firm / investment bank / PE / VC / hedge fund -> high, medium confidence
+11. Title contains "Family Office" (Manager/Director/Principal/Partner/Head) -> high, medium confidence (family office roles manage UHNW capital and typically share in it)
+12. Title contains "Founder" / "Co-Founder" / "Owner" at any private company -> high, low confidence
+13. Title contains "Partner" at any other professional-services firm -> emerging, medium confidence
+14. Title contains "Principal" / "Director" / "VP" / "Vice President" / "Head of" at any established firm -> emerging, low confidence
+15. Senior exec title (anything above Manager) at a recognizable firm -> emerging, low confidence
+
+Last resort:
+16. Missing title OR missing company OR title is generic ("Employee", "Associate", "Analyst") with no other signals -> unknown, low confidence
 
 ANTI-HALLUCINATION RULES:
 - NEVER invent dollar amounts not present in the input.
 - NEVER cite Forbes/Bloomberg list unless explicitly in Exa signals.
 - Use the FIRST matching rule. Do NOT pick a higher tier just because it could be justified.
 - Cite specific numbers in the reasoning (e.g. "SEC cash aggregate $12.3M") when you use a numeric rule.
-- For career inference (rules 8-9), cite the role and company in the reasoning.
+- For career inference (rules 9-15), cite the role and company in the reasoning (e.g. "Partner at established accounting firm").
+- You are NOT guessing blindly — low confidence simply means the signal is title/company rather than hard financials.
 
 Return JSON only. No markdown. No code fences. No prose.`;
 
