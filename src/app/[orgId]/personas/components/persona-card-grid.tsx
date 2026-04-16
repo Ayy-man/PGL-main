@@ -80,7 +80,7 @@ export function PersonaCardGrid({ personas: serverPersonas, orgId, canEdit = tru
   return (
     <div className="grid gap-4 md:gap-5 content-start grid-cols-1 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fill,minmax(340px,1fr))]">
       {personas.map((persona, index) => (
-        <div key={persona.id} className="animate-stagger-in" style={{ animationDelay: `${index * 50}ms` }}>
+        <div key={persona.id} className="animate-stagger-in h-full" style={{ animationDelay: `${index * 50}ms` }}>
           <PersonaCard persona={persona} onDelete={handleRequestDeletePersona} onUpdated={handlePersonaUpdated} canEdit={canEdit} />
         </div>
       ))}
@@ -93,7 +93,7 @@ export function PersonaCardGrid({ personas: serverPersonas, orgId, canEdit = tru
         onCreated={handlePersonaCreated}
         trigger={
           <button
-            className="rounded-[14px] p-5 md:p-7 w-full cursor-pointer flex flex-col items-center justify-center gap-4 transition-all group card-interactive"
+            className="rounded-[14px] p-5 md:p-7 w-full h-full cursor-pointer flex flex-col items-center justify-center gap-4 transition-all group card-interactive"
             style={{
               border: "1px dashed var(--border-default)",
               minHeight: "180px",

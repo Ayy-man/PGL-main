@@ -77,7 +77,7 @@ export function PersonaCard({ persona, onDelete, onUpdated, canEdit = true }: Pe
 
   return (
     <div
-      className="rounded-[14px] flex flex-col transition-all overflow-hidden"
+      className="rounded-[14px] flex flex-col h-full transition-all overflow-hidden"
       style={{
         background: cardStyle.background,
         border: `1px solid ${cardStyle.borderColor}`,
@@ -216,7 +216,7 @@ export function PersonaCard({ persona, onDelete, onUpdated, canEdit = true }: Pe
 
       {/* Action bar */}
       <div
-        className="px-6 py-4 flex items-center gap-2"
+        className="mt-auto px-6 py-4 flex items-center gap-2"
         style={{ borderTop: "1px solid var(--border-subtle)" }}
       >
         <Link
