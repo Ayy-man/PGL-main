@@ -119,8 +119,14 @@ export function ProductTour() {
   const showNextButton = !isWaitingForEnrichment || timedOut;
 
   const content = (
-    <PopoverContent side={step.placement} align="start">
-      <div className="space-y-3">
+    <PopoverContent
+      side={step.placement}
+      align="start"
+      data-tour-popover="true"
+      className="border-[var(--gold-primary)] [box-shadow:0_0_0_1px_var(--gold-primary),0_8px_40px_rgba(var(--gold-primary-rgb),0.18)]"
+    >
+      {/* key={step.id} re-mounts this div on every step → entrance animation fires each time */}
+      <div key={step.id} className="space-y-3 animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-2 duration-300">
         <h4 className="font-serif text-base font-semibold">{step.title}</h4>
         <p className="text-sm text-muted-foreground">{effectiveBody}</p>
         <div className="flex items-center justify-between pt-1">
@@ -149,8 +155,15 @@ export function ProductTour() {
   // it either auto-navigates via handleNext (Fix 1) or advances step state.
   if (!anchorEl) {
     return (
-      <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[min(22rem,90vw)] rounded-lg border bg-[var(--bg-floating-elevated,#1a1a1e)] backdrop-blur-sm p-4 shadow-xl">
-        <div className="space-y-3">
+      <div
+        className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[min(22rem,90vw)] rounded-lg bg-[var(--bg-floating-elevated,#1a1a1e)] backdrop-blur-sm p-4"
+        style={{
+          border: "1px solid var(--gold-primary)",
+          boxShadow: "0 0 0 1px var(--gold-primary), 0 8px 40px rgba(var(--gold-primary-rgb), 0.18)",
+        }}
+      >
+        {/* key on inner div so it remounts (replaying the animation) on every step change */}
+        <div key={step.id} className="space-y-3 animate-in fade-in-0 zoom-in-95 slide-in-from-bottom-2 duration-300">
           <h4 className="font-serif text-base font-semibold">{step.title}</h4>
           <p className="text-sm text-muted-foreground">{effectiveBody}</p>
           <div className="flex items-center justify-between pt-1">
