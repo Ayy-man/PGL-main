@@ -33,9 +33,8 @@ export function ProductTour() {
     // components that render synchronously but after the effect). If
     // still missing (e.g. Suspense boundary still showing fallback after
     // a page navigation), retry once more after 300ms.
-    let raf: number;
-    let timer: ReturnType<typeof setTimeout>;
-    raf = requestAnimationFrame(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const raf = requestAnimationFrame(() => {
       const el2 = document.querySelector<HTMLElement>(step.targetSelector);
       if (el2) { setAnchorEl(el2); return; }
       timer = setTimeout(() => {
