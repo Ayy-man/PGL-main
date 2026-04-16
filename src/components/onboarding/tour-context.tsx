@@ -5,11 +5,7 @@ import {
   TOUR_STEPS,
   type TourStepId,
 } from "@/lib/onboarding/tour-steps";
-import {
-  nextTourStep,
-  previousTourStep,
-  findFirstPresentStep,
-} from "@/lib/onboarding/tour-navigation";
+import { findFirstPresentStep } from "@/lib/onboarding/tour-navigation";
 import { subscribeTourEvent } from "@/lib/onboarding/tour-event-bus";
 import { updateOnboardingState } from "@/app/actions/onboarding-state";
 
@@ -33,15 +29,27 @@ export function useTour() {
 
 export function TourProvider({
   initiallyActive,
+  userRole,
   children,
 }: {
   initiallyActive: boolean;
+  userRole?: string;
   children: React.ReactNode;
 }) {
+  // Filter steps by role. Assistants skip the 8 write-gated steps
+  // (C1-E5) since they can't add to lists or enrich (Phase 42 server-
+  // side guards). Everyone else sees the full 15 steps.
+  const steps = React.useMemo(() => {
+    if (userRole === "assistant") {
+      return TOUR_STEPS.filter((s) => !s.hiddenForAssistant);
+    }
+    return [...TOUR_STEPS];
+  }, [userRole]);
+
   const [isActive, setIsActive] = React.useState(initiallyActive);
   const [currentStep, setCurrentStep] = React.useState<TourStepId | null>(() => {
     if (!initiallyActive || typeof document === "undefined") return null;
-    return findFirstPresentStep(TOUR_STEPS, (sel) => !!document.querySelector(sel));
+    return findFirstPresentStep(steps, (sel) => !!document.querySelector(sel));
   });
 
   // Re-resolve first present step on mount (SSR->CSR, data-tour-id nodes may
@@ -50,24 +58,32 @@ export function TourProvider({
     if (!isActive || currentStep) return;
     const id = requestAnimationFrame(() => {
       setCurrentStep(
-        findFirstPresentStep(TOUR_STEPS, (sel) => !!document.querySelector(sel))
+        findFirstPresentStep(steps, (sel) => !!document.querySelector(sel))
       );
     });
     return () => cancelAnimationFrame(id);
-  }, [isActive, currentStep]);
+  }, [isActive, currentStep, steps]);
 
   const next = React.useCallback(() => {
-    // Structural advance. The tour is a multi-page journey — most steps have
-    // targets on DIFFERENT pages, so auto-skipping missing targets would end
-    // the tour prematurely. If the advanced-to step's target isn't on the
-    // current page, ProductTour's fallback card renders with a
-    // "Go to [page]" CTA that deep-links via suggestedHref.
-    setCurrentStep((s) => (s ? nextTourStep(s) : null));
-  }, []);
+    // Structural advance using the ROLE-FILTERED step list, not all TOUR_STEPS.
+    // Assistants' "next" after search-try (step B4) should be null (tour end),
+    // not dossier steps they can't reach.
+    setCurrentStep((s) => {
+      if (!s) return null;
+      const i = steps.findIndex((step) => step.id === s);
+      if (i === -1 || i === steps.length - 1) return null;
+      return steps[i + 1].id;
+    });
+  }, [steps]);
 
   const previous = React.useCallback(() => {
-    setCurrentStep((s) => (s ? previousTourStep(s) : null));
-  }, []);
+    setCurrentStep((s) => {
+      if (!s) return null;
+      const i = steps.findIndex((step) => step.id === s);
+      if (i <= 0) return null;
+      return steps[i - 1].id;
+    });
+  }, [steps]);
 
   const skip = React.useCallback(async () => {
     setIsActive(false);
@@ -91,9 +107,9 @@ export function TourProvider({
     await updateOnboardingState({ tour_completed: false });
     setIsActive(true);
     setCurrentStep(
-      findFirstPresentStep(TOUR_STEPS, (sel) => !!document.querySelector(sel))
+      findFirstPresentStep(steps, (sel) => !!document.querySelector(sel))
     );
-  }, []);
+  }, [steps]);
 
   // Escape = skip
   React.useEffect(() => {

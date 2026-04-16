@@ -123,7 +123,7 @@ export default async function TenantLayout({
         <MobileBottomNav orgId={orgId} userRole={userRole} />
 
         {/* Product tour — renders only when onboarding_state.tour_completed !== true */}
-        <TourTrigger initialOnboardingState={initialOnboardingState} />
+        <TourTrigger initialOnboardingState={initialOnboardingState} userRole={userRole} />
       </div>
     </div>
   );
