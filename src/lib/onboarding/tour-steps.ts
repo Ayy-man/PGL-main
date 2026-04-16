@@ -1,10 +1,25 @@
 export type TourStepId =
-  | "discover"
-  | "search"
-  | "enrich"
-  | "list"
-  | "profile"
-  | "export";
+  | "dashboard-welcome"
+  | "dashboard-checklist"
+  | "nav-discover"
+  | "search-hero"
+  | "search-filters"
+  | "search-new-cta"
+  | "search-try"
+  | "results-header"
+  | "results-bulk-actions"
+  | "dossier-enriching"
+  | "dossier-contacts"
+  | "dossier-ai-summary"
+  | "dossier-wealth"
+  | "dossier-research"
+  | "export-done";
+
+export type TourAdvanceEvent =
+  | "search_submitted"
+  | "persona_created"
+  | "list_added"
+  | "enrichment_complete";
 
 export interface TourStep {
   id: TourStepId;
@@ -12,54 +27,148 @@ export interface TourStep {
   body: string;
   targetSelector: string; // `[data-tour-id="..."]`
   placement: "top" | "right" | "bottom" | "left";
-  // Optional href the CTA can deep-link to if the user is on the wrong page
+  /** Optional href the CTA can deep-link to if the user is on the wrong page */
   suggestedHref?: (orgId: string) => string;
+  /** If set, tour advances automatically when this event fires (from tour-event-bus) */
+  advanceOn?: { event: TourAdvanceEvent };
+  /** If true, hide for role='assistant' (they can't perform the action) */
+  hiddenForAssistant?: boolean;
 }
 
 export const TOUR_STEPS: readonly TourStep[] = [
+  // ─── PART A — DASHBOARD ───────────────────────────────────────────
   {
-    id: "discover",
-    title: "Start here: Discover leads",
-    body: "This is your hub. Hit New Search anytime to find high-net-worth prospects matching your criteria.",
-    targetSelector: '[data-tour-id="discover-card"]',
+    id: "dashboard-welcome",
+    title: "Welcome to PGL",
+    body: "This is your hub — checklist, daily prospects, exports, and team pulse all live here.",
+    targetSelector: '[data-tour-id="dashboard-hero"]',
     placement: "bottom",
     suggestedHref: (o) => `/${o}`,
   },
   {
-    id: "search",
-    title: "Describe who you want to find",
-    body: "Type in plain English — 'tech founders in Miami worth $5M+'. Advanced Filters fine-tune the search.",
+    id: "dashboard-checklist",
+    title: "Your setup checklist",
+    body: "Finish these 4 steps anytime: invite your team, upload a logo, pick a theme, create your first search.",
+    targetSelector: '[data-tour-id="onboarding-checklist"]',
+    placement: "right",
+    suggestedHref: (o) => `/${o}`,
+  },
+  {
+    id: "nav-discover",
+    title: "Find your leads here",
+    body: "Everything starts with Lead Discovery. Let's go.",
+    targetSelector: '[data-tour-id="discover-card"]',
+    placement: "right",
+    suggestedHref: (o) => `/${o}/search`,
+  },
+
+  // ─── PART B — LEAD DISCOVERY ──────────────────────────────────────
+  {
+    id: "search-hero",
+    title: "Two ways to search",
+    body: "Describe who you want in plain English, or build a structured saved search. Both work — pick your style.",
     targetSelector: '[data-tour-id="nl-search-bar"]',
     placement: "bottom",
     suggestedHref: (o) => `/${o}/search`,
   },
   {
-    id: "enrich",
-    title: "Enrich to unlock contacts",
-    body: "Select prospects, then hit Enrich Selection. We fetch emails, phones, wealth signals, and company news.",
-    targetSelector: '[data-tour-id="bulk-actions-bar"]',
+    id: "search-filters",
+    title: "Filters for fine-tuning",
+    body: "Quick filter pills for tweaks. Advanced Filters for full control. Saved Searches below for reusable recipes.",
+    targetSelector: '[data-tour-id="advanced-filters-toggle"]',
     placement: "top",
+    suggestedHref: (o) => `/${o}/search`,
   },
   {
-    id: "list",
-    title: "Organize into Lists",
-    body: "Save enriched prospects to a list. Pipeline-style tracking with notes and status.",
-    targetSelector: '[data-tour-id="list-member-table"]',
-    placement: "top",
-    suggestedHref: (o) => `/${o}/lists`,
-  },
-  {
-    id: "profile",
-    title: "Every detail in one view",
-    body: "Click any prospect to see wealth signals, recent filings, company news, and an AI summary.",
-    targetSelector: '[data-tour-id="profile-summary"]',
+    id: "search-new-cta",
+    title: "+ New Search",
+    body: "Build a saved search from scratch — pick industry, title, location, seniority, company size. It's saved for next time.",
+    targetSelector: '[data-tour-id="new-search-cta"]',
     placement: "left",
+    suggestedHref: (o) => `/${o}/search`,
   },
   {
-    id: "export",
-    title: "Export and go",
-    body: "Export any list as CSV for your CRM or outreach tool. You're ready — happy prospecting.",
+    id: "search-try",
+    title: "Your turn",
+    body: "Type a search in the NL bar, or click + New Search. I'll pick up from there.",
+    targetSelector: '[data-tour-id="nl-search-bar"]',
+    placement: "bottom",
+    suggestedHref: (o) => `/${o}/search`,
+    advanceOn: { event: "search_submitted" },
+  },
+
+  // ─── PART C — SEARCH RESULTS ──────────────────────────────────────
+  {
+    id: "results-header",
+    title: "Your results",
+    body: "Ranked by relevance. All start as Preview Only — names redacted, no contacts. Search is free; only enrichment costs credits.",
+    targetSelector: '[data-tour-id="results-header"]',
+    placement: "bottom",
+    hiddenForAssistant: true,
+  },
+  {
+    id: "results-bulk-actions",
+    title: "Enrich and save",
+    body: "Pick prospects with the checkboxes, then add them to a list — existing or new.",
+    targetSelector: '[data-tour-id="bulk-actions"]',
+    placement: "top",
+    advanceOn: { event: "list_added" },
+    hiddenForAssistant: true,
+  },
+
+  // ─── PART D — DOSSIER ENRICHING ───────────────────────────────────
+  {
+    id: "dossier-enriching",
+    title: "Pulling their dossier",
+    body: "Contacts, wealth signals, SEC filings, news — usually 5–15 seconds.",
+    targetSelector: '[data-tour-id="enrichment-status"]',
+    placement: "bottom",
+    advanceOn: { event: "enrichment_complete" },
+    hiddenForAssistant: true,
+  },
+
+  // ─── PART E — DOSSIER ENRICHED ────────────────────────────────────
+  {
+    id: "dossier-contacts",
+    title: "Direct contact info",
+    body: "Name, title, company — plus verified email, phone, and LinkedIn. Copy, dial, compose.",
+    targetSelector: '[data-tour-id="dossier-contacts"]',
+    placement: "right",
+    hiddenForAssistant: true,
+  },
+  {
+    id: "dossier-ai-summary",
+    title: "AI-written summary",
+    body: "One-paragraph digest of everything we know. Use this as your opening line.",
+    targetSelector: '[data-tour-id="ai-summary"]',
+    placement: "left",
+    hiddenForAssistant: true,
+  },
+  {
+    id: "dossier-wealth",
+    title: "Wealth signals + company",
+    body: "Wealth from SEC, property, and news. Plus the company they work at — ticker, market cap, recent events.",
+    targetSelector: '[data-tour-id="wealth-signals"]',
+    placement: "left",
+    hiddenForAssistant: true,
+  },
+  {
+    id: "dossier-research",
+    title: "Ask and organize",
+    body: "Ask research questions in plain English. Tag, note, assign owner — everything syncs with your team.",
+    targetSelector: '[data-tour-id="research-panel"]',
+    placement: "left",
+    hiddenForAssistant: true,
+  },
+
+  // ─── CLOSE — EXPORT ───────────────────────────────────────────────
+  {
+    id: "export-done",
+    title: "You're ready",
+    body: "Export any list as CSV for your CRM or outreach tool. We'll keep enriching in the background. Happy prospecting.",
     targetSelector: '[data-tour-id="export-csv"]',
     placement: "top",
+    suggestedHref: (o) => `/${o}/lists`,
+    hiddenForAssistant: true,
   },
 ];
