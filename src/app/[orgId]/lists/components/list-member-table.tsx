@@ -38,6 +38,8 @@ import { useToast } from "@/hooks/use-toast";
 import { ToastAction } from "@/components/ui/toast";
 import { createClient } from "@/lib/supabase/client";
 import { ProspectAvatar } from "@/components/prospect/prospect-avatar";
+import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
+import { LeadHoverPreview } from "@/components/prospect/lead-hover-preview";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   Confirmation,
@@ -311,13 +313,20 @@ export function ListMemberTable({ members: serverMembers, listId, listName }: Li
                     <EnrichmentStatusDots sourceStatus={null} />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
-                        <Link
-                          href={`/${orgId}/prospects/${member.prospect.id}${fromQuery}`}
-                          className="text-[15px] font-semibold truncate hover:underline transition-colors"
-                          style={{ color: "var(--gold-primary)" }}
-                        >
-                          {member.prospect.name}
-                        </Link>
+                        <HoverCard openDelay={300} closeDelay={120}>
+                          <HoverCardTrigger asChild>
+                            <Link
+                              href={`/${orgId}/prospects/${member.prospect.id}${fromQuery}`}
+                              className="text-[15px] font-semibold truncate hover:underline transition-colors"
+                              style={{ color: "var(--gold-primary)" }}
+                            >
+                              {member.prospect.name}
+                            </Link>
+                          </HoverCardTrigger>
+                          <HoverCardContent align="start" side="right" sideOffset={12}>
+                            <LeadHoverPreview prospect={member.prospect} />
+                          </HoverCardContent>
+                        </HoverCard>
                         {member.prospect.linkedin_url && (
                           <a
                             href={member.prospect.linkedin_url}
@@ -464,13 +473,20 @@ export function ListMemberTable({ members: serverMembers, listId, listName }: Li
                     size="sm"
                   />
                   <EnrichmentStatusDots sourceStatus={null} />
-                  <Link
-                    href={`/${orgId}/prospects/${member.prospect.id}${fromQuery}`}
-                    className="text-sm font-semibold truncate hover:underline"
-                    style={{ color: "var(--gold-primary)" }}
-                  >
-                    {member.prospect.name}
-                  </Link>
+                  <HoverCard openDelay={300} closeDelay={120}>
+                    <HoverCardTrigger asChild>
+                      <Link
+                        href={`/${orgId}/prospects/${member.prospect.id}${fromQuery}`}
+                        className="text-sm font-semibold truncate hover:underline"
+                        style={{ color: "var(--gold-primary)" }}
+                      >
+                        {member.prospect.name}
+                      </Link>
+                    </HoverCardTrigger>
+                    <HoverCardContent align="start" side="bottom" sideOffset={8}>
+                      <LeadHoverPreview prospect={member.prospect} />
+                    </HoverCardContent>
+                  </HoverCard>
                 </div>
                 <p className="text-xs mt-0.5 truncate" style={{ color: "var(--text-tertiary)" }}>
                   {member.prospect.title || ""}
