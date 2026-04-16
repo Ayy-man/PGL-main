@@ -88,16 +88,41 @@ export function ProductTour() {
     [anchorEl]
   );
 
+  // 10s enrichment timeout: if the current step is waiting on
+  // `enrichment_complete` and the Realtime payload doesn't arrive in time,
+  // expose a "Continue anyway" Next button with a softened failure message.
+  // If the event fires within 10s, the tour context auto-advances (context
+  // effect listens) and this timeout state is cleaned up on step change.
+  const isWaitingForEnrichment =
+    step?.advanceOn?.event === "enrichment_complete";
+  const [timedOut, setTimedOut] = React.useState(false);
+  React.useEffect(() => {
+    setTimedOut(false);
+    if (!isWaitingForEnrichment) return;
+    const handle = window.setTimeout(() => setTimedOut(true), 10_000);
+    return () => window.clearTimeout(handle);
+  }, [isWaitingForEnrichment, step?.id]);
+
   if (!isActive || !step) return null;
 
   const isLast = step.id === TOUR_STEPS[TOUR_STEPS.length - 1].id;
   const stepIndex = TOUR_STEPS.findIndex((s) => s.id === step.id) + 1;
 
+  // Copy shown when enrichment times out — frames the failure honestly
+  // without blocking the tour.
+  const timedOutBody =
+    "Enrichment didn't complete — rate limits or missing data sometimes cause this. We'll retry in the background. Continue anyway?";
+  const effectiveBody =
+    isWaitingForEnrichment && timedOut ? timedOutBody : step.body;
+  // While waiting for enrichment, the Next button is hidden (event-driven).
+  // Only surface it when timeout fires (and as usual on all other steps).
+  const showNextButton = !isWaitingForEnrichment || timedOut;
+
   const content = (
     <PopoverContent side={step.placement} align="start">
       <div className="space-y-3">
         <h4 className="font-serif text-base font-semibold">{step.title}</h4>
-        <p className="text-sm text-muted-foreground">{step.body}</p>
+        <p className="text-sm text-muted-foreground">{effectiveBody}</p>
         <div className="flex items-center justify-between pt-1">
           <span className="text-xs text-muted-foreground">
             Step {stepIndex} of {TOUR_STEPS.length}
@@ -106,9 +131,11 @@ export function ProductTour() {
             <Button size="sm" variant="ghost" onClick={skip}>
               Skip
             </Button>
-            <Button size="sm" onClick={handleNext}>
-              {isLast ? "Done" : "Next"}
-            </Button>
+            {showNextButton && (
+              <Button size="sm" onClick={handleNext}>
+                {isLast ? "Done" : timedOut ? "Continue anyway" : "Next"}
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -124,7 +151,7 @@ export function ProductTour() {
       <div className="fixed bottom-6 right-6 z-50 w-[min(22rem,90vw)] rounded-lg border bg-[var(--bg-floating-elevated,#1a1a1e)] backdrop-blur-sm p-4 shadow-xl">
         <div className="space-y-3">
           <h4 className="font-serif text-base font-semibold">{step.title}</h4>
-          <p className="text-sm text-muted-foreground">{step.body}</p>
+          <p className="text-sm text-muted-foreground">{effectiveBody}</p>
           <div className="flex items-center justify-between pt-1">
             <span className="text-xs text-muted-foreground">
               Step {stepIndex} of {TOUR_STEPS.length}
@@ -133,9 +160,11 @@ export function ProductTour() {
               <Button size="sm" variant="ghost" onClick={skip}>
                 Skip
               </Button>
-              <Button size="sm" onClick={handleNext}>
-                {isLast ? "Done" : "Next"}
-              </Button>
+              {showNextButton && (
+                <Button size="sm" onClick={handleNext}>
+                  {isLast ? "Done" : timedOut ? "Continue anyway" : "Next"}
+                </Button>
+              )}
             </div>
           </div>
         </div>
