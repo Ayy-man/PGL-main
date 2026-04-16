@@ -24,8 +24,25 @@ export function ProductTour() {
       setAnchorEl(null);
       return;
     }
+    // Try immediately — covers same-page step advances where the anchor
+    // is already in the DOM.
     const el = document.querySelector<HTMLElement>(step.targetSelector);
-    setAnchorEl(el);
+    if (el) { setAnchorEl(el); return; }
+
+    // Not found yet: retry after one animation frame (handles client
+    // components that render synchronously but after the effect). If
+    // still missing (e.g. Suspense boundary still showing fallback after
+    // a page navigation), retry once more after 300ms.
+    let raf: number;
+    let timer: ReturnType<typeof setTimeout>;
+    raf = requestAnimationFrame(() => {
+      const el2 = document.querySelector<HTMLElement>(step.targetSelector);
+      if (el2) { setAnchorEl(el2); return; }
+      timer = setTimeout(() => {
+        setAnchorEl(document.querySelector<HTMLElement>(step.targetSelector));
+      }, 300);
+    });
+    return () => { cancelAnimationFrame(raf); clearTimeout(timer); };
   }, [step]);
 
   // Fix 2 — Auto-advance on organic interaction with the current step's
