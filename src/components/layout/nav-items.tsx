@@ -82,12 +82,6 @@ export function NavItems({ orgId, userRole, collapsed, savedSearchCount, listsCo
                   }
             }
           >
-            {isActive && (
-              <span
-                className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-full bg-[var(--gold-primary)] transition-opacity"
-                aria-hidden
-              />
-            )}
             <item.icon className="h-4 w-4 shrink-0" />
             {!collapsed && item.label}
             {!collapsed && (() => {
