@@ -135,7 +135,7 @@ function SearchCard({
           style={{ background: getPersonaColor(persona.id) }}
         />
         <span
-          className="text-[14px] font-medium leading-snug"
+          className="text-[14px] font-medium leading-snug line-clamp-2"
           style={{ color: "var(--text-primary-ds)" }}
         >
           {persona.name}
