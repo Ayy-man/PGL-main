@@ -3,6 +3,7 @@
 import {
   Building2,
   Plus,
+  Sparkles,
 } from "lucide-react";
 import { ProspectAvatar } from "./prospect-avatar";
 import { InlineEditField } from "./inline-edit-field";
@@ -52,6 +53,11 @@ interface Prospect {
   manual_country?: string | null;
   manual_photo_url?: string | null;
   manual_wealth_tier?: string | null;
+  // Auto-estimated wealth tier (Phase 43)
+  auto_wealth_tier?: string | null;
+  auto_wealth_tier_confidence?: string | null;
+  auto_wealth_tier_reasoning?: string | null;
+  auto_wealth_tier_estimated_at?: string | null;
   pinned_note?: string | null;
   lead_owner_id?: string | null;
 }
@@ -234,26 +240,49 @@ export function ProfileHeader({
         />
       </div>
 
-      {/* Wealth Tier */}
-      <div className="w-full text-left mb-2">
-        <InlineEditField
-          value={resolveField(prospect.manual_wealth_tier, null)}
-          onSave={async (v) => { await onFieldSave?.("manual_wealth_tier", v); }}
-          isEditable={canEdit}
-          isOverridden={isOverridden(prospect.manual_wealth_tier)}
-          label="Wealth Tier"
-          type="select"
-          options={[
-            { label: "Ultra-High ($50M+)", value: "ultra_high" },
-            { label: "Very High ($10-50M)", value: "very_high" },
-            { label: "High ($5-10M)", value: "high" },
-            { label: "Emerging ($1-5M)", value: "emerging" },
-            { label: "Unknown", value: "unknown" },
-          ]}
-          placeholder="Set wealth tier..."
-          displayClassName="text-sm text-muted-foreground"
-        />
-      </div>
+      {/* Wealth Tier — manual override wins; else fall back to auto_wealth_tier with Sparkles + reasoning tooltip (Phase 43 D-07) */}
+      {(() => {
+        const manualTier = prospect.manual_wealth_tier ?? null;
+        const autoTier = prospect.auto_wealth_tier ?? null;
+        const isAutoDisplayed = !manualTier && !!autoTier;
+        const reasoning = prospect.auto_wealth_tier_reasoning ?? undefined;
+        return (
+          <div
+            className="w-full text-left mb-2"
+            title={isAutoDisplayed ? reasoning : undefined}
+          >
+            <div className="flex items-center gap-1">
+              {isAutoDisplayed && (
+                <Sparkles
+                  className="h-3 w-3 shrink-0"
+                  style={{ color: "var(--gold-primary)" }}
+                  aria-label="Auto-estimated wealth tier"
+                />
+              )}
+              <div className="flex-1 min-w-0">
+                <InlineEditField
+                  value={resolveField(manualTier, autoTier)}
+                  originalValue={autoTier}
+                  onSave={async (v) => { await onFieldSave?.("manual_wealth_tier", v); }}
+                  isEditable={canEdit}
+                  isOverridden={isOverridden(manualTier)}
+                  label="Wealth Tier"
+                  type="select"
+                  options={[
+                    { label: "Ultra-High ($50M+)", value: "ultra_high" },
+                    { label: "Very High ($10-50M)", value: "very_high" },
+                    { label: "High ($5-10M)", value: "high" },
+                    { label: "Emerging ($1-5M)", value: "emerging" },
+                    { label: "Unknown", value: "unknown" },
+                  ]}
+                  placeholder="Set wealth tier..."
+                  displayClassName="text-sm text-muted-foreground"
+                />
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Location inline edits */}
       <div className="w-full mt-2 pt-2 border-t border-[var(--border-default)] text-left">
