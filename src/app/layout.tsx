@@ -47,7 +47,6 @@ export default function RootLayout({
     <html lang="en" className="dark" suppressHydrationWarning>
       <body
         className={`${dmSans.variable} ${cormorant.variable} ${jetbrainsMono.variable} font-sans antialiased text-foreground`}
-        style={{ backgroundColor: "var(--bg-root)" }}
       >
         <div className="noise-overlay" aria-hidden="true" />
         <NuqsAdapter>

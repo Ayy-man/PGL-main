@@ -195,8 +195,11 @@
   * {
     @apply border-border;
   }
+  html, body {
+    background-color: var(--bg-root);
+  }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
     /* Safe area insets for notched devices (iPhone X+) */
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);

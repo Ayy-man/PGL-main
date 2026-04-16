@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback } from "react";
 import { ArrowUp, Mic, Loader2, X } from "lucide-react";
+import { emitTourEvent } from "@/lib/onboarding/tour-event-bus";
 
 interface NLSearchBarProps {
   initialValue?: string;
@@ -41,7 +42,10 @@ export function NLSearchBar({
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      if (value.trim() && !isLoading) onSearch(value.trim());
+      if (value.trim() && !isLoading) {
+        onSearch(value.trim());
+        emitTourEvent("search_submitted", { query: value.trim() });
+      }
     }
   };
 
@@ -123,7 +127,12 @@ export function NLSearchBar({
           {/* Send / ArrowUp */}
           <button
             type="button"
-            onClick={() => { if (value.trim() && !isLoading) onSearch(value.trim()); }}
+            onClick={() => {
+              if (value.trim() && !isLoading) {
+                onSearch(value.trim());
+                emitTourEvent("search_submitted", { query: value.trim() });
+              }
+            }}
             disabled={isLoading || !value.trim()}
             aria-label={isLoading ? "Searching..." : "Search"}
             className="h-8 w-8 rounded-full flex items-center justify-center transition-colors cursor-pointer disabled:cursor-not-allowed"

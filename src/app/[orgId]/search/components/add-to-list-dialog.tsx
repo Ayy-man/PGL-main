@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { emitTourEvent } from "@/lib/onboarding/tour-event-bus";
 import { ListPlus } from "lucide-react";
 import Link from "next/link";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -77,6 +78,12 @@ export function AddToListDialog({
       }
 
       const result = await response.json();
+
+      // Fire tour event with the prospect ID so the tour can deep-link to
+      // the dossier page for the just-added prospect. result.prospectId is
+      // the DB-side id (not the Apollo id) returned by /api/prospects/upsert.
+      const prospectId = result?.prospectId ?? null;
+      emitTourEvent("list_added", { prospectId });
 
       toast({
         title: "Success",

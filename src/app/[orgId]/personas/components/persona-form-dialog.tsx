@@ -19,6 +19,7 @@ import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TagInput } from "@/components/ui/tag-input";
 import { createPersonaAction, updatePersonaAction } from "../actions";
+import { emitTourEvent } from "@/lib/onboarding/tour-event-bus";
 
 /* ── Apollo API enum values ── */
 
@@ -278,6 +279,7 @@ export function PersonaFormDialog({ mode, persona, trigger, open: controlledOpen
       try {
         if (mode === "create") {
           const created = await createPersonaAction(formData);
+          emitTourEvent("persona_created", { personaId: created.id });
           onCreated?.(created);
         } else if (persona) {
           const updated = await updatePersonaAction(persona.id, formData);

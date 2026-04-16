@@ -9,6 +9,7 @@ import {
   type ProspectsRow,
 } from "@/lib/realtime/prospects-enriched-handler";
 import { useRealtimeWithFallback } from "@/lib/realtime/with-polling-fallback";
+import { emitTourEvent } from "@/lib/onboarding/tour-event-bus";
 
 interface Props {
   /** Current tenant id used in the Realtime filter. Stable per mount. */
@@ -74,6 +75,13 @@ export function ListProspectsRealtime({ tenantId, visibleIds, onPayload }: Props
           (payload) => {
             const typed = payload as unknown as RealtimePostgresChangesPayload<ProspectsRow>;
             if (!shouldApplyProspectUpdate(typed, visibleIdsRef.current)) return;
+            // Tour hook — detect enrichment-complete transition and emit.
+            // Any payload where enrichment_status is now "complete" counts;
+            // the product tour context listens on this step.
+            const row = typed.new as ProspectsRow;
+            if (row?.enrichment_status === "complete" && row.id) {
+              emitTourEvent("enrichment_complete", { prospectId: row.id });
+            }
             const cb = onPayloadRef.current;
             if (cb) {
               cb(typed);
