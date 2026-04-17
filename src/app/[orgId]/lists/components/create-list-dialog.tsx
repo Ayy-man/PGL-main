@@ -14,10 +14,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus } from "lucide-react";
+import { Plus, Users, Lock } from "lucide-react";
 import { createListAction } from "../actions";
 import { useToast } from "@/hooks/use-toast";
 import type { List } from "@/lib/lists/types";
+import type { Visibility } from "@/types/visibility";
 import type { OptimisticList, ListGridOptimisticHandle } from "./list-grid";
 
 interface CreateListDialogProps {
@@ -40,9 +41,23 @@ interface CreateListDialogProps {
    * the `List` type is satisfied until reconcile.
    */
   tenantId?: string;
+  /**
+   * Current authenticated user id — used for the optimistic temp row's
+   * `created_by` field so the grid badge renders correctly pre-confirm
+   * (Plan 44-04 Pitfall 5). Optional: when null, the temp row's
+   * `created_by` is null; the real row from the server will carry the
+   * correct creator id once the mutation reconciles.
+   */
+  currentUserId?: string | null;
 }
 
-function makeTempList(name: string, description: string | null, tenantId: string): OptimisticList {
+function makeTempList(
+  name: string,
+  description: string | null,
+  tenantId: string,
+  visibility: Visibility,
+  createdBy: string | null,
+): OptimisticList {
   const now = new Date().toISOString();
   return {
     id: `temp-${typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : Math.random().toString(36).slice(2)}`,
@@ -50,19 +65,21 @@ function makeTempList(name: string, description: string | null, tenantId: string
     name,
     description,
     member_count: 0,
-    // Plan 44-02: default optimistic visibility to team_shared; 44-03 will thread
-    // actual selected visibility + creator id from the dialog's segmented control.
-    visibility: "team_shared",
-    created_by: null,
+    // Plan 44-04: thread selected visibility + creator id from the dialog's
+    // segmented control so the optimistic grid badge renders correctly
+    // pre-confirm (Pitfall 5).
+    visibility,
+    created_by: createdBy,
     created_at: now,
     updated_at: now,
     __pending: true,
   };
 }
 
-export function CreateListDialog({ onCreated, gridHandle, tenantId }: CreateListDialogProps) {
+export function CreateListDialog({ onCreated, gridHandle, tenantId, currentUserId }: CreateListDialogProps) {
   const [open, setOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [visibility, setVisibility] = useState<Visibility>("team_shared");
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -75,8 +92,10 @@ export function CreateListDialog({ onCreated, gridHandle, tenantId }: CreateList
 
     // Push the optimistic pending row into the grid before awaiting the
     // server — this is the core UX win: Maggie sees the new list instantly.
+    // Thread selected visibility + currentUserId so the pre-confirm badge
+    // renders correctly (Pitfall 5).
     const tempList = gridHandle
-      ? makeTempList(rawName, rawDescription, tenantId ?? "")
+      ? makeTempList(rawName, rawDescription, tenantId ?? "", visibility, currentUserId ?? null)
       : null;
     if (gridHandle && tempList) {
       gridHandle.optimisticCreate(tempList);
@@ -150,6 +169,50 @@ export function CreateListDialog({ onCreated, gridHandle, tenantId }: CreateList
                 rows={3}
                 disabled={isSubmitting}
               />
+            </div>
+            {/* Plan 44-04 (D-10): Visibility segmented control. Hidden input
+                carries the current value into FormData for createListAction,
+                which validates via isVisibility() server-side. */}
+            <div className="space-y-2">
+              <Label>Visibility</Label>
+              <input type="hidden" name="visibility" value={visibility} />
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setVisibility("team_shared")}
+                  disabled={isSubmitting}
+                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-[8px] text-[12px] cursor-pointer transition-all"
+                  style={{
+                    background: visibility === "team_shared" ? "var(--gold-bg)" : "rgba(255,255,255,0.03)",
+                    border: `1px solid ${visibility === "team_shared" ? "var(--border-gold)" : "rgba(255,255,255,0.08)"}`,
+                    color: visibility === "team_shared" ? "var(--gold-primary)" : "var(--text-secondary)",
+                  }}
+                  aria-pressed={visibility === "team_shared"}
+                >
+                  <Users className="h-3.5 w-3.5" />
+                  Team shared
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setVisibility("personal")}
+                  disabled={isSubmitting}
+                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-[8px] text-[12px] cursor-pointer transition-all"
+                  style={{
+                    background: visibility === "personal" ? "var(--gold-bg)" : "rgba(255,255,255,0.03)",
+                    border: `1px solid ${visibility === "personal" ? "var(--border-gold)" : "rgba(255,255,255,0.08)"}`,
+                    color: visibility === "personal" ? "var(--gold-primary)" : "var(--text-secondary)",
+                  }}
+                  aria-pressed={visibility === "personal"}
+                >
+                  <Lock className="h-3.5 w-3.5" />
+                  Personal
+                </button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {visibility === "personal"
+                  ? "Only you and admins can see this list."
+                  : "Everyone on the team can see this list."}
+              </p>
             </div>
           </div>
           <DialogFooter>

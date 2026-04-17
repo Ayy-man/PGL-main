@@ -18,9 +18,16 @@ interface ListsPageClientProps {
   lists: List[];
   canEdit?: boolean;
   tenantId?: string;
+  /**
+   * Current authenticated user id — passed through to CreateListDialog so the
+   * optimistic temp row carries the real `created_by` value before the server
+   * confirm. Plan 44-04 (Pitfall 5): ensures the visibility badge on the
+   * optimistic row reflects the creator correctly.
+   */
+  currentUserId?: string | null;
 }
 
-export function ListsPageClient({ lists: serverLists, canEdit = true, tenantId }: ListsPageClientProps) {
+export function ListsPageClient({ lists: serverLists, canEdit = true, tenantId, currentUserId }: ListsPageClientProps) {
   const copy = emptyStateCopy("lists");
   const [lists, setLists] = useState(serverLists);
   // Imperative handle exposed by ListGrid so the dialog can push a pending row
@@ -50,6 +57,7 @@ export function ListsPageClient({ lists: serverLists, canEdit = true, tenantId }
             onCreated={handleListCreated}
             gridHandle={gridHandle}
             tenantId={tenantId}
+            currentUserId={currentUserId}
           />
         ) : (
           <Tooltip>
@@ -79,6 +87,7 @@ export function ListsPageClient({ lists: serverLists, canEdit = true, tenantId }
               onCreated={handleListCreated}
               gridHandle={gridHandle}
               tenantId={tenantId}
+              currentUserId={currentUserId}
             />
           ) : (
             <Tooltip>
