@@ -1402,7 +1402,6 @@ export function SearchContent({ personas, lists, orgId, canEdit = true }: Search
         open={createDialogOpen}
         onOpenChange={setCreateDialogOpen}
         trigger={null}
-        initialKeywords={searchState.keywords}
         initialFilterOverrides={{ ...lastParsedFilters, ...filterOverrides }}
       />
 
