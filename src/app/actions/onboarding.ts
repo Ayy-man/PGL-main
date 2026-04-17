@@ -12,13 +12,24 @@ const confirmOnboardingSchema = z
     name: z.string().min(1, "Name is required").max(100),
     slug: tenantSlugSchema,
     theme: z.string().optional().default("gold"),
-    password: z.string().min(8, "Password must be at least 8 characters"),
-    confirm_password: z.string(),
+    // Password is optional here: invited admins who already set a password
+    // via /reset-password (e.g. after a prefetch-broken invite link) should
+    // not be forced to re-enter one. When provided, enforce the 8-char
+    // minimum and confirmation match.
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .optional()
+      .or(z.literal("")),
+    confirm_password: z.string().optional().or(z.literal("")),
   })
-  .refine((data) => data.password === data.confirm_password, {
-    message: "Passwords do not match",
-    path: ["confirm_password"],
-  });
+  .refine(
+    (data) => !data.password || data.password === data.confirm_password,
+    {
+      message: "Passwords do not match",
+      path: ["confirm_password"],
+    }
+  );
 
 export async function confirmTenantOnboarding(formData: FormData) {
   // 1. Get authenticated user session
@@ -96,15 +107,17 @@ export async function confirmTenantOnboarding(formData: FormData) {
       return { error: "Failed to update tenant settings" };
     }
 
-    // 7. Update user password
-    const { error: passwordError } = await admin.auth.admin.updateUserById(
-      user.id,
-      { password }
-    );
+    // 7. Update user password (only if a new one was supplied — see schema note)
+    if (password) {
+      const { error: passwordError } = await admin.auth.admin.updateUserById(
+        user.id,
+        { password }
+      );
 
-    if (passwordError) {
-      console.error("Failed to update password:", passwordError);
-      return { error: "Failed to set password" };
+      if (passwordError) {
+        console.error("Failed to update password:", passwordError);
+        return { error: "Failed to set password" };
+      }
     }
 
     // 8. Set onboarding_completed: true

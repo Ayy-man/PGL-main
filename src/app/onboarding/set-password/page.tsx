@@ -9,12 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-function passwordStrength(pwd: string): 1 | 2 | 3 {
-  if (pwd.length < 8) return 1;
-  if (pwd.length >= 8 && /[A-Z]/.test(pwd) && /\d/.test(pwd)) return 3;
-  return 2;
-}
+import { passwordStrength } from "@/lib/password-strength";
 
 export default function SetPasswordPage() {
   const router = useRouter();

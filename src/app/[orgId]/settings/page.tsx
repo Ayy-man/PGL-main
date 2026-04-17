@@ -20,12 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 import { updateProfile, changePassword } from "@/app/actions/profile";
 import { updateOnboardingState } from "@/app/actions/onboarding-state";
 import { cn } from "@/lib/utils";
-
-function passwordStrength(pwd: string): 1 | 2 | 3 {
-  if (pwd.length < 8) return 1;
-  if (pwd.length >= 8 && /[A-Z]/.test(pwd) && /\d/.test(pwd)) return 3;
-  return 2;
-}
+import { passwordStrength } from "@/lib/password-strength";
 
 export default function SettingsPage() {
   const { orgId } = useParams<{ orgId: string }>();

@@ -113,7 +113,7 @@ export default function ConfirmTenantPage() {
 
       if (result.success && result.slug) {
         setDirty(false);
-        router.push(`/${result.slug}/dashboard`);
+        router.push(`/${result.slug}`);
       }
     } catch {
       setError("An unexpected error occurred");
@@ -278,9 +278,14 @@ export default function ConfirmTenantPage() {
           style={{ borderTop: "1px solid var(--border-default)" }}
         />
 
-        {/* New Password */}
+        {/* New Password (optional) */}
         <div className="space-y-1">
-          <Label htmlFor="password">New Password</Label>
+          <Label htmlFor="password">
+            New Password{" "}
+            <span className="ml-1 text-xs font-normal text-muted-foreground">
+              (optional — leave blank to keep your current password)
+            </span>
+          </Label>
           <Input
             id="password"
             type="password"
@@ -289,36 +294,34 @@ export default function ConfirmTenantPage() {
               setPassword(e.target.value);
               setDirty(true);
             }}
-            placeholder="Minimum 8 characters"
-            required
-            minLength={8}
+            placeholder="Leave blank to keep current password"
+            minLength={password.length > 0 ? 8 : undefined}
             disabled={submitting}
           />
-          <p className="text-xs" style={{ color: "var(--text-secondary-ds)" }}>
-            Choose a strong password with at least 8 characters
-          </p>
         </div>
 
         {/* Confirm Password */}
-        <div className="space-y-1">
-          <Label htmlFor="confirm_password">Confirm Password</Label>
-          <Input
-            id="confirm_password"
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => {
-              setConfirmPassword(e.target.value);
-              setDirty(true);
-            }}
-            placeholder="Re-enter your password"
-            required
-            minLength={8}
-            disabled={submitting}
-          />
-          {passwordMismatch && (
-            <p className="text-xs text-destructive">Passwords do not match</p>
-          )}
-        </div>
+        {password.length > 0 && (
+          <div className="space-y-1">
+            <Label htmlFor="confirm_password">Confirm Password</Label>
+            <Input
+              id="confirm_password"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => {
+                setConfirmPassword(e.target.value);
+                setDirty(true);
+              }}
+              placeholder="Re-enter your password"
+              required
+              minLength={8}
+              disabled={submitting}
+            />
+            {passwordMismatch && (
+              <p className="text-xs text-destructive">Passwords do not match</p>
+            )}
+          </div>
+        )}
 
         {/* Submit */}
         <Button
