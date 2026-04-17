@@ -40,6 +40,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Activity",       href: "/dashboard/activity",  icon: Activity,        exact: false },
   { label: "Analytics",      href: "/dashboard/analytics", icon: BarChart3,       exact: false },
   { label: "Team",           href: "/team",                icon: Users,           exact: false, roles: ["tenant_admin", "super_admin"] },
+  { label: "Workspace",      href: "/team/workspace",      icon: LayoutDashboard, exact: false, roles: ["tenant_admin", "super_admin"] },
   { label: "Settings",      href: "/settings",            icon: Settings,        exact: false },
 ];
 

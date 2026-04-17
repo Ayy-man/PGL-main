@@ -1,11 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { updateOnboardingState } from "@/app/actions/onboarding-state";
 import { InviteDialog } from "./invite-dialog";
 import { UserStatusToggle } from "./user-status-toggle";
 import { TeamMemberActions } from "./team-member-actions";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Button } from "@/components/ui/button";
 import { Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -111,7 +113,14 @@ export default async function TeamPage({
             Manage your team members and send invitations
           </p>
         </div>
-        <InviteDialog orgId={orgId} />
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" asChild>
+            <Link href={`/${orgId}/team/workspace`}>
+              View team workspace →
+            </Link>
+          </Button>
+          <InviteDialog orgId={orgId} />
+        </div>
       </div>
 
       {teamMembers.length === 0 ? (
