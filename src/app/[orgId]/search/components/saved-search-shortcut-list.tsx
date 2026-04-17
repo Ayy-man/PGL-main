@@ -168,7 +168,9 @@ export function SavedSearchShortcutList({
   maxItems = 6,
   onCreateNew,
 }: SavedSearchShortcutListProps) {
-  if (personas.length === 0) return null;
+  // Don't hide the entire section when empty — the "+ New Search"
+  // button still needs to be visible (and anchored for the tour).
+  if (personas.length === 0 && !onCreateNew) return null;
 
   const visible = personas.slice(0, maxItems);
   const hasMore = personas.length > maxItems;
