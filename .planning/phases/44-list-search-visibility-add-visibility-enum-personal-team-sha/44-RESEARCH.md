@@ -909,28 +909,33 @@ const [visibility, setVisibility] = useState<Visibility>("team_shared");
 
 **Action for planner:** The migration plan MUST include a discovery step (manual SQL query against Supabase dashboard) BEFORE writing the policy DROPs. Capture A5 and A8 findings in a pre-migration artifact.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **What are the exact existing policy names on `lists`, `list_members`, `saved_search_prospects`?**
+   - **RESOLVED:** Deferred to runtime discovery in Plan 44-01 Task 1 (pg_policies query before migration authored; task is `checkpoint:human-action gate=blocking`).
    - What we know: CONTEXT states these were authored in the dashboard. Migration `20260412` only handles `personas` and `activity_log`.
    - What's unclear: Policy names that must be dropped before our `CREATE POLICY` calls.
    - Recommendation: Plan 01 (migration) includes a mandatory pre-step: run `SELECT tablename, policyname FROM pg_policies WHERE tablename IN ('lists','list_members','saved_search_prospects')` against production/staging Supabase and record results in the plan file. Then the DROP IF EXISTS list is explicit, not speculative.
 
 2. **Is `personas.created_by` currently NULLABLE?**
+   - **RESOLVED:** Deferred to runtime discovery in Plan 44-01 Task 1 (information_schema.columns query; task is `checkpoint:human-action gate=blocking`).
    - What we know: `src/lib/personas/queries.ts:49` always supplies a value (`userId`). So no existing rows have NULL. But the column nullability is unknown.
    - What's unclear: Whether the FK action on `auth.users` delete is set to `SET NULL`, `CASCADE`, or `RESTRICT`.
    - Recommendation: Plan 01 includes `SELECT column_name, is_nullable FROM information_schema.columns WHERE table_name='personas' AND column_name='created_by';` and `SELECT constraint_name, delete_rule FROM information_schema.referential_constraints WHERE constraint_name LIKE '%personas%created_by%';`. If either differs from D-04 expectations, add `ALTER COLUMN ... DROP NOT NULL` + `ALTER TABLE ... DROP CONSTRAINT ... ADD CONSTRAINT ... REFERENCES auth.users(id) ON DELETE SET NULL`.
 
 3. **What component does the list detail page header use for the visibility toggle dropdown?**
+   - **RESOLVED:** Planner picks shadcn `DropdownMenu` per CONTEXT Claude's Discretion #1.
    - What we know: CONTEXT D-11 says "Dropdown that calls `updateListVisibilityAction`". Codebase has `@radix-ui/react-dropdown-menu` in package.json + `src/components/ui/dropdown-menu.tsx`.
    - What's unclear: Whether to render inline radios or a proper dropdown menu.
    - Recommendation: Use the existing `DropdownMenu` component from `@/components/ui/dropdown-menu` — matches `team-member-actions` pattern. Trigger is the visibility badge itself (click-to-toggle).
 
 4. **Should the optional sidebar nav entry for the admin workspace (D-12) ship in this phase?**
+   - **RESOLVED:** Shipping the nav entry per recommendation; gated to tenant_admin/super_admin in Plan 44-06 Task 2.
    - What we know: CONTEXT Claude's Discretion says "acceptable to ship or skip per reviewer call. Default: yes, gated to tenant_admin/super_admin".
    - Recommendation: Ship it — it's a 10-line change to `nav-items.tsx`. Without it, admins have to know the URL.
 
 5. **Do we need a `personas-optimistic.test.ts` analog to `list-grid.optimistic.test.tsx`?**
+   - **RESOLVED:** Deferred; personas use in-place state updates (no reducer). Regression for `persona.visibility` flow covered by Plan 44-06 admin workspace action test.
    - What we know: `PersonaCardGrid` uses plain `setState` (no pure reducer) for optimistic create/delete.
    - What's unclear: Whether Phase 44 should refactor to a reducer or stay with the ad-hoc approach.
    - Recommendation: Do NOT refactor this phase. The visibility field threads cleanly into `PersonaCardGrid`'s existing state. Add visibility-threading assertions if a reducer is extracted later.
