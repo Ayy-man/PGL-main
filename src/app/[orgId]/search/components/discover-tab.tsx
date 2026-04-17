@@ -112,6 +112,7 @@ export function DiscoverTab({
               <button
                 type="button"
                 onClick={onSaveAsNewSearch}
+                data-tour-id="save-search-cta"
                 className="text-[12px] font-light cursor-pointer transition-colors"
                 style={{
                   color: "var(--text-tertiary)",

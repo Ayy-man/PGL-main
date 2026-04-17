@@ -6,6 +6,7 @@ export type TourStepId =
   | "search-filters"
   | "search-new-cta"
   | "search-try"
+  | "save-search"
   | "results-header"
   | "results-bulk-actions"
   | "dossier-enriching"
@@ -98,6 +99,16 @@ export const TOUR_STEPS: readonly TourStep[] = [
     // Advance only when leads actually render — not on submit (results take
     // 1-2s to load, so advancing on submit puts step 8 over a loading state).
     advanceOn: { event: "results_ready" },
+  },
+
+  // ─── PART B2 — SAVE THE SEARCH ─────────────────────────────────────
+  {
+    id: "save-search",
+    title: "Save this search",
+    body: "Click here to save this query as a reusable saved search. It will appear in your Saved Searches list for next time.",
+    targetSelector: '[data-tour-id="save-search-cta"]',
+    placement: "bottom",
+    suggestedHref: (o) => `/${o}/search`,
   },
 
   // ─── PART C — SEARCH RESULTS ──────────────────────────────────────
