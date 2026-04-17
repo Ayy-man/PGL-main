@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import type { Persona } from "@/lib/personas/types";
 import { Badge } from "@/components/ui/badge";
-import { Search, Pencil, Trash2, Briefcase, MapPin, Users, Tag } from "lucide-react";
+import { Search, Pencil, Trash2, Briefcase, MapPin, Users, Tag, Lock } from "lucide-react";
 import { PersonaFormDialog } from "./persona-form-dialog";
 import {
   Tooltip,
@@ -105,14 +105,30 @@ export function PersonaCard({ persona, onDelete, onUpdated, canEdit = true }: Pe
           >
             {persona.name}
           </h3>
-          {persona.is_starter && (
-            <Badge
-              variant="gold"
-              className="shrink-0 text-[10px] uppercase tracking-wide"
-            >
-              Suggested
-            </Badge>
-          )}
+          <div className="flex items-center gap-2 shrink-0">
+            {persona.visibility === "personal" && (
+              <span
+                title="Private — only you and admins"
+                className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-[5px] uppercase tracking-wide"
+                style={{
+                  background: "var(--bg-elevated)",
+                  border: "1px solid var(--border-default)",
+                  color: "var(--text-ghost)",
+                }}
+              >
+                <Lock className="h-3 w-3" />
+                Personal
+              </span>
+            )}
+            {persona.is_starter && (
+              <Badge
+                variant="gold"
+                className="text-[10px] uppercase tracking-wide"
+              >
+                Suggested
+              </Badge>
+            )}
+          </div>
         </div>
 
         {/* Description */}
