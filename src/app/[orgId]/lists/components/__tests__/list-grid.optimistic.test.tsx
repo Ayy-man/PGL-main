@@ -5,6 +5,7 @@ import {
   type OptimisticListsAction,
 } from "../list-grid";
 import type { List } from "@/lib/lists/types";
+import type { Visibility } from "@/types/visibility";
 
 /**
  * Tests for the pure `listsOptimisticReducer` state machine.
@@ -26,23 +27,35 @@ function makeList(overrides: Partial<List> = {}): List {
     name: "Untitled",
     description: null,
     member_count: 0,
+    // Plan 44-04: default fixtures to a real user id so tests exercise the
+    // creator-threading path end-to-end. Callers that want the null-creator
+    // edge case can still override via the `overrides` bag.
     visibility: "team_shared",
-    created_by: null,
+    created_by: "user-abc",
     created_at: NOW,
     updated_at: NOW,
     ...overrides,
   };
 }
 
-function makePending(tempId: string, name: string, description: string | null = null): OptimisticList {
+function makePending(
+  tempId: string,
+  name: string,
+  visibility: Visibility = "team_shared",
+  createdBy: string | null = "user-abc",
+  description: string | null = null,
+): OptimisticList {
   return {
     id: tempId,
     tenant_id: TENANT_ID,
     name,
     description,
     member_count: 0,
-    visibility: "team_shared",
-    created_by: null,
+    // Plan 44-04: visibility + createdBy are now threaded from the dialog's
+    // segmented control (Pitfall 5). Tests can assert that the reducer
+    // preserves both through CREATE_PENDING / CREATE_CONFIRMED.
+    visibility,
+    created_by: createdBy,
     created_at: NOW,
     updated_at: NOW,
     __pending: true,
@@ -73,6 +86,34 @@ describe("listsOptimisticReducer — CREATE_PENDING", () => {
     listsOptimisticReducer(state, { type: "CREATE_PENDING", tempList });
 
     expect(state).toEqual(snapshot);
+  });
+
+  // Plan 44-04 (Pitfall 5): The optimistic temp list now carries the
+  // visibility selected in the CreateListDialog segmented control. The
+  // reducer must preserve that visibility through CREATE_PENDING so the
+  // grid badge renders correctly pre-confirm — NOT flash 'team_shared'
+  // for a personal list until the server round-trip completes.
+  it("preserves visibility=personal from makeTempList through CREATE_PENDING (Pitfall 5)", () => {
+    const state: OptimisticList[] = [];
+    const tempList = makePending("temp-xyz", "My private list", "personal");
+
+    const next = listsOptimisticReducer(state, { type: "CREATE_PENDING", tempList });
+
+    expect(next).toHaveLength(1);
+    expect(next[0].visibility).toBe("personal");
+    expect(next[0].created_by).toBe("user-abc");
+    expect(next[0].__pending).toBe(true);
+  });
+
+  it("preserves visibility=team_shared (default) through CREATE_PENDING", () => {
+    const state: OptimisticList[] = [];
+    const tempList = makePending("temp-abc", "Shared list");
+
+    const next = listsOptimisticReducer(state, { type: "CREATE_PENDING", tempList });
+
+    expect(next).toHaveLength(1);
+    expect(next[0].visibility).toBe("team_shared");
+    expect(next[0].__pending).toBe(true);
   });
 });
 
