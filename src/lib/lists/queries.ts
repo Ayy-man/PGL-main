@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { List, ListMember, CreateListInput, ListMemberStatus } from "./types";
+import type { Visibility } from "@/types/visibility";
+import type { List, ListWithCreator, ListMember, CreateListInput, ListMemberStatus } from "./types";
 
 /**
  * Syncs the cached member_count on a list by counting actual members.
@@ -38,6 +39,8 @@ export async function getLists(tenantId: string): Promise<List[]> {
       tenant_id,
       name,
       description,
+      visibility,
+      created_by,
       member_count,
       created_at,
       updated_at
@@ -62,6 +65,8 @@ export async function getListById(id: string, tenantId: string): Promise<List | 
       tenant_id,
       name,
       description,
+      visibility,
+      created_by,
       member_count,
       created_at,
       updated_at
@@ -93,6 +98,7 @@ export async function createList(
       tenant_id: tenantId,
       name: input.name,
       description: input.description || null,
+      visibility: input.visibility ?? 'team_shared',  // NEW — D-08
       created_by: userId,
       member_count: 0
     })
@@ -101,6 +107,8 @@ export async function createList(
       tenant_id,
       name,
       description,
+      visibility,
+      created_by,
       member_count,
       created_at,
       updated_at
@@ -447,4 +455,63 @@ export async function getListsForProspect(
         : null;
     })
     .filter((list): list is { id: string; name: string } => list !== null);
+}
+
+/**
+ * Updates a list's visibility. Creator/admin gating enforced by RLS
+ * UPDATE USING clause (D-09) — no parallel JS permission check.
+ * A non-creator non-admin caller silently updates zero rows.
+ */
+export async function updateListVisibility(
+  id: string,
+  tenantId: string,
+  visibility: Visibility
+): Promise<void> {
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from("lists")
+    .update({ visibility, updated_at: new Date().toISOString() })
+    .eq("id", id)
+    .eq("tenant_id", tenantId);
+
+  if (error) {
+    throw new Error(`Failed to update list visibility: ${error.message}`);
+  }
+}
+
+/**
+ * Admin-workspace fetcher: lists with creator (full_name + email) joined from users.
+ * No visibility filter — relies on RLS admin role clause to yield all rows.
+ * Callers are already admin-gated at the page level (D-12).
+ */
+export async function getAllListsWithCreators(tenantId: string): Promise<ListWithCreator[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("lists")
+    .select(`
+      id,
+      tenant_id,
+      name,
+      description,
+      visibility,
+      created_by,
+      member_count,
+      created_at,
+      updated_at,
+      creator:users!created_by (
+        id,
+        full_name,
+        email
+      )
+    `)
+    .eq("tenant_id", tenantId)
+    .order("updated_at", { ascending: false });
+
+  if (error) {
+    throw new Error(`Failed to fetch all lists with creators: ${error.message}`);
+  }
+
+  return data as unknown as ListWithCreator[];
 }

@@ -50,6 +50,10 @@ function makeTempList(name: string, description: string | null, tenantId: string
     name,
     description,
     member_count: 0,
+    // Plan 44-02: default optimistic visibility to team_shared; 44-03 will thread
+    // actual selected visibility + creator id from the dialog's segmented control.
+    visibility: "team_shared",
+    created_by: null,
     created_at: now,
     updated_at: now,
     __pending: true,
