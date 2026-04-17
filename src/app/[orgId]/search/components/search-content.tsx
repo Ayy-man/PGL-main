@@ -478,22 +478,26 @@ export function SearchContent({ personas, lists, orgId, canEdit = true }: Search
     });
   };
 
+  // Cap Select All at 100 — bulk-enrich is limited to 100 IDs per request
+  const SELECT_ALL_CAP = 100;
+
   const handleSelectAll = () => {
     if (isSavedSearchMode) {
-      // Enriched prospects show an indicator instead of a checkbox — exclude from Select All
       const selectableIds = savedProspects
         .filter(p => p.status !== 'enriched')
-        .map((p) => p.apollo_person_id);
+        .map((p) => p.apollo_person_id)
+        .slice(0, SELECT_ALL_CAP);
       if (selectedIds.size === selectableIds.length && selectableIds.length > 0) {
         setSelectedIds(new Set());
       } else {
         setSelectedIds(new Set(selectableIds));
       }
     } else {
-      if (selectedIds.size === results.length) {
+      const allIds = results.map((r) => r.id).slice(0, SELECT_ALL_CAP);
+      if (selectedIds.size === allIds.length) {
         setSelectedIds(new Set());
       } else {
-        setSelectedIds(new Set(results.map((r) => r.id)));
+        setSelectedIds(new Set(allIds));
       }
     }
   };
