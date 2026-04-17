@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ReportIssueButton } from "@/components/issues/report-issue-button";
 import { ArrowLeft, Users } from "lucide-react";
+import { ListVisibilityToggle } from "./visibility-toggle";
 
 interface PageProps {
   params: Promise<{ orgId: string; listId: string }>;
@@ -45,6 +46,14 @@ export default async function ListDetailPage({ params }: PageProps) {
     notFound();
   }
 
+  // Phase 44 D-11: render-gate for visibility toggle. Mirror of the admin-check
+  // idiom from src/app/[orgId]/team/page.tsx:57-60. This is a UX-only gate —
+  // the actual authorization is the RLS UPDATE USING clause from Plan 44-01
+  // (T-44-02 mitigation: RLS is the trust boundary, not this flag).
+  const role = user.app_metadata?.role as string | undefined;
+  const isAdmin = role === "tenant_admin" || role === "super_admin";
+  const canToggleVisibility = !!user && (user.id === list.created_by || isAdmin);
+
   return (
     <div className="space-y-8">
       <div className="flex items-center gap-4">
@@ -54,7 +63,14 @@ export default async function ListDetailPage({ params }: PageProps) {
           </Link>
         </Button>
         <div className="flex-1">
-          <h1 className="font-serif text-3xl font-bold tracking-tight">{list.name}</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="font-serif text-3xl font-bold tracking-tight">{list.name}</h1>
+            <ListVisibilityToggle
+              listId={list.id}
+              current={list.visibility}
+              canToggle={canToggleVisibility}
+            />
+          </div>
           {list.description && (
             <p className="mt-1 text-sm text-muted-foreground">{list.description}</p>
           )}
