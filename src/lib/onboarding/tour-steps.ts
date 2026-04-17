@@ -41,7 +41,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
   {
     id: "dashboard-welcome",
     title: "Welcome to PGL",
-    body: "This is your hub — checklist, daily prospects, exports, and team pulse all live here.",
+    body: "This is your hub: checklist, daily prospects, exports, and team pulse all live here.",
     targetSelector: '[data-tour-id="dashboard-hero"]',
     placement: "bottom",
     suggestedHref: (o) => `/${o}`,
@@ -67,7 +67,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
   {
     id: "search-hero",
     title: "Two ways to search",
-    body: "Describe who you want in plain English, or build a structured saved search. Both work — pick your style.",
+    body: "Describe who you want in plain English, or build a structured saved search. Both work. Pick your style.",
     targetSelector: '[data-tour-id="nl-search-bar"]',
     placement: "bottom",
     suggestedHref: (o) => `/${o}/search`,
@@ -83,7 +83,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
   {
     id: "search-new-cta",
     title: "+ New Search",
-    body: "Build a saved search from scratch — pick industry, title, location, seniority, company size. It's saved for next time.",
+    body: "Build a saved search from scratch: industry, title, location, seniority, company size. It's saved for next time.",
     targetSelector: '[data-tour-id="new-search-cta"]',
     placement: "left",
     suggestedHref: (o) => `/${o}/search`,
@@ -104,7 +104,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
   {
     id: "results-header",
     title: "Your results",
-    body: "Ranked by relevance. All start as Preview Only — names redacted, no contacts. Search is free; only enrichment costs credits.",
+    body: "Ranked by relevance. All start as Preview Only: names redacted, no contacts. Search is free; only enrichment costs credits.",
     targetSelector: '[data-tour-id="results-header"]',
     // top-placed so it appears above the header (in the filter pills / search
     // area) instead of overlapping the results table below.
@@ -114,7 +114,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
   {
     id: "results-bulk-actions",
     title: "Enrich and save",
-    body: "Pick prospects with the checkboxes, then add them to a list — existing or new.",
+    body: "Pick prospects with the checkboxes, then add them to a list, existing or new.",
     targetSelector: '[data-tour-id="bulk-actions"]',
     placement: "top",
     advanceOn: { event: "list_added" },
@@ -125,7 +125,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
   {
     id: "dossier-enriching",
     title: "Pulling their dossier",
-    body: "Contacts, wealth signals, SEC filings, news — usually 5–15 seconds.",
+    body: "Contacts, wealth signals, SEC filings, news. Usually 5 to 15 seconds.",
     targetSelector: '[data-tour-id="enrichment-status"]',
     placement: "bottom",
     advanceOn: { event: "enrichment_complete" },
@@ -136,7 +136,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
   {
     id: "dossier-contacts",
     title: "Direct contact info",
-    body: "Name, title, company — plus verified email, phone, and LinkedIn. Copy, dial, compose.",
+    body: "Name, title, company, plus verified email, phone, and LinkedIn. Copy, dial, compose.",
     targetSelector: '[data-tour-id="dossier-contacts"]',
     placement: "right",
     hiddenForAssistant: true,
@@ -152,7 +152,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
   {
     id: "dossier-wealth",
     title: "Wealth signals + company",
-    body: "Wealth from SEC, property, and news. Plus the company they work at — ticker, market cap, recent events.",
+    body: "Wealth from SEC, property, and news. Plus the company they work at: ticker, market cap, recent events.",
     targetSelector: '[data-tour-id="wealth-signals"]',
     placement: "left",
     hiddenForAssistant: true,
@@ -160,7 +160,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
   {
     id: "dossier-research",
     title: "Ask and organize",
-    body: "Ask research questions in plain English. Tag, note, assign owner — everything syncs with your team.",
+    body: "Ask research questions in plain English. Tag, note, assign owner. Everything syncs with your team.",
     targetSelector: '[data-tour-id="research-panel"]',
     placement: "left",
     hiddenForAssistant: true,
