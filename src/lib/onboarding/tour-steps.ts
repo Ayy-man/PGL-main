@@ -114,7 +114,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
   {
     id: "results-bulk-actions",
     title: "Enrich and save",
-    body: "Pick prospects with the checkboxes, then add them to a list, existing or new.",
+    body: "Pick prospects with the checkboxes, then click Enrich Selection to pull full contact info and wealth signals.",
     targetSelector: '[data-tour-id="bulk-actions"]',
     placement: "top",
     advanceOn: { event: "list_added" },
