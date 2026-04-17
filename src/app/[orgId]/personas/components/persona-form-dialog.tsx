@@ -2,6 +2,7 @@
 
 import { useState, useTransition, useEffect, useRef, useCallback } from "react";
 import type { Persona } from "@/lib/personas/types";
+import type { Visibility } from "@/types/visibility";
 import {
   Dialog,
   DialogContent,
@@ -18,6 +19,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TagInput } from "@/components/ui/tag-input";
+import { Users, Lock } from "lucide-react";
 import { createPersonaAction, updatePersonaAction } from "../actions";
 import { emitTourEvent } from "@/lib/onboarding/tour-event-bus";
 
@@ -144,6 +146,12 @@ export function PersonaFormDialog({ mode, persona, trigger, open: controlledOpen
     persona?.filters.locations ?? []
   );
   const [keywords, setKeywords] = useState(persona?.filters.keywords ?? initialKeywords ?? "");
+  // Plan 44-04 (D-10): visibility state for both create + edit modes.
+  // Edit mode pre-fills from persona.visibility (falls back to team_shared for
+  // legacy rows that landed before the migration). Create mode defaults to
+  // team_shared per D-02. Submitted via hidden input so updatePersonaAction +
+  // createPersonaAction pick it up from FormData (Plan 44-03 action-layer).
+  const [visibility, setVisibility] = useState<Visibility>(persona?.visibility ?? "team_shared");
 
   // Pre-fill from NLP-parsed filters when opening "Save this search" in create mode (H3)
   useEffect(() => {
@@ -253,6 +261,7 @@ export function PersonaFormDialog({ mode, persona, trigger, open: controlledOpen
       setIndustries(persona.filters.industries ?? []);
       setLocations(persona.filters.locations ?? []);
       setKeywords(persona.filters.keywords ?? "");
+      setVisibility(persona.visibility ?? "team_shared");
     } else {
       setOrganizationNames([]);
       setSeniorities([]);
@@ -261,6 +270,7 @@ export function PersonaFormDialog({ mode, persona, trigger, open: controlledOpen
       setIndustries([]);
       setLocations([]);
       setKeywords("");
+      setVisibility("team_shared");
     }
     setError(null);
     setLeadCount(null);
@@ -344,6 +354,52 @@ export function PersonaFormDialog({ mode, persona, trigger, open: controlledOpen
                 maxLength={500}
                 rows={2}
               />
+            </div>
+
+            {/* Plan 44-04 (D-10): Visibility segmented control — create + edit
+                modes share the same pattern. Hidden input carries the current
+                value into FormData for createPersonaAction / updatePersonaAction
+                (both validate via isVisibility() server-side, plan 44-03). */}
+            <div className="space-y-2">
+              <Label>Visibility</Label>
+              <input type="hidden" name="visibility" value={visibility} />
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setVisibility("team_shared")}
+                  disabled={isPending}
+                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-[8px] text-[12px] cursor-pointer transition-all"
+                  style={{
+                    background: visibility === "team_shared" ? "var(--gold-bg)" : "rgba(255,255,255,0.03)",
+                    border: `1px solid ${visibility === "team_shared" ? "var(--border-gold)" : "rgba(255,255,255,0.08)"}`,
+                    color: visibility === "team_shared" ? "var(--gold-primary)" : "var(--text-secondary)",
+                  }}
+                  aria-pressed={visibility === "team_shared"}
+                >
+                  <Users className="h-3.5 w-3.5" />
+                  Team shared
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setVisibility("personal")}
+                  disabled={isPending}
+                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-[8px] text-[12px] cursor-pointer transition-all"
+                  style={{
+                    background: visibility === "personal" ? "var(--gold-bg)" : "rgba(255,255,255,0.03)",
+                    border: `1px solid ${visibility === "personal" ? "var(--border-gold)" : "rgba(255,255,255,0.08)"}`,
+                    color: visibility === "personal" ? "var(--gold-primary)" : "var(--text-secondary)",
+                  }}
+                  aria-pressed={visibility === "personal"}
+                >
+                  <Lock className="h-3.5 w-3.5" />
+                  Personal
+                </button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {visibility === "personal"
+                  ? "Only you and admins can see this saved search."
+                  : "Everyone on the team can see this saved search."}
+              </p>
             </div>
           </div>
 
