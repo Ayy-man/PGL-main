@@ -20,10 +20,12 @@ vi.mock("@/lib/supabase/server", () => ({
 const mockCreatePersona = vi.fn();
 const mockUpdatePersona = vi.fn();
 const mockDeletePersona = vi.fn();
+const mockUpdatePersonaVisibility = vi.fn();   // NEW — Phase 44
 vi.mock("@/lib/personas/queries", () => ({
   createPersona: (...a: unknown[]) => mockCreatePersona(...a),
   updatePersona: (...a: unknown[]) => mockUpdatePersona(...a),
   deletePersona: (...a: unknown[]) => mockDeletePersona(...a),
+  updatePersonaVisibility: (...a: unknown[]) => mockUpdatePersonaVisibility(...a),
 }));
 
 // --- Mock next/cache (revalidatePath is a no-op in tests) ---
@@ -40,7 +42,10 @@ import {
   createPersonaAction,
   updatePersonaAction,
   deletePersonaAction,
+  updatePersonaVisibilityAction,
 } from "../actions";
+
+import type { Visibility } from "@/types/visibility";
 
 // Helper: an object shaped like NEXT_REDIRECT (what redirect() throws).
 class RedirectError extends Error {
@@ -66,10 +71,13 @@ const SESSION_USER = {
   fullName: "a@b.com",
 };
 
-function fdWithFilters(name = "My Persona") {
+function fdWithFilters(name = "My Persona", visibility?: Visibility | string) {
   const fd = new FormData();
   fd.set("name", name);
   fd.set("titles", "CEO|CFO"); // satisfies "at least one filter"
+  if (visibility !== undefined) {
+    fd.set("visibility", visibility);
+  }
   return fd;
 }
 
@@ -175,5 +183,165 @@ describe("personas/actions — role guard", () => {
         expect(result).toEqual({ id: "P1" });
       }
     });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Phase 44 — Visibility round-trip coverage
+// ---------------------------------------------------------------------------
+
+describe("createPersonaAction — visibility (Phase 44)", () => {
+  it("passes personal visibility through to createPersona when formData specifies", async () => {
+    mockCreatePersona.mockResolvedValue({ id: "P1", visibility: "personal" });
+
+    const result = await createPersonaAction(fdWithFilters("X", "personal"));
+
+    expect(result).toEqual({ id: "P1", visibility: "personal" });
+    expect(mockCreatePersona).toHaveBeenCalledWith(
+      "tenant-x",
+      "user-123",
+      expect.objectContaining({ visibility: "personal" })
+    );
+  });
+
+  it("defaults to team_shared when visibility missing from formData", async () => {
+    mockCreatePersona.mockResolvedValue({ id: "P1", visibility: "team_shared" });
+
+    const result = await createPersonaAction(fdWithFilters("X"));
+
+    expect(result).toEqual({ id: "P1", visibility: "team_shared" });
+    expect(mockCreatePersona).toHaveBeenCalledWith(
+      "tenant-x",
+      "user-123",
+      expect.objectContaining({ visibility: "team_shared" })
+    );
+  });
+
+  it("rejects invalid visibility value without calling createPersona", async () => {
+    await expect(createPersonaAction(fdWithFilters("X", "garbage"))).rejects.toThrow(
+      "Invalid visibility value"
+    );
+    expect(mockCreatePersona).not.toHaveBeenCalled();
+  });
+
+  it("accepts team_shared explicitly from formData", async () => {
+    mockCreatePersona.mockResolvedValue({ id: "P1", visibility: "team_shared" });
+
+    const result = await createPersonaAction(fdWithFilters("X", "team_shared"));
+
+    expect(result).toEqual({ id: "P1", visibility: "team_shared" });
+    expect(mockCreatePersona).toHaveBeenCalledWith(
+      "tenant-x",
+      "user-123",
+      expect.objectContaining({ visibility: "team_shared" })
+    );
+  });
+});
+
+describe("updatePersonaAction — visibility (Phase 44)", () => {
+  it("merges visibility into UpdatePersonaInput when formData specifies", async () => {
+    mockUpdatePersona.mockResolvedValue({ id: "P1", visibility: "personal" });
+
+    await updatePersonaAction("P1", fdWithFilters("Updated", "personal"));
+
+    expect(mockUpdatePersona).toHaveBeenCalledWith(
+      "P1",
+      "tenant-x",
+      expect.objectContaining({ visibility: "personal" })
+    );
+  });
+
+  it("omits visibility from UpdatePersonaInput when missing (partial-update semantics)", async () => {
+    mockUpdatePersona.mockResolvedValue({ id: "P1" });
+
+    await updatePersonaAction("P1", fdWithFilters("Updated"));
+
+    // The updates object should NOT have a visibility key when formData omits it.
+    const callArgs = mockUpdatePersona.mock.calls[0];
+    expect(callArgs[0]).toBe("P1");
+    expect(callArgs[1]).toBe("tenant-x");
+    expect(callArgs[2]).not.toHaveProperty("visibility");
+  });
+
+  it("rejects invalid visibility without calling updatePersona", async () => {
+    await expect(
+      updatePersonaAction("P1", fdWithFilters("Updated", "garbage"))
+    ).rejects.toThrow("Invalid visibility value");
+    expect(mockUpdatePersona).not.toHaveBeenCalled();
+  });
+});
+
+describe("updatePersonaVisibilityAction — Phase 44", () => {
+  it("calls updatePersonaVisibility query with (personaId, tenantId, visibility) on happy path", async () => {
+    mockUpdatePersonaVisibility.mockResolvedValue(undefined);
+
+    const result = await updatePersonaVisibilityAction("p-1", "personal");
+
+    expect(result).toEqual({ success: true });
+    expect(mockRequireRole).toHaveBeenCalledWith("agent");
+    expect(mockUpdatePersonaVisibility).toHaveBeenCalledWith(
+      "p-1",
+      "tenant-x",
+      "personal"
+    );
+  });
+
+  it("accepts team_shared on happy path", async () => {
+    mockUpdatePersonaVisibility.mockResolvedValue(undefined);
+
+    const result = await updatePersonaVisibilityAction("p-1", "team_shared");
+
+    expect(result).toEqual({ success: true });
+    expect(mockUpdatePersonaVisibility).toHaveBeenCalledWith(
+      "p-1",
+      "tenant-x",
+      "team_shared"
+    );
+  });
+
+  it("rejects invalid visibility without calling query", async () => {
+    const result = await updatePersonaVisibilityAction("p-1", "garbage" as never);
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toContain("Invalid visibility");
+    }
+    expect(mockUpdatePersonaVisibility).not.toHaveBeenCalled();
+  });
+
+  it("returns error when unauthenticated, DB never touched", async () => {
+    mockGetUser.mockResolvedValue(NO_SESSION);
+
+    const result = await updatePersonaVisibilityAction("p-1", "personal");
+
+    expect(result).toEqual({ success: false, error: "Not authenticated" });
+    expect(mockUpdatePersonaVisibility).not.toHaveBeenCalled();
+    expect(mockRequireRole).not.toHaveBeenCalled();
+  });
+
+  it("returns error when role guard rejects (assistant), DB never touched", async () => {
+    // RedirectError in this file mirrors next/navigation redirect() —
+    // thrown object has .digest but empty .message (see class at top).
+    // The action catches the throw, returns { success: false }, and the
+    // security-critical invariant is that the DB is never touched.
+    mockRequireRole.mockRejectedValue(new RedirectError());
+
+    const result = await updatePersonaVisibilityAction("p-1", "personal");
+
+    expect(result.success).toBe(false);
+    expect(mockUpdatePersonaVisibility).not.toHaveBeenCalled();
+  });
+
+  it("surfaces query-layer error when RLS rejects (silent 0-row or thrown)", async () => {
+    mockUpdatePersonaVisibility.mockRejectedValue(
+      new Error("Failed to update persona visibility: permission denied")
+    );
+
+    const result = await updatePersonaVisibilityAction("p-1", "personal");
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toContain("permission denied");
+    }
   });
 });
