@@ -428,6 +428,35 @@ export async function removeTeamMember(userId: string, orgId: string) {
     },
   });
 
+  // Phase 44 D-13: Reassign orphaned lists + personas to the acting admin.
+  // Flip visibility to team_shared so nothing becomes inaccessible after the
+  // user row + auth record get deleted below.
+  // Admin client REQUIRED (cross-user mutation; tenantId was already verified
+  // above via the tenant-match guard). Belt-and-braces: FK ON DELETE SET NULL
+  // from migration 20260417 catches any bypass (created_by → null, admins
+  // still see via role clause).
+  const { error: listReassignError } = await admin
+    .from("lists")
+    .update({ visibility: "team_shared", created_by: user.id })
+    .eq("tenant_id", tenantId)
+    .eq("created_by", userId);
+
+  if (listReassignError) {
+    console.error("[removeTeamMember] list reassign failed:", listReassignError);
+    return { error: `Failed to reassign lists: ${listReassignError.message}` };
+  }
+
+  const { error: personaReassignError } = await admin
+    .from("personas")
+    .update({ visibility: "team_shared", created_by: user.id })
+    .eq("tenant_id", tenantId)
+    .eq("created_by", userId);
+
+  if (personaReassignError) {
+    console.error("[removeTeamMember] persona reassign failed:", personaReassignError);
+    return { error: `Failed to reassign personas: ${personaReassignError.message}` };
+  }
+
   // Delete public.users row
   await admin.from("users").delete().eq("id", userId);
   // Delete auth.users record
