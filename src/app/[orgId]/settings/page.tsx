@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useTransition, useEffect, useRef } from "react";
+import { useState, useTransition, useEffect, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
@@ -15,7 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Breadcrumbs } from "@/components/ui/breadcrumbs";
 import Link from "next/link";
-import { Loader2, Eye, EyeOff, RotateCcw, Building2, ChevronRight } from "lucide-react";
+import { Loader2, Eye, EyeOff, RotateCcw, Building2, ChevronRight, Camera, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { updateProfile, changePassword } from "@/app/actions/profile";
 import { updateOnboardingState } from "@/app/actions/onboarding-state";
@@ -50,6 +51,75 @@ export default function SettingsPage() {
     confirmPasswordValue.length > 0 && confirmPasswordValue !== newPasswordValue;
 
   const profileFormRef = useRef<HTMLFormElement>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+
+  // User profile data loaded from DB
+  const [currentName, setCurrentName] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
+  const [confirmRemoveAvatar, setConfirmRemoveAvatar] = useState(false);
+  const [removingAvatar, setRemovingAvatar] = useState(false);
+
+  useEffect(() => {
+    async function loadProfile() {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      const { data } = await supabase
+        .from("users")
+        .select("full_name, avatar_url")
+        .eq("id", user.id)
+        .single();
+      if (data) {
+        setCurrentName(data.full_name || "");
+        setAvatarUrl(data.avatar_url ?? null);
+      }
+    }
+    loadProfile();
+  }, []);
+
+  const handleAvatarUpload = useCallback(async (file: File) => {
+    setAvatarError(null);
+    if (file.size > 2 * 1024 * 1024) { setAvatarError("File size exceeds 2MB limit"); return; }
+    if (!["image/png", "image/jpeg", "image/webp"].includes(file.type)) {
+      setAvatarError("Invalid file type. Allowed: PNG, JPG, WebP"); return;
+    }
+    const localUrl = URL.createObjectURL(file);
+    setAvatarUrl(localUrl);
+    setAvatarUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/upload/avatar", { method: "POST", body: fd });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Upload failed");
+      URL.revokeObjectURL(localUrl);
+      setAvatarUrl(data.url);
+      toast({ title: "Profile photo updated" });
+    } catch (err) {
+      URL.revokeObjectURL(localUrl);
+      setAvatarUrl(null);
+      setAvatarError(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setAvatarUploading(false);
+    }
+  }, [toast]);
+
+  const handleRemoveAvatar = useCallback(async () => {
+    setRemovingAvatar(true);
+    try {
+      const res = await fetch("/api/upload/avatar", { method: "DELETE" });
+      if (!res.ok) { const d = await res.json(); throw new Error(d.error || "Failed"); }
+      setAvatarUrl(null);
+      setConfirmRemoveAvatar(false);
+      toast({ title: "Profile photo removed" });
+    } catch (err) {
+      setAvatarError(err instanceof Error ? err.message : "Failed to remove photo");
+    } finally {
+      setRemovingAvatar(false);
+    }
+  }, [toast]);
 
   // Beforeunload guard when either form is dirty
   useEffect(() => {
@@ -150,11 +220,99 @@ export default function SettingsPage() {
       {/* Profile Section */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base font-semibold">
-            Display Name
-          </CardTitle>
+          <CardTitle className="text-base font-semibold">Profile</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-6">
+          {/* Avatar upload */}
+          <div className="flex flex-col items-center gap-3">
+            <input
+              ref={avatarInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleAvatarUpload(file);
+                if (avatarInputRef.current) avatarInputRef.current.value = "";
+              }}
+            />
+            <div className="relative group">
+              {/* Avatar circle */}
+              <button
+                type="button"
+                onClick={() => { setConfirmRemoveAvatar(false); avatarInputRef.current?.click(); }}
+                disabled={avatarUploading}
+                className="size-20 rounded-full overflow-hidden flex items-center justify-center text-xl font-bold shrink-0 cursor-pointer"
+                style={{
+                  background: avatarUrl ? "transparent" : "var(--gold-bg-strong)",
+                  color: "var(--gold-primary)",
+                  border: "2px solid var(--border-gold)",
+                }}
+                aria-label="Upload profile photo"
+              >
+                {avatarUploading ? (
+                  <Loader2 className="h-6 w-6 animate-spin" style={{ color: "var(--gold-primary)" }} />
+                ) : avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={avatarUrl} alt="Profile photo" className="h-full w-full object-cover" />
+                ) : (
+                  currentName?.charAt(0).toUpperCase() || "?"
+                )}
+              </button>
+              {/* Camera overlay on hover */}
+              {!avatarUploading && (
+                <div
+                  className="absolute inset-0 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+                  style={{ background: "rgba(0,0,0,0.5)" }}
+                >
+                  <Camera className="h-5 w-5" style={{ color: "#fff" }} />
+                </div>
+              )}
+              {/* Remove button */}
+              {avatarUrl && !avatarUploading && (
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); setConfirmRemoveAvatar(true); }}
+                  className="absolute -top-1 -right-1 size-5 rounded-full flex items-center justify-center transition-colors"
+                  style={{ background: "rgba(0,0,0,0.7)", border: "1px solid rgba(255,255,255,0.15)", color: "#fff" }}
+                  aria-label="Remove photo"
+                >
+                  <X size={10} />
+                </button>
+              )}
+            </div>
+            {confirmRemoveAvatar ? (
+              <div className="flex items-center gap-2 text-sm">
+                <span style={{ color: "var(--text-secondary-ds)" }}>Remove photo?</span>
+                <button
+                  type="button"
+                  disabled={removingAvatar}
+                  onClick={handleRemoveAvatar}
+                  className="font-semibold disabled:opacity-50"
+                  style={{ color: "var(--destructive, #ef4444)" }}
+                >
+                  {removingAvatar ? "Removing…" : "Yes"}
+                </button>
+                <button
+                  type="button"
+                  disabled={removingAvatar}
+                  onClick={() => setConfirmRemoveAvatar(false)}
+                  style={{ color: "var(--text-tertiary)" }}
+                >
+                  No
+                </button>
+              </div>
+            ) : (
+              <p className="text-xs" style={{ color: "var(--text-tertiary)" }}>
+                Click to upload · PNG, JPG, WebP · Max 2MB
+              </p>
+            )}
+            {avatarError && (
+              <p className="text-xs text-destructive">{avatarError}</p>
+            )}
+          </div>
+
+          {/* Name form */}
           <form
             ref={profileFormRef}
             onSubmit={handleProfileSubmit}
@@ -169,6 +327,8 @@ export default function SettingsPage() {
                 type="text"
                 placeholder="Your full name"
                 required
+                value={currentName}
+                onChange={(e) => { setCurrentName(e.target.value); setProfileDirty(true); }}
               />
             </div>
 

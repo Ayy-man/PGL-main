@@ -14,13 +14,14 @@ interface SidebarProps {
   userName: string;
   userInitials: string;
   userEmail?: string;
+  userAvatarUrl?: string | null;
   savedSearchCount?: number;
   listsCount?: number;
 }
 
 const STORAGE_KEY = "pgl-sidebar-collapsed";
 
-export function Sidebar({ orgId, tenantName, logoUrl, userRole, userName, userInitials, userEmail, savedSearchCount, listsCount }: SidebarProps) {
+export function Sidebar({ orgId, tenantName, logoUrl, userRole, userName, userInitials, userEmail, userAvatarUrl, savedSearchCount, listsCount }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
 
   // Hydrate from localStorage after mount
@@ -116,14 +117,19 @@ export function Sidebar({ orgId, tenantName, logoUrl, userRole, userName, userIn
                 }}
               >
                 <div
-                  className="size-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+                  className="size-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 overflow-hidden"
                   style={{
                     background: "var(--gold-bg-strong)",
                     color: "var(--gold-primary)",
                     border: "1px solid var(--border-gold)",
                   }}
                 >
-                  {userInitials}
+                  {userAvatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={userAvatarUrl} alt={userName} className="h-full w-full object-cover" />
+                  ) : (
+                    userInitials
+                  )}
                 </div>
                 <div className="overflow-hidden min-w-0">
                   <p className="text-sm font-medium truncate" style={{ color: "var(--text-primary-ds)" }}>

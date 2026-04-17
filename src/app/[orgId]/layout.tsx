@@ -20,6 +20,7 @@ export default async function TenantLayout({
   let userInitials: string;
   let userRole: string;
   let userEmail: string | undefined;
+  let userAvatarUrl: string | null = null;
   let savedSearchCount = 0;
   let listsCount = 0;
   let initialOnboardingState: OnboardingState | null = null;
@@ -54,7 +55,7 @@ export default async function TenantLayout({
     // Live counts for sidebar nav badges (RLS handles tenant scoping for the session client)
     const tenantScopeId = (user.app_metadata?.tenant_id as string | undefined) ?? tenant.id;
 
-    const [personasCountResult, listsCountResult] = await Promise.all([
+    const [personasCountResult, listsCountResult, userRowResult] = await Promise.all([
       supabase
         .from("personas")
         .select("*", { count: "exact", head: true })
@@ -63,12 +64,21 @@ export default async function TenantLayout({
         .from("lists")
         .select("*", { count: "exact", head: true })
         .eq("tenant_id", tenantScopeId),
+      supabase
+        .from("users")
+        .select("full_name, avatar_url")
+        .eq("id", user.id)
+        .single(),
     ]);
 
     savedSearchCount = personasCountResult.count ?? 0;
     listsCount = listsCountResult.count ?? 0;
 
-    userName = user?.user_metadata?.full_name ?? user?.email ?? "User";
+    const dbFullName = userRowResult.data?.full_name;
+    userAvatarUrl = userRowResult.data?.avatar_url ?? null;
+
+    // Prefer DB full_name (set via profile settings) over auth metadata
+    userName = dbFullName || user?.user_metadata?.full_name || user?.email || "User";
     userInitials = userName.charAt(0).toUpperCase() || "?";
     userRole = (user?.app_metadata?.role as string) || "assistant";
     userEmail = user?.email ?? undefined;
@@ -104,12 +114,13 @@ export default async function TenantLayout({
           userName={userName}
           userInitials={userInitials}
           userEmail={userEmail}
+          userAvatarUrl={userAvatarUrl}
           savedSearchCount={savedSearchCount}
           listsCount={listsCount}
         />
 
         <div className="flex flex-1 flex-col min-w-0">
-          <TopBar userName={userName} userInitials={userInitials} orgId={orgId} />
+          <TopBar userName={userName} userInitials={userInitials} avatarUrl={userAvatarUrl ?? undefined} orgId={orgId} />
 
           {/* Page content with fade-in animation */}
           <main className="flex-1 overflow-y-auto">
