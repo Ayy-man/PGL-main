@@ -65,10 +65,14 @@ export default async function TeamPage({
   // Mark invite_team done on first visit — navigating to this page signals intent.
   updateOnboardingState({ admin_checklist: { invite_team: true } }).catch(() => {});
 
-  // Fetch users for this tenant (RLS auto-scopes to tenant)
+  // Fetch users for this tenant (RLS auto-scopes to tenant).
+  // Super admins manage the platform, not individual tenants — they shouldn't
+  // appear in any tenant's team roster even if a seed row has their tenant_id
+  // set.
   const { data: users, error } = await supabase
     .from("users")
     .select("id, email, full_name, role, is_active, updated_at, created_at")
+    .neq("role", "super_admin")
     .order("created_at", { ascending: false });
 
   if (error) {
