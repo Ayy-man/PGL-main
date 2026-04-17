@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
+import { updateOnboardingState } from "@/app/actions/onboarding-state";
 import { InviteDialog } from "./invite-dialog";
 import { UserStatusToggle } from "./user-status-toggle";
 import { TeamMemberActions } from "./team-member-actions";
@@ -58,6 +59,9 @@ export default async function TeamPage({
   if (role !== "tenant_admin" && role !== "super_admin") {
     redirect(`/${orgId}/dashboard`);
   }
+
+  // Mark invite_team done on first visit — navigating to this page signals intent.
+  updateOnboardingState({ admin_checklist: { invite_team: true } }).catch(() => {});
 
   // Fetch users for this tenant (RLS auto-scopes to tenant)
   const { data: users, error } = await supabase

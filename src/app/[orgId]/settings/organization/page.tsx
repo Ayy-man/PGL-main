@@ -4,6 +4,7 @@ import { useState, useEffect, useTransition } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { updateTenantSettings } from "@/app/actions/tenant-settings";
+import { updateOnboardingState } from "@/app/actions/onboarding-state";
 import { ThemePicker } from "@/components/ui/theme-picker";
 import { LogoUpload } from "@/components/ui/logo-upload";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -73,6 +74,13 @@ export default function OrganizationSettingsPage() {
     }
     loadTenant();
   }, [orgId, router]);
+
+  // Mark pick_theme done on first visit — user intent is visiting this page,
+  // not necessarily saving a non-default theme.
+  useEffect(() => {
+    updateOnboardingState({ admin_checklist: { pick_theme: true } }).catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Beforeunload guard when form is dirty
   useEffect(() => {

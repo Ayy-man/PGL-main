@@ -97,10 +97,11 @@ export async function updateTenantSettings(formData: FormData) {
   // endpoint (`/api/upload/logo`) also flips upload_logo directly on first
   // successful upload — this branch catches the "save settings after a prior
   // upload" path and self-heals stale flags.
-  const checklistPartial: { pick_theme?: boolean; upload_logo?: boolean } = {};
-  if (newValues.theme !== "gold") {
-    checklistPartial.pick_theme = true;
-  }
+  // Saving any settings = user visited the org settings page = both branding
+  // steps are considered done, regardless of which theme or logo they chose.
+  const checklistPartial: { pick_theme?: boolean; upload_logo?: boolean } = {
+    pick_theme: true,
+  };
   if (oldTenant.logo_url) {
     checklistPartial.upload_logo = true;
   }
