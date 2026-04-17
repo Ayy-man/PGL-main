@@ -4,14 +4,14 @@ milestone: v2.0
 milestone_name: milestone
 status: executing
 stopped_at: Completed 43-05-PLAN.md
-last_updated: "2026-04-16T22:39:52.726Z"
-last_activity: 2026-04-16
+last_updated: "2026-04-17T11:16:20.257Z"
+last_activity: 2026-04-17 -- Phase 44 execution started
 progress:
-  total_phases: 36
-  completed_phases: 16
-  total_plans: 102
-  completed_plans: 101
-  percent: 99
+  total_phases: 37
+  completed_phases: 17
+  total_plans: 108
+  completed_plans: 102
+  percent: 94
 ---
 
 # Project State
@@ -22,14 +22,14 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 
 **Core value:** Real estate teams can quickly find and qualify wealthy prospects by searching structured lead databases, enriching profiles with personal contact info and wealth signals, and organizing prospects into actionable lists.
 
-**Current focus:** Phase 43 — wealth-tier-auto-estimation
+**Current focus:** Phase 44 — list-search-visibility
 
 ## Current Position
 
-Phase: 43 (wealth-tier-auto-estimation) — EXECUTING
-Plan: 6 of 6
-Status: Ready to execute
-Last activity: 2026-04-16
+Phase: 44 (list-search-visibility) — EXECUTING
+Plan: 1 of 6
+Status: Executing Phase 44
+Last activity: 2026-04-17 -- Phase 44 execution started
 
 Progress: [████████████████████] 100% (20/20 phases complete)
 
@@ -396,6 +396,7 @@ Recent decisions affecting current work:
 - Phase 39 added: UX Polish Pass — Luxury Consistency and Keystone Primitives. 242 findings from 5-agent audit (`.planning/audits/ux-polish-2026-04-14/`). Ships in 5 PRs: (1) 10 keystone primitive edits that cascade (~60 findings closed); (2) destructive-action safety sweep onto `<Confirmation>`; (3) Assistant read-only role gating across write surface; (4) tenant-theme hex→CSS-var leak in 9 primitives; (5) per-screen polish from the 5 detail files. Polish only — no architectural changes, no new features.
 - Phase 39 COMPLETE 2026-04-14: 9 plans / 81 commits / 87-93% audit closure. Verifier passed 10/10 must-haves. 8 manual browser spot-checks deferred (consolidated in 39-09-SUMMARY.md and verifier output). Discovered: 4 write API routes (`lists/actions.ts`, `personas/actions.ts`, `bulk-enrich/route.ts`, `notes/route.ts`) lack server-side role enforcement — pre-existing gap exposed by client-side canEdit gating, needs follow-up phase.
 - Phase 43 added: Wealth Tier Auto-Estimation — Automated wealth tier scoring during prospect enrichment. New Inngest step synthesizes SEC transaction data, Exa wealth signals, and career inference to output a structured wealth tier (1-4: Affluent/HNW/VHNW/UHNW) with confidence rating. Stores 4 new DB columns on prospects table. UI: auto-populate "Set wealth tier..." field with manual override.
+- Phase 44 added: List & Saved-Search Visibility — Add `visibility` enum (personal / team_shared) to `lists` and `personas` tables plus RLS so agents can mark their lists/saved-searches private (only creator + admins see them) while defaulting to team-shared. Admins always see everything. Leads stay tenant-scoped — only the organizational wrappers get the flag. Includes migration (`20260417_list_search_visibility.sql`), type + query-layer + server-action updates, creation-dialog toggles, badges/dropdowns on lists + personas, admin workspace view, and user-removal reassign hook.
 
 ### Pending Todos
 
