@@ -529,6 +529,21 @@ Plans:
 - [x] 43-05-PLAN.md — Optional dossier hint pass-through (DossierInput.autoWealthTier, narrative alignment)
 - [ ] 43-06-PLAN.md — Build + UAT verification (pnpm build + test + pitfall-regression grep audit + human-verify UI fallback)
 
+### Phase 44: list-search-visibility — Add visibility enum (personal/team_shared) to lists and personas with RLS so agents can mark work private while defaulting to team-shared; admins always see all. Leads stay tenant-scoped.
+
+**Goal:** Ship per-user privacy for lists + personas via a `visibility_mode` enum and an RLS clause that folds tenant-scope + creator-scope + admin-override into one predicate. `lists` + `personas` get `visibility` (default `team_shared`) and `created_by` (nullable FK to `auth.users` with `ON DELETE SET NULL`). Child tables (`list_members`, `saved_search_prospects`) defer to parent via `EXISTS` — no denormalization. Creation dialogs get a segmented visibility control; list/persona cards get lock/users badges; list detail page gets a creator-or-admin-gated visibility dropdown; admins get a new `/team/workspace` two-tab view listing every list + persona across the tenant with creator attribution. `removeTeamMember` reassigns orphaned rows to the acting admin as `team_shared`. Leads stay tenant-scoped per D-01.
+**Requirements**: VIS-MIGRATION, VIS-TYPES, VIS-ACTIONS, VIS-UI-CREATE, VIS-UI-BADGE, VIS-ADMIN-WORKSPACE, VIS-USER-REMOVAL (derived from CONTEXT D-01 through D-16)
+**Depends on:** Phase 43
+**Plans:** 6 plans
+
+Plans:
+- [ ] 44-01-PLAN.md — Migration (visibility_mode enum, ALTER TABLE, RLS policies) + shared Visibility type + [BLOCKING] schema push
+- [ ] 44-02-PLAN.md — Type extensions (List, Persona) + query-layer additions (updateListVisibility, getAllListsWithCreators, persona mirrors, seedStarterPersonas visibility override)
+- [ ] 44-03-PLAN.md — Server actions (visibility on create, updateListVisibilityAction, updatePersonaVisibilityAction) + Vitest coverage
+- [ ] 44-04-PLAN.md — Creation dialog visibility segmented control (create-list-dialog, persona-form-dialog) + makeTempList thread-through + optimistic reducer test
+- [ ] 44-05-PLAN.md — Visibility badges + creator-or-admin-gated toggle dropdown (list-grid, list detail, persona-card)
+- [ ] 44-06-PLAN.md — Admin workspace view + removeTeamMember reassign hook + team reassign Vitest coverage + manual QA matrix
+
 ---
 
 ### Phase 19: Admin Automations Dashboard — Inngest Monitoring
