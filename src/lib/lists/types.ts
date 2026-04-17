@@ -1,3 +1,5 @@
+import type { Visibility } from "@/types/visibility";
+
 export type ListMemberStatus = "new" | "contacted" | "responded" | "not_interested";
 
 export interface List {
@@ -6,6 +8,8 @@ export interface List {
   name: string;
   description: string | null;
   member_count: number;
+  visibility: Visibility;          // NEW — D-02 default 'team_shared'
+  created_by: string | null;       // NEW — nullable per D-04 ON DELETE SET NULL
   created_at: string;
   updated_at: string;
 }
@@ -40,4 +44,13 @@ export interface ListMember {
 export interface CreateListInput {
   name: string;
   description?: string;
+  visibility?: Visibility;         // NEW — default 'team_shared' in createList()
+}
+
+export interface ListWithCreator extends List {
+  creator: {
+    id: string;
+    full_name: string | null;
+    email: string | null;
+  } | null;
 }
