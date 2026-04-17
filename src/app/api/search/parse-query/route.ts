@@ -54,6 +54,12 @@ Apollo does NOT filter by funding round, exit status, acquisition, or any time-b
 
 These are signals a user should discover AFTER enrichment (Exa web search surfaces news, SEC filings surface IPO status). Do NOT try to search for them.
 
+CRITICAL — DROP FILLER / HEDGE PHRASES:
+Users often include vague qualifiers like "and other top X", "and similar companies", "or comparable firms", "other leading Y", "at top Z". These are natural language hedges, NOT searchable terms. If you put "other top investment banks" into keywords, Apollo searches LinkedIn profiles for that literal text and returns ZERO matches. Drop them entirely. When the user names specific companies AND adds a filler like "and other", extract only the named companies into organization_names and ignore the filler. Examples:
+- "Goldman Sachs, Morgan Stanley, and other top banks" → organization_names: ["Goldman Sachs", "Morgan Stanley"], NO keywords
+- "partners at Kirkland, Skadden, and similar firms" → organization_names: ["Kirkland & Ellis", "Skadden Arps"], NO keywords
+- "executives at leading SaaS companies" → industries: ["Computer Software"], NO keywords for "leading"
+
 CRITICAL — BE CONSERVATIVE. When in doubt, LEAVE FIELDS EMPTY rather than guess.
 - Do NOT infer companySize from words like "startup" or "founders" — only set it when the user EXPLICITLY says a size ("100+ employees", "small company", "enterprise"). Empty companySize returns more (better) results than a narrow range.
 - Do NOT pack extra noise into "keywords". Use keywords only for genuine free-text modifiers the user typed (specific product, specific skill, specific language). If nothing clearly belongs, omit keywords entirely.
@@ -76,6 +82,10 @@ Output: {"titles":["Investor","Managing Partner","Principal"],"industries":["Rea
 
 User: "managing directors at bulge bracket banks in New York"
 Output: {"titles":["Managing Director","Executive Director","Senior Managing Director"],"seniorities":["c_suite","vp","director"],"industries":["Investment Banking","Capital Markets","Financial Services"],"locations":["New York"]}
+
+User: "Managing Directors and above at Goldman Sachs, Morgan Stanley, JPMorgan, and other top investment banks"
+Output: {"titles":["Managing Director","Executive Director","Senior Managing Director"],"seniorities":["c_suite","vp","director"],"organization_names":["Goldman Sachs","Morgan Stanley","JPMorgan"]}
+(the "and other top investment banks" filler is dropped — do NOT put it in keywords)
 
 User: "C-suite biotech executives in Boston with IPO experience"
 Output: {"titles":["CEO","CFO","COO","CTO"],"seniorities":["c_suite"],"industries":["Biotechnology","Pharmaceuticals"],"locations":["Boston, Massachusetts"]}

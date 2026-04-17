@@ -96,10 +96,19 @@ export function translateFiltersToApolloParams(
   // Also includes organization_names for fuzzy employer matching (Apollo's
   // organization_names filter is exact-match, so "Kantor Consulting" won't
   // match "Kantor Consulting LLC" — q_keywords catches the fuzzy case).
+  // Skip q_keywords entirely when organization_names is set. The org names
+  // already constrain results to specific companies — adding q_keywords
+  // AND's the criteria, requiring that person-text ALSO match the keyword.
+  // This kills results when the LLM parser emits filler like "other top
+  // investment banks" as a keyword (nobody's LinkedIn says that literally).
+  const hasOrgNames = filters.organization_names && filters.organization_names.length > 0;
+
   const keywordParts: string[] = [];
-  if (filters.keywords?.trim()) keywordParts.push(filters.keywords.trim());
-  // When searching by person name + company, also put company in q_keywords
-  // for fuzzy employer name matching (supplements exact organization_names filter)
+  if (!hasOrgNames && filters.keywords?.trim()) {
+    keywordParts.push(filters.keywords.trim());
+  }
+  // When searching by person name + company (no explicit org list), also
+  // put company in q_keywords for fuzzy employer name matching.
   if (filters.person_name?.trim() && filters.organization_names?.length) {
     keywordParts.push(filters.organization_names.join(" "));
   }
