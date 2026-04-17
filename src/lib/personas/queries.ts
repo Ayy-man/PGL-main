@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
-import type { Persona, CreatePersonaInput, UpdatePersonaInput } from "./types";
+import type { Visibility } from "@/types/visibility";
+import type { Persona, PersonaWithCreator, CreatePersonaInput, UpdatePersonaInput } from "./types";
 import { STARTER_PERSONAS } from "./seed-data";
 
 export async function getPersonas(tenantId: string): Promise<Persona[]> {
@@ -50,7 +51,8 @@ export async function createPersona(tenantId: string, userId: string, input: Cre
       name: input.name,
       description: input.description || null,
       filters: input.filters,
-      is_starter: false
+      is_starter: false,
+      visibility: input.visibility ?? 'team_shared',  // NEW — D-08
     })
     .select()
     .single();
@@ -69,6 +71,7 @@ export async function updatePersona(id: string, tenantId: string, input: UpdateP
   if (input.name !== undefined) updateData.name = input.name;
   if (input.description !== undefined) updateData.description = input.description;
   if (input.filters !== undefined) updateData.filters = input.filters;
+  if (input.visibility !== undefined) updateData.visibility = input.visibility;  // NEW
 
   const { data, error } = await supabase
     .from("personas")
@@ -139,7 +142,8 @@ export async function seedStarterPersonas(tenantId: string, userId: string): Pro
       name: persona.name,
       description: persona.description || null,
       filters: persona.filters,
-      is_starter: true
+      is_starter: true,
+      visibility: 'team_shared' as const,  // NEW — Pitfall 7 belt-and-braces
     }));
 
   if (personasToInsert.length === 0) {
@@ -153,4 +157,55 @@ export async function seedStarterPersonas(tenantId: string, userId: string): Pro
   if (error) {
     throw new Error(`Failed to seed starter personas: ${error.message}`);
   }
+}
+
+/**
+ * Updates a persona's visibility. Creator/admin gating enforced by RLS
+ * UPDATE USING clause (D-09) — no parallel JS permission check.
+ * A non-creator non-admin caller silently updates zero rows.
+ */
+export async function updatePersonaVisibility(
+  id: string,
+  tenantId: string,
+  visibility: Visibility
+): Promise<void> {
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from("personas")
+    .update({ visibility, updated_at: new Date().toISOString() })
+    .eq("id", id)
+    .eq("tenant_id", tenantId);
+
+  if (error) {
+    throw new Error(`Failed to update persona visibility: ${error.message}`);
+  }
+}
+
+/**
+ * Admin-workspace fetcher: personas with creator (full_name + email) joined from users.
+ * No visibility filter — relies on RLS admin role clause to yield all rows.
+ * Callers are already admin-gated at the page level (D-12).
+ */
+export async function getAllPersonasWithCreators(tenantId: string): Promise<PersonaWithCreator[]> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("personas")
+    .select(`
+      *,
+      creator:users!created_by (
+        id,
+        full_name,
+        email
+      )
+    `)
+    .eq("tenant_id", tenantId)
+    .order("updated_at", { ascending: false });
+
+  if (error) {
+    throw new Error(`Failed to fetch all personas with creators: ${error.message}`);
+  }
+
+  return data as unknown as PersonaWithCreator[];
 }
