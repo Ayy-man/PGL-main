@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 44-05-PLAN.md
-last_updated: "2026-04-17T12:21:42.971Z"
+stopped_at: context exhaustion at 92% (2026-04-17)
+last_updated: "2026-04-17T13:02:03.175Z"
 last_activity: 2026-04-17
 progress:
   total_phases: 37
@@ -414,6 +414,7 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
+- **Pre-demo: Custom SMTP via Resend** (2026-04-17) — see `.planning/todos/pending/2026-04-17-custom-smtp-via-resend-pre-demo-infra.md`. Supabase built-in SMTP rate-limited to 4/hr (hit during invite testing). Needs verified sender domain + Resend SMTP creds pasted into Supabase dashboard. Zero code changes. Blocks Maggie demo.
 - Supabase Dashboard: Register Auth Hook function (deferred — user hasn't set up Supabase yet)
 - Supabase Dashboard: Enable Connection Pooling in transaction mode (deferred — same reason)
 - Upstash Redis: Create database and add UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN to .env.local
@@ -491,8 +492,8 @@ All 20 phases complete (6-20, including 14.1). The following items remain before
 
 ## Session Continuity
 
-Last session: 2026-04-17T12:21:42.964Z
-Stopped at: Completed 44-05-PLAN.md
+Last session: 2026-04-17T13:02:03.169Z
+Stopped at: context exhaustion at 92% (2026-04-17)
 
 ---
 
