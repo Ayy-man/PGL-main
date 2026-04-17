@@ -113,22 +113,20 @@ export const TOUR_STEPS: readonly TourStep[] = [
   },
   {
     id: "results-bulk-actions",
-    title: "Enrich and save",
-    body: "Pick prospects with the checkboxes, then click Enrich Selection to pull full contact info and wealth signals.",
+    title: "Open a prospect",
+    body: "Click on any prospect row to view their full dossier. You can also select multiple with checkboxes to enrich or export in bulk.",
     targetSelector: '[data-tour-id="bulk-actions"]',
     placement: "top",
-    advanceOn: { event: "list_added" },
     hiddenForAssistant: true,
   },
 
-  // ─── PART D — DOSSIER ENRICHING ───────────────────────────────────
+  // ─── PART D — DOSSIER ─────────────────────────────────────────────
   {
     id: "dossier-enriching",
-    title: "Pulling their dossier",
-    body: "Contacts, wealth signals, SEC filings, news. Usually 5 to 15 seconds.",
+    title: "The dossier",
+    body: "Everything we know about this prospect: contacts, wealth signals, SEC filings, and recent news. Enrichment pulls it all automatically.",
     targetSelector: '[data-tour-id="enrichment-status"]',
     placement: "bottom",
-    advanceOn: { event: "enrichment_complete" },
     hiddenForAssistant: true,
   },
 
