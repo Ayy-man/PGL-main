@@ -19,6 +19,8 @@ export function LogoUpload({
   const [preview, setPreview] = useState<string | null>(currentUrl);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isRemoving, setIsRemoving] = useState(false);
+  const [confirmRemove, setConfirmRemove] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -122,11 +124,28 @@ export function LogoUpload({
     [handleUpload]
   );
 
-  const handleRemove = useCallback(() => {
-    setPreview(null);
+  const handleRemoveConfirm = useCallback(async () => {
+    setIsRemoving(true);
     setError(null);
-    onRemoved?.();
-  }, [onRemoved]);
+    try {
+      const res = await fetch("/api/upload/logo", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tenantId }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to remove logo");
+      }
+      setPreview(null);
+      setConfirmRemove(false);
+      onRemoved?.();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to remove logo");
+    } finally {
+      setIsRemoving(false);
+    }
+  }, [tenantId, onRemoved]);
 
   const handleClick = useCallback(() => {
     inputRef.current?.click();
@@ -167,27 +186,43 @@ export function LogoUpload({
               style={{ maxWidth: "120px", maxHeight: "120px" }}
             />
 
-            {/* Remove button */}
-            {!isUploading && (
+            {/* Remove button / inline confirmation */}
+            {!isUploading && !confirmRemove && (
               <button
                 type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleRemove();
-                }}
-                className="absolute flex items-center justify-center rounded-full transition-colors duration-150"
-                style={{
-                  top: "8px",
-                  right: "8px",
-                  width: "20px",
-                  height: "20px",
-                  backgroundColor: "rgba(0,0,0,0.6)",
-                  color: "var(--text-primary-ds)",
-                }}
+                onClick={(e) => { e.stopPropagation(); setConfirmRemove(true); }}
+                className="absolute flex items-center justify-center rounded-full transition-colors duration-150 hover:bg-black/80"
+                style={{ top: "8px", right: "8px", width: "20px", height: "20px", backgroundColor: "rgba(0,0,0,0.6)", color: "var(--text-primary-ds)" }}
                 aria-label="Remove logo"
               >
                 <X size={12} />
               </button>
+            )}
+            {!isUploading && confirmRemove && (
+              <div
+                className="absolute flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs"
+                style={{ top: "8px", right: "8px", background: "rgba(0,0,0,0.85)", border: "1px solid var(--border-subtle)" }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <span style={{ color: "var(--text-primary-ds)" }}>Remove logo?</span>
+                <button
+                  type="button"
+                  disabled={isRemoving}
+                  onClick={handleRemoveConfirm}
+                  className="font-semibold transition-opacity disabled:opacity-50"
+                  style={{ color: "var(--destructive, #ef4444)" }}
+                >
+                  {isRemoving ? "Removing…" : "Yes"}
+                </button>
+                <button
+                  type="button"
+                  disabled={isRemoving}
+                  onClick={() => setConfirmRemove(false)}
+                  style={{ color: "var(--text-tertiary)" }}
+                >
+                  No
+                </button>
+              </div>
             )}
 
             {/* Uploading overlay */}

@@ -225,6 +225,7 @@ export default function OrganizationSettingsPage() {
                   tenantId={tenantId}
                   currentUrl={logoUrl}
                   onUploaded={(url) => setLogoUrl(url)}
+                  onRemoved={() => setLogoUrl(null)}
                 />
               )}
               <p className="text-xs text-muted-foreground">Logo is saved immediately on upload.</p>

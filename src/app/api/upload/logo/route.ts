@@ -150,3 +150,48 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export async function DELETE(request: Request) {
+  try {
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError || !user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    const role = user.app_metadata?.role as string | undefined;
+    if (role !== "super_admin" && role !== "tenant_admin") {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const { tenantId } = await request.json() as { tenantId: string };
+    if (!tenantId) return NextResponse.json({ error: "tenantId is required" }, { status: 400 });
+
+    if (role !== "super_admin" && user.app_metadata?.tenant_id !== tenantId) {
+      return NextResponse.json({ error: "Forbidden: cannot modify another tenant" }, { status: 403 });
+    }
+
+    const admin = createAdminClient();
+
+    // Remove all possible logo file extensions from storage (best-effort)
+    const exts = ["png", "jpg", "svg", "webp"];
+    await Promise.allSettled(
+      exts.map((ext) =>
+        admin.storage.from("general").remove([`tenant-logos/${tenantId}.${ext}`])
+      )
+    );
+
+    // Clear logo_url in tenants table
+    const { error: updateError } = await admin
+      .from("tenants")
+      .update({ logo_url: null })
+      .eq("id", tenantId);
+
+    if (updateError) {
+      return NextResponse.json({ error: "Failed to update tenant record" }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Logo delete error:", error);
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
