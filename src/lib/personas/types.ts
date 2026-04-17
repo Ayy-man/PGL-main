@@ -1,3 +1,5 @@
+import type { Visibility } from "@/types/visibility";
+
 export interface PersonaFilters {
   organization_names?: string[];
   titles?: string[];
@@ -17,7 +19,8 @@ export interface Persona {
   description: string | null;
   filters: PersonaFilters;
   is_starter: boolean;
-  created_by: string;
+  visibility: Visibility;                  // NEW — D-02 default 'team_shared'
+  created_by: string | null;               // Plan 44-01 dropped NOT NULL for ON DELETE SET NULL
   last_used_at: string | null;
   last_refreshed_at: string | null;       // NEW
   total_apollo_results: number | null;     // NEW
@@ -29,12 +32,22 @@ export interface CreatePersonaInput {
   name: string;
   description?: string;
   filters: PersonaFilters;
+  visibility?: Visibility;                 // NEW — default 'team_shared' in createPersona()
 }
 
 export interface UpdatePersonaInput {
   name?: string;
   description?: string;
   filters?: PersonaFilters;
+  visibility?: Visibility;                 // NEW — optional, changes when provided
+}
+
+export interface PersonaWithCreator extends Persona {
+  creator: {
+    id: string;
+    full_name: string | null;
+    email: string | null;
+  } | null;
 }
 
 export type SavedSearchProspectStatus = 'active' | 'dismissed' | 'enriched';
