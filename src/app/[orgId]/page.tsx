@@ -174,6 +174,16 @@ export default async function TenantDashboard({
   ] = await Promise.all(fetchPromises);
   const newProspectsCount = newProspectsResult?.count ?? 0;
 
+  // Find the saved search most likely responsible for the "new prospects" count.
+  // Pick the persona with the latest last_refreshed_at inside the 24h window; fall
+  // back to /search if nothing was refreshed (new prospects came from a one-off Discover run).
+  const recentlyRefreshedPersona = personas
+    .filter((p) => p.last_refreshed_at && p.last_refreshed_at >= twentyFourHoursAgo)
+    .sort((a, b) => (b.last_refreshed_at ?? "").localeCompare(a.last_refreshed_at ?? ""))[0];
+  const newProspectsHref = recentlyRefreshedPersona
+    ? `/${orgId}/search?persona=${recentlyRefreshedPersona.id}`
+    : `/${orgId}/search`;
+
   // Resolve user names for export entries
   const userMap: Record<string, string> = {};
   const uniqueUserIds = Array.from(
@@ -249,7 +259,7 @@ export default async function TenantDashboard({
       {/* New prospects alert banner */}
       {newProspectsCount > 0 && (
         <Link
-          href={`/${orgId}/search`}
+          href={newProspectsHref}
           className="flex items-center gap-3 rounded-[14px] px-5 py-3 cursor-pointer transition-colors hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           style={{
             background: "var(--gold-bg-strong)",
