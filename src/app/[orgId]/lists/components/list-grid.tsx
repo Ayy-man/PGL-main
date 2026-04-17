@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Trash2, Download, Loader2 } from "lucide-react";
+import { Trash2, Download, Loader2, Lock, Users } from "lucide-react";
 import {
   Tooltip,
   TooltipTrigger,
@@ -266,6 +266,30 @@ export function ListGrid({ lists: serverLists, canEdit = true, onReady }: ListGr
                     aria-label="Creating list"
                   />
                 )}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span tabIndex={0} className="inline-flex shrink-0">
+                      {list.visibility === "personal" ? (
+                        <Lock
+                          className="h-3.5 w-3.5"
+                          style={{ color: "var(--text-ghost)" }}
+                          aria-label="Personal list"
+                        />
+                      ) : (
+                        <Users
+                          className="h-3.5 w-3.5"
+                          style={{ color: "var(--text-ghost)" }}
+                          aria-label="Team shared list"
+                        />
+                      )}
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    {list.visibility === "personal"
+                      ? "Private — only you and admins"
+                      : "Team shared"}
+                  </TooltipContent>
+                </Tooltip>
               </div>
               {list.description && (
                 <p className="text-[13px] text-muted-foreground mt-0.5 truncate">
