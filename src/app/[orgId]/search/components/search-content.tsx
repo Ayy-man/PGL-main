@@ -13,7 +13,7 @@ import { SavedSearchesTab } from "./saved-searches-tab";
 import { BulkActionsBar } from "./bulk-actions-bar";
 import { ProspectResultsTable } from "./prospect-results-table";
 import { ProspectSlideOver } from "@/components/prospect/prospect-slide-over";
-import { Search, AlertCircle, RefreshCw, Loader2, Plus, X } from "lucide-react";
+import { Search, AlertCircle, RefreshCw, Loader2, Plus, X, Lock, Users } from "lucide-react";
 import { ReportIssueButton } from "@/components/issues/report-issue-button";
 import { PersonaFormDialog } from "../../personas/components/persona-form-dialog";
 import { Button } from "@/components/ui/button";
@@ -220,6 +220,7 @@ export function SearchContent({ personas, lists, orgId, canEdit = true }: Search
   const [showNewListInput, setShowNewListInput] = useState(false);
   const [newListName, setNewListName] = useState("");
   const [isCreatingList, setIsCreatingList] = useState(false);
+  const [newListVisibility, setNewListVisibility] = useState<"personal" | "team_shared">("team_shared");
 
   // Filtered lists for bulk dialog search
   const filteredLists = useMemo(
@@ -1459,11 +1460,13 @@ export function SearchContent({ personas, lists, orgId, canEdit = true }: Search
                       setIsCreatingList(true);
                       const fd = new FormData();
                       fd.set("name", newListName.trim());
+                      fd.set("visibility", newListVisibility);
                       const res = await createListAction(fd);
                       if (res.success && res.list) {
                         setLocalLists((prev) => [res.list!, ...prev]);
                         setBulkSelectedListIds((prev) => [...prev, res.list!.id]);
                         setNewListName("");
+                        setNewListVisibility("team_shared");
                         setShowNewListInput(false);
                       } else {
                         toast({ title: "Failed to create list", description: res.error || "Please try again.", variant: "destructive" });
@@ -1484,11 +1487,13 @@ export function SearchContent({ personas, lists, orgId, canEdit = true }: Search
                     setIsCreatingList(true);
                     const fd = new FormData();
                     fd.set("name", newListName.trim());
+                    fd.set("visibility", newListVisibility);
                     const res = await createListAction(fd);
                     if (res.success && res.list) {
                       setLocalLists((prev) => [res.list!, ...prev]);
                       setBulkSelectedListIds((prev) => [...prev, res.list!.id]);
                       setNewListName("");
+                      setNewListVisibility("team_shared");
                       setShowNewListInput(false);
                     } else {
                       toast({ title: "Failed to create list", description: res.error || "Please try again.", variant: "destructive" });
@@ -1507,9 +1512,42 @@ export function SearchContent({ personas, lists, orgId, canEdit = true }: Search
                   <X className="h-3 w-3" />
                 </Button>
               </div>
-                <span className="mt-1 block text-[10px] text-muted-foreground">
-                  <kbd className="font-sans">↵</kbd> to create · <kbd className="font-sans">Esc</kbd> to cancel
-                </span>
+                <div className="mt-2 flex items-center gap-2">
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Visibility</span>
+                  <div className="inline-flex items-center rounded-full p-0.5" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.10)" }}>
+                    <button
+                      type="button"
+                      onClick={() => setNewListVisibility("team_shared")}
+                      disabled={isCreatingList}
+                      className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] transition-colors"
+                      style={
+                        newListVisibility === "team_shared"
+                          ? { background: "rgba(255,255,255,0.08)", color: "var(--text-primary-ds, rgba(255,255,255,0.92))" }
+                          : { color: "var(--text-ghost)" }
+                      }
+                    >
+                      <Users className="h-3 w-3" />
+                      Team
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setNewListVisibility("personal")}
+                      disabled={isCreatingList}
+                      className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] transition-colors"
+                      style={
+                        newListVisibility === "personal"
+                          ? { background: "var(--gold-bg-strong, rgba(212,175,55,0.12))", color: "var(--gold-primary, #d4af37)", border: "1px solid var(--border-gold, rgba(212,175,55,0.45))" }
+                          : { color: "var(--text-ghost)" }
+                      }
+                    >
+                      <Lock className="h-3 w-3" />
+                      Personal
+                    </button>
+                  </div>
+                  <span className="ml-auto text-[10px] text-muted-foreground">
+                    <kbd className="font-sans">↵</kbd> to create · <kbd className="font-sans">Esc</kbd> to cancel
+                  </span>
+                </div>
               </div>
               ) : (
               <>

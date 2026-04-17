@@ -43,16 +43,25 @@ export function ListVisibilityToggle({
   const Icon = current === "personal" ? Lock : Users;
   const label = current === "personal" ? "Private" : "Team shared";
 
+  const isPersonal = current === "personal";
+  const accent = isPersonal
+    ? {
+        background: "var(--gold-bg-strong, rgba(212,175,55,0.10))",
+        border: "1px solid var(--border-gold, rgba(212,175,55,0.45))",
+        color: "var(--gold-primary, #d4af37)",
+      }
+    : {
+        background: "rgba(255,255,255,0.04)",
+        border: "1px solid rgba(255,255,255,0.14)",
+        color: "var(--text-primary-ds, rgba(255,255,255,0.92))",
+      };
+
   const badge = (
     <span
-      className="inline-flex items-center gap-1.5 text-[11px] px-2 py-1 rounded-[6px]"
-      style={{
-        background: "var(--bg-elevated)",
-        border: "1px solid var(--border-default)",
-        color: "var(--text-ghost)",
-      }}
+      className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-full"
+      style={accent}
     >
-      <Icon className="h-3 w-3" />
+      <Icon className="h-3.5 w-3.5" />
       {label}
     </span>
   );
@@ -92,18 +101,16 @@ export function ListVisibilityToggle({
         <button
           type="button"
           disabled={isPending}
-          className="inline-flex items-center gap-1.5 text-[11px] px-2 py-1 rounded-[6px] cursor-pointer"
+          className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-full cursor-pointer transition-colors hover:brightness-110"
           style={{
-            background: "var(--bg-elevated)",
-            border: "1px solid var(--border-default)",
-            color: "var(--text-ghost)",
+            ...accent,
             opacity: isPending ? 0.6 : 1,
           }}
           aria-label="Change list visibility"
         >
-          <Icon className="h-3 w-3" />
+          <Icon className="h-3.5 w-3.5" />
           {label}
-          <ChevronDown className="h-3 w-3" />
+          <ChevronDown className="h-3.5 w-3.5 opacity-70" />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
