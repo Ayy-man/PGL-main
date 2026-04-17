@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 44-04-PLAN.md (visibility dialog UI)
-last_updated: "2026-04-17T12:14:00.860Z"
+stopped_at: Completed 44-05-PLAN.md
+last_updated: "2026-04-17T12:21:42.971Z"
 last_activity: 2026-04-17
 progress:
   total_phases: 37
   completed_phases: 17
   total_plans: 108
-  completed_plans: 106
-  percent: 98
+  completed_plans: 107
+  percent: 99
 ---
 
 # Project State
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 ## Current Position
 
 Phase: 44 (list-search-visibility) — EXECUTING
-Plan: 4 of 6
+Plan: 5 of 6
 Status: Ready to execute
 Last activity: 2026-04-17
 
@@ -119,6 +119,7 @@ Progress: [████████████████████] 100% (2
 | Phase 44 P02 | 4min | 4 tasks | 6 files |
 | Phase 44 P03 | 5min | 4 tasks | 4 files |
 | Phase 44 P04 | 4min | 3 tasks | 5 files |
+| Phase 44 P05 | 3 min | 3 tasks | 4 files |
 
 ### Phase 3 Plan Completion
 
@@ -384,6 +385,7 @@ Recent decisions affecting current work:
 - [Phase 44]: [Phase 44][44-04] Threaded currentUserId from lists/page.tsx supabase.auth.getUser() call to CreateListDialog via ListsPageClient — reused existing auth fetch instead of adding a new one, mirrors existing tenantId prop pattern
 - [Phase 44]: [Phase 44][44-04] Bespoke two-button segmented control over shadcn RadioGroup — matches persona-card ghost/gold button pattern, pixel-perfect gold-accent active state via CSS variable tokens
 - [Phase 44]: [Phase 44][44-04] Persona edit mode folds visibility into existing updatePersonaAction via FormData (D-10) — leverages 44-03 partial-update semantics, no separate updatePersonaVisibilityAction invocation from the dialog
+- [Phase 44]: Phase 44 Plan 05: placed visibility-toggle client component adjacent to list detail page (src/app/[orgId]/lists/[listId]/visibility-toggle.tsx) — route-specific, reuses shadcn DropdownMenu; canToggleVisibility computed server-side and passed as boolean prop (UX-only render gate, RLS is trust boundary per T-44-02)
 
 ### Roadmap Evolution
 
@@ -489,8 +491,8 @@ All 20 phases complete (6-20, including 14.1). The following items remain before
 
 ## Session Continuity
 
-Last session: 2026-04-17T12:14:00.856Z
-Stopped at: Completed 44-04-PLAN.md (visibility dialog UI)
+Last session: 2026-04-17T12:21:42.964Z
+Stopped at: Completed 44-05-PLAN.md
 
 ---
 
