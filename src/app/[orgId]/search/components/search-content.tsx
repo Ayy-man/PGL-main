@@ -1529,41 +1529,40 @@ export function SearchContent({ personas, lists, orgId, canEdit = true }: Search
                   <X className="h-3 w-3" />
                 </Button>
               </div>
-                <div className="mt-2 flex items-center gap-2">
-                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Visibility</span>
-                  <div className="inline-flex items-center rounded-full p-0.5" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.10)" }}>
+                <div className="mt-3">
+                  <span className="block text-[11px] font-medium mb-1.5" style={{ color: "var(--text-tertiary)" }}>Visibility</span>
+                  <div className="grid grid-cols-2 gap-1.5 rounded-[10px] p-1" style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
                     <button
                       type="button"
                       onClick={() => setNewListVisibility("team_shared")}
                       disabled={isCreatingList}
-                      className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] transition-colors"
+                      className="flex flex-col items-center gap-0.5 rounded-[8px] px-3 py-2.5 transition-all disabled:opacity-50"
                       style={
                         newListVisibility === "team_shared"
-                          ? { background: "rgba(255,255,255,0.08)", color: "var(--text-primary-ds, rgba(255,255,255,0.92))" }
-                          : { color: "var(--text-ghost)" }
+                          ? { background: "rgba(255,255,255,0.10)", color: "var(--text-primary-ds)", boxShadow: "0 1px 3px rgba(0,0,0,0.25)" }
+                          : { color: "var(--text-tertiary)" }
                       }
                     >
-                      <Users className="h-3 w-3" />
-                      Team
+                      <Users className="h-4 w-4 mb-0.5" />
+                      <span className="text-[12px] font-medium">Team</span>
+                      <span className="text-[10px] font-normal" style={{ color: newListVisibility === "team_shared" ? "var(--text-secondary-ds)" : "var(--text-ghost)" }}>Visible to all</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setNewListVisibility("personal")}
                       disabled={isCreatingList}
-                      className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] transition-colors"
+                      className="flex flex-col items-center gap-0.5 rounded-[8px] px-3 py-2.5 transition-all disabled:opacity-50"
                       style={
                         newListVisibility === "personal"
-                          ? { background: "var(--gold-bg-strong, rgba(212,175,55,0.12))", color: "var(--gold-primary, #d4af37)", border: "1px solid var(--border-gold, rgba(212,175,55,0.45))" }
-                          : { color: "var(--text-ghost)" }
+                          ? { background: "rgba(212,175,55,0.12)", color: "var(--gold-primary)", border: "1px solid rgba(212,175,55,0.30)" }
+                          : { color: "var(--text-tertiary)" }
                       }
                     >
-                      <Lock className="h-3 w-3" />
-                      Personal
+                      <Lock className="h-4 w-4 mb-0.5" />
+                      <span className="text-[12px] font-medium">Personal</span>
+                      <span className="text-[10px] font-normal" style={{ color: newListVisibility === "personal" ? "rgba(212,175,55,0.7)" : "var(--text-ghost)" }}>Only you</span>
                     </button>
                   </div>
-                  <span className="ml-auto text-[10px] text-muted-foreground">
-                    <kbd className="font-sans">↵</kbd> to create · <kbd className="font-sans">Esc</kbd> to cancel
-                  </span>
                 </div>
               </div>
               ) : (

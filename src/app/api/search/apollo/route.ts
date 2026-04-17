@@ -58,6 +58,7 @@ export async function POST(request: NextRequest) {
 
     let mergedFilters: PersonaFilters;
     let searchIdentifier: string;
+    let personaName: string | undefined;
 
     if (personaId) {
       // 3a. Persona-based search
@@ -77,6 +78,7 @@ export async function POST(request: NextRequest) {
         ? { ...persona.filters, ...filterOverrides }
         : persona.filters;
       searchIdentifier = personaId;
+      personaName = persona.name;
     } else if (filterOverrides && Object.keys(filterOverrides).length > 0) {
       // 3b. Filter-only search (NL-parsed or manual)
       console.info(`[API /search/apollo] Filter-only search:`, JSON.stringify(filterOverrides));
@@ -124,6 +126,8 @@ export async function POST(request: NextRequest) {
         cached: result.cached,
         searchIdentifier,
         page,
+        personaName,
+        userEmail: user.email,
       },
     }).catch(() => {}); // defensive catch — logActivity already catches internally
 
