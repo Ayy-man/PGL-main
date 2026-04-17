@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 44-02-PLAN.md
-last_updated: "2026-04-17T11:57:36.596Z"
+stopped_at: Completed 44-03-PLAN.md (server-action layer for visibility)
+last_updated: "2026-04-17T12:05:44.224Z"
 last_activity: 2026-04-17
 progress:
   total_phases: 37
   completed_phases: 17
   total_plans: 108
-  completed_plans: 104
-  percent: 96
+  completed_plans: 105
+  percent: 97
 ---
 
 # Project State
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-02-07)
 ## Current Position
 
 Phase: 44 (list-search-visibility) — EXECUTING
-Plan: 2 of 6
+Plan: 3 of 6
 Status: Ready to execute
 Last activity: 2026-04-17
 
@@ -117,6 +117,7 @@ Progress: [████████████████████] 100% (2
 | Phase 43 P04 | 2min | 2 tasks | 2 files |
 | Phase 43 P05 | ~2min | 2 tasks | 2 files |
 | Phase 44 P02 | 4min | 4 tasks | 6 files |
+| Phase 44 P03 | 5min | 4 tasks | 4 files |
 
 ### Phase 3 Plan Completion
 
@@ -376,6 +377,9 @@ Recent decisions affecting current work:
 - [Phase 44]: Plan 44-02: Persona.created_by relaxed to string | null to match migration DROP NOT NULL for ON DELETE SET NULL FK cascade
 - [Phase 44]: Plan 44-02: getAllListsWithCreators + getAllPersonasWithCreators trust RLS admin-role clause (no visibility filter in JS — D-12 compliance)
 - [Phase 44]: Plan 44-02 Rule 3 unblock: added default visibility:'team_shared' + created_by:null to makeTempList and list-grid optimistic fixtures; Plan 44-03 must wire real values from segmented control
+- [Phase 44]: Input validation at action boundary: isVisibility() runs BEFORE query layer; Postgres enum is second line of defense
+- [Phase 44]: updatePersonaAction uses partial-update semantics for visibility (omit = no-op); prevents silent reset on unrelated edits
+- [Phase 44]: T-44-02 mitigation: zero parallel JS permission checks in action files; RLS UPDATE USING clause is sole authorization boundary (D-09)
 
 ### Roadmap Evolution
 
@@ -481,8 +485,8 @@ All 20 phases complete (6-20, including 14.1). The following items remain before
 
 ## Session Continuity
 
-Last session: 2026-04-17T11:57:25.469Z
-Stopped at: Completed 44-02-PLAN.md
+Last session: 2026-04-17T12:05:37.329Z
+Stopped at: Completed 44-03-PLAN.md (server-action layer for visibility)
 
 ---
 
