@@ -14,29 +14,39 @@ export const STARTER_PERSONAS: CreatePersonaInput[] = [
   },
   {
     name: "Tech Execs",
-    description: "VP+ at unicorns or public tech companies",
+    description: "VP+ at top tech companies",
     filters: {
+      // Explicit org list prevents consulting/staffing pollution. Same
+      // approach as BigLaw Partners and Top Tech Earners — far more
+      // accurate than industry tags alone.
+      organization_names: [
+        "Google", "Meta", "Apple", "Microsoft", "Amazon",
+        "NVIDIA", "Salesforce", "Adobe", "Oracle", "SAP",
+        "Stripe", "Snowflake", "Databricks", "Palantir", "Uber",
+        "Airbnb", "Netflix", "Spotify", "Shopify", "Square",
+        "Cloudflare", "CrowdStrike", "Datadog", "MongoDB", "Twilio",
+        "ServiceNow", "Workday", "Atlassian", "HubSpot", "Intuit",
+      ],
       titles: ["VP", "SVP", "EVP", "CTO", "CPO", "CEO"],
       seniorities: ["c_suite", "vp"],
-      industries: ["Computer Software", "Internet", "Information Technology and Services"],
-      companySize: ["201-500", "501-1000", "1001-5000", "5001-10000", "10001+"],
-      keywords: "technology software SaaS"
     }
   },
   {
     name: "Startup Founders",
-    description: "Founder/CEO, Series B+, tech sector",
+    description: "Founder/CEO at early-to-mid stage tech companies",
     filters: {
       titles: ["Founder", "Co-Founder", "CEO", "Co-CEO"],
       seniorities: ["c_suite", "owner"],
-      industries: ["Computer Software", "Internet", "Information Technology and Services", "Financial Services"],
+      industries: ["Computer Software", "Internet", "Information Technology and Services"],
       companySize: ["11-50", "51-200", "201-500"],
-      keywords: "startup founder series"
+      // No keywords — industries already targets via q_organization_keyword_tags.
+      // Adding "startup founder series" to q_keywords pollutes results with
+      // anyone whose title mentions "founder" at non-tech companies.
     }
   },
   {
     name: "BigLaw Partners",
-    description: "Equity partners at firms with highest profit per partner — $7M-$9M+ PEP",
+    description: "Equity partners at firms with highest profit per partner, $7M-$9M+ PEP",
     filters: {
       organization_names: [
         "Kirkland & Ellis",
@@ -67,7 +77,7 @@ export const STARTER_PERSONAS: CreatePersonaInput[] = [
   },
   {
     name: "Prop Trading Elite",
-    description: "Traders and quants at top proprietary trading firms — average comp $650K-$1.4M+",
+    description: "Traders and quants at top proprietary trading firms, average comp $650K-$1.4M+",
     filters: {
       organization_names: [
         "Jane Street",

@@ -293,7 +293,19 @@ export async function searchApollo(
     const totalEntries = searchResponse.total_entries ?? searchResponse.pagination?.total_entries ?? searchPeople.length;
     const pagination = calculatePagination(totalEntries, page, cappedPageSize);
 
-    const result = { people: previewPeople, pagination };
+    // 6b. Post-search noise filter — remove results from known staffing /
+    // IT outsourcing / generic consulting companies that pollute industry-
+    // specific searches. Only active when persona has `industries` set
+    // (not when using explicit org names, which are already precise).
+    const { filterNoiseResults } = await import("./noise-filter");
+    const filteredPeople = filterNoiseResults(previewPeople, normalizedFilters);
+    if (filteredPeople.length < previewPeople.length) {
+      console.info(
+        `[searchApollo] Noise filter removed ${previewPeople.length - filteredPeople.length} results from staffing/consulting companies`
+      );
+    }
+
+    const result = { people: filteredPeople, pagination };
 
     // 7. Cache search results (previews are safe to cache)
     if (previewPeople.length > 0) {

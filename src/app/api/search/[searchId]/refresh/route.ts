@@ -28,12 +28,23 @@ export async function POST(
     return NextResponse.json({ error: "Saved search not found" }, { status: 404 });
   }
 
-  const result = await refreshSavedSearchProspects({
-    searchId,
-    tenantId,
-    filters: persona.filters,
-    supabase,
-  });
+  try {
+    const result = await refreshSavedSearchProspects({
+      searchId,
+      tenantId,
+      filters: persona.filters,
+      supabase,
+    });
 
-  return NextResponse.json(result);
+    return NextResponse.json(result);
+  } catch (err) {
+    console.error("[refresh] Failed to refresh saved search:", err);
+    const message =
+      err instanceof Error ? err.message : "Unknown error during refresh";
+    const status =
+      message.includes("rate limit") || message.includes("RATE_LIMIT") ? 429
+      : message.includes("Breaker is open") ? 503
+      : 500;
+    return NextResponse.json({ error: message }, { status });
+  }
 }

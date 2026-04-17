@@ -37,7 +37,7 @@ const SUGGESTED: SuggestedPersona[] = [
     label: "BigLaw Partners",
     description: "Am Law 100 partners",
     count: "~1,900 matches",
-    query: "Partners at Am Law 100 firms — equity partners with 10+ years tenure",
+    query: "Partners at Am Law 100 firms, equity partners with 10+ years tenure",
     Icon: Scale,
     color: "34,197,94",
   },
