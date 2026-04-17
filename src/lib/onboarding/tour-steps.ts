@@ -144,7 +144,7 @@ export const TOUR_STEPS: readonly TourStep[] = [
   {
     id: "dossier-ai-summary",
     title: "AI-written summary",
-    body: "One-paragraph digest of everything we know. Use this as your opening line.",
+    body: "One-paragraph digest of everything we know about this prospect.",
     targetSelector: '[data-tour-id="ai-summary"]',
     placement: "left",
     hiddenForAssistant: true,
