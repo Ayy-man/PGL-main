@@ -678,6 +678,20 @@ export function SearchContent({ personas, lists, orgId, canEdit = true }: Search
             organization_name: p.organization_name,
           }));
 
+        // Client-side cap: Apollo bulk-enrich is limited to 100 IDs per
+        // request (each costs credits, and Apollo's batch API caps at 10
+        // per call internally). Surface the limit before hitting the API.
+        if (previewIds.length > 100) {
+          toast({
+            title: "Too many selected",
+            description: `You selected ${previewIds.length} prospects. Enrichment is limited to 100 at a time. Deselect some and try again.`,
+            variant: "destructive",
+          });
+          setIsBulkSubmitting(false);
+          setBulkListDialogOpen(false);
+          return;
+        }
+
         // Hard-abort on enrich failure: previously we would fall through to
         // upserting the raw preview data, which always 400'd against the
         // OBFUSCATED_PROSPECT guard in /api/prospects/upsert and left users
