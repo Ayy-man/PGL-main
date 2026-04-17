@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Pencil, X, User } from "lucide-react";
 
 interface TeamMember {
@@ -30,6 +31,8 @@ export function LeadOwnerSelect({
   const [isSaving, setIsSaving] = useState(false);
   const [optimisticOwnerId, setOptimisticOwnerId] = useState(currentOwnerId);
   const containerRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
 
   // Sync with prop when server state arrives
   useEffect(() => {
@@ -40,6 +43,10 @@ export function LeadOwnerSelect({
 
   const handleOpen = useCallback(() => {
     if (!isEditable || isSaving) return;
+    const rect = buttonRef.current?.getBoundingClientRect();
+    if (rect) {
+      setDropdownPos({ top: rect.bottom + 4, left: rect.left });
+    }
     setIsOpen(true);
   }, [isEditable, isSaving]);
 
@@ -110,6 +117,7 @@ export function LeadOwnerSelect({
     <div ref={containerRef} className="relative inline-block">
       {/* Display row with pencil on hover */}
       <button
+        ref={buttonRef}
         type="button"
         onClick={handleOpen}
         disabled={isSaving}
@@ -127,13 +135,17 @@ export function LeadOwnerSelect({
         <Pencil className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
       </button>
 
-      {/* Dropdown */}
-      {isOpen && (
+      {/* Dropdown — rendered in a portal to escape overflow:hidden ancestors */}
+      {isOpen && typeof document !== "undefined" && createPortal(
         <div
           role="listbox"
           aria-label="Select lead owner"
-          className="absolute left-0 top-full mt-1 min-w-[220px] rounded-lg z-50 border overflow-hidden"
+          className="min-w-[220px] rounded-lg border overflow-hidden"
           style={{
+            position: "fixed",
+            top: dropdownPos.top,
+            left: dropdownPos.left,
+            zIndex: 9999,
             backgroundColor: "#1a1a1a",
             borderColor: "var(--border-gold, rgba(var(--gold-primary-rgb), 0.3))",
             boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
@@ -214,7 +226,8 @@ export function LeadOwnerSelect({
               No team members
             </p>
           )}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

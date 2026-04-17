@@ -218,12 +218,12 @@ export function LeadHoverPreview({ prospect }: LeadHoverPreviewProps) {
         <span
           className="inline-flex items-center gap-1.5"
           style={{
-            color: prospect.manual_wealth_tier ? "var(--gold-primary)" : "var(--text-tertiary, rgba(232,228,220,0.4))",
+            color: (prospect.manual_wealth_tier ?? prospect.auto_wealth_tier) ? "var(--gold-primary)" : "var(--text-tertiary, rgba(232,228,220,0.4))",
           }}
-          title={prospect.manual_wealth_tier ? `Wealth tier: ${prospect.manual_wealth_tier}` : "Wealth tier not set"}
+          title={(prospect.manual_wealth_tier ?? prospect.auto_wealth_tier) ? `Wealth tier: ${prospect.manual_wealth_tier ?? prospect.auto_wealth_tier}` : "Wealth tier not set"}
         >
           <Sparkles className="h-3 w-3" />
-          {prospect.manual_wealth_tier ?? "Tier —"}
+          {prospect.manual_wealth_tier ?? prospect.auto_wealth_tier ?? "Tier —"}
         </span>
       </div>
     </div>

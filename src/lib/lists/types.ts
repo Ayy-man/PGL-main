@@ -32,6 +32,7 @@ export interface ListMember {
     enrichment_source_status: Record<string, string | { status?: string; at?: string; error?: string }> | null;
     photo_url: string | null;
     manual_wealth_tier: string | null;
+    auto_wealth_tier: string | null;
     lead_owner_id: string | null;
   };
 }

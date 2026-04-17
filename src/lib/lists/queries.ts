@@ -153,6 +153,7 @@ export async function getListMembers(listId: string, tenantId: string): Promise<
         enrichment_status,
         enrichment_source_status,
         manual_wealth_tier,
+        auto_wealth_tier,
         lead_owner_id,
         contact_data,
         manual_photo_url
@@ -179,6 +180,7 @@ export async function getListMembers(listId: string, tenantId: string): Promise<
     enrichment_status: string | null;
     enrichment_source_status: Record<string, string | { status?: string; at?: string; error?: string }> | null;
     manual_wealth_tier: string | null;
+    auto_wealth_tier: string | null;
     lead_owner_id: string | null;
     contact_data: { photo_url?: string } | null;
     manual_photo_url: string | null;
@@ -222,6 +224,7 @@ export async function getListMembers(listId: string, tenantId: string): Promise<
         enrichment_source_status: raw.enrichment_source_status,
         photo_url: raw.manual_photo_url ?? (raw.contact_data as { photo_url?: string } | null)?.photo_url ?? null,
         manual_wealth_tier: raw.manual_wealth_tier,
+        auto_wealth_tier: raw.auto_wealth_tier,
         lead_owner_id: raw.lead_owner_id,
       }
     });
@@ -266,6 +269,7 @@ export async function addProspectToList(
         enrichment_status,
         enrichment_source_status,
         manual_wealth_tier,
+        auto_wealth_tier,
         lead_owner_id,
         contact_data,
         manual_photo_url
@@ -294,6 +298,7 @@ export async function addProspectToList(
     enrichment_status: string | null;
     enrichment_source_status: Record<string, string | { status?: string; at?: string; error?: string }> | null;
     manual_wealth_tier: string | null;
+    auto_wealth_tier: string | null;
     lead_owner_id: string | null;
     contact_data: { photo_url?: string } | null;
     manual_photo_url: string | null;
@@ -338,6 +343,7 @@ export async function addProspectToList(
       enrichment_source_status: raw?.enrichment_source_status ?? null,
       photo_url: raw?.manual_photo_url ?? (raw?.contact_data as { photo_url?: string } | null)?.photo_url ?? null,
       manual_wealth_tier: raw?.manual_wealth_tier ?? null,
+      auto_wealth_tier: raw?.auto_wealth_tier ?? null,
       lead_owner_id: raw?.lead_owner_id ?? null,
     }
   } as ListMember;
